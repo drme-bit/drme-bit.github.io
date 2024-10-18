@@ -1,7 +1,49 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Portfolio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Minimalist Site</title>
+    <link rel="stylesheet" href="src/css/styles.css">
 </head>
 <body>
-    <h1>Hello</h1>
+    
+    <header class="header">
+        <div class="logo">MY LOGO</div>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+    
+    <section id="hero" class="section full-page-section">
+        <h1>Minimalist Design</h1>
+        <p>Modern, clean and interactive</p>
+    </section>
+
+    <section id="info" class="section full-page-section">
+        <h2>Important Information</h2>
+        <p>This section stays at the top while you scroll!</p>
+    </section>
+    
+    <section id="about" class="section full-page-section">
+        <h2>About Me</h2>
+        <p>Introduction to me...</p>
+    </section>
+
+    <section id="projects" class="section full-page-section">
+        <h2>Projects</h2>
+        <div class="project">Project 1</div>
+        <div class="project">Project 2</div>
+    </section>
+
+    <footer id="contact" class="footer">
+        <p>Contact me: email@example.com</p>
+    </footer>
+
+    <script src="src/js/script.js"></script>
+    <script src="src/js/animation.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/smoothscroll/1.4.10/SmoothScroll.min.js" integrity="sha256-huW7yWl7tNfP7lGk46XE+Sp0nCotjzYodhVKlwaNeco=" crossorigin="anonymous"></script>
 </body>
+</html>

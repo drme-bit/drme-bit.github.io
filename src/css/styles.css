@@ -1,0 +1,145 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .scroll-container {
+    position: relative;
+    overflow: hidden; /* Скрываем переполнение */
+    height: 100vh; /* Высота контейнера */
+}
+
+  body {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    background-color: #fafafa;
+    scroll-behavior: smooth;
+  }
+  
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000; /* Помещаем за остальные элементы */
+    overflow: hidden;
+}
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: linear-gradient(135deg, #2B2B2B, #F0F0F0); /* Fully opaque */
+    color: #fff;
+    position: fixed; /* Fixed positioning */
+    top: 0; /* Stick to the top */
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Ensure it sits above all other content */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+}
+
+.header.transparent {
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent */
+    position: fixed;
+}
+  
+  .header nav a {
+    color: #fff;
+    margin: 0 15px;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s ease;
+  }
+  
+  .header nav a:hover {
+    color: #ff6347;
+  }
+  
+  #hero {
+    height: 100vh;
+    background: linear-gradient(135deg, #000000, #808080);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #D3D3D3;
+  }
+  
+  #hero h1 {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: fadeInUp 1s ease-out;
+  }
+  
+  #hero p {
+    font-size: 1.5rem;
+    animation: fadeInUp 1.5s ease-out;
+  }
+  
+  .section {
+    height: 100vh; /* Высота каждой секции */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    background-color: #f0f0f0;
+}
+  
+  .project {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  
+  .project.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  
+  .footer {
+    position: fixed; /* Keep the footer fixed */
+    bottom: -100px; /* Initially hidden */
+    left: 0;
+    right: 0;
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    transition: bottom 0.3s ease-in-out;
+    z-index: 1000; /* Ensure it sits above all other content */
+}
+
+
+  .footer.show {
+    bottom: 0;
+    position: fixed;
+  }
+
+  .sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10; /* Ensure it sits above other content */
+    background-color: white; /* or any other color */
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
