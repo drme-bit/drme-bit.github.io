@@ -152,4 +152,5 @@ body {
   62.5% {background-position:0 0,100% 0,50% 100%,100% 100%}
   75%   {background-position:0 0,50% 0,50% 100%,100% 100%}
   87.5% {background-position:0 0,50% 0,0 100%,100% 100%}
-  100%  {background-
+  100%  {background-position:0 0,50% 0,0 100%,50% 100%}
+}
