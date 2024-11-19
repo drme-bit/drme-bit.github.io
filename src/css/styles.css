@@ -1,145 +1,155 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  .scroll-container {
-    position: relative;
-    overflow: hidden; /* Скрываем переполнение */
-    height: 100vh; /* Высота контейнера */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-  body {
-    font-family: 'Arial', sans-serif;
-    color: #333;
-    background-color: #fafafa;
-    scroll-behavior: smooth;
-  }
-  
-
-.background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10000; /* Помещаем за остальные элементы */
-    overflow: hidden;
+body {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  background-color: #fff;
+  scroll-behavior: smooth;
 }
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: linear-gradient(135deg, #2B2B2B, #F0F0F0); /* Fully opaque */
-    color: #fff;
-    position: fixed; /* Fixed positioning */
-    top: 0; /* Stick to the top */
-    left: 0;
-    right: 0;
-    z-index: 1000; /* Ensure it sits above all other content */
-    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.8); /* Opaque */
+  color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
 }
 
 .header.transparent {
-    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent */
-    position: fixed;
-}
-  
-  .header nav a {
-    color: #fff;
-    margin: 0 15px;
-    text-decoration: none;
-    font-size: 18px;
-    transition: color 0.3s ease;
-  }
-  
-  .header nav a:hover {
-    color: #ff6347;
-  }
-  
-  #hero {
-    height: 100vh;
-    background: linear-gradient(135deg, #000000, #808080);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    color: #D3D3D3;
-  }
-  
-  #hero h1 {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    animation: fadeInUp 1s ease-out;
-  }
-  
-  #hero p {
-    font-size: 1.5rem;
-    animation: fadeInUp 1.5s ease-out;
-  }
-  
-  .section {
-    height: 100vh; /* Высота каждой секции */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    background-color: #f0f0f0;
-}
-  
-  .project {
-    margin: 20px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-  }
-  
-  .project.show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  
-  .footer {
-    position: fixed; /* Keep the footer fixed */
-    bottom: -100px; /* Initially hidden */
-    left: 0;
-    right: 0;
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    transition: bottom 0.3s ease-in-out;
-    z-index: 1000; /* Ensure it sits above all other content */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent */
 }
 
-
-  .footer.show {
-    bottom: 0;
-    position: fixed;
-  }
-
-  .sticky {
-    position: sticky;
-    top: 0;
-    z-index: 10; /* Ensure it sits above other content */
-    background-color: white; /* or any other color */
-    padding: 20px;
-    border: 1px solid #ccc;
+.header nav a {
+  color: #fff;
+  margin: 0 15px;
+  text-decoration: none;
+  font-size: 18px;
+  transition: color 0.3s ease;
 }
 
-  @keyframes fadeInUp {
-    from {
+.header nav a:hover {
+  color: #ff6347; /* Highlight color */
+}
+
+.section {
+  min-height: 100vh; /* Minimum height */
+  display: flex;
+  flex-direction: column; /* Stack contents vertically */
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  background-color: #fafafa; /* Light background */
+  text-align: center;
+  position: relative;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, #000, #444); /* Dark gradient */
+  color: #fff;
+}
+
+.info-section {
+  background-color: #f7f7f7; /* Light gray */
+  color: #333;
+}
+
+.about-section {
+  background-color: #e9ecef; /* Slightly darker gray */
+}
+
+.projects-section {
+  background-color: #f0f0f0; /* Light gray background */
+  height: 300vh; /* Set a fixed height for scrolling */
+  display: flex;
+  flex-direction: column;
+  padding: 20px; /* Padding for aesthetics */
+  border: 1px solid #ccc; /* Optional: border for distinction */
+  overflow-y: auto; /* Allow vertical scrolling within this section */
+}
+
+.project {
+  background-color: #fff; /* White background for project cards */
+  border: 1px solid #ccc; /* Border for projects */
+  border-radius: 8px; /* Rounded corners */
+  padding: 20px; /* Padding inside each project card */
+  margin: 15px 0; /* Margin between project cards */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: transform 0.2s, box-shadow 0.2s; /* Animation on hover */
+}
+
+.project:hover {
+  transform: translateY(-5px); /* Slight lift effect on hover */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+}
+
+.project h3 {
+  color: #333; /* Dark text for project title */
+  margin-bottom: 10px; /* Spacing below title */
+}
+
+.project p {
+  color: #666; /* Lighter text for description */
+  line-height: 1.6; /* Spacing between lines */
+}
+
+.footer {
+  position: fixed; /* Keep the footer fixed */
+  bottom: -100px; /* Initially hidden */
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 20px;
+  transition: bottom 0.3s ease-in-out;
+  z-index: 1000; /* Ensure it sits above all other content */
+}
+
+.footer.show {
+  bottom: 0; /* Show footer */
+}
+
+@keyframes fadeInUp {
+  from {
       opacity: 0;
       transform: translateY(20px);
-    }
-    to {
+  }
+  to {
       opacity: 1;
       transform: translateY(0);
-    }
   }
-  
+}
+
+.loader {
+  height: 40px;
+  aspect-ratio: 1.5;
+  --c: #fff 96%,#0000;
+  background:
+    radial-gradient(farthest-side at 100% 100%,var(--c)),
+    radial-gradient(farthest-side at 0    100%,var(--c)),
+    radial-gradient(farthest-side at 100% 0   ,var(--c)),
+    radial-gradient(farthest-side at 0    0   ,var(--c));
+  background-size: 33.4% 50%;
+  background-repeat: no-repeat;
+  animation: l9 2s infinite linear;
+}
+@keyframes l9 {
+  0%    {background-position:0 0,50% 0,0 100%,50% 100%}
+  12.5% {background-position:0 0,100% 0,0 100%,50% 100%}
+  25%   {background-position:50% 0,100% 0,0 100%,50% 100%}
+  37.5% {background-position:50% 0,100% 0,0 100%,100% 100%}
+  50%   {background-position:50% 0,100% 0,50% 100%,100% 100%}
+  62.5% {background-position:0 0,100% 0,50% 100%,100% 100%}
+  75%   {background-position:0 0,50% 0,50% 100%,100% 100%}
+  87.5% {background-position:0 0,50% 0,0 100%,100% 100%}
+  100%  {background-
