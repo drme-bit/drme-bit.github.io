@@ -1,4 +1,3 @@
-// Utility function for throttling
 document.body.style.overflow = 'hidden';
 function throttle(callback, limit) {
     let wait = false;
@@ -11,7 +10,6 @@ function throttle(callback, limit) {
     };
 }
 
-// Show project animation on scroll using IntersectionObserver
 const projects = document.querySelectorAll('.project');
 if (projects.length) {
     const observer = new IntersectionObserver(
@@ -28,11 +26,10 @@ if (projects.length) {
     projects.forEach((project) => observer.observe(project));
 }
 
-// Scroll navigation between full-page sections
 const sections = Array.from(document.querySelectorAll('.full-page-section'));
 let currentSectionIndex = 0;
-const scrollDuration = 800; // ms
-const scrollThreshold = 150; // pixels
+const scrollDuration = 800;
+const scrollThreshold = 150;
 
 function smoothScrollTo(target) {
     const start = window.scrollY;
