@@ -1,20 +1,37 @@
-// Show project animation on scroll
-document.addEventListener('scroll', () => {
-    const projects = document.querySelectorAll('.project');
-    projects.forEach((project) => {
-        const rect = project.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 100) {
-            project.classList.add('show');
+// Utility function for throttling
+function throttle(callback, limit) {
+    let wait = false;
+    return function (...args) {
+        if (!wait) {
+            callback.apply(this, args);
+            wait = true;
+            setTimeout(() => (wait = false), limit);
         }
-    });
-});
+    };
+}
 
-// Selecting all full-page sections
-const sections = document.querySelectorAll('.full-page-section');
+// Show project animation on scroll using IntersectionObserver
+const projects = document.querySelectorAll('.project');
+if (projects.length) {
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        },
+        { threshold: 0.1 }
+    );
+
+    projects.forEach((project) => observer.observe(project));
+}
+
+// Scroll navigation between full-page sections
+const sections = Array.from(document.querySelectorAll('.full-page-section'));
 let currentSectionIndex = 0;
-let isThrottled = false; // Throttle flag
-const scrollDuration = 800; // Duration for the scroll in milliseconds
-const scrollThreshold = 150; // Required scroll distance in pixels to trigger a section change
+const scrollDuration = 800; // ms
+const scrollThreshold = 150; // pixels
 
 function smoothScrollTo(target) {
     const start = window.scrollY;
@@ -24,8 +41,8 @@ function smoothScrollTo(target) {
 
     function animation(currentTime) {
         const timeElapsed = currentTime - startTime;
-        const progress = Math.min(timeElapsed / scrollDuration, 1); // Normalize progress (0 to 1)
-        window.scrollTo(0, start + distance * easeOutCubic(progress)); // Easing function
+        const progress = Math.min(timeElapsed / scrollDuration, 1);
+        window.scrollTo(0, start + distance * easeOutCubic(progress));
         if (progress < 1) {
             requestAnimationFrame(animation);
         }
@@ -34,104 +51,83 @@ function smoothScrollTo(target) {
     requestAnimationFrame(animation);
 }
 
-// Easing function (Cubic)
 function easeOutCubic(t) {
-    return 1 - Math.pow(1 - t, 3); // Easing out for a smooth end
+    return 1 - Math.pow(1 - t, 3);
 }
 
-let lastScrollY = window.scrollY; // To track the last scroll position
-
-window.addEventListener('wheel', (event) => {
-    if (isThrottled) return; // Prevent further actions until throttle is released
-
-    const deltaY = event.deltaY;
-
-    // Determine which direction to scroll
-    if (deltaY > 0) {
-        // Scrolling down
-        if (currentSectionIndex < sections.length - 1) {
-            currentSectionIndex++;
-        }
-    } else if (deltaY < 0) {
-        // Scrolling up
-        if (currentSectionIndex > 0) {
-            currentSectionIndex--;
-        }
+function scrollToSection(index) {
+    if (index >= 0 && index < sections.length) {
+        currentSectionIndex = index;
+        smoothScrollTo(sections[currentSectionIndex]);
     }
+}
 
-    // Scroll to the current section
-    smoothScrollTo(sections[currentSectionIndex]);
+window.addEventListener(
+    'wheel',
+    throttle((event) => {
+        const deltaY = event.deltaY;
+        if (deltaY > 0 && currentSectionIndex < sections.length - 1) {
+            scrollToSection(currentSectionIndex + 1);
+        } else if (deltaY < 0 && currentSectionIndex > 0) {
+            scrollToSection(currentSectionIndex - 1);
+        }
+    }, scrollDuration)
+);
 
-    // Set throttle
-    isThrottled = true;
-    setTimeout(() => {
-        isThrottled = false; // Reset throttle after scroll duration
-    }, scrollDuration);
-    
-    lastScrollY = window.scrollY; // Update the last scroll position
-});
-
-// Touch Events for Mobile Devices (Optional)
+// Touch support for mobile
 let touchStartY = 0;
-
 window.addEventListener('touchstart', (event) => {
-    touchStartY = event.touches[0].clientY; // Get the initial touch position
+    touchStartY = event.touches[0].clientY;
 });
 
-window.addEventListener('touchmove', (event) => {
-    const touchEndY = event.touches[0].clientY;
-    const touchDeltaY = touchStartY - touchEndY;
+window.addEventListener(
+    'touchmove',
+    throttle((event) => {
+        const touchEndY = event.touches[0].clientY;
+        const touchDeltaY = touchStartY - touchEndY;
 
-    if (Math.abs(touchDeltaY) > scrollThreshold) {
-        if (touchDeltaY > 0 && currentSectionIndex < sections.length - 1) {
-            // Swiping up
-            currentSectionIndex++;
-        } else if (touchDeltaY < 0 && currentSectionIndex > 0) {
-            // Swiping down
-            currentSectionIndex--;
+        if (Math.abs(touchDeltaY) > scrollThreshold) {
+            if (touchDeltaY > 0 && currentSectionIndex < sections.length - 1) {
+                scrollToSection(currentSectionIndex + 1);
+            } else if (touchDeltaY < 0 && currentSectionIndex > 0) {
+                scrollToSection(currentSectionIndex - 1);
+            }
+            touchStartY = touchEndY; // Reset for continued swiping
         }
+    }, scrollDuration)
+);
 
-        smoothScrollTo(sections[currentSectionIndex]); // Scroll to the current section
-        touchStartY = touchEndY; // Reset the touch start position
-    }
-});
-
-// Ensure the user can navigate back to the first section if at the last section
+// Footer and Header Logic
 const footer = document.querySelector('.footer');
 const header = document.querySelector('.header');
+window.addEventListener(
+    'scroll',
+    throttle(() => {
+        const scrollTop = window.scrollY;
 
-window.addEventListener('scroll', function() {
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-
-    // Hide footer at the top
-    if (scrollTop === 0) {
-        footer.style.bottom = '-100px'; // Hide footer
-    } else if (scrollTop + window.innerHeight >= document.body.offsetHeight) {
-        // Show footer when at the bottom
-        footer.style.bottom = '0';
-    }
-
-    // Add or remove transparent class from header
-    if (scrollTop > header.offsetHeight) {
-        header.classList.add('transparent'); // Add transparency
-    } else {
-        header.classList.remove('transparent'); // Remove transparency
-    }
-});
-
-// Smooth scroll for anchor links (optional)
-const links = document.querySelectorAll('nav a'); // Find all navigation links
-links.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault(); // Prevent default link behavior
-
-        const targetId = link.getAttribute('href'); // Get href attribute
-        const targetElement = document.querySelector(targetId); // Find the element by ID
-
-        if (targetElement) {
-            smoothScrollTo(targetElement); // Scroll to the element
+        if (footer) {
+            footer.style.bottom =
+                scrollTop + window.innerHeight >= document.body.offsetHeight
+                    ? '0'
+                    : '-100px';
         }
+
+        if (header) {
+            if (scrollTop > header.offsetHeight) {
+                header.classList.add('transparent');
+            } else {
+                header.classList.remove('transparent');
+            }
+        }
+    }, 200)
+);
+
+// Smooth scroll for anchor links
+document.querySelectorAll('nav a').forEach((link) => {
+    link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const targetId = link.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) smoothScrollTo(targetElement);
     });
 });
-
-
