@@ -1,4 +1,5 @@
 // Utility function for throttling
+document.body.style.overflow = 'hidden';
 function throttle(callback, limit) {
     let wait = false;
     return function (...args) {
