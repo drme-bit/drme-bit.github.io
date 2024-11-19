@@ -1,31 +1,31 @@
-// Show project animation on scroll
-document.addEventListener('scroll', () => {
-    const projects = document.querySelectorAll('.project');
-    projects.forEach((project) => {
-        const rect = project.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 100) {
-            project.classList.add('show');
+// Utility: Throttle function to limit event calls
+function throttle(callback, delay) {
+    let isThrottled = false;
+    return (...args) => {
+        if (!isThrottled) {
+            callback(...args);
+            isThrottled = true;
+            setTimeout(() => (isThrottled = false), delay);
         }
-    });
-});
+    };
+}
 
-// Selecting all full-page sections
-const sections = document.querySelectorAll('.full-page-section');
-let currentSectionIndex = 0;
-let isThrottled = false; // Throttle flag
-const scrollDuration = 800; // Duration for the scroll in milliseconds
-const scrollThreshold = 150; // Required scroll distance in pixels to trigger a section change
-
+// Utility: Smooth scroll with reduced-motion preference support
 function smoothScrollTo(target) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        target.scrollIntoView({ behavior: 'auto' });
+        return;
+    }
+
     const start = window.scrollY;
     const end = target.offsetTop;
     const distance = end - start;
     const startTime = performance.now();
 
     function animation(currentTime) {
-        const timeElapsed = currentTime - startTime;
-        const progress = Math.min(timeElapsed / scrollDuration, 1); // Normalize progress (0 to 1)
-        window.scrollTo(0, start + distance * easeOutCubic(progress)); // Easing function
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / scrollDuration, 1);
+        window.scrollTo(0, start + distance * easeOutCubic(progress));
         if (progress < 1) {
             requestAnimationFrame(animation);
         }
@@ -34,103 +34,102 @@ function smoothScrollTo(target) {
     requestAnimationFrame(animation);
 }
 
-// Easing function (Cubic)
+// Easing function
 function easeOutCubic(t) {
-    return 1 - Math.pow(1 - t, 3); // Easing out for a smooth end
+    return 1 - Math.pow(1 - t, 3);
 }
 
-let lastScrollY = window.scrollY; // To track the last scroll position
+// Show project animation using IntersectionObserver
+const projects = document.querySelectorAll('.project');
+if (projects.length) {
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        },
+        { threshold: 0.1 }
+    );
 
-window.addEventListener('wheel', (event) => {
-    if (isThrottled) return; // Prevent further actions until throttle is released
+    projects.forEach((project) => observer.observe(project));
+}
 
-    const deltaY = event.deltaY;
+// Section Scrolling Logic
+const sections = Array.from(document.querySelectorAll('.full-page-section'));
+let currentSectionIndex = 0;
+const scrollDuration = 800; // Scroll animation duration (ms)
+const scrollThreshold = 150; // Distance in pixels for touch gestures
 
-    // Determine which direction to scroll
-    if (deltaY > 0) {
-        // Scrolling down
-        if (currentSectionIndex < sections.length - 1) {
-            currentSectionIndex++;
-        }
-    } else if (deltaY < 0) {
-        // Scrolling up
-        if (currentSectionIndex > 0) {
-            currentSectionIndex--;
-        }
+function scrollToSection(index) {
+    if (index >= 0 && index < sections.length) {
+        currentSectionIndex = index;
+        smoothScrollTo(sections[currentSectionIndex]);
     }
+}
 
-    // Scroll to the current section
-    smoothScrollTo(sections[currentSectionIndex]);
+window.addEventListener(
+    'wheel',
+    throttle((event) => {
+        if (event.deltaY > 0 && currentSectionIndex < sections.length - 1) {
+            scrollToSection(currentSectionIndex + 1);
+        } else if (event.deltaY < 0 && currentSectionIndex > 0) {
+            scrollToSection(currentSectionIndex - 1);
+        }
+    }, scrollDuration)
+);
 
-    // Set throttle
-    isThrottled = true;
-    setTimeout(() => {
-        isThrottled = false; // Reset throttle after scroll duration
-    }, scrollDuration);
-    
-    lastScrollY = window.scrollY; // Update the last scroll position
-});
-
-// Touch Events for Mobile Devices (Optional)
+// Touch support for mobile devices
 let touchStartY = 0;
-
 window.addEventListener('touchstart', (event) => {
-    touchStartY = event.touches[0].clientY; // Get the initial touch position
+    touchStartY = event.touches[0].clientY;
 });
 
-window.addEventListener('touchmove', (event) => {
-    const touchEndY = event.touches[0].clientY;
-    const touchDeltaY = touchStartY - touchEndY;
+window.addEventListener(
+    'touchmove',
+    throttle((event) => {
+        const touchDeltaY = touchStartY - event.touches[0].clientY;
 
-    if (Math.abs(touchDeltaY) > scrollThreshold) {
-        if (touchDeltaY > 0 && currentSectionIndex < sections.length - 1) {
-            // Swiping up
-            currentSectionIndex++;
-        } else if (touchDeltaY < 0 && currentSectionIndex > 0) {
-            // Swiping down
-            currentSectionIndex--;
+        if (Math.abs(touchDeltaY) > scrollThreshold) {
+            if (touchDeltaY > 0 && currentSectionIndex < sections.length - 1) {
+                scrollToSection(currentSectionIndex + 1);
+            } else if (touchDeltaY < 0 && currentSectionIndex > 0) {
+                scrollToSection(currentSectionIndex - 1);
+            }
+            touchStartY = event.touches[0].clientY; // Reset start position
         }
+    }, scrollDuration)
+);
 
-        smoothScrollTo(sections[currentSectionIndex]); // Scroll to the current section
-        touchStartY = touchEndY; // Reset the touch start position
-    }
-});
-
-// Ensure the user can navigate back to the first section if at the last section
+// Footer and Header Visibility
 const footer = document.querySelector('.footer');
 const header = document.querySelector('.header');
+window.addEventListener(
+    'scroll',
+    throttle(() => {
+        const scrollTop = window.scrollY;
+        const scrollHeight = document.body.scrollHeight;
+        const windowHeight = window.innerHeight;
 
-window.addEventListener('scroll', function() {
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-
-    // Hide footer at the top
-    if (scrollTop === 0) {
-        footer.style.bottom = '-100px'; // Hide footer
-    } else if (scrollTop + window.innerHeight >= document.body.offsetHeight) {
-        // Show footer when at the bottom
-        footer.style.bottom = '0';
-    }
-
-    // Add or remove transparent class from header
-    if (scrollTop > header.offsetHeight) {
-        header.classList.add('transparent'); // Add transparency
-    } else {
-        header.classList.remove('transparent'); // Remove transparency
-    }
-});
-
-// Smooth scroll for anchor links (optional)
-const links = document.querySelectorAll('nav a'); // Find all navigation links
-links.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault(); // Prevent default link behavior
-
-        const targetId = link.getAttribute('href'); // Get href attribute
-        const targetElement = document.querySelector(targetId); // Find the element by ID
-
-        if (targetElement) {
-            smoothScrollTo(targetElement); // Scroll to the element
+        if (footer) {
+            footer.style.bottom =
+                scrollTop + windowHeight >= scrollHeight ? '0' : '-100px';
         }
+
+        if (header) {
+            header.classList.toggle('transparent', scrollTop > header.offsetHeight);
+        }
+    }, 200)
+);
+
+// Smooth Scroll for Anchor Links
+document.querySelectorAll('nav a').forEach((link) => {
+    link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const targetId = link.getAttribute('href');
+        const target = document.querySelector(targetId);
+        if (target) smoothScrollTo(target);
     });
 });
 
