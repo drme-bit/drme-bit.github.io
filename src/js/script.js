@@ -12,7 +12,7 @@ function throttle(callback, limit) {
 }
 
 // Show project animation on scroll using IntersectionObserver
-const projects = document.querySelectorAll('.project');
+const projects = document.querySelectorAll('.project-card');
 if (projects.length) {
     const observer = new IntersectionObserver(
         (entries) => {
@@ -26,6 +26,24 @@ if (projects.length) {
     );
 
     projects.forEach((project) => observer.observe(project));
+}
+
+// Skills animation
+const skillBars = document.querySelectorAll('.skill-progress');
+if (skillBars.length) {
+    const skillObserver = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const width = entry.target.getAttribute('data-width');
+                    entry.target.style.width = width + '%';
+                }
+            });
+        },
+        { threshold: 0.5 }
+    );
+
+    skillBars.forEach((bar) => skillObserver.observe(bar));
 }
 
 // Scroll navigation between full-page sections
@@ -98,20 +116,12 @@ window.addEventListener(
     }, scrollDuration)
 );
 
-// Footer and Header Logic
-const footer = document.querySelector('.footer');
+// Header Logic
 const header = document.querySelector('.header');
 window.addEventListener(
     'scroll',
     throttle(() => {
         const scrollTop = window.scrollY;
-
-        if (footer) {
-            footer.style.bottom =
-                scrollTop + window.innerHeight >= document.body.offsetHeight
-                    ? '0'
-                    : '-100px';
-        }
 
         if (header) {
             if (scrollTop > header.offsetHeight) {
@@ -132,3 +142,73 @@ document.querySelectorAll('nav a').forEach((link) => {
         if (targetElement) smoothScrollTo(targetElement);
     });
 });
+
+// Contact Form Validation
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Clear previous errors
+        document.querySelectorAll('.error-message').forEach(error => {
+            error.textContent = '';
+        });
+        
+        let isValid = true;
+        
+        // Validate name
+        const name = document.getElementById('name').value.trim();
+        if (!name) {
+            document.getElementById('nameError').textContent = 'Name is required';
+            isValid = false;
+        } else if (name.length < 2) {
+            document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
+            isValid = false;
+        }
+        
+        // Validate email
+        const email = document.getElementById('email').value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            document.getElementById('emailError').textContent = 'Email is required';
+            isValid = false;
+        } else if (!emailRegex.test(email)) {
+            document.getElementById('emailError').textContent = 'Please enter a valid email address';
+            isValid = false;
+        }
+        
+        // Validate subject
+        const subject = document.getElementById('subject').value.trim();
+        if (!subject) {
+            document.getElementById('subjectError').textContent = 'Subject is required';
+            isValid = false;
+        }
+        
+        // Validate message
+        const message = document.getElementById('message').value.trim();
+        if (!message) {
+            document.getElementById('messageError').textContent = 'Message is required';
+            isValid = false;
+        } else if (message.length < 10) {
+            document.getElementById('messageError').textContent = 'Message must be at least 10 characters';
+            isValid = false;
+        }
+        
+        if (isValid) {
+            // Form is valid - in a real application, you would send the data to a server
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.querySelector('.btn-text').textContent;
+            
+            submitBtn.querySelector('.btn-text').textContent = 'Sending...';
+            submitBtn.disabled = true;
+            
+            // Simulate form submission
+            setTimeout(() => {
+                alert('Thank you for your message! I\'ll get back to you soon.');
+                contactForm.reset();
+                submitBtn.querySelector('.btn-text').textContent = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        }
+    });
+}
