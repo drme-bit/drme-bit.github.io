@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Name - Full Stack Developer</title>
+    <title>Dilip Maurya - Full Stack Developer</title>
     <link rel="stylesheet" href="src/css/styles.css">
     <style>
         /* Simple icon replacements */
@@ -20,19 +20,21 @@
 </head>
 <body>
     <header class="header">
-        <div class="logo">Portfolio</div>
+        <div class="logo">Dilip Maurya</div>
         <nav>
             <a href="#about">About</a>
             <a href="#projects">Projects</a>
             <a href="#contact">Contact</a>
+            <a href="#dashboard" class="admin-link" id="adminLink" style="display: none;">Dashboard</a>
         </nav>
+        <div class="theme-toggle" id="themeToggle">🌙</div>
     </header>
     
     <section id="hero" class="section full-page-section">
         <div class="hero-content">
-            <h1>Hi, I'm <span class="highlight">Your Name</span></h1>
-            <h2 class="hero-subtitle">Full Stack Developer & UI/UX Designer</h2>
-            <p class="hero-description">I create beautiful, responsive websites and applications with modern technologies. Passionate about clean code and exceptional user experiences.</p>
+            <h1>Hi, I'm <span class="highlight">Dilip Maurya</span></h1>
+            <h2 class="hero-subtitle">Full Stack Developer & Tech Enthusiast</h2>
+            <p class="hero-description">Passionate about creating innovative web solutions with modern technologies. I build scalable applications and love exploring new tech stacks.</p>
             <div class="hero-buttons">
                 <a href="#projects" class="btn btn-primary">View My Work</a>
                 <a href="#contact" class="btn btn-secondary">Get In Touch</a>
@@ -169,7 +171,7 @@
                         <i class="fas fa-map-marker-alt"></i>
                         <div>
                             <h4>Location</h4>
-                            <p>Your City, Country</p>
+                            <p>Mumbai, India</p>
                         </div>
                     </div>
                     
@@ -177,7 +179,7 @@
                         <i class="fas fa-envelope"></i>
                         <div>
                             <h4>Email</h4>
-                            <p>your.email@example.com</p>
+                            <p>dilip.maurya@example.com</p>
                         </div>
                     </div>
                     
@@ -185,23 +187,23 @@
                         <i class="fas fa-phone"></i>
                         <div>
                             <h4>Phone</h4>
-                            <p>+1 (555) 123-4567</p>
+                            <p>+91 98765 43210</p>
                         </div>
                     </div>
                     
                     <div class="social-links">
                         <h4>Follow Me</h4>
                         <div class="social-icons">
-                            <a href="https://github.com/yourusername" target="_blank" class="social-icon">
+                            <a href="https://github.com/dilipmaurya" target="_blank" class="social-icon">
                                 <i class="fab fa-github"></i>
                             </a>
-                            <a href="https://linkedin.com/in/yourusername" target="_blank" class="social-icon">
+                            <a href="https://linkedin.com/in/dilipmaurya" target="_blank" class="social-icon">
                                 <i class="fab fa-linkedin"></i>
                             </a>
-                            <a href="https://twitter.com/yourusername" target="_blank" class="social-icon">
+                            <a href="https://twitter.com/dilipmaurya" target="_blank" class="social-icon">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="mailto:your.email@example.com" class="social-icon">
+                            <a href="mailto:dilip.maurya@example.com" class="social-icon">
                                 <i class="fas fa-envelope"></i>
                             </a>
                         </div>
@@ -242,9 +244,117 @@
         </div>
     </section>
 
+    <!-- Developer Dashboard Section -->
+    <section id="dashboard" class="section full-page-section dashboard-section" style="display: none;">
+        <div class="container">
+            <h2>Developer Dashboard</h2>
+            
+            <div class="dashboard-content">
+                <div class="dashboard-sidebar">
+                    <div class="status-section">
+                        <h3>Status</h3>
+                        <div class="status-indicator">
+                            <span id="currentStatus" class="status-available">Available</span>
+                            <button id="toggleStatus" class="btn btn-sm">Toggle Status</button>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="messageCount">0</span>
+                            <span class="stat-label">Messages</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="projectCount">3</span>
+                            <span class="stat-label">Projects</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-main">
+                    <div class="dashboard-tabs">
+                        <button class="tab-button active" data-tab="messages">Messages</button>
+                        <button class="tab-button" data-tab="projects">Projects</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="messages-tab">
+                        <div class="messages-header">
+                            <h3>Contact Messages</h3>
+                            <button id="clearMessages" class="btn btn-danger btn-sm">Clear All</button>
+                        </div>
+                        <div id="messagesList" class="messages-list">
+                            <p class="no-messages">No messages yet.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="projects-tab">
+                        <div class="projects-header">
+                            <h3>Manage Projects</h3>
+                            <button id="addProject" class="btn btn-primary btn-sm">Add Project</button>
+                        </div>
+                        <div id="projectsList" class="projects-management">
+                            <!-- Projects will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Developer Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <p class="login-hint">Hint: username: admin, password: admin123</p>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="projectModalTitle">Add Project</h2>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label for="projectTitle">Project Title</label>
+                    <input type="text" id="projectTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="projectDescription">Description</label>
+                    <textarea id="projectDescription" name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="projectTech">Technologies (comma-separated)</label>
+                    <input type="text" id="projectTech" name="tech" placeholder="React, Node.js, MongoDB" required>
+                </div>
+                <div class="form-group">
+                    <label for="projectLink">Project Link</label>
+                    <input type="url" id="projectLink" name="link" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="projectCode">Code Link</label>
+                    <input type="url" id="projectCode" name="code" placeholder="https://github.com/...">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Project</button>
+            </form>
+        </div>
+    </div>
+
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Your Name. All rights reserved.</p>
+            <p>&copy; 2024 Dilip Maurya. All rights reserved. | <a href="#" id="adminLoginLink">Admin</a></p>
         </div>
     </footer>
 
