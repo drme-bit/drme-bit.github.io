@@ -1,0 +1,46 @@
+.nav {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  backdrop-filter: blur(8px);
+  padding: 0.4rem 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sep {
+  margin: 0 0.35rem;
+  font-size: 0.5rem;
+  color: rgba(255, 255, 255, 0.15);
+  user-select: none;
+}
+
+.link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.85rem;
+  font-family: inherit;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0.1rem 0;
+  transition: color 0.3s ease;
+}
+
+.link:hover {
+  color: rgba(94, 200, 216, 0.6);
+}
+
+.active {
+  color: #5ec8d8;
+}

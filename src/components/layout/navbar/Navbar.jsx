@@ -1,0 +1,50 @@
+import { useState, useEffect } from 'react';
+import styles from './Navbar.module.scss';
+
+const ITEMS = [
+  { id: 'hero', label: '✦' },
+  { id: 'about', label: 'About' },
+  { id: 'work', label: 'Work' },
+  { id: 'contact', label: 'Contact' },
+];
+
+export default function Navbar() {
+  const [active, setActive] = useState('hero');
+
+  useEffect(() => {
+    const observers = ITEMS.map(({ id }) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActive(id);
+        },
+        { threshold: 0.3 },
+      );
+      observer.observe(el);
+      return observer;
+    });
+
+    return () => observers.forEach((o) => o?.disconnect());
+  }, []);
+
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <nav className={styles.nav}>
+      {ITEMS.map((item, i) => (
+        <span key={item.id} className={styles.item}>
+          {i > 0 && <span className={styles.sep}>/</span>}
+          <button
+            className={`${styles.link} ${active === item.id ? styles.active : ''}`}
+            onClick={() => scrollTo(item.id)}
+          >
+            {item.label}
+          </button>
+        </span>
+      ))}
+    </nav>
+  );
+}

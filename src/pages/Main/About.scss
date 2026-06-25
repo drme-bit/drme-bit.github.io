@@ -1,0 +1,63 @@
+.section {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+}
+
+.section-inner {
+  max-width: 640px;
+  padding: 6rem 2rem;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 1vw, 0.75rem);
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.15;
+  margin: 0 0 1.5rem;
+}
+
+.section-accent {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.section-body {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: clamp(0.85rem, 1.4vw, 1rem);
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.section-body p {
+  margin: 0 0 1em;
+}
+
+.section-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.section-tag {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.9vw, 0.7rem);
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.3rem 0.7rem;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
