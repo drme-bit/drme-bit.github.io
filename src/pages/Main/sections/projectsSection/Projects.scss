@@ -1,0 +1,224 @@
+// "Scattered desktop icons" layout — entries are absolutely positioned
+// within .registry-canvas at seeded (x, y, width), freely draggable.
+// Below 700px this collapses to a plain stacked column (see media query at
+// the bottom) since free XY dragging isn't a workable touch pattern.
+
+.section--projects {
+  align-items: flex-start;
+}
+
+.section--projects .section-inner {
+  max-width: 980px;
+  width: 100%;
+}
+
+.registry-hint {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-mono);
+  font-size: clamp(0.55rem, 0.7vw, 0.65rem);
+  color: rgba(255, 255, 255, 0.18);
+  letter-spacing: 0.08em;
+}
+
+.registry-canvas {
+  position: relative;
+  margin-top: 1.5rem;
+  height: 560px;
+  // a faint dot-grid background reinforces the "desktop surface" you're
+  // scattering icons across, echoing the contour/grid motifs elsewhere
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.registry-entry {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.82);
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.5s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease, left 0.05s linear, top 0.05s linear;
+
+  &.is-visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  &:hover {
+    border-color: rgba(94, 200, 216, 0.25);
+  }
+
+  &.is-dragging {
+    transition: opacity 0.5s ease, border-color 0.2s ease; // no position easing while actively dragging — must track the pointer 1:1
+    border-color: var(--accent);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  &.is-expanded {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.entry-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none; // prevents the browser from intercepting drag gestures as scroll/pan
+}
+
+.registry-entry.is-dragging .entry-bar {
+  cursor: grabbing;
+}
+
+.registry-entry.is-expanded .entry-bar {
+  cursor: pointer;
+}
+
+.entry-id {
+  font-family: var(--font-mono);
+  font-size: clamp(0.5rem, 0.65vw, 0.6rem);
+  color: rgba(94, 200, 216, 0.5);
+  flex-shrink: 0;
+}
+
+.entry-title {
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 0.85vw, 0.75rem);
+  color: rgba(255, 255, 255, 0.75);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-status {
+  font-family: var(--font-mono);
+  font-size: clamp(0.45rem, 0.55vw, 0.52rem);
+  letter-spacing: 0.05em;
+  padding: 1px 5px;
+  border: 1px solid currentColor;
+  flex-shrink: 0;
+
+  &--active {
+    color: rgba(94, 200, 216, 0.6);
+  }
+
+  &--archived {
+    color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.entry-caret {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.3);
+  width: 12px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.entry-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.project-preview {
+  width: 100%;
+  height: 56px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.entry-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.entry-desc {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: clamp(0.6rem, 0.75vw, 0.7rem);
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.5;
+  margin: 0;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  &.is-full {
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+}
+
+.entry-tech {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.entry-tech-tag {
+  font-family: var(--font-mono);
+  font-size: clamp(0.42rem, 0.55vw, 0.5rem);
+  color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1px 5px;
+  transition: all 0.2s;
+}
+
+.registry-entry:hover .entry-tech-tag {
+  border-color: rgba(94, 200, 216, 0.15);
+  color: rgba(94, 200, 216, 0.4);
+}
+
+.entry-link {
+  font-family: var(--font-mono);
+  font-size: clamp(0.55rem, 0.65vw, 0.6rem);
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  align-self: flex-start;
+  margin-top: 2px;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+// Below this width, free XY dragging isn't a workable touch interaction —
+// fall back to a plain stacked column with normal document flow.
+@media (max-width: 700px) {
+  .registry-canvas {
+    height: auto;
+    background-image: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .registry-entry {
+    position: static !important;
+    width: 100% !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .entry-bar {
+    cursor: default;
+    touch-action: auto;
+  }
+}

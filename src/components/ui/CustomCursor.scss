@@ -1,0 +1,26 @@
+.custom-cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  will-change: left, top;
+}
+
+.custom-cursor-ring {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(94, 200, 216, 0.25);
+  transition: width 0.2s, height 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.custom-cursor-ring.is-hovered {
+  width: 40px;
+  height: 40px;
+  border-color: var(--accent);
+  background: rgba(94, 200, 216, 0.06);
+}
+
+@media (pointer: coarse) {
+  .custom-cursor { display: none; }
+}

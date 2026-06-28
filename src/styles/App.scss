@@ -1,5 +1,21 @@
 html { scroll-behavior: smooth; }
-body { overflow-x: hidden; }
+body { overflow-x: hidden; cursor: none; }
+
+@media (pointer: coarse) {
+  body { cursor: auto; }
+}
+
+/* ---- reveal animation ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* ---- 3D scene ---- */
 #bg {
@@ -59,9 +75,4 @@ body { overflow-x: hidden; }
   background: var(--accent);
   transition: width 0.3s linear;
   box-shadow: 0 0 8px var(--accent);
-}
-
-@keyframes mpFadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
 }

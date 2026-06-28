@@ -1,9 +1,14 @@
+import useReveal from '@/hooks/useReveal';
+import useCursorParallax from '@/hooks/useCursorParallax';
 import './About.scss';
 
 export default function About() {
+  const [ref, visible] = useReveal();
+  const { x, y } = useCursorParallax();
+
   return (
-    <section id="about" className="section">
-      <div className="section-inner">
+    <section id="about" ref={ref} className={`section reveal${visible ? ' is-visible' : ''}`}>
+      <div className="section-inner" style={{ transform: `translate(${x * 4}px, ${y * 3}px)` }}>
         <div className="section-label">// about</div>
         <h2 className="section-title">Building digital<br /><span className="section-accent">products</span></h2>
         <div className="section-body">

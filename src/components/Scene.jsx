@@ -251,9 +251,12 @@ function Beacons() {
 }
 
 function IsoCamera() {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const scrollT = useRef(0);
   const angle = useRef(0.78);
+  const dragAngle = useRef(0);
+  const isDragging = useRef(false);
+  const prevX = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -265,18 +268,36 @@ function IsoCamera() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const el = gl.domElement;
+    const onDown = (e) => { isDragging.current = true; prevX.current = e.clientX; };
+    const onUp = () => { isDragging.current = false; };
+    const onMove = (e) => {
+      if (!isDragging.current) return;
+      dragAngle.current += (e.clientX - prevX.current) * 0.005;
+      prevX.current = e.clientX;
+    };
+    el.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointermove', onMove);
+    return () => {
+      el.removeEventListener('pointerdown', onDown);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointermove', onMove);
+    };
+  }, [gl]);
+
   useFrame(({ mouse }) => {
     const s = scrollT.current;
 
-    // target isometric position (desired end state)
-    angle.current += ((0.6 + s * 1.4) - angle.current) * 0.01;
+    const targetAngle = 0.6 + s * 1.4 + dragAngle.current;
+    angle.current += (targetAngle - angle.current) * 0.02;
     const dist = 13;
-    const a = angle.current + mouse.x * 0.15;
+    const a = isDragging.current ? angle.current : angle.current + mouse.x * 0.12;
     const isoX = Math.cos(a) * dist * 0.82;
-    const isoY = 9.2 + mouse.y * 0.5;
+    const isoY = 9.2 + mouse.y * 0.4;
     const isoZ = Math.sin(a) * dist * 0.82 - 4;
 
-    // transition weight: top-down (0) → isometric (1)
     const t = Math.min(s * 2.5, 1);
 
     const camX = isoX * t;

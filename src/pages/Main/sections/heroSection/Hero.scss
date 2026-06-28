@@ -63,12 +63,11 @@
 }
 
 .hero-typewrap {
-  display: flex;
-  align-items: center;
   font-family: var(--font-mono);
   font-size: clamp(1rem, 2.8vw, 2rem);
   color: var(--accent);
   text-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 120px rgba(0, 0, 0, 0.4);
+  white-space: pre;
 }
 
 .hero-type-cursor {
@@ -162,4 +161,91 @@
 @keyframes arrowBounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(10px); }
+}
+
+.hero-contacts {
+  display: flex;
+  gap: 10px;
+  margin-top: 0.75rem;
+}
+
+.hero-contact-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.2s;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--accent);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 0.85rem;
+  font-family: var(--font-mono);
+}
+
+.hero-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.hero-stat-value {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.85rem;
+}
+
+.hero-stat-label {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+}
+
+.hero-stat-sep {
+  width: 1px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+// Minimal placeholder for the sticky name/role seam — swap for your own
+// component (see the comment on <StickyIdentity> in Hero.jsx). Pinned to
+// the top of the viewport, fades in as `fadeProgress` (the hero's own
+// scroll-out progress) approaches 1.
+.hero-sticky-identity {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.5rem;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+.hero-sticky-name {
+  letter-spacing: 0.05em;
+}
+
+.hero-sticky-status {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 4px rgba(94, 200, 216, 0.5);
 }

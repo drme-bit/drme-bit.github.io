@@ -37,3 +37,21 @@
 .gh-status-link:hover {
   color: var(--accent);
 }
+
+.gh-stats {
+  display: none;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.45rem, 0.65vw, 0.55rem);
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.gh-stat-sep {
+  color: rgba(255, 255, 255, 0.08);
+}
+
+@media (min-width: 600px) {
+  .gh-stats {
+    display: flex;
+  }
+}
