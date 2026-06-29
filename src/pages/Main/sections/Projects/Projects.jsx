@@ -4,7 +4,7 @@ import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import './Projects.scss';
 
 /* ------------------------------------------------------------------ */
-/*  Data — add image path to show a screenshot; null → fallback shown */
+//  Data
 /* ------------------------------------------------------------------ */
 
 const PROJECTS = [
@@ -29,7 +29,32 @@ const PROJECTS = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Fallback canvas — procedural wave animation                       */
+//  Arc/carousel positioning                                          
+/* ------------------------------------------------------------------ */
+
+const ARC_STEP_DEG = 48;   // angular distance between adjacent cards, in degrees
+const ARC_RADIUS_PX = 620; // horizontal arc radius
+const ARC_DROP_PX = 60;    // how far off-center cards drop along the arc's underside
+const MAX_OFFSET_VISIBLE = 2.2; // beyond this offset, treat scale/opacity as fully minimal
+
+function computeCardTransform(offset) {
+  const angleDeg = offset * ARC_STEP_DEG;
+  const angleRad = (angleDeg * Math.PI) / 180;
+
+  const translateX = Math.sin(angleRad) * ARC_RADIUS_PX;
+  const translateY = (1 - Math.cos(angleRad)) * ARC_DROP_PX;
+  const rotateY = -angleDeg;
+
+  const absOffset = Math.min(Math.abs(offset), MAX_OFFSET_VISIBLE);
+  const scale = 1 - (absOffset / MAX_OFFSET_VISIBLE) * 0.35;
+  const opacity = 1 - (absOffset / MAX_OFFSET_VISIBLE) * 0.85;
+  const zIndex = Math.round(1000 - absOffset * 10);
+
+  return { translateX, translateY, rotateY, scale, opacity, zIndex };
+}
+
+/* ------------------------------------------------------------------ */
+//  Fallback canvas — procedural wave animation                       
 /* ------------------------------------------------------------------ */
 
 function makeSignature(seedString) {
@@ -62,7 +87,6 @@ function drawFrame(ctx, w, h, sig, t) {
     pts.push({ x, y });
   }
 
-  // filled shape
   ctx.beginPath();
   ctx.moveTo(pts[0].x, h);
   for (const p of pts) ctx.lineTo(p.x, p.y);
@@ -75,7 +99,6 @@ function drawFrame(ctx, w, h, sig, t) {
   ctx.fillStyle = g;
   ctx.fill();
 
-  // glow line
   ctx.shadowColor = 'rgba(94,200,216,0.25)';
   ctx.shadowBlur = 12;
   ctx.strokeStyle = 'rgba(94,200,216,0.5)';
@@ -85,7 +108,6 @@ function drawFrame(ctx, w, h, sig, t) {
   for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
   ctx.stroke();
 
-  // bright core
   ctx.shadowBlur = 0;
   ctx.strokeStyle = 'rgba(94,200,216,0.7)';
   ctx.lineWidth = 0.8;
@@ -94,7 +116,6 @@ function drawFrame(ctx, w, h, sig, t) {
   for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
   ctx.stroke();
 
-  // subtle dot at current phase endpoint
   const last = pts[pts.length - 1];
   ctx.fillStyle = 'rgba(94,200,216,0.6)';
   ctx.shadowColor = 'rgba(94,200,216,0.4)';
@@ -128,7 +149,7 @@ function LivePreview({ seedString }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Preview — macOS‑style window with traffic‑light buttons           */
+//  Preview — macOS‑style window       
 /* ------------------------------------------------------------------ */
 
 function ProjectPreview({ project }) {
@@ -160,7 +181,7 @@ function ProjectPreview({ project }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Status badge                                                      */
+//  Status badge                                                      */
 /* ------------------------------------------------------------------ */
 
 const STATUS_META = {
@@ -169,14 +190,14 @@ const STATUS_META = {
 };
 
 /* ------------------------------------------------------------------ */
-/*  Project card                                                      */
+//  Project card                                                      */
 /* ------------------------------------------------------------------ */
 
 function formatId(i) {
   return `ENTRY_${String(i + 1).padStart(3, '0')}`;
 }
 
-function ProjectCard({ project, index, isCurrent }) {
+function ProjectCard({ project, index, offset, isCurrent }) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
 
@@ -199,12 +220,21 @@ function ProjectCard({ project, index, isCurrent }) {
     window.open(project.url, '_blank', 'noopener noreferrer');
   };
 
+  const { translateX, translateY, rotateY, scale, opacity, zIndex } = computeCardTransform(offset);
+
+  const style = {
+    transform: `translate(-50%, 0) translateX(${translateX}px) translateY(${translateY}px) rotateY(${rotateY}deg) scale(${scale})`,
+    opacity,
+    zIndex,
+  };
+
   return (
     <div
       ref={ref}
       role="button"
       tabIndex={0}
       className={`project-card${inView ? ' is-inview' : ''}${isCurrent ? ' is-current' : ''}${disabled ? ' project-card--disabled' : ''}`}
+      style={style}
       onClick={handleClick}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
     >
@@ -257,8 +287,9 @@ export default function Projects() {
   }, []);
 
   const count = PROJECTS.length;
-  const currentIndex = Math.round(progress * (count - 1));
-  const translatePct = progress * (count - 1) * 100;
+
+  const virtualCurrentIndex = progress * (count - 1);
+  const currentIndex = Math.round(virtualCurrentIndex);
 
   return (
     <section
@@ -282,18 +313,19 @@ export default function Projects() {
           </div>
 
           <div className="projects-viewport">
-            <div
-              className="projects-track"
-              style={{ transform: `translateX(-${translatePct}%)` }}
-            >
-              {PROJECTS.map((project, i) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  index={i}
-                  isCurrent={i === currentIndex}
-                />
-              ))}
+            <div className="projects-arc">
+              {PROJECTS.map((project, i) => {
+                const offset = i - virtualCurrentIndex;
+                return (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    index={i}
+                    offset={offset}
+                    isCurrent={Math.abs(offset) < 0.5}
+                  />
+                );
+              })}
             </div>
           </div>
 

@@ -183,27 +183,72 @@ $head-color: #ffd700;
 
 @media (max-width: 700px) {
   .section-inner {
-    padding: 1.5rem 1rem 3rem;
+    padding: 1.5rem 0.75rem 3rem;
+    width: 100%;
+    margin-left: 0;
   }
 
-  .timeline-entry {
-    grid-template-columns: 1.5rem 1fr;
-    gap: 0.75rem;
-    margin: 2.5rem 0;
+  .section > .section-header {
+    margin-left: 0.75rem;
+    width: calc(100% - 1.5rem);
+  }
+
+  .timeline {
+    position: relative;
+    padding: 0;
   }
 
   .timeline-line {
-    display: none;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 2px;
+    margin-left: 0;
+    background: linear-gradient(180deg, transparent, rgba(94, 200, 216, 0.25) 15%, rgba(94, 200, 216, 0.25) 85%, transparent);
+    display: block;
+  }
+
+  .tl-head {
+    width: 9px;
+    height: 9px;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.2);
+  }
+
+  .tl-head::before {
+    width: 24px;
+    height: 24px;
+  }
+
+  .timeline-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 1.75rem 0;
+    padding-left: 1.75rem;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .timeline-entry.is-visible {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .tl-dot {
-    position: static;
-    margin-top: 4px;
+    position: absolute;
+    left: -3.5px;
+    top: 4px;
+    width: 7px;
+    height: 7px;
   }
 
   .tl-left .tl-body,
   .tl-right .tl-body {
-    grid-column: 2;
     text-align: left;
+  }
+
+  .tl-body {
+    gap: 1px;
   }
 }

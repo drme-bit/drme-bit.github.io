@@ -44,7 +44,8 @@ export default function Experience() {
     const p = Math.max(0, Math.min(1, total > 0 ? scrolled / total : 0));
     setProgress(p);
 
-    const headY = vh * 0.1 + p * vh * 0.8;
+    const isMobile = window.innerWidth <= 700;
+    const threshold = isMobile ? vh * 0.75 : vh * 0.1 + p * vh * 0.8;
 
     const next = new Set();
     entryRefs.current.forEach((entryEl, i) => {
@@ -52,7 +53,7 @@ export default function Experience() {
       const dot = entryEl.querySelector('.tl-dot');
       if (!dot) return;
       const dotRect = dot.getBoundingClientRect();
-      if (headY >= dotRect.top + dotRect.height / 2) next.add(i);
+      if (threshold >= dotRect.top + dotRect.height / 2) next.add(i);
     });
 
     setVisibleSet(prev => {
