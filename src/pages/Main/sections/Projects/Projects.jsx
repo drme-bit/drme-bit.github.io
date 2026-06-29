@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import useReveal from '@/hooks/useReveal';
+import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import './Projects.scss';
 
 const PROJECTS = [
@@ -223,6 +225,7 @@ function ProjectEntry({
 
 export default function Projects() {
   const containerRef = useRef(null);
+  const [projectsRef, projectsVisible] = useReveal();
   const initialLayout = useMemo(() => computeInitialLayout(PROJECTS), []);
   const [positions, setPositions] = useState(initialLayout);
   const [zIndices, setZIndices] = useState(() => {
@@ -304,9 +307,9 @@ export default function Projects() {
   }, []);
 
   return (
-    <section id="work" className="section section--projects">
+    <section id="work" ref={projectsRef} className={`section section--projects reveal${projectsVisible ? ' is-visible' : ''}`}>
       <div className="section-inner">
-        <div className="section-label">// system registry</div>
+        <SectionHeader title="system registry" visible={projectsVisible} />
         <h2 className="section-title">Selected<span className="section-accent"> work</span></h2>
         <p className="registry-hint">drag entries to rearrange · click to expand</p>
 

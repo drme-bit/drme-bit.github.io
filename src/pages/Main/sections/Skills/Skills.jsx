@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import useReveal from '@/hooks/useReveal';
+import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import SkillsGlobe from './SkillsGlobe';
 import './Skills.scss';
 
@@ -20,7 +21,7 @@ export default function Skills() {
   return (
     <section id="skills" ref={ref} className={`section section--skills reveal${visible ? ' is-visible' : ''}`}>
       <div className="section-inner">
-        <div className="section-label">// skills</div>
+        <SectionHeader title="skills" visible={visible} />
         <div className="skills-layout">
           <div className="skills-globe-wrap">
             <SkillsGlobe selected={selected} onSelect={handleSelect} />

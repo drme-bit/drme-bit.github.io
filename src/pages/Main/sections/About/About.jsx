@@ -1,5 +1,6 @@
 import useReveal from '@/hooks/useReveal';
 import useCursorParallax from '@/hooks/useCursorParallax';
+import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import './About.scss';
 
 export default function About() {
@@ -9,7 +10,7 @@ export default function About() {
   return (
     <section id="about" ref={ref} className={`section reveal${visible ? ' is-visible' : ''}`}>
       <div className="section-inner" style={{ transform: `translate(${x * 4}px, ${y * 3}px)` }}>
-        <div className="section-label">// about</div>
+        <SectionHeader title="about" visible={visible} />
         <h2 className="section-title">Building digital<br /><span className="section-accent">products</span></h2>
         <div className="section-body">
           <p>

@@ -1,5 +1,6 @@
 import useReveal from '@/hooks/useReveal';
 import useCursorParallax from '@/hooks/useCursorParallax';
+import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import './Experience.scss';
 
 const ENTRIES = [
@@ -13,7 +14,7 @@ export default function Experience() {
   return (
     <section id="experience" ref={ref} className={`section section--experience reveal${visible ? ' is-visible' : ''}`}>
       <div className="section-inner" style={{ transform: `translate(${x * 4}px, ${y * 3}px)` }}>
-        <div className="section-label">// experience</div>
+        <SectionHeader title="experience" visible={visible} />
         <h2 className="section-title">Where I've<span className="section-accent"> worked</span></h2>
         <div className="timeline">
           {ENTRIES.map((e, i) => (
