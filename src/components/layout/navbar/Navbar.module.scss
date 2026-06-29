@@ -44,3 +44,9 @@
 .active {
   color: #5ec8d8;
 }
+
+@media (max-width: 700px) {
+  .nav {
+    display: none;
+  }
+}

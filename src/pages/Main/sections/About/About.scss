@@ -165,3 +165,27 @@
   border-radius: 2px;
   letter-spacing: 0.05em;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Mobile                                                            */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 700px) {
+  .main-intro {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .img-frame {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .quick-info {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .section-inner {
+    padding: 2rem 1rem 3rem;
+  }
+}

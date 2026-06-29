@@ -155,3 +155,24 @@ $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   color: rgba(255, 255, 255, 0.12);
   letter-spacing: 0.05em;
 }
+
+@media (max-width: 700px) {
+  .drawer-trigger {
+    left: auto;
+    right: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: none;
+    padding: 10px 6px;
+    top: 1rem;
+    transform: none;
+  }
+
+  .drawer-trigger-line {
+    width: 12px;
+  }
+
+  .drawer-panel {
+    width: 100%;
+    padding: 1.5rem 1.25rem;
+  }
+}

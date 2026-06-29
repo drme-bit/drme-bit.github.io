@@ -323,3 +323,73 @@
   background: var(--accent);
   box-shadow: 0 0 4px rgba(94, 200, 216, 0.5);
 }
+
+/* ------------------------------------------------------------------ */
+/*  Mobile                                                            */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 700px) {
+  .hero-overlay {
+    left: 0;
+    top: 12vh;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0 5vw;
+  }
+
+  .hero-avatar-col {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .hero-typewrap {
+    font-size: clamp(0.7rem, 4vw, 1rem);
+  }
+
+  .hero-tagline {
+    display: none;
+  }
+
+  .hero-stats {
+    display: none;
+  }
+
+  .hero-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .hero-arrow {
+    display: none;
+  }
+
+  .terminal {
+    width: 100%;
+  }
+
+  .terminal-body {
+    padding: 8px 10px;
+  }
+
+  .hero-sticky-identity {
+    display: none;
+  }
+
+  .hero-type-area {
+    width: 100%;
+  }
+
+  .hero-langs {
+    gap: 4px;
+  }
+
+  .hero-lang-badge {
+    width: 26px;
+    height: 26px;
+  }
+
+  .hero-contacts {
+    margin-top: 0.5rem;
+  }
+}
