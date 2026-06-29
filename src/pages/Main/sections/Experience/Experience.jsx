@@ -11,7 +11,7 @@ export default function Experience() {
   const { x, y } = useCursorParallax();
 
   return (
-    <section ref={ref} className={`section section--experience reveal${visible ? ' is-visible' : ''}`}>
+    <section id="experience" ref={ref} className={`section section--experience reveal${visible ? ' is-visible' : ''}`}>
       <div className="section-inner" style={{ transform: `translate(${x * 4}px, ${y * 3}px)` }}>
         <div className="section-label">// experience</div>
         <h2 className="section-title">Where I've<span className="section-accent"> worked</span></h2>
