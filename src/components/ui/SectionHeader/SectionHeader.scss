@@ -6,6 +6,8 @@
   margin-bottom: 2.5rem;
   opacity: 0;
   transition: opacity 0.3s ease;
+  position: sticky;
+  top: 1.25rem;
 }
 
 .section-header.is-visible {
@@ -15,8 +17,6 @@
 .section-header-line {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(94, 200, 216, 0.08), rgba(94, 200, 216, 0.25));
-  transform: scaleX(0);
   transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -25,10 +25,12 @@
 }
 
 .section-header-line:first-child {
+  background: linear-gradient(90deg, rgba(94, 200, 216, 0.08), rgba(94, 200, 216, 0.25));
   transform-origin: right center;
 }
 
 .section-header-line:last-child {
+  background: linear-gradient(90deg, rgba(94, 200, 216, 0.25), rgba(94, 200, 216, 0.08));
   transform-origin: left center;
 }
 
@@ -46,4 +48,18 @@
 .section-header.is-visible .section-header-text {
   opacity: 1;
   transform: translateY(0);
+}
+
+.section-header-number {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: rgba(94, 200, 216, 0.3);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.4s ease 0.15s;
+}
+
+.section-header.is-visible .section-header-number {
+  opacity: 1;
 }

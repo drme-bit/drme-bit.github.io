@@ -1,48 +1,151 @@
+.section--experience {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-inner {
+  width: calc(100% - 10vw);
+  margin-left: 5vw;
+  padding: 2rem 2rem 4rem;
+}
+
+.section-title {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.15;
+  margin: 0 0 2rem;
+}
+
+.section-accent {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---- timeline ---- */
 .timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  position: relative;
+  padding: 1rem 0;
 }
 
-.timeline-entry {
-  display: flex;
-  gap: 1rem;
-  min-height: 100px;
-}
-
+/* sticky centered line */
 .timeline-line {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 12px;
-  flex-shrink: 0;
-  padding-top: 4px;
+  position: sticky;
+  top: 10vh;
+  height: 80vh;
+  width: 1px;
+  margin: 0 auto;
+  background: linear-gradient(180deg, transparent, rgba(94, 200, 216, 0.12) 15%, rgba(94, 200, 216, 0.12) 85%, transparent);
+  z-index: 0;
 }
 
-.timeline-dot {
+$head-color: #ffd700;
+
+/* tail — comet trail behind the head dot */
+.tl-tail {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba($head-color, 0.08) 40%, rgba($head-color, 0.3) 75%, $head-color 100%);
+  box-shadow:
+    0 0 4px rgba($head-color, 0.2),
+    0 0 12px rgba($head-color, 0.08);
+  z-index: 1;
+  transition: height 0.05s linear;
+  pointer-events: none;
+}
+
+/* head dot — moves along the line with scroll */
+.tl-head {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: $head-color;
+  box-shadow:
+    0 0 12px rgba($head-color, 0.6),
+    0 0 30px rgba($head-color, 0.25);
+  z-index: 2;
+  transition: top 0.05s linear;
+  pointer-events: none;
+}
+
+/* glow halo behind the head */
+.tl-head::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba($head-color, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* each entry — 3-column grid */
+.timeline-entry {
+  display: grid;
+  grid-template-columns: 1fr 2rem 1fr;
+  margin: 3.5rem 0;
+  position: relative;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.timeline-entry.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* entry dot on the center line */
+.tl-dot {
+  position: absolute;
+  left: calc(50% - 4px);
+  top: 4px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(94, 200, 216, 0.15);
+  z-index: 1;
+  transition: all 0.4s ease;
+}
+
+.timeline-entry.is-visible .tl-dot {
   background: var(--accent);
-  box-shadow: 0 0 6px rgba(94, 200, 216, 0.4);
-  flex-shrink: 0;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(94, 200, 216, 0.3);
 }
 
-.timeline-connector {
-  width: 1px;
-  flex: 1;
-  background: rgba(255, 255, 255, 0.06);
-  min-height: 40px;
+/* content placement */
+.tl-left .tl-body {
+  grid-column: 1;
+  text-align: right;
 }
 
-.timeline-body {
+.tl-right .tl-body {
+  grid-column: 3;
+  text-align: left;
+}
+
+.tl-body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-bottom: 1.5rem;
 }
 
-.timeline-period {
+.tl-period {
   font-family: var(--font-mono);
   font-size: clamp(0.5rem, 0.65vw, 0.6rem);
   color: rgba(255, 255, 255, 0.15);
@@ -51,25 +154,25 @@
   margin-bottom: 2px;
 }
 
-.timeline-role {
+.tl-role {
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: clamp(0.85rem, 1.1vw, 1rem);
   color: rgba(255, 255, 255, 0.7);
 }
 
-.timeline-org {
+.tl-org {
   font-family: var(--font-sans);
   font-weight: 300;
   font-size: clamp(0.7rem, 0.9vw, 0.8rem);
   color: rgba(255, 255, 255, 0.3);
 }
 
-.timeline-desc {
+.tl-desc {
   font-family: var(--font-sans);
   font-weight: 300;
   font-size: clamp(0.65rem, 0.8vw, 0.75rem);
   color: rgba(255, 255, 255, 0.35);
-  line-height: 1.5;
-  margin: 4px 0 0;
+  line-height: 1.6;
+  margin: 6px 0 0;
 }

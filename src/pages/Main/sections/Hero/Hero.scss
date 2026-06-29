@@ -1,8 +1,19 @@
 #hero {
-  position: relative;
   height: 100vh;
   pointer-events: none;
   background: transparent;
+}
+
+#hero::before {
+  content: '';
+  position: absolute;
+  top: -20vh;
+  left: 30%;
+  width: 60vw;
+  height: 80vh;
+  background: radial-gradient(ellipse at center, rgba(94, 200, 216, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .hero-overlay {
@@ -98,13 +109,11 @@
 }
 
 .hero-lang-badge {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  width: 28px;
-  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 30px;
+  height: 30px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.3);
   transition: all 0.2s;
@@ -161,6 +170,71 @@
 @keyframes arrowBounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(10px); }
+}
+
+.terminal {
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+  width: min(90vw, 720px);
+}
+
+.terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.terminal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.terminal-dot:nth-child(1) { background: #ff5f56; }
+.terminal-dot:nth-child(2) { background: #ffbd2e; }
+.terminal-dot:nth-child(3) { background: #27c93f; }
+
+.terminal-name {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.terminal-name-icon {
+  display: flex;
+  opacity: 0.5;
+}
+
+.terminal-body {
+  padding: 16px 18px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.06) transparent;
+}
+
+.terminal-body::-webkit-scrollbar {
+  height: 3px;
+}
+
+.terminal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.terminal-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 0;
 }
 
 .hero-contacts {

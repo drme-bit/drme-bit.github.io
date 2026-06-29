@@ -216,6 +216,8 @@ function GlobeContent({ selected, onSelect }) {
   );
 }
 
+export { SKILLS_DATA, GROUP_COLORS };
+
 export default function SkillsGlobe({ selected, onSelect }) {
   return (
     <Canvas

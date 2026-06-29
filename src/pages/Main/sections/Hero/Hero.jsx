@@ -1,19 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import useCursorParallax from '@/hooks/useCursorParallax';
-import { FiLinkedin, FiGithub, FiMail } from 'react-icons/fi';
+import { SiC, SiCplusplus, SiPython, SiJavascript, SiTypescript, SiRust, SiDotnet } from 'react-icons/si';
+import { DiJava } from 'react-icons/di';
+import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 import './Hero.scss';
 
 const GITHUB_USERNAME = 'drme-bit';
 
 const LANGUAGES = [
-  { label: 'c', name: 'C', code: '#include <stdio.h>\nint main() {\n printf("Hello, world!");\n return 0; \n}' },
-  { label: 'cpp', name: 'C++', code: '#include <iostream>\nint main() { std::cout << "Hello, world!" << std::endl; return 0; }' },
-  { label: 'java', name: 'Java', code: 'public class Main { public static void main(String[] args) { System.out.println("Hello, world!"); } }' },
-  { label: 'cs', name: 'C#', code: 'using System;\nclass Program { static void Main() { Console.WriteLine("Hello, world!"); } }' },
-  { label: 'py', name: 'Python', code: 'print("Hello, world!")' },
-  { label: 'js', name: 'JavaScript', code: 'console.log("Hello, world!");' },
-  { label: 'ts', name: 'TypeScript', code: 'console.log("Hello, world!");' },
-  { label: 'rs', name: 'Rust', code: 'println!("Hello, world!");' },
+  { label: 'c', name: 'C', icon: SiC, code: '#include <stdio.h>\nint main() {\n printf("Hello, world!");\n return 0; \n}' },
+  { label: 'cpp', name: 'C++', icon: SiCplusplus, code: '#include <iostream>\nint main() { std::cout << "Hello, world!" << std::endl; return 0; }' },
+  { label: 'java', name: 'Java', icon: DiJava, code: 'public class Main { public static void main(String[] args) { System.out.println("Hello, world!"); } }' },
+  { label: 'cs', name: 'C#', icon: SiDotnet, code: 'using System;\nclass Program { static void Main() { Console.WriteLine("Hello, world!"); } }' },
+  { label: 'py', name: 'Python', icon: SiPython, code: 'print("Hello, world!")' },
+  { label: 'js', name: 'JavaScript', icon: SiJavascript, code: 'console.log("Hello, world!");' },
+  { label: 'ts', name: 'TypeScript', icon: SiTypescript, code: 'console.log("Hello, world!");' },
+  { label: 'rs', name: 'Rust', icon: SiRust, code: 'println!("Hello, world!");' },
 ];
 
 const TYPE_SPEED = 55;
@@ -256,7 +258,7 @@ export default function Hero() {
   const typeTransform = `translate(${parallax.x * -4}px, ${parallax.y * -3}px)`;
 
   return (
-    <section id="hero" ref={ref}>
+    <section id="hero" ref={ref} className="section section--hero">
       <div
         className="hero-overlay"
         style={{
@@ -283,11 +285,24 @@ export default function Hero() {
         </div>
 
         <div className="hero-type-area" style={{ transform: typeTransform }}>
-          <div className="hero-typewrap">
-            <span className="hero-type-code">
-              {display}
-              <span className="hero-type-cursor">|</span>
-            </span>
+          <div className="terminal">
+            <div className="terminal-bar">
+              <span className="terminal-dot" />
+              <span className="terminal-dot" />
+              <span className="terminal-dot" />
+              <span className="terminal-name">
+                <span className="terminal-name-icon">{activeLanguage.icon({ size: 10 })}</span>
+                {activeLanguage.label}
+              </span>
+            </div>
+            <div className="terminal-body">
+              <div className="hero-typewrap">
+                <span className="hero-type-code">
+                  {display}
+                  <span className="hero-type-cursor">|</span>
+                </span>
+              </div>
+            </div>
           </div>
           <span className="hero-type-lang">// {activeLanguage.name}</span>
 
@@ -305,7 +320,7 @@ export default function Hero() {
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleBadgeClick(i); }}
                 >
-                  {l.label}
+                  {l.icon({ size: 14 })}
                 </span>
               );
             })}

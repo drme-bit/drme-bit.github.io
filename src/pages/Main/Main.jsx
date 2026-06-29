@@ -17,7 +17,7 @@ import BackToTop from '../../components/ui/BackToTop/BackToTop';
 import SoundEffects from '../../components/ui/SoundEffects/SoundEffects';
 import ErrorMessages from '../../components/ui/ErrorMessages/ErrorMessages';
 
-const SECTIONS = ['hero', 'about', 'skills', 'experience', 'work', 'contact'];
+const SECTIONS = ['hero', 'about', 'skills', 'experience', 'projects', 'contact'];
 
 export default function Main() {
   const [booted, setBooted] = useState(false);
