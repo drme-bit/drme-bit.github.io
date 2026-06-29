@@ -29,7 +29,7 @@ const ICON_MAP = {
   Git: SiGit, Docker: SiDocker,
   WebGPU: FiCode, WASM: SiWebassembly,
   CUDA: FiCpu, OpenGL: SiOpengl, Linux: SiLinux,
-  C: FiCode, 'C++': FiCode, 'C#': FiCode, Luau: SiLua,
+  C: FiCode, 'C++': FiCode, 'C#': FiCode, Luau: FiCode,
 };
 
 const SKILLS_DATA = [
