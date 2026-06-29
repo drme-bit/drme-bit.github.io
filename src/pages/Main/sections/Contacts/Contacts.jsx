@@ -24,6 +24,11 @@ export default function Contacts() {
             <span className="contact-link-value">drme-bit</span>
             <span className="contact-arrow">↗</span>
           </a>
+          <a href="https://www.linkedin.com/in/vyacheslav-tkachik-2a3b8a277" target="_blank" rel="noopener noreferrer" className="contact-link">
+            <span className="contact-link-label">linkedin</span>
+            <span className="contact-link-value">vacheslavtkachik</span>
+            <span className="contact-arrow">↗</span>
+          </a>
           <a href="#" className="contact-link" style={{ pointerEvents: 'none', opacity: 0.5 }}>
             <span className="contact-link-label">resume</span>
             <span className="contact-link-value">download.pdf</span>
