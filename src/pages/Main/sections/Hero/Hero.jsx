@@ -9,9 +9,9 @@ const GITHUB_USERNAME = 'drme-bit';
 
 const LANGUAGES = [
   { label: 'c', name: 'C', icon: SiC, code: '#include <stdio.h>\nint main() {\n printf("Hello, world!");\n return 0; \n}' },
-  { label: 'cpp', name: 'C++', icon: SiCplusplus, code: '#include <iostream>\nint main() { std::cout << "Hello, world!" << std::endl; return 0; }' },
-  { label: 'java', name: 'Java', icon: DiJava, code: 'public class Main { public static void main(String[] args) { System.out.println("Hello, world!"); } }' },
-  { label: 'cs', name: 'C#', icon: SiDotnet, code: 'using System;\nclass Program { static void Main() { Console.WriteLine("Hello, world!"); } }' },
+  { label: 'cpp', name: 'C++', icon: SiCplusplus, code: '#include <iostream>\nint main() {\n std::cout << "Hello, world!" << std::endl;\n return 0; \n}' },
+  { label: 'java', name: 'Java', icon: DiJava, code: 'System.out.println("Hello, world!");' },
+  { label: 'cs', name: 'C#', icon: SiDotnet, code: 'Console.WriteLine("Hello, world!");' },
   { label: 'py', name: 'Python', icon: SiPython, code: 'print("Hello, world!")' },
   { label: 'js', name: 'JavaScript', icon: SiJavascript, code: 'console.log("Hello, world!");' },
   { label: 'ts', name: 'TypeScript', icon: SiTypescript, code: 'console.log("Hello, world!");' },
@@ -226,10 +226,67 @@ function ContactRow() {
   );
 }
 
+function HeroParticles() {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const count = 50;
+    const particles = Array.from({ length: count }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.2,
+      vy: -Math.random() * 0.15 - 0.03,
+      r: Math.random() * 1.5 + 0.5,
+      o: Math.random() * 0.25 + 0.05,
+    }));
+
+    let raf;
+    const tick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+        if (p.x < -10 || p.x > canvas.width + 10) { p.x = Math.random() * canvas.width; }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(94, 200, 216, ${p.o})`;
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return <canvas ref={ref} className="hero-particles" />;
+}
+
 export default function Hero() {
   const [p, setP] = useState(0);
   const [lockedIndex, setLockedIndex] = useState(null);
+  const [time, setTime] = useState(new Date());
   const ref = useRef(null);
+
+  useEffect(() => {
+    const id = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   const { display, activeIndex } = useTypewriter(LANGUAGES, lockedIndex);
   const parallax = useCursorParallax();
@@ -267,6 +324,7 @@ export default function Hero() {
           pointerEvents: faded ? 'none' : undefined,
         }}
       >
+        <HeroParticles />
         <div className="hero-avatar-col" style={{ transform: avatarTransform }}>
           <a
             href={`https://github.com/${GITHUB_USERNAME}`}
@@ -285,6 +343,14 @@ export default function Hero() {
         </div>
 
         <div className="hero-type-area" style={{ transform: typeTransform }}>
+          <div className="hero-intro">
+            <div className="hero-intro-line">
+              <span className="hero-prompt">$</span>
+              <span className="hero-cmd">whoami</span>
+            </div>
+            <div className="hero-intro-name">Vyacheslav Tkachik</div>
+            <div className="hero-intro-role">full-stack developer</div>
+          </div>
           <div className="terminal">
             <div className="terminal-bar">
               <span className="terminal-dot" />
@@ -294,6 +360,7 @@ export default function Hero() {
                 <span className="terminal-name-icon">{activeLanguage.icon({ size: 10 })}</span>
                 {activeLanguage.label}
               </span>
+              <span className="terminal-time">{time.toLocaleTimeString()}</span>
             </div>
             <div className="terminal-body">
               <div className="hero-typewrap">
@@ -329,6 +396,12 @@ export default function Hero() {
           <StatsStrip username={GITHUB_USERNAME} />
 
           <p className="hero-tagline">full-stack · creative technology</p>
+
+          <div className="hero-info">
+            <span className="hero-info-item">🌍 remote</span>
+            <span className="hero-info-item">🟢 open to opportunities</span>
+            <span className="hero-info-resume">[ download cv ]</span>
+          </div>
         </div>
 
         <svg className="hero-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

@@ -14,6 +14,19 @@
   background: radial-gradient(ellipse at center, rgba(94, 200, 216, 0.03) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+  animation: heroGlow 4s ease-in-out infinite;
+}
+
+@keyframes heroGlow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.hero-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .hero-overlay {
@@ -26,6 +39,7 @@
   will-change: opacity;
   pointer-events: none;
   transition: visibility 0s linear;
+  z-index: 1;
 }
 
 .hero-avatar-col {
@@ -71,6 +85,45 @@
   align-items: flex-start;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+}
+
+/* ---- whoami intro ---- */
+.hero-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+}
+
+.hero-intro-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-prompt {
+  color: var(--accent);
+  font-size: clamp(0.7rem, 1.1vw, 0.85rem);
+  opacity: 0.6;
+}
+
+.hero-cmd {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+}
+
+.hero-intro-name {
+  font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.hero-intro-role {
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 300;
 }
 
 .hero-typewrap {
@@ -156,6 +209,30 @@
   text-transform: lowercase;
 }
 
+.hero-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hero-info-item {
+  font-family: var(--font-mono);
+  font-size: clamp(0.5rem, 0.7vw, 0.6rem);
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.05em;
+}
+
+.hero-info-resume {
+  font-family: var(--font-mono);
+  font-size: clamp(0.5rem, 0.7vw, 0.6rem);
+  color: rgba(255, 255, 255, 0.12);
+  letter-spacing: 0.05em;
+  cursor: default;
+  opacity: 0.4;
+}
+
 .hero-arrow {
   position: fixed;
   bottom: 2rem;
@@ -179,6 +256,24 @@
   overflow: hidden;
   backdrop-filter: blur(4px);
   width: min(90vw, 720px);
+  position: relative;
+  animation: terminalGlow 4s ease-in-out infinite;
+}
+
+/* CRT scanlines overlay */
+.terminal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.06) 2px, rgba(0, 0, 0, 0.06) 4px);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 6px;
+}
+
+@keyframes terminalGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(94, 200, 216, 0.04); }
+  50% { box-shadow: 0 0 60px rgba(94, 200, 216, 0.1); }
 }
 
 .terminal-bar {
@@ -215,6 +310,13 @@
 .terminal-name-icon {
   display: flex;
   opacity: 0.5;
+}
+
+.terminal-time {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  color: rgba(255, 255, 255, 0.12);
+  letter-spacing: 0.05em;
 }
 
 .terminal-body {
@@ -348,6 +450,10 @@
   }
 
   .hero-tagline {
+    display: none;
+  }
+
+  .hero-info {
     display: none;
   }
 

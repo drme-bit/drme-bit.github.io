@@ -282,8 +282,13 @@ export default function Projects() {
       setProgress(Math.max(0, Math.min(1, -rect.top / scrollable)));
     };
     update();
-    window.addEventListener('scroll', update, { passive: true });
-    return () => window.removeEventListener('scroll', update);
+    let rafId;
+    const tick = () => {
+      update();
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   const count = PROJECTS.length;

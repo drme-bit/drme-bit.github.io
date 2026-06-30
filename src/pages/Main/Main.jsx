@@ -6,6 +6,7 @@ import Skills from './sections/Skills/Skills';
 import Experience from './sections/Experience/Experience';
 import Projects from './sections/Projects/Projects';
 import Contacts from './sections/Contacts/Contacts';
+import Outro from './sections/Outro/Outro';
 import GitHubStatus from '../../components/ui/GitHubStatus/GitHubStatus';
 import Navbar from '../../components/layout/navbar/Navbar';
 import DrawerMenu from '../../components/layout/DrawerMenu/DrawerMenu';
@@ -66,6 +67,7 @@ export default function Main() {
           <CursorTrail />
           <BackToTop />
           <SoundEffects />
+          <Outro />
         </>
       )}
     </>

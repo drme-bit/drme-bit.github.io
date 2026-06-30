@@ -56,7 +56,6 @@ $head-color: #ffd700;
     0 0 4px rgba($head-color, 0.2),
     0 0 12px rgba($head-color, 0.08);
   z-index: 1;
-  transition: height 0.05s linear;
   pointer-events: none;
 }
 
@@ -74,7 +73,6 @@ $head-color: #ffd700;
     0 0 12px rgba($head-color, 0.6),
     0 0 30px rgba($head-color, 0.25);
   z-index: 2;
-  transition: top 0.05s linear;
   pointer-events: none;
 }
 

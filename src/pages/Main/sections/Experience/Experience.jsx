@@ -45,7 +45,7 @@ export default function Experience() {
     setProgress(p);
 
     const isMobile = window.innerWidth <= 700;
-    const threshold = isMobile ? vh * 0.75 : vh * 0.1 + p * vh * 0.8;
+    const threshold = isMobile ? p * vh + 30 : vh * 0.1 + p * vh * 0.8;
 
     const next = new Set();
     entryRefs.current.forEach((entryEl, i) => {
@@ -64,10 +64,15 @@ export default function Experience() {
 
   useEffect(() => {
     update();
-    window.addEventListener('scroll', update, { passive: true });
+    let rafId;
+    const tick = () => {
+      update();
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
     window.addEventListener('resize', update);
     return () => {
-      window.removeEventListener('scroll', update);
+      cancelAnimationFrame(rafId);
       window.removeEventListener('resize', update);
     };
   }, [update]);

@@ -5,12 +5,18 @@ export default function ScrollProgressBar() {
   const [pct, setPct] = useState(0);
 
   useEffect(() => {
-    const onScroll = () => {
+    const update = () => {
       const h = document.documentElement.scrollHeight - window.innerHeight;
       setPct(h > 0 ? (window.scrollY / h) * 100 : 0);
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    update();
+    let rafId;
+    const tick = () => {
+      update();
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   return (

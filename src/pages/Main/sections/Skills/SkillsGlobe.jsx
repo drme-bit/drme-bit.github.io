@@ -119,7 +119,7 @@ function GlobeParticles({ count = 300 }) {
   );
 }
 
-function ConnectingLines({ skills, radius }) {
+function ConnectingLines({ skills, radius, selectedGroup }) {
   const positions = useMemo(() => {
     const pairs = [];
     for (let i = 0; i < skills.length; i++) {
@@ -136,12 +136,14 @@ function ConnectingLines({ skills, radius }) {
 
   if (positions.length === 0) return null;
 
+  const opacity = selectedGroup ? 0.12 : 0.06;
+
   return (
     <lineSegments>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <lineBasicMaterial color={ACCENT} transparent opacity={0.06} />
+      <lineBasicMaterial color={ACCENT} transparent opacity={opacity} />
     </lineSegments>
   );
 }
@@ -150,6 +152,7 @@ function GlobeContent({ selected, onSelect }) {
   const groupRef = useRef();
   const controlsRef = useRef();
   const resumeTimer = useRef(null);
+  const wireRef = useRef();
   const radius = 1.5;
 
   const pauseAutoRotate = useCallback(() => {
@@ -164,8 +167,17 @@ function GlobeContent({ selected, onSelect }) {
     }, 3000);
   }, []);
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     controlsRef.current?.update();
+    if (wireRef.current) {
+      const s = 1 + Math.sin(clock.elapsedTime * 0.5) * 0.008;
+      wireRef.current.scale.set(s, s, s);
+    }
+    if (groupRef.current) {
+      const t = clock.elapsedTime;
+      groupRef.current.position.x = Math.sin(t * 0.15) * 0.12;
+      groupRef.current.position.y = Math.sin(t * 0.1 + 1) * 0.08;
+    }
   });
 
   return (
@@ -184,8 +196,8 @@ function GlobeContent({ selected, onSelect }) {
         onEnd={resumeAutoRotate}
       />
 
-      <group ref={groupRef}>
-        <mesh>
+      <group ref={groupRef} rotation={[0.1, 0.3, 0]}>
+        <mesh ref={wireRef}>
           <sphereGeometry args={[radius, 36, 24]} />
           <meshBasicMaterial color={ACCENT} wireframe transparent opacity={0.08} />
         </mesh>
@@ -195,7 +207,7 @@ function GlobeContent({ selected, onSelect }) {
           <meshBasicMaterial color={ACCENT} wireframe transparent opacity={0.04} />
         </mesh>
 
-        <ConnectingLines skills={SKILLS_DATA} radius={radius} />
+        <ConnectingLines skills={SKILLS_DATA} radius={radius} selectedGroup={selected?.group} />
         <GlobeParticles />
 
         {SKILLS_DATA.map((skill, i) => {

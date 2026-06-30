@@ -12,10 +12,26 @@
   filter: none;
   line-height: 1;
   -webkit-font-smoothing: antialiased;
+  position: relative;
 }
 
 .globe-skill:hover {
   filter: brightness(1.5);
+}
+
+.globe-skill.is-selected::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dot-color, var(--accent));
+  animation: skillPulse 1.5s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes skillPulse {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.6); opacity: 0; }
 }
 
 .globe-skill-icon {
