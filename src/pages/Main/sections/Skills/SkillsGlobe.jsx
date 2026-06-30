@@ -234,15 +234,15 @@ export default function SkillsGlobe({ selected, onSelect }) {
   return (
     <Canvas
       camera={{ position: [0, 0, 7], fov: 35, near: 0.1, far: 20 }}
-      gl={{ alpha: true, antialias: true }}
+      gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }}
       onCreated={({ gl }) => {
         gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       }}
+      onLost={(e) => e.preventDefault()}
       style={{
         width: '100%',
         height: '100%',
         pointerEvents: 'auto',
-        overflow: 'visible',
       }}
     >
       <GlobeContent selected={selected} onSelect={onSelect} />

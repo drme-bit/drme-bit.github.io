@@ -44,8 +44,34 @@
   width: min(100%, 50vh, 420px);
   aspect-ratio: 1;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   flex-shrink: 0;
+}
+
+.skills-globe-wrap::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 80%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(94, 200, 216, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: globeGlow 4s ease-in-out infinite;
+}
+
+@keyframes globeGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.skills-globe-wrap canvas {
+  display: block;
+  position: relative;
+  z-index: 1;
+  touch-action: none;
 }
 
 .skills-globe-wrap::before {
