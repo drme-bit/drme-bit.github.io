@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import useReveal from '@/hooks/useReveal';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
+import ProjectModal from '@/components/ui/ProjectModal/ProjectModal';
 import './Projects.scss';
 
 /* ------------------------------------------------------------------ */
@@ -11,8 +12,14 @@ const PROJECTS = [
   {
     id: 'drme-bit.github.io',
     title: 'drme-bit.github.io',
-    url: 'https://github.com/drme-bit/drme-bit.github.io',
+    url: 'https://drme-bit.github.io',
+    repo: 'https://github.com/drme-bit/drme-bit.github.io',
     desc: 'Isometric terrain portfolio built with React, Three.js, R3F and SCSS. Features real-time 3D globe, terminal-style hero section, and interactive project dashboard.',
+    fullDesc:
+      'Personal portfolio website built from scratch with a focus on immersive 3D interactions and a cohesive terminal-inspired design system. '
+      + 'Features include a real-time 3D skills globe built with Three.js and react-three-fiber, a scrolling timeline with animated HEAD indicator, '
+      + 'a macOS-style project carousel in 3D arc space, and a particle-based hero section with live clock and CRT scanlines. '
+      + 'The site uses sticky-scroll sections, custom cursor trails, boot screen sequence, and an interactive Companion Cube mascot with dynamic dialogue.',
     tech: ['React', 'Three.js', 'R3F', 'SCSS'],
     status: 'ACTIVE',
     image: 'images/projects/githubio_hero.png',
@@ -21,10 +28,30 @@ const PROJECTS = [
     id: 'nexagon',
     title: 'Nexagon — Game Servers Monitoring',
     url: 'https://www.blackvoxel.studio',
+    repo: 'https://github.com/drme-bit/nexagon',
     desc: 'Web-instrument made for admins to administrate and monitor game servers, with real-time metrics and alerts built in Rust, React, WebGPU and WASM.',
+    fullDesc:
+      'A comprehensive server administration dashboard that connects to game servers via WebSocket and displays real-time metrics including player count, '
+      + 'CPU/RAM usage, map rotation, and event logs. The frontend is built with React and WebGPU for hardware-accelerated visualizations, '
+      + 'while the backend is written in Rust for maximum performance and safety. WASM modules handle data parsing and compression client-side.',
     tech: ['Rust', 'React', 'WebGPU', 'WASM'],
     status: 'ACTIVE',
     image: 'images/projects/nexagon_main.png',
+  },
+  {
+    id: 'fivem-roblox',
+    title: 'Freelance Roblox Developer',
+    url: '#',
+    desc: 'Custom game mechanics, admin panels, and monetization systems for Roblox and FiveM communities serving 2000+ daily players.',
+    fullDesc:
+      'Self-employed developer creating custom game systems for Roblox and FiveM/RedM communities. '
+      + 'Developed admin panels with real-time player moderation, custom vehicle systems with advanced physics, '
+      + 'inventory and economy frameworks with persistent data storage, and anti-cheat detection systems. '
+      + 'Optimized server performance for communities averaging 2000+ daily active players. '
+      + 'Technologies include Luau, TypeScript (roblox-ts), MySQL, and FiveM Lua scripting with native code integration.',
+    tech: ['Luau', 'TypeScript', 'roblox-ts', 'MySQL', 'FiveM Lua'],
+    status: 'ACTIVE',
+    image: null,
   },
 ];
 
@@ -197,7 +224,7 @@ function formatId(i) {
   return `ENTRY_${String(i + 1).padStart(3, '0')}`;
 }
 
-function ProjectCard({ project, index, offset, isCurrent }) {
+function ProjectCard({ project, index, offset, isCurrent, onSelect }) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
 
@@ -215,9 +242,10 @@ function ProjectCard({ project, index, offset, isCurrent }) {
   const meta = STATUS_META[project.status] || STATUS_META.ARCHIVED;
   const disabled = project.url === '#';
 
-  const handleClick = () => {
+  const handleClick = (e) => {
     if (disabled) return;
-    window.open(project.url, '_blank', 'noopener noreferrer');
+    const rect = e.currentTarget.getBoundingClientRect();
+    onSelect?.({ project, rect });
   };
 
   const { translateX, translateY, rotateY, scale, opacity, zIndex } = computeCardTransform(offset);
@@ -269,6 +297,8 @@ function ProjectCard({ project, index, offset, isCurrent }) {
 export default function Projects() {
   const outerRef = useRef(null);
   const [progress, setProgress] = useState(0);
+  const [modalProject, setModalProject] = useState(null);
+  const [modalOrigin, setModalOrigin] = useState(null);
   const [sectionRef, sectionVisible] = useReveal();
 
   useEffect(() => {
@@ -297,59 +327,73 @@ export default function Projects() {
   const currentIndex = Math.round(virtualCurrentIndex);
 
   return (
-    <section
-      id="projects"
-      ref={(el) => {
-        outerRef.current = el;
-        sectionRef.current = el;
-      }}
-      className={`section section--projects reveal${sectionVisible ? ' is-visible' : ''}`}
-      style={{ height: `${count * 100}vh` }}
-    >
-      <div className="projects-sticky">
-        <div className="projects-inner">
-          <SectionHeader title="system registry" number="04" visible={sectionVisible} />
-          <h2 className="section-title">Selected<span className="section-accent"> work</span></h2>
+    <>
+      <section
+        id="projects"
+        ref={(el) => {
+          outerRef.current = el;
+          sectionRef.current = el;
+        }}
+        className={`section section--projects reveal${sectionVisible ? ' is-visible' : ''}`}
+        style={{ height: `${count * 100}vh` }}
+      >
+        <div className="projects-sticky">
+          <div className="projects-inner">
+            <SectionHeader title="system registry" number="04" visible={sectionVisible} />
+            <h2 className="section-title">Selected<span className="section-accent"> work</span></h2>
 
-          <div className="projects-counter">
-            <span className="projects-counter-current">{String(currentIndex + 1).padStart(2, '0')}</span>
-            <span className="projects-counter-sep">/</span>
-            <span className="projects-counter-total">{String(count).padStart(2, '0')}</span>
-          </div>
-
-          <div className="projects-viewport">
-            <div className="projects-arc">
-              {PROJECTS.map((project, i) => {
-                const offset = i - virtualCurrentIndex;
-                return (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    index={i}
-                    offset={offset}
-                    isCurrent={Math.abs(offset) < 0.5}
-                  />
-                );
-              })}
+            <div className="projects-counter">
+              <span className="projects-counter-current">{String(currentIndex + 1).padStart(2, '0')}</span>
+              <span className="projects-counter-sep">/</span>
+              <span className="projects-counter-total">{String(count).padStart(2, '0')}</span>
             </div>
-          </div>
 
-          <div className="projects-progress">
-            <div className="projects-progress-track">
-              <div
-                className="projects-progress-fill"
-                style={{ width: `${(progress * 100).toFixed(1)}%` }}
-              />
-              {PROJECTS.map((_, i) => (
-                <span
-                  key={i}
-                  className={`projects-progress-dot${i <= currentIndex ? ' is-filled' : ''}`}
+            <div className="projects-viewport">
+              <div className="projects-arc">
+                {PROJECTS.map((project, i) => {
+                  const offset = i - virtualCurrentIndex;
+                  return (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      index={i}
+                      offset={offset}
+                      isCurrent={Math.abs(offset) < 0.5}
+                      onSelect={({ project, rect }) => {
+                        setModalOrigin(rect);
+                        setModalProject(project);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="projects-progress">
+              <div className="projects-progress-track">
+                <div
+                  className="projects-progress-fill"
+                  style={{ width: `${(progress * 100).toFixed(1)}%` }}
                 />
-              ))}
+                {PROJECTS.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`projects-progress-dot${i <= currentIndex ? ' is-filled' : ''}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {modalProject && (
+        <ProjectModal
+          project={modalProject}
+          originRect={modalOrigin}
+          onClose={() => { setModalProject(null); setModalOrigin(null); }}
+        />
+      )}
+    </>
   );
 }
