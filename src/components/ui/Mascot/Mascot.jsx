@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTypingSound } from '../../../hooks/useTypingSound';
+import findAnswer from '../../../data/pageKnowledge';
 import './Mascot.scss';
 
 const FACTS = [
@@ -17,6 +18,7 @@ const FACTS = [
   'Works on my machine.',
   'It\u2019s not a bug, it\u2019s a feature.',
   'I\u2019m not arguing, I\u2019m just explaining why I\u2019m right.',
+  "Psst. Click me and ask something about this site. I actually know things.",
 ];
 
 export const MOCK_MESSAGE =
@@ -118,6 +120,9 @@ const DEFAULTS = [
 ];
 
 function pickResponse(text) {
+  const fromKnowledge = findAnswer(text);
+  if (fromKnowledge) return fromKnowledge;
+
   const lower = text.toLowerCase();
   for (const entry of RESPONSES) {
     if (entry.keywords.some((kw) => lower.includes(kw))) {
