@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Scene from '../../components/Scene';
 import Hero from './sections/Hero/Hero';
 import About from './sections/About/About';
@@ -14,6 +14,8 @@ import BootScreen from '../../components/ui/BootScreen/BootScreen';
 import CustomCursor from '../../components/ui/CustomCursor/CustomCursor';
 import CursorTrail from '../../components/ui/CursorTrail/CursorTrail';
 import ScrollProgressBar from '../../components/ui/ScrollProgressBar/ScrollProgressBar';
+import SearchBar from '../../components/ui/SearchBar/SearchBar';
+import Mascot, { MOCK_MESSAGE } from '../../components/ui/Mascot/Mascot';
 import BackToTop from '../../components/ui/BackToTop/BackToTop';
 import SoundEffects from '../../components/ui/SoundEffects/SoundEffects';
 import ErrorMessages from '../../components/ui/ErrorMessages/ErrorMessages';
@@ -24,6 +26,15 @@ export default function Main() {
   const [booted, setBooted] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
+  const [mascotMessage, setMascotMessage] = useState(null);
+
+  const handleSearch = useCallback(() => {
+    setMascotMessage(MOCK_MESSAGE);
+  }, []);
+
+  const handleMascotDone = useCallback(() => {
+    setMascotMessage(null);
+  }, []);
 
   useEffect(() => {
     if (!booted) return;
@@ -55,6 +66,8 @@ export default function Main() {
           <Projects />
           <Contacts />
           <Navbar />
+          <SearchBar onSearch={handleSearch} />
+          <Mascot userMessage={mascotMessage} onDone={handleMascotDone} />
           <DrawerMenu
             activePage={activeSection}
             open={drawerOpen}

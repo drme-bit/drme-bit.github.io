@@ -89,10 +89,6 @@
   transition: opacity 0.6s ease, filter 0.6s ease, transform 0.15s linear;
   will-change: transform;
 
-  &.is-inview {
-    
-  }
-
   cursor: pointer;
 
   &:focus-visible {
