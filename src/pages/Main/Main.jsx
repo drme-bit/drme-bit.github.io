@@ -15,7 +15,7 @@ import CustomCursor from '../../components/ui/CustomCursor/CustomCursor';
 import CursorTrail from '../../components/ui/CursorTrail/CursorTrail';
 import ScrollProgressBar from '../../components/ui/ScrollProgressBar/ScrollProgressBar';
 import SearchBar from '../../components/ui/SearchBar/SearchBar';
-import Mascot, { MOCK_MESSAGE } from '../../components/ui/Mascot/Mascot';
+import Mascot, { getMockMessage } from '../../components/ui/Mascot/Mascot';
 import Archive from '../../components/ui/Archive/Archive';
 import BackToTop from '../../components/ui/BackToTop/BackToTop';
 import SoundEffects from '../../components/ui/SoundEffects/SoundEffects';
@@ -28,11 +28,16 @@ export default function Main() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [mascotMessage, setMascotMessage] = useState(null);
+  const [searchCount, setSearchCount] = useState(0);
   const [archiveOpen, setArchiveOpen] = useState(false);
 
   const handleSearch = useCallback(() => {
-    setMascotMessage(MOCK_MESSAGE);
+    setSearchCount((c) => c + 1);
   }, []);
+
+  useEffect(() => {
+    if (searchCount > 0) setMascotMessage(getMockMessage(searchCount));
+  }, [searchCount]);
 
   const handleMascotDone = useCallback(() => {
     setMascotMessage(null);
@@ -69,7 +74,7 @@ export default function Main() {
           <Contacts />
           <Navbar onArchive={() => setArchiveOpen(true)} />
           <SearchBar onSearch={handleSearch} />
-          <Mascot userMessage={mascotMessage} onDone={handleMascotDone} />
+          <Mascot userMessage={mascotMessage} searchCount={searchCount} onDone={handleMascotDone} />
           <DrawerMenu
             activePage={activeSection}
             open={drawerOpen}

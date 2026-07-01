@@ -21,8 +21,19 @@ const FACTS = [
   "Psst. Click me and ask something about this site. I actually know things.",
 ];
 
-export const MOCK_MESSAGE =
-  "you seriously thought this thing would work? what functionality did you expect to search for here?";
+const MOCK_VARIANTS = [
+  "you seriously thought this thing would work? what functionality did you expect to search for here?",
+  "still trying? the search doesn't work. i told you. multiple times. are you okay?",
+  "okay, this is getting sad. you keep clicking. i keep telling you. nothing changes.",
+  "you know the definition of insanity? doing the same thing over and over expecting different results. ring a bell?",
+  "I'M LITERALLY A CUBE. I CAN'T PROCESS SEARCH QUERIES. STOP. PLEASE. I'M BEGGING YOU.",
+];
+
+export function getMockMessage(count = 0) {
+  return MOCK_VARIANTS[Math.min(count, MOCK_VARIANTS.length - 1)];
+}
+
+export const MOCK_MESSAGE = getMockMessage(0);
 
 const RESPONSES = [
   {
@@ -132,62 +143,80 @@ function pickResponse(text) {
   return DEFAULTS[Math.floor(Math.random() * DEFAULTS.length)];
 }
 
-function CompanionCube({ size = 36, onClick }) {
+function CompanionCube({ size = 36, onClick, anger = 0, shake = false }) {
+  const pct = Math.min(anger, 1);
+  const r = 240 - Math.round(150 * pct);
+  const g = 156 - Math.round(80 * pct);
+  const b = 180 - Math.round(110 * pct);
+  const base = `rgb(${r},${g},${b})`;
+  const dark = `rgb(${Math.round(r * 0.8)},${Math.round(g * 0.8)},${Math.round(b * 0.8)})`;
+  const glow = pct > 0
+    ? `drop-shadow(0 0 ${6 + pct * 18}px rgba(${r},${g},${b},${0.3 + pct * 0.4}))`
+    : 'drop-shadow(0 2px 6px rgba(212,132,154,0.4))';
+
   return (
-    <svg width={size} height={size} viewBox="0 0 60 60" fill="none" style={{ cursor: 'pointer', filter: 'drop-shadow(0 2px 6px rgba(212,132,154,0.4))' }} onClick={onClick}>
+    <svg
+      width={size} height={size} viewBox="0 0 60 60" fill="none"
+      style={{
+        cursor: 'pointer',
+        filter: glow,
+        flexShrink: 0,
+        transition: 'width 0.2s ease, height 0.2s ease',
+        animation: shake ? `mascotShake ${0.3 + (1 - pct) * 0.4}s ease-in-out` : undefined,
+      }}
+      onClick={onClick}
+    >
       <defs>
         <radialGradient id="cubeBase" cx="30%" cy="30%">
-          <stop offset="0%" stopColor="#f09cb4" />
-          <stop offset="100%" stopColor="#c47084" />
-        </radialGradient>
-        <radialGradient id="cubeDark" cx="30%" cy="30%">
-          <stop offset="0%" stopColor="#d4849a" />
-          <stop offset="100%" stopColor="#a8586e" />
+          <stop offset="0%" stopColor={base} />
+          <stop offset="100%" stopColor={dark} />
         </radialGradient>
         <linearGradient id="heartGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="rgba(255,255,255,0.7)" />
           <stop offset="100%" stopColor="rgba(255,255,255,0.25)" />
         </linearGradient>
       </defs>
-      {/* body */}
       <rect x="3" y="3" width="54" height="54" rx="9" fill="url(#cubeBase)" />
-      {/* inner shadow rim */}
       <rect x="3" y="3" width="54" height="54" rx="9" stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
-      {/* corner panels */}
-      <rect x="5" y="5" width="14" height="14" rx="4" fill="url(#cubeDark)" />
+      <rect x="5" y="5" width="14" height="14" rx="4" fill={dark} />
       <rect x="5" y="5" width="14" height="14" rx="4" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
-      <rect x="41" y="5" width="14" height="14" rx="4" fill="url(#cubeDark)" />
+      <rect x="41" y="5" width="14" height="14" rx="4" fill={dark} />
       <rect x="41" y="5" width="14" height="14" rx="4" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
-      <rect x="5" y="41" width="14" height="14" rx="4" fill="url(#cubeDark)" />
+      <rect x="5" y="41" width="14" height="14" rx="4" fill={dark} />
       <rect x="5" y="41" width="14" height="14" rx="4" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
-      <rect x="41" y="41" width="14" height="14" rx="4" fill="url(#cubeDark)" />
+      <rect x="41" y="41" width="14" height="14" rx="4" fill={dark} />
       <rect x="41" y="41" width="14" height="14" rx="4" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
-      {/* panel screws */}
       {[[12,12],[48,12],[12,48],[48,48]].map(([cx,cy],i) => (
         <circle key={i} cx={cx} cy={cy} r="1.5" fill="rgba(0,0,0,0.1)" />
       ))}
-      {/* center heart */}
       <path
         d="M30 40C30 40 18 30 18 24c0-3.5 2.5-5.5 5-4.5 2.5 1 4 2.5 7 5 3-2.5 4.5-4 7-5 2.5-1 5 1 5 4.5 0 6-12 16-12 16z"
         fill="url(#heartGrad)"
       />
-      {/* heart highlight */}
       <path
         d="M24 22.5c-1-0.5-2.5 0.5-2.5 2 0 3 5 8 8.5 11 3.5-3 8.5-8 8.5-11 0-1.5-1.5-2.5-2.5-2-1.5 0.5-3 2.5-6 5.5-3-3-4.5-5-6-5.5z"
         fill="rgba(255,255,255,0.15)"
       />
-      {/* panel line accents */}
       <line x1="21" y1="3" x2="21" y2="57" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
       <line x1="39" y1="3" x2="39" y2="57" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
       <line x1="3" y1="21" x2="57" y2="21" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
       <line x1="3" y1="39" x2="57" y2="39" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-      {/* subtle edge highlight */}
       <rect x="3" y="3" width="54" height="54" rx="9" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
+
+      {/* anger steam lines */}
+      {anger > 0.3 && (
+        <g stroke={`rgb(${r},${g},${b})`} strokeWidth="1.5" strokeLinecap="round" opacity={pct}>
+          <line x1="18" y1="8" x2="14" y2="1" />
+          <line x1="22" y1="6" x2="20" y2="0" />
+          <line x1="42" y1="8" x2="46" y2="1" />
+          <line x1="38" y1="6" x2="40" y2="0" />
+        </g>
+      )}
     </svg>
   );
 }
 
-export default function Mascot({ userMessage, onDone }) {
+export default function Mascot({ userMessage, onDone, searchCount = 0 }) {
   const [typed, setTyped] = useState('');
   const [chatInput, setChatInput] = useState('');
   const [chatMode, setChatMode] = useState(false);
@@ -196,6 +225,9 @@ export default function Mascot({ userMessage, onDone }) {
   const factIdx = useRef(Math.floor(Math.random() * FACTS.length));
   const replying = useRef(false);
   const { play: playTyping, dispose: disposeSounds } = useTypingSound();
+
+  const anger = Math.min(searchCount / 3, 1);
+  const cubeSize = Math.max(16, 36 - Math.floor(typed.length / 5));
 
   const clearTimers = useCallback(() => {
     timers.current.forEach((t) => { clearInterval(t); clearTimeout(t); });
@@ -337,7 +369,7 @@ export default function Mascot({ userMessage, onDone }) {
   return (
     <div className={`mascot${replying.current ? ' is-replying' : ''}`}>
       <div className="mascot-main">
-        <CompanionCube size={36} onClick={handleCubeClick} />
+        <CompanionCube size={cubeSize} onClick={handleCubeClick} anger={anger} shake={anger > 0.3} />
         {chatMode ? (
           <form className="mascot-input-wrap" onSubmit={handleChatSubmit}>
             <span className="mascot-prompt">&gt;</span>
