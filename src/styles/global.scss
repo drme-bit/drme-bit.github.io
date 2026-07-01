@@ -61,3 +61,31 @@ body::after {
   min-height: 100vh;
   z-index: 1;
 }
+
+.archive-fab {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 4rem;
+  z-index: 149;
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(8px);
+  border: 0.5px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.15);
+  padding: 0.45rem;
+  cursor: pointer;
+  line-height: 0;
+  transition: color 0.2s, background 0.2s;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.4);
+    background: rgba(30, 30, 30, 0.8);
+  }
+}
+
+@media (max-width: 700px) {
+  .archive-fab {
+    right: 1rem;
+    bottom: 3.5rem;
+  }
+}
