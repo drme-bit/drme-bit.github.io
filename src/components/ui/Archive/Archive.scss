@@ -70,6 +70,45 @@
   flex: 1;
 }
 
+.archive-breadcrumb {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-left: 0.25rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.archive-breadcrumb-up {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 0;
+  flex-shrink: 0;
+  transition: color 0.2s;
+
+  &:hover { color: rgba(255, 255, 255, 0.4); }
+}
+
+.archive-breadcrumb-part {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.archive-breadcrumb-sep {
+  margin: 0 0.1rem;
+  color: rgba(255, 255, 255, 0.06);
+}
+
+.archive-breadcrumb-current {
+  color: rgba(255, 255, 255, 0.25);
+}
+
 .archive-bar-actions {
   display: flex;
   align-items: center;
@@ -206,6 +245,14 @@
   border-radius: 4px;
   overflow: hidden;
   color: rgba(255, 255, 255, 0.12);
+}
+
+.is-dir .archive-file-preview {
+  color: rgba(255, 255, 255, 0.08);
+}
+
+.is-dir:hover .archive-file-preview {
+  color: rgba(255, 255, 255, 0.2);
 }
 
 .archive-file-thumb {

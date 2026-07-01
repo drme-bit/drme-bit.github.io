@@ -1,7 +1,6 @@
 const OWNER = 'drme-bit';
 const REPO = 'drme-bit.github.io';
 const BRANCH = 'main';
-const FOLDER = 'uploads';
 const TOKEN_KEY = 'gh_archive_token';
 
 const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
@@ -46,8 +45,17 @@ function toEntry(item) {
   };
 }
 
-function rawUrl(path) {
-  return `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${path}`;
+function toDirEntry(item) {
+  return {
+    name: item.name,
+    path: item.path,
+    sha: item.sha,
+    size: 0,
+    type: 'application/octet-stream',
+    category: 'documents',
+    download_url: null,
+    isDir: true,
+  };
 }
 
 export function getToken() {
@@ -66,12 +74,13 @@ export function isAuthed() {
   return !!getToken();
 }
 
-export async function listFiles() {
-  const res = await fetch(`${API}/${FOLDER}`, { headers: auth() });
+export async function listFiles(path = 'uploads') {
+  const res = await fetch(`${API}/${path}`, { headers: auth() });
   if (res.status === 404) return [];
   check(res);
   const items = await res.json();
-  return Array.isArray(items) ? items.filter(i => i.type === 'file').map(toEntry) : [];
+  if (!Array.isArray(items)) return [];
+  return items.map((i) => (i.type === 'dir' ? toDirEntry(i) : toEntry(i)));
 }
 
 function toBase64(file) {
@@ -83,13 +92,13 @@ function toBase64(file) {
   });
 }
 
-export async function uploadFile(file) {
+export async function uploadFile(file, currentPath = 'uploads') {
   if (!getToken()) throw new Error('Auth required');
-  const path = `${FOLDER}/${file.name}`;
+  const path = `${currentPath}/${file.name}`;
   const content = await toBase64(file);
   const body = { message: `Upload ${file.name}`, content, branch: BRANCH };
 
-  const exist = await fetch(`${API}/${path}`, { headers: auth() });
+  const exist = await fetch(`${API}/${encodeURIComponent(path)}`, { headers: auth() });
   if (exist.ok) body.sha = (await exist.json()).sha;
 
   const res = await fetch(`${API}/${encodeURIComponent(path)}`, {
