@@ -144,6 +144,26 @@ $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   50% { opacity: 0; }
 }
 
+.drawer-link-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.04);
+  margin: 0.5rem 1.5rem;
+}
+
+.drawer-link--archive {
+  .drawer-link-id {
+    color: rgba(255, 255, 255, 0.15);
+  }
+
+  .drawer-link-label {
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  &:hover .drawer-link-label {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
 .drawer-footer {
   margin-top: auto;
   padding-top: 2rem;

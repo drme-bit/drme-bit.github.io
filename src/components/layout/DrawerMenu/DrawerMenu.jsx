@@ -10,7 +10,7 @@ const PAGES = [
   { id: 'contact', label: 'Contact' },
 ];
 
-export default function DrawerMenu({ activePage, onNavigate, open, onToggle, onClose }) {
+export default function DrawerMenu({ activePage, onNavigate, open, onToggle, onClose, onArchive }) {
   const panelRef = useRef(null);
 
   useEffect(() => {
@@ -54,6 +54,14 @@ export default function DrawerMenu({ activePage, onNavigate, open, onToggle, onC
               </button>
             );
           })}
+          <div className="drawer-link-divider" />
+          <button
+            className="drawer-link drawer-link--archive"
+            onClick={() => { onClose(); onArchive?.(); }}
+          >
+            <span className="drawer-link-id">~</span>
+            <span className="drawer-link-label">archive</span>
+          </button>
         </nav>
         <div className="drawer-footer">
           <span className="drawer-footer-text">$ close [esc]</span>

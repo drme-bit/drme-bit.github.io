@@ -10,7 +10,7 @@ const ITEMS = [
   { id: 'contact', label: 'Contact' },
 ];
 
-export default function Navbar() {
+export default function Navbar({ onArchive }) {
   const [active, setActive] = useState('hero');
 
   useEffect(() => {
@@ -47,6 +47,10 @@ export default function Navbar() {
           </button>
         </span>
       ))}
+      <span className={styles.sep}>/</span>
+      <button className={`${styles.link} ${styles.archiveLink}`} onClick={onArchive}>
+        archive
+      </button>
     </nav>
   );
 }

@@ -45,6 +45,14 @@
   color: #5ec8d8;
 }
 
+.archiveLink {
+  color: rgba(255, 255, 255, 0.12);
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.35);
+  }
+}
+
 @media (max-width: 700px) {
   .nav {
     display: none;
