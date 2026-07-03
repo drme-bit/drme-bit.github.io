@@ -3,7 +3,7 @@ const KNOWLEDGE = [
     keywords: ['what is this', 'what is this site', 'what is this website', 'this site', 'about this site', 'tell me about this', 'portfolio', ''],
     priority: 1,
     answer:
-      "This is the personal portfolio of Vyacheslav Tkachik — a full-stack developer. It's built with React, Three.js, R3F, and SCSS. Features a 3D skills globe, terminal-style hero, scrolling timeline, and me — a Companion Cube mascot. Pretty cool, right?",
+      "This is Vyacheslav Tkachik's personal site — built with React, Three.js, R3F, and SCSS. It features a 3D skills globe, terminal-style hero, scrolling timeline, and a Companion Cube mascot.",
   },
   {
     keywords: ['who made', 'who built', 'who created', 'creator', 'author', 'vyacheslav', 'tkachik', 'your name', 'developer', 'about you'],
@@ -14,7 +14,7 @@ const KNOWLEDGE = [
   {
     keywords: ['skills', 'technologies', 'tech stack', 'what can you do', 'languages', 'stack', 'know', 'proficient', 'experienced with'],
     answer:
-      "Vyacheslav works with React, TypeScript, Three.js, R3F, SCSS, Rust, WebGPU, WASM, Luau, roblox-ts, MySQL, Python, and C/C++/C#, Rust. The 3D globe on this site knows the main ones.",
+      "Vyacheslav works with React, TypeScript, Three.js, R3F, SCSS, Rust, WebGPU, Luau, roblox-ts, MySQL, Python, and C/C++/C#. The 3D globe on this site knows the main ones.",
   },
   {
     keywords: ['projects', 'work', 'what have you built', 'what did you make', 'showcase', 'portfolio projects'],
@@ -24,7 +24,7 @@ const KNOWLEDGE = [
   {
     keywords: ['experience', 'job', 'work history', 'career', 'background', 'professional', 'employment'],
     answer:
-      "Three entries on the timeline: 1) Freelance Roblox Developer (2023–present) — custom game systems for Roblox and FiveM. 2) Nexagon diploma project (2026) — bachelor's in Software Engineering. 3) Bot Developer (2023–present) — freelance automation and bots.",
+      "Three entries on the timeline: 1) Freelance Roblox Developer (2023–present) — custom game systems for Roblox. 2) Nexagon diploma project (2026) — bachelor's in Software Engineering. 3) Bot Developer (2023–present) — freelance automation and bots.",
   },
   {
     keywords: ['contact', 'email', 'reach', 'get in touch', 'social', 'hire', 'message'],

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import useCursorParallax from '@/hooks/useCursorParallax';
 import { SiC, SiCplusplus, SiPython, SiJavascript, SiTypescript, SiRust, SiDotnet } from 'react-icons/si';
 import { DiJava } from 'react-icons/di';
@@ -314,6 +315,7 @@ export default function Hero() {
   const avatarTransform = `translate(${parallax.x * -8}px, ${parallax.y * -6}px)`;
   const typeTransform = `translate(${parallax.x * -4}px, ${parallax.y * -3}px)`;
 
+
   return (
     <section id="hero" ref={ref} className="section section--hero">
       <div
@@ -402,6 +404,7 @@ export default function Hero() {
             <span className="hero-info-item">🟢 open to opportunities</span>
             <span className="hero-info-resume">[ download cv ]</span>
           </div>
+
         </div>
 
         <svg className="hero-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

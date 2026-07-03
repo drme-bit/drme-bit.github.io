@@ -186,6 +186,11 @@ $head-color: #ffd700;
     margin-left: 0;
   }
 
+  .section-title {
+    font-size: clamp(1.45rem, 7vw, 2.1rem);
+    margin-bottom: 1.25rem;
+  }
+
   .section > .section-header {
     margin-left: 0.75rem;
     width: calc(100% - 1.5rem);
@@ -197,12 +202,13 @@ $head-color: #ffd700;
   }
 
   .timeline-line {
-    position: sticky;
+    position: absolute;
     top: 0;
-    height: 100vh;
+    height: 100%;
     width: 2px;
+    left: 14px;
     margin-left: 0;
-    background: linear-gradient(180deg, transparent, rgba(94, 200, 216, 0.25) 15%, rgba(94, 200, 216, 0.25) 85%, transparent);
+    background: linear-gradient(180deg, transparent, rgba(94, 200, 216, 0.22) 15%, rgba(94, 200, 216, 0.22) 85%, transparent);
     display: block;
   }
 
@@ -221,8 +227,8 @@ $head-color: #ffd700;
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
-    margin: 1.75rem 0;
-    padding-left: 1.75rem;
+    margin: 1.15rem 0;
+    padding-left: 2rem;
     opacity: 0;
     transform: translateY(12px);
     transition: opacity 0.5s ease, transform 0.5s ease;
@@ -235,7 +241,7 @@ $head-color: #ffd700;
 
   .tl-dot {
     position: absolute;
-    left: -3.5px;
+    left: 10px;
     top: 4px;
     width: 7px;
     height: 7px;
@@ -248,5 +254,14 @@ $head-color: #ffd700;
 
   .tl-body {
     gap: 1px;
+    padding: 0.85rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.015);
+  }
+
+  .tl-desc {
+    line-height: 1.55;
+    margin-top: 4px;
   }
 }

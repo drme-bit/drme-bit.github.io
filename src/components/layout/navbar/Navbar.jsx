@@ -35,11 +35,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={styles.nav}>
+    <nav className={styles.nav} aria-label="Main navigation">
       {ITEMS.map((item, i) => (
         <span key={item.id} className={styles.item}>
           {i > 0 && <span className={styles.sep}>/</span>}
           <button
+            type="button"
             className={`${styles.link} ${active === item.id ? styles.active : ''}`}
             onClick={() => scrollTo(item.id)}
           >

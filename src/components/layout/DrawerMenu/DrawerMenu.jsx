@@ -54,7 +54,6 @@ export default function DrawerMenu({ activePage, onNavigate, open, onToggle, onC
               </button>
             );
           })}
-          <div className="drawer-link-divider" />
           <button
             className="drawer-link drawer-link--archive"
             onClick={() => { onClose(); onArchive?.(); }}
