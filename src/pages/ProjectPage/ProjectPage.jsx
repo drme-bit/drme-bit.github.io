@@ -548,19 +548,6 @@ export default function ProjectPage() {
           )}
         </div>
       </nav>
-
-      <footer className="pp-footer">
-        <div className="pp-footer-inner">
-          <Link to="/" className="pp-footer-back">
-            <FiChevronLeft size={14} />
-            Back to home
-          </Link>
-          <div className="pp-footer-meta">
-            <span className="pp-footer-project-label">Project</span>
-            <span className="pp-footer-project-name">{project.title.replace(/ —.*/, '')}</span>
-          </div>
-        </div>
-      </footer>
       </div>
     </div>
   );
