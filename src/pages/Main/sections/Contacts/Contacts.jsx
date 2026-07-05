@@ -40,7 +40,7 @@ const GROUPS = [
     items: [
       { kind: 'link', label: 'github', value: 'drme-bit', href: 'https://github.com/drme-bit', external: true },
       { kind: 'link', label: 'telegram', value: '@drme_bit', href: 'https://t.me/drmebit', external: true },
-      { kind: 'copy', label: 'discord', value: 'dr.me', copyText: 'dr.me' },
+      { kind: 'link', label: 'discord', value: 'Dr.ME', href: 'https://discord.gg/389417490809225216', external: true },
     ],
   },
 ];
