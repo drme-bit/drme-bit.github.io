@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useReveal from '@/hooks/useReveal';
+import { useScrollY } from '@/hooks/useRafScroll';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import { PROJECTS } from '@/data/projectsData';
 import './Projects.scss';
@@ -129,9 +130,23 @@ function LivePreview({ seedString }) {
 //  Preview — macOS‑style window       
 /* ------------------------------------------------------------------ */
 
-function ProjectPreview({ project }) {
+function ProjectPreview({ project, isCurrent }) {
+  const [idx, setIdx] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  const images = project.images?.filter(Boolean) || [];
+  const hasGallery = images.length > 1;
+
+  useEffect(() => {
+    if (!hasGallery || !isCurrent || hovered) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % images.length), 3000);
+    return () => clearInterval(t);
+  }, [hasGallery, isCurrent, hovered, images.length]);
+
   return (
-    <div className="project-window">
+    <div className="project-window"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <div className="project-window-bar">
         <div className="project-window-dots">
           <span className="project-window-dot project-window-dot--red" />
@@ -142,15 +157,27 @@ function ProjectPreview({ project }) {
         <span className="project-window-arrow">↗</span>
       </div>
       <div className="project-window-body">
-        {project.image ? (
+        {!project.image && !hasGallery ? (
+          <LivePreview seedString={project.id} />
+        ) : hasGallery ? (
+          <div className="project-gallery-strip">
+            {images.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt=""
+                className={`project-preview-img${i === idx ? ' is-active' : ''}`}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        ) : (
           <img
             src={project.image}
             alt={`${project.title} screenshot`}
             className="project-preview-img"
             loading="lazy"
           />
-        ) : (
-          <LivePreview seedString={project.id} />
         )}
       </div>
     </div>
@@ -223,7 +250,7 @@ function ProjectCard({ project, index, offset, isCurrent }) {
         <span className="project-card-link">↗</span>
       </div>
 
-      <ProjectPreview project={project} />
+      <ProjectPreview project={project} isCurrent={isCurrent} />
 
       <div className="project-card-body">
         <h3 className="project-card-title">{project.title}</h3>
@@ -246,26 +273,17 @@ export default function Projects() {
   const outerRef = useRef(null);
   const [progress, setProgress] = useState(0);
   const [sectionRef, sectionVisible] = useReveal();
+  const scrollY = useScrollY();
 
   useEffect(() => {
     const section = outerRef.current;
     if (!section) return;
-    const update = () => {
-      const rect = section.getBoundingClientRect();
-      const winH = window.innerHeight;
-      const scrollable = rect.height - winH;
-      if (scrollable <= 0) { setProgress(0); return; }
-      setProgress(Math.max(0, Math.min(1, -rect.top / scrollable)));
-    };
-    update();
-    let rafId;
-    const tick = () => {
-      update();
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
+    const rect = section.getBoundingClientRect();
+    const winH = window.innerHeight;
+    const scrollable = rect.height - winH;
+    if (scrollable <= 0) { setProgress(0); return; }
+    setProgress(Math.max(0, Math.min(1, -rect.top / scrollable)));
+  }, [scrollY]);
 
   const count = PROJECTS.length;
 

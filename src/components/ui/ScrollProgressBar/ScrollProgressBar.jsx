@@ -1,27 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useScrollProgress } from '@/hooks/useRafScroll';
 import './ScrollProgressBar.scss';
 
 export default function ScrollProgressBar() {
-  const [pct, setPct] = useState(0);
-
-  useEffect(() => {
-    const update = () => {
-      const h = document.documentElement.scrollHeight - window.innerHeight;
-      setPct(h > 0 ? (window.scrollY / h) * 100 : 0);
-    };
-    update();
-    let rafId;
-    const tick = () => {
-      update();
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
+  const pct = useScrollProgress();
 
   return (
     <div className="scroll-progress">
-      <div className="scroll-progress-fill" style={{ width: `${pct}%` }} />
+      <div className="scroll-progress-fill" style={{ width: `${pct * 100}%` }} />
     </div>
   );
 }

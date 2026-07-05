@@ -1,13 +1,56 @@
 import { useState, useEffect } from 'react';
 
-function requestOrientationPermission() {
-  if (
-    typeof DeviceOrientationEvent !== 'undefined' &&
-    typeof DeviceOrientationEvent.requestPermission === 'function'
-  ) {
-    DeviceOrientationEvent.requestPermission().then((state) => {
-      if (state !== 'granted') console.warn('deviceorientation permission denied');
-    });
+let gyro = { x: 0, y: 0, available: false };
+let gyroListeners = new Set();
+
+function gyroTick() {
+  for (const fn of gyroListeners) fn(gyro.x, gyro.y);
+}
+
+function startGyro() {
+  const isIOS = typeof DeviceOrientationEvent !== 'undefined'
+    && typeof DeviceOrientationEvent.requestPermission === 'function';
+
+  const handleOrientation = (e) => {
+    if (e.gamma == null) return;
+    gyro.x = Math.max(-1, Math.min(1, e.gamma / 90));
+    gyro.y = Math.max(-1, Math.min(1, (e.beta ?? 45) / 180));
+    gyro.available = true;
+    gyroTick();
+  };
+
+  if (isIOS) {
+    const requestPermission = () => {
+      DeviceOrientationEvent.requestPermission()
+        .then((state) => {
+          if (state === 'granted') {
+            window.addEventListener('deviceorientation', handleOrientation);
+          }
+        })
+        .catch(() => {});
+      document.removeEventListener('pointerup', requestPermission);
+    };
+    document.addEventListener('pointerup', requestPermission, { once: true });
+  } else {
+    window.addEventListener('deviceorientation', handleOrientation);
+  }
+
+  return () => {
+    window.removeEventListener('deviceorientation', handleOrientation);
+  };
+}
+
+let cleanupGyro = null;
+
+function ensureGyro() {
+  if (cleanupGyro) return;
+  cleanupGyro = startGyro();
+}
+
+function stopGyro() {
+  if (gyroListeners.size === 0 && cleanupGyro) {
+    cleanupGyro();
+    cleanupGyro = null;
   }
 }
 
@@ -17,30 +60,16 @@ export default function useCursorParallax() {
   useEffect(() => {
     const isMobile = window.matchMedia('(pointer: coarse)').matches;
 
-    if (isMobile && typeof DeviceOrientationEvent !== 'undefined') {
-      const grantedRef = { current: false };
+    if (isMobile) {
+      const fn = (gx, gy) => setOffset({ x: gx, y: gy });
+      gyroListeners.add(fn);
+      ensureGyro();
 
-      const onOrientation = (e) => {
-        if (e.gamma == null) return;
-        setOffset({
-          x: Math.max(-1, Math.min(1, e.gamma / 90)),
-          y: Math.max(-1, Math.min(1, (e.beta ?? 0) / 180)),
-        });
-      };
-
-      const onUserGesture = () => {
-        if (grantedRef.current) return;
-        grantedRef.current = true;
-        requestOrientationPermission();
-        window.removeEventListener('pointerup', onUserGesture);
-      };
-
-      window.addEventListener('deviceorientation', onOrientation);
-      window.addEventListener('pointerup', onUserGesture);
+      if (gyro.available) fn(gyro.x, gyro.y);
 
       return () => {
-        window.removeEventListener('deviceorientation', onOrientation);
-        window.removeEventListener('pointerup', onUserGesture);
+        gyroListeners.delete(fn);
+        stopGyro();
       };
     }
 

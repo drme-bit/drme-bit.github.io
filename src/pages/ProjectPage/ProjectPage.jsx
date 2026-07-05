@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FiHome, FiChevronLeft, FiChevronRight, FiGithub, FiExternalLink, FiCheck, FiCode, FiAlertCircle, FiMonitor } from 'react-icons/fi';
 import { getProjectById, getProjectIndex, PROJECTS } from '@/data/projectsData';
-import CustomCursor from '@/components/ui/CustomCursor/CustomCursor';
-import CursorTrail from '@/components/ui/CursorTrail/CursorTrail';
 import './ProjectPage.scss';
 
 const STATUS_META = {
@@ -80,6 +78,15 @@ function buildDefaultSections(project) {
     });
   }
 
+  if (Array.isArray(project.images) && project.images.length > 0) {
+    sections.push({
+      id: 'gallery',
+      label: 'Gallery',
+      type: 'gallery',
+      items: project.images,
+    });
+  }
+
   if (project.plans) {
     sections.push({
       id: 'plans',
@@ -130,6 +137,77 @@ function buildSidebarFacts(project, meta, stageWeeks) {
 function getPresentation(project) {
   const preset = project.presentation?.mode || project.presentation?.layout || 'classic';
   return PRESENTATION_META[preset] || PRESENTATION_META.classic;
+}
+
+function GalleryCarousel({ images }) {
+  const [current, setCurrent] = useState(0);
+  const [fullscreen, setFullscreen] = useState(null);
+
+  const prev = () => setCurrent(c => (c === 0 ? images.length - 1 : c - 1));
+  const next = () => setCurrent(c => (c === images.length - 1 ? 0 : c + 1));
+
+  useEffect(() => {
+    const h = (e) => {
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'Escape') setFullscreen(null);
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+
+  if (images.length === 1) {
+    return (
+      <div className="pp-gallery">
+        <div className="pp-gallery-main">
+          <img
+            src={images[0]}
+            alt=""
+            className="pp-gallery-img"
+            onClick={() => setFullscreen(images[0])}
+          />
+        </div>
+        {fullscreen && (
+          <div className="pp-gallery-fullscreen" onClick={() => setFullscreen(null)}>
+            <img src={fullscreen} alt="" className="pp-gallery-fullscreen-img" />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="pp-gallery">
+      <div className="pp-gallery-main">
+        <button className="pp-gallery-arrow pp-gallery-arrow--prev" onClick={prev}>
+          <FiChevronLeft size={18} />
+        </button>
+        <img
+          src={images[current]}
+          alt=""
+          className="pp-gallery-img"
+          onClick={() => setFullscreen(images[current])}
+        />
+        <button className="pp-gallery-arrow pp-gallery-arrow--next" onClick={next}>
+          <FiChevronRight size={18} />
+        </button>
+      </div>
+      <div className="pp-gallery-dots">
+        {images.map((_, i) => (
+          <button
+            key={i}
+            className={`pp-gallery-dot${i === current ? ' is-active' : ''}`}
+            onClick={() => setCurrent(i)}
+          />
+        ))}
+      </div>
+      {fullscreen && (
+        <div className="pp-gallery-fullscreen" onClick={() => setFullscreen(null)}>
+          <img src={fullscreen} alt="" className="pp-gallery-fullscreen-img" />
+        </div>
+      )}
+    </div>
+  );
 }
 
 function renderSectionContent(section) {
@@ -255,6 +333,10 @@ function renderSectionContent(section) {
     );
   }
 
+  if (section.type === 'gallery' && Array.isArray(section.items)) {
+    return <GalleryCarousel images={section.items} />;
+  }
+
   if (section.type === 'text') {
     return (
       <div className={`pp-content-body pp-content-body--${section.variant || 'default'}`}>
@@ -333,9 +415,6 @@ export default function ProjectPage() {
 
   return (
     <div className="project-page" ref={scrollRef}>
-      <CustomCursor />
-      <CursorTrail />
-
       <div className={`project-page-shell ${presentation.cls}`}>
 
       <nav className="pp-nav">
@@ -381,8 +460,12 @@ export default function ProjectPage() {
               autoPlay
               muted
               loop
-              playsInline
-              poster={project.image || undefined}
+            />
+          ) : project.image ? (
+            <img
+              className="pp-hero-bg-media pp-hero-bg-media--image"
+              src={project.image}
+              alt=""
             />
           ) : null}
           <div className="pp-hero-bg-overlay" />
@@ -476,9 +559,9 @@ export default function ProjectPage() {
 
         <aside className="pp-right">
           <div className="pp-right-sticky">
-            {project.video ? (
+            {project.logo ? (
               <div className="pp-right-preview">
-                <video src={project.video} autoPlay muted loop playsInline />
+                <img src={project.logo} alt={`${project.title} logo`} />
               </div>
             ) : project.image ? (
               <div className="pp-right-preview">

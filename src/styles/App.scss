@@ -1,9 +1,5 @@
 html { scroll-behavior: smooth; }
-body { overflow-x: hidden; cursor: none; }
-
-@media (pointer: coarse) {
-  body { cursor: auto; }
-}
+body { overflow-x: hidden; }
 
 /* ---- reveal animation ---- */
 .reveal {
@@ -22,55 +18,4 @@ body { overflow-x: hidden; cursor: none; }
   width: 100vw; height: 100vh;
 }
 
-/* ---- boot screen ---- */
-.boot {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg);
-  transition: opacity 0.4s ease;
-}
 
-.boot--gone {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.boot-inner {
-  width: clamp(280px, 50vw, 520px);
-}
-
-.boot-line {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: clamp(0.65rem, 1.2vw, 0.8rem);
-  color: var(--accent);
-  line-height: 1.6;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  min-height: 1.6em;
-}
-
-.boot-line.shown {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.boot-bar-track {
-  margin-top: 2rem;
-  height: 2px;
-  background: var(--accent-muted);
-  position: relative;
-  overflow: hidden;
-}
-
-.boot-bar-fill {
-  height: 100%;
-  background: var(--accent);
-  transition: width 0.3s linear;
-  box-shadow: 0 0 8px var(--accent);
-}

@@ -1,24 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useScrollY } from '@/hooks/useRafScroll';
 import './BackToTop.scss';
 
 export default function BackToTop() {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const update = () => setShow(window.scrollY > window.innerHeight * 0.6);
-    update();
-    let rafId;
-    const tick = () => {
-      update();
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
+  const scrollY = useScrollY();
 
   return (
     <button
-      className={`back-to-top${show ? ' is-visible' : ''}`}
+      className={`back-to-top${scrollY > window.innerHeight * 0.6 ? ' is-visible' : ''}`}
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="Back to top"
     >

@@ -1,11 +1,15 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Main from './pages/Main/Main';
-import ProjectPage from './pages/ProjectPage/ProjectPage';
 import { SmoothScrolling } from '@/components/layout/SmoothScrolling/SmoothScrolling';
+import LoadingScreen from '@/components/ui/LoadingScreen/LoadingScreen';
 import './styles/App.scss';
+
+const Main = lazy(() => import('./pages/Main/Main'));
+const ProjectPage = lazy(() => import('./pages/ProjectPage/ProjectPage'));
 
 export default function App() {
   return (
+    <Suspense fallback={<LoadingScreen />}>
     <Routes>
       <Route
         path="/"
@@ -22,5 +26,6 @@ export default function App() {
         </SmoothScrolling>
       } />
     </Routes>
+    </Suspense>
   );
 }

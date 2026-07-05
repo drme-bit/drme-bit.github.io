@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import useCursorParallax from '@/hooks/useCursorParallax';
+import { useScrollY } from '@/hooks/useRafScroll';
 import { SiC, SiCplusplus, SiPython, SiJavascript, SiTypescript, SiRust, SiDotnet } from 'react-icons/si';
 import { DiJava } from 'react-icons/di';
 import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
@@ -291,19 +292,15 @@ export default function Hero() {
 
   const { display, activeIndex } = useTypewriter(LANGUAGES, lockedIndex);
   const parallax = useCursorParallax();
+  const scrollY = useScrollY();
 
   useEffect(() => {
-    const onScroll = () => {
-      const el = ref.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      const h = el.clientHeight;
-      setP(Math.max(0, Math.min(1, (h - r.bottom) / (h * 0.35))));
-    };
-    window.addEventListener('scroll', onScroll);
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const h = el.clientHeight;
+    setP(Math.max(0, Math.min(1, (h - r.bottom) / (h * 0.35))));
+  }, [scrollY]);
 
   const handleBadgeClick = useCallback((index) => {
     setLockedIndex((current) => (current === index ? null : index));

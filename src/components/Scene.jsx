@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -311,22 +311,50 @@ function IsoCamera() {
   return null;
 }
 
-export default function Scene() {
+function useLowPowerMode() {
+  const [low, setLow] = useState(true);
+  useEffect(() => {
+    const isMobile = window.matchMedia('(pointer: coarse)').matches;
+    const isLowMem = navigator.deviceMemory && navigator.deviceMemory < 4;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lowPower = isMobile || isLowMem || prefersReduced;
+    setLow(lowPower);
+  }, []);
+  return low;
+}
+
+function SceneInner({ lowPower }) {
+  if (lowPower) {
+    return (
+      <IsoCamera />
+    );
+  }
+
   return (
-    <Canvas
-      id="bg"
-      camera={{ position: [9, 9.2, 5], fov: 32, near: 0.1, far: 80 }}
-      gl={{ alpha: true, antialias: true }}
-      onCreated={({ gl, scene }) => {
-        gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        scene.fog = new THREE.Fog('#000000', 14, 34);
-      }}
-      style={{ position: 'fixed', inset: 0, zIndex: 0, background: '#000000' }}
-    >
+    <>
       <IsoCamera />
       <Starfield />
       <Terrain />
       <Beacons />
+    </>
+  );
+}
+
+export default function Scene() {
+  const lowPower = useLowPowerMode();
+
+  return (
+    <Canvas
+      id="bg"
+      camera={{ position: [9, 9.2, 5], fov: 32, near: 0.1, far: 80 }}
+      gl={{ alpha: true, antialias: !lowPower }}
+      onCreated={({ gl, scene }) => {
+        gl.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 2));
+        scene.fog = new THREE.Fog('#000000', 14, 34);
+      }}
+      style={{ position: 'fixed', inset: 0, zIndex: 0, background: '#000000' }}
+    >
+      <SceneInner lowPower={lowPower} />
     </Canvas>
   );
 }

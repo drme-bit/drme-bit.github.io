@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import useReveal from '@/hooks/useReveal';
 import useCursorParallax from '@/hooks/useCursorParallax';
+import { useScrollY } from '@/hooks/useRafScroll';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import './Experience.scss';
 
@@ -33,6 +34,8 @@ export default function Experience() {
   const [progress, setProgress] = useState(0);
   const [visibleSet, setVisibleSet] = useState(new Set());
 
+  const scrollY = useScrollY();
+
   const update = useCallback(() => {
     const el = timelineRef.current;
     if (!el) return;
@@ -64,18 +67,9 @@ export default function Experience() {
 
   useEffect(() => {
     update();
-    let rafId;
-    const tick = () => {
-      update();
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
     window.addEventListener('resize', update);
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', update);
-    };
-  }, [update]);
+    return () => window.removeEventListener('resize', update);
+  }, [update, scrollY]);
 
   return (
     <section id="experience" ref={ref} className={`section section--experience reveal${visible ? ' is-visible' : ''}`}>

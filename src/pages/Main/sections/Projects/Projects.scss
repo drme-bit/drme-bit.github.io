@@ -235,9 +235,10 @@
 }
 
 .project-window-body {
-  line-height: 0;
-  max-height: 320px;
+  position: relative;
+  height: 320px;
   overflow: hidden;
+  line-height: 0;
 }
 
 .project-preview-canvas {
@@ -245,6 +246,24 @@
   width: 100%;
   height: auto;
   aspect-ratio: 400 / 180;
+}
+
+.project-gallery-strip {
+  display: grid;
+  height: 100%;
+
+  > * {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  > .is-active {
+    opacity: 1;
+  }
 }
 
 .project-preview-img {
@@ -432,7 +451,7 @@
   }
 
   .project-window-body {
-    max-height: 170px;
+    height: 170px;
   }
 
   .project-preview-img {
