@@ -43,9 +43,8 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
 
     const rect = canvas.getBoundingClientRect()
     const isMobile = window.innerWidth <= 768
-    const rawSize = Math.max(Math.floor(rect.width), 200)
-    const size = isMobile ? Math.min(rawSize, 250) : rawSize
-    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio, 2)
+    const size = Math.max(Math.floor(rect.width), 200)
+    const dpr = isMobile ? 2 : Math.min(window.devicePixelRatio, 2)
 
     if (globeRef.current) {
       globeRef.current.destroy()
@@ -63,8 +62,8 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
       dark: colors.dark,
       diffuse: 1.2,
       scale: 1,
-      mapSamples: isMobile ? 2000 : 16000,
-      mapBrightness: 6,
+      mapSamples: isMobile ? 1000 : 16000,
+      mapBrightness: isMobile ? 4 : 6,
       baseColor: colors.baseColor,
       markerColor: colors.markerColor,
       glowColor: colors.glowColor,
@@ -76,15 +75,8 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
 
   useEffect(() => {
     createGlobeInstance()
-    const isMobile = window.innerWidth <= 768
-    let frame = 0
 
     const tick = () => {
-      frame++
-      if (isMobile && frame % 3 !== 0) {
-        rafRef.current = requestAnimationFrame(tick)
-        return
-      }
       if (!dragRef.current.active && !pauseRef.current) {
         phiRef.current += 0.004 + scrollRef.current * 0.002
       }
