@@ -62,7 +62,7 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
       dark: colors.dark,
       diffuse: 1.2,
       scale: 1,
-      mapSamples: isMobile ? 8000 : 16000,
+      mapSamples: isMobile ? 4000 : 16000,
       mapBrightness: 6,
       baseColor: colors.baseColor,
       markerColor: colors.markerColor,
@@ -75,10 +75,17 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
 
   useEffect(() => {
     createGlobeInstance()
+    const isMobile = window.innerWidth <= 768
+    let frame = 0
 
     const tick = () => {
+      frame++
       if (!dragRef.current.active && !pauseRef.current) {
         phiRef.current += 0.004 + scrollRef.current * 0.002
+      }
+      if (isMobile && frame % 3 !== 0) {
+        rafRef.current = requestAnimationFrame(tick)
+        return
       }
       const currentPhi = phiRef.current + dragRef.current.offset
       if (externalPhiRef) externalPhiRef.current = currentPhi

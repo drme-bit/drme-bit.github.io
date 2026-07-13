@@ -275,14 +275,17 @@ function getAccentRGB() {
 function Particles() {
   const ref = useRef(null);
   const mouse = useRef({ x: 0, y: 0 });
+  const isMobile = window.matchMedia('(pointer: coarse)').matches;
 
   useEffect(() => {
+    if (isMobile) return;
     const on = (e) => { mouse.current = { x: e.clientX, y: e.clientY }; };
     window.addEventListener('mousemove', on, { passive: true });
     return () => window.removeEventListener('mousemove', on);
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
+    if (isMobile) return;
     const c = ref.current;
     if (!c) return;
     const ctx = c.getContext('2d');
@@ -346,8 +349,9 @@ function Particles() {
     };
     raf = requestAnimationFrame(draw);
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
-  }, []);
+  }, [isMobile]);
 
+  if (isMobile) return null;
   return <canvas ref={ref} className="h-canvas" />;
 }
 
