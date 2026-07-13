@@ -3,8 +3,9 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { getAccent, getBg } from '@/utils/cssTheme';
 
-const GRID_X = 90;
-const GRID_Z = 90;
+const _isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+const GRID_X = _isMobile ? 50 : 90;
+const GRID_Z = _isMobile ? 50 : 90;
 const SPACING = 0.5;
 const HALF_X = (GRID_X - 1) * SPACING * 0.5;
 const HALF_Z = (GRID_Z - 1) * SPACING * 0.5;
