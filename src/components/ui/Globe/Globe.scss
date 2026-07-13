@@ -1,0 +1,68 @@
+/* =================================================================
+   GLOBE — COBE-powered interactive 3D globe
+   ================================================================= */
+
+.globe {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.globe__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 1s ease-out;
+
+  &.is-ready {
+    opacity: 1;
+  }
+
+  &.is-dragging {
+    cursor: grabbing;
+  }
+}
+
+.globe__glow {
+  position: absolute;
+  inset: -8%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(125, 211, 252, 0.08) 0%,
+    rgba(196, 181, 253, 0.04) 35%,
+    transparent 65%
+  );
+  pointer-events: none;
+  animation: globe-pulse 5s ease-in-out infinite;
+}
+
+.globe__ring {
+  position: absolute;
+  inset: -2%;
+  border-radius: 50%;
+  border: 1px solid rgba(125, 211, 252, 0.08);
+  pointer-events: none;
+  animation: globe-pulse 5s ease-in-out infinite 0.5s;
+}
+
+@keyframes globe-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+@media (max-width: 768px) {
+  .globe { }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .globe__glow,
+  .globe__ring {
+    animation: none;
+    opacity: 0.6;
+  }
+}

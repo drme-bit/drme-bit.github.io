@@ -1,0 +1,120 @@
+/* =================================================================
+   CUSTOM CURSOR
+   Coal-white theme with trail effect
+   ================================================================= */
+
+.cursor-container {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-cursor, 9998);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* --- Outer Ring --- */
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(232, 228, 223, 0.3);
+  border-radius: 50%;
+  will-change: transform;
+  transition: width 0.2s var(--ease-out),
+              height 0.2s var(--ease-out),
+              border-color 0.2s var(--ease-out),
+              background 0.2s var(--ease-out);
+
+  &.is-hovering {
+    width: 56px;
+    height: 56px;
+    border-color: rgba(232, 228, 223, 0.5);
+    background: rgba(232, 228, 223, 0.03);
+  }
+
+  &.is-pressed {
+    width: 32px;
+    height: 32px;
+    border-color: rgba(232, 228, 223, 0.6);
+    background: rgba(232, 228, 223, 0.08);
+  }
+}
+
+/* --- Inner Dot --- */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--accent, #e8e4df);
+  border-radius: 50%;
+  will-change: transform;
+  transition: width 0.15s var(--ease-out),
+              height 0.15s var(--ease-out),
+              background 0.15s var(--ease-out);
+
+  &.is-pressed {
+    width: 4px;
+    height: 4px;
+  }
+}
+
+/* --- Trail Dots --- */
+.cursor-trail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background: rgba(232, 228, 223, 0.15);
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.cursor-trail-0 {
+  width: 4px;
+  height: 4px;
+  background: rgba(232, 228, 223, 0.2);
+}
+
+.cursor-trail-1 {
+  width: 3.5px;
+  height: 3.5px;
+  background: rgba(232, 228, 223, 0.16);
+}
+
+.cursor-trail-2 {
+  width: 3px;
+  height: 3px;
+  background: rgba(232, 228, 223, 0.12);
+}
+
+.cursor-trail-3 {
+  width: 2.5px;
+  height: 2.5px;
+  background: rgba(232, 228, 223, 0.08);
+}
+
+.cursor-trail-4 {
+  width: 2px;
+  height: 2px;
+  background: rgba(232, 228, 223, 0.04);
+}
+
+/* --- Hide on Mobile/Touch --- */
+@media (pointer: coarse) {
+  .cursor-container {
+    display: none;
+  }
+}
+
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-ring,
+  .cursor-dot,
+  .cursor-trail {
+    transition: none !important;
+  }
+}
