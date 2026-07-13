@@ -1,21 +1,86 @@
-html { scroll-behavior: smooth; }
-body { overflow-x: hidden; }
+/* =================================================================
+   APP GLOBAL STYLES
+   ================================================================= */
 
-/* ---- reveal animation ---- */
-.reveal {
-  opacity: 0;
-  transition: opacity 0.7s ease;
+html {
+  scroll-behavior: smooth;
 }
 
-.reveal.is-visible {
+body {
+  overflow-x: hidden;
+}
+
+/* --- Cursor Hide on Desktop --- */
+@media (pointer: fine) {
+  body.custom-cursor-active {
+    cursor: none;
+    a, button, [role="button"], input, textarea, select, label {
+      cursor: none;
+    }
+  }
+}
+
+/* --- 3D Scene --- */
+#bg {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* --- Page Transition --- */
+.page-transition {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: var(--z-overlay);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out);
+}
+.page-transition.is-active {
   opacity: 1;
 }
 
-/* ---- 3D scene ---- */
-#bg {
-  position: fixed !important;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+/* --- Section Inner Container --- */
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-3xl) var(--space-xl);
 }
 
+/* --- Section Title --- */
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 var(--space-2xl);
+}
 
+.section-accent {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-title-sub {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 1vw, 0.75rem);
+  font-weight: 400;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  margin-top: var(--space-sm);
+}
+
+/* --- Mobile Adjustments --- */
+@media (max-width: 700px) {
+  .section-inner {
+    padding: var(--space-2xl) var(--space-lg);
+  }
+}

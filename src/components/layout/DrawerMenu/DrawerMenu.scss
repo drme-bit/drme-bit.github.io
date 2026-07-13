@@ -1,4 +1,9 @@
-$drawer-width: 240px;
+/* =================================================================
+   DRAWER MENU - Glass Navigation Panel
+   Coal-White Theme
+   ================================================================= */
+
+$drawer-width: 260px;
 $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 
 .drawer-trigger {
@@ -10,42 +15,47 @@ $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 14px 8px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 5px;
+  padding: 16px 10px;
+  background: var(--glass);
+  border: 1px solid var(--border);
   border-left: none;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-  backdrop-filter: blur(4px);
+  transition: background 0.2s var(--ease-out),
+              border-color 0.2s var(--ease-out);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
 .drawer-trigger:hover {
-  background: rgba(0, 0, 0, 0.8);
-  border-color: rgba(94, 200, 216, 0.25);
+  background: var(--glass-hover);
+  border-color: var(--border-hover);
 }
 
 .drawer-trigger-line {
   display: block;
-  width: 14px;
+  width: 16px;
   height: 1px;
-  background: rgba(255, 255, 255, 0.35);
-  transition: background 0.2s;
+  background: var(--text-dim);
+  transition: background 0.2s var(--ease-out),
+              transform 0.2s var(--ease-out);
 }
 
 .drawer-trigger:hover .drawer-trigger-line {
-  background: rgba(94, 200, 216, 0.6);
+  background: var(--accent);
 }
 
 .drawer-overlay {
   position: fixed;
   inset: 0;
   z-index: 170;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   pointer-events: none;
   transition: opacity $transition;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .drawer-overlay.is-open {
@@ -60,14 +70,15 @@ $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   bottom: 0;
   z-index: 171;
   width: $drawer-width;
-  background: rgba(10, 10, 10, 0.92);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(12px);
+  background: rgba(10, 10, 10, 0.95);
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   transform: translateX(-100%);
   transition: transform $transition;
   display: flex;
   flex-direction: column;
-  padding: 2rem 1.5rem;
+  padding: 2.5rem 1.75rem;
 }
 
 .drawer-panel.is-open {
@@ -75,10 +86,10 @@ $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .drawer-header {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: rgba(94, 200, 216, 0.5);
-  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  letter-spacing: 0.18em;
   margin-bottom: 2.5rem;
   user-select: none;
 }
@@ -86,51 +97,77 @@ $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 .drawer-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .drawer-link {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   background: none;
   border: none;
-  padding: 10px 8px;
+  padding: 12px 10px;
   cursor: pointer;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.3);
-  transition: color 0.2s, background 0.2s;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  transition: color 0.2s var(--ease-out),
+              background 0.2s var(--ease-out),
+              transform 0.2s var(--ease-out);
   text-align: left;
   width: 100%;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 0;
+    background: var(--accent);
+    transition: height 0.2s var(--ease-out);
+    border-radius: var(--radius-full);
+  }
 }
 
 .drawer-link:hover {
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  background: var(--glass);
+  transform: translateX(4px);
+
+  &::before {
+    height: 60%;
+  }
 }
 
 .drawer-link.is-active {
   color: var(--accent);
-  background: rgba(94, 200, 216, 0.06);
+  background: var(--accent-muted);
+
+  &::before {
+    height: 60%;
+    opacity: 0.8;
+  }
 }
 
 .drawer-link-id {
-  font-size: 0.55rem;
-  color: rgba(255, 255, 255, 0.12);
-  width: 20px;
+  font-size: 0.6rem;
+  color: var(--text-ghost);
+  width: 24px;
   flex-shrink: 0;
   letter-spacing: 0.05em;
 }
 
 .drawer-link.is-active .drawer-link-id {
-  color: rgba(94, 200, 216, 0.4);
+  color: rgba(232, 228, 223, 0.4);
 }
 
 .drawer-link-label {
   flex: 1;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 
 .drawer-link-cursor {
@@ -145,16 +182,20 @@ $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .drawer-link--archive {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+
   .drawer-link-id {
-    color: rgba(255, 255, 255, 0.15);
+    color: var(--text-ghost);
   }
 
   .drawer-link-label {
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--text-dim);
   }
 
   &:hover .drawer-link-label {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text);
   }
 }
 
@@ -164,29 +205,30 @@ $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .drawer-footer-text {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.12);
-  letter-spacing: 0.05em;
+  color: var(--text-ghost);
+  letter-spacing: 0.06em;
 }
 
 @media (max-width: 700px) {
   .drawer-trigger {
     left: auto;
     right: 0;
-    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 1px solid var(--border);
     border-right: none;
-    padding: 10px 6px;
+    padding: 12px 8px;
     top: 5rem;
     transform: none;
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
   }
 
   .drawer-trigger-line {
-    width: 12px;
+    width: 14px;
   }
 
   .drawer-panel {
     width: 100%;
-    padding: 1.5rem 1.25rem;
+    padding: 2rem 1.5rem;
   }
 }

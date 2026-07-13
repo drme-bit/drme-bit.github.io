@@ -1,3 +1,8 @@
+/* =================================================================
+   MASCOT - Coal-White Theme
+   Glass chat bubble with warm accent
+   ================================================================= */
+
 .mascot {
   position: fixed;
   bottom: 1rem;
@@ -12,18 +17,18 @@
   gap: 8px;
 }
 
-/* ---- bubble ---- */
+/* --- Bubble --- */
 .mascot-bubble {
   position: relative;
-  background: rgba(20, 20, 20, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 0.5px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
+  background: rgba(12, 12, 12, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 6px 10px;
   font-family: var(--font-mono, monospace);
   font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-secondary);
   line-height: 1.4;
   white-space: pre-wrap;
   animation: bubbleIn 0.3s ease;
@@ -40,16 +45,16 @@
   bottom: 12px;
   width: 8px;
   height: 8px;
-  background: rgba(20, 20, 20, 0.8);
-  border-left: 0.5px solid rgba(255, 255, 255, 0.06);
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+  background: rgba(12, 12, 12, 0.9);
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   transform: rotate(45deg);
 }
 
 .mascot-cursor {
   margin-left: 1px;
   animation: blink 0.8s step-end infinite;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--text-dim);
 }
 
 @keyframes blink {
@@ -57,24 +62,29 @@
   50% { opacity: 0; }
 }
 
-/* ---- chat input ---- */
+/* --- Chat Input --- */
 .mascot-input-wrap {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(20, 20, 20, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 0.5px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  background: rgba(12, 12, 12, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 6px 10px;
   animation: bubbleIn 0.25s ease;
+  transition: border-color 0.2s var(--ease-out);
+
+  &:focus-within {
+    border-color: rgba(232, 228, 223, 0.2);
+  }
 }
 
 .mascot-prompt {
   font-family: var(--font-mono, monospace);
   font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-dim);
 }
 
 .mascot-input {
@@ -83,12 +93,12 @@
   outline: none;
   font-family: var(--font-mono, monospace);
   font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   width: 160px;
-}
 
-.mascot-input::placeholder {
-  color: rgba(255, 255, 255, 0.12);
+  &::placeholder {
+    color: var(--text-ghost);
+  }
 }
 
 @keyframes mascotShake {
@@ -99,4 +109,10 @@
   80% { transform: translateX(0.5px); }
 }
 
-
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .mascot-bubble,
+  .mascot-input-wrap {
+    animation: none;
+  }
+}

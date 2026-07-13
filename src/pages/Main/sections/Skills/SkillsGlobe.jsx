@@ -13,9 +13,9 @@ import { FiCode, FiCpu } from 'react-icons/fi';
 
 import './SkillsGlobe.scss';
 
-const ACCENT = '#5ec8d8';
+const ACCENT = '#e8e4df';
 const GROUP_COLORS = {
-  frontend: '#5ec8d8',
+  frontend: '#e8e4df',
   backend: '#d8a85e',
   tools: '#a85ed8',
 };
@@ -388,7 +388,7 @@ function GlobeContent({ selected, onSelect, filterGroup, searchQuery }) {
   );
 }
 
-export { SKILLS_DATA, GROUP_COLORS };
+export { SKILLS_DATA, GROUP_COLORS, ICON_MAP };
 
 export default function SkillsGlobe({ selected, onSelect, filterGroup, searchQuery }) {
   return (

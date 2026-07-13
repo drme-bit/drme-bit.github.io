@@ -1,3 +1,8 @@
+/* =================================================================
+   SEARCH BAR - Coal-White Theme
+   Glass search panel with warm cream accent
+   ================================================================= */
+
 .searchbar {
   position: fixed;
   top: 12px;
@@ -5,7 +10,7 @@
   z-index: 200;
 }
 
-/* ---- trigger (magnifying glass) ---- */
+/* --- Trigger (magnifying glass) --- */
 .searchbar-trigger {
   display: flex;
   align-items: center;
@@ -14,28 +19,29 @@
   height: 28px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--text-dim);
   cursor: pointer;
-  border-radius: 6px;
-  transition: color 0.2s, background 0.2s;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s var(--ease-out),
+              background 0.2s var(--ease-out);
+
+  &:hover {
+    color: var(--text);
+    background: var(--glass);
+  }
 }
 
-.searchbar-trigger:hover {
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-/* ---- form ---- */
+/* --- Form --- */
 .searchbar-form {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(30, 30, 30, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 0.5px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 4px 10px;
+  background: rgba(12, 12, 12, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.4rem 0.65rem;
   animation: searchOpen 0.2s ease;
 }
 
@@ -55,7 +61,7 @@
 
 .searchbar-icon {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-dim);
 }
 
 .searchbar-input {
@@ -65,12 +71,10 @@
   width: 180px;
   font-family: var(--font-sans, sans-serif);
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   padding: 2px 0;
+
+  &::placeholder {
+    color: var(--text-ghost);
+  }
 }
-
-.searchbar-input::placeholder {
-  color: rgba(255, 255, 255, 0.15);
-}
-
-

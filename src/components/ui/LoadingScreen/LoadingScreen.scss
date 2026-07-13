@@ -1,3 +1,7 @@
+/* =================================================================
+   LOADING SCREEN - Coal-White Theme
+   ================================================================= */
+
 @keyframes pulse-box {
   0%, 100% { opacity: 0.3; transform: scale(1); }
   50%      { opacity: 1;   transform: scale(1.15); }
@@ -25,16 +29,17 @@
 .loading-screen__box {
   width: 24px;
   height: 24px;
-  border: 1px solid var(--accent, #5ec8d8);
+  border: 1px solid var(--accent, #e8e4df);
   border-radius: 2px;
   animation: pulse-box 1.2s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(232, 228, 223, 0.15);
 }
 
 .loading-screen__text {
   margin: 0;
   font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--text-dim, rgba(255, 255, 255, 0.3));
   letter-spacing: 0.1em;
   text-transform: lowercase;
 }
@@ -42,4 +47,12 @@
 .loading-screen__dots::after {
   content: '';
   animation: dots 1.6s steps(4) infinite;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .loading-screen__box {
+    animation: none;
+    opacity: 0.6;
+  }
 }

@@ -1,3 +1,8 @@
+/* =================================================================
+   HERO SECTION - Coal-White Theme
+   Glassmorphism, gradient text, enhanced particles
+   ================================================================= */
+
 #hero {
   height: 100vh;
   pointer-events: none;
@@ -11,15 +16,15 @@
   left: 30%;
   width: 60vw;
   height: 80vh;
-  background: radial-gradient(ellipse at center, rgba(94, 200, 216, 0.03) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(125, 211, 252, 0.03) 0%, rgba(196, 181, 253, 0.02) 40%, transparent 70%);
   pointer-events: none;
   z-index: 0;
-  animation: heroGlow 4s ease-in-out infinite;
+  animation: heroGlow 6s ease-in-out infinite;
 }
 
 @keyframes heroGlow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
 }
 
 .hero-particles {
@@ -58,16 +63,40 @@
 }
 
 .hero-avatar-link:hover {
-  opacity: 0.7;
+  opacity: 0.8;
+}
+
+.hero-avatar-wrapper {
+  position: relative;
+  display: inline-block;
 }
 
 .hero-avatar {
   width: clamp(56px, 7vw, 80px);
   height: clamp(56px, 7vw, 80px);
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  filter: grayscale(1);
+  border: 1px solid rgba(232, 228, 223, 0.1);
+  filter: grayscale(0.3) contrast(1.05);
   object-fit: cover;
+  transition: filter 0.3s ease, border-color 0.3s ease;
+}
+
+.hero-avatar-link:hover .hero-avatar {
+  filter: grayscale(0) contrast(1.1);
+  border-color: rgba(232, 228, 223, 0.3);
+}
+
+.hero-avatar-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(125, 211, 252, 0.25);
+  animation: avatarRingPulse 3s ease-in-out infinite;
+}
+
+@keyframes avatarRingPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); border-color: rgba(125, 211, 252, 0.25); }
+  50% { opacity: 0.8; transform: scale(1.02); border-color: rgba(196, 181, 253, 0.35); }
 }
 
 .hero-avatar-status {
@@ -75,7 +104,7 @@
   height: 6px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 6px rgba(94, 200, 216, 0.5);
+  box-shadow: 0 0 8px rgba(232, 228, 223, 0.4);
 }
 
 .hero-type-area {
@@ -87,7 +116,7 @@
   will-change: transform;
 }
 
-/* ---- whoami intro ---- */
+/* --- Whoami Intro --- */
 .hero-intro {
   display: flex;
   flex-direction: column;
@@ -109,21 +138,26 @@
 }
 
 .hero-cmd {
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-dim);
   font-size: clamp(0.6rem, 0.9vw, 0.75rem);
 }
 
 .hero-intro-name {
-  font-size: clamp(1.2rem, 2.2vw, 1.8rem);
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  font-weight: 600;
+  background: linear-gradient(135deg, #f0eeeb 0%, #7dd3fc 50%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -0.02em;
 }
 
 .hero-intro-role {
   font-size: clamp(0.7rem, 1vw, 0.85rem);
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--text-dim);
   font-weight: 300;
+  letter-spacing: 0.05em;
 }
 
 .hero-typewrap {
@@ -138,7 +172,7 @@
   margin-left: 2px;
   animation: blink 0.8s step-end infinite;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
 }
 
 @keyframes blink {
@@ -150,7 +184,7 @@
   margin-top: 0.5rem;
   font-family: var(--font-mono);
   font-size: clamp(0.55rem, 1vw, 0.7rem);
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-dim);
   letter-spacing: 0.1em;
   padding-right: 0.15em;
 }
@@ -165,25 +199,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.3);
-  transition: all 0.2s;
-  border-radius: 3px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  transition: all 0.2s var(--ease-out);
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  background: var(--glass);
 
-  // synced with the typewriter: whichever language is currently displayed
-  // gets a quiet outline highlight, in both auto-cycle and locked modes
   &.is-active {
-    border-color: rgba(94, 200, 216, 0.4);
-    color: rgba(94, 200, 216, 0.7);
+    border-color: rgba(125, 211, 252, 0.35);
+    color: var(--accent-secondary);
+    background: rgba(125, 211, 252, 0.06);
   }
 
-  // a manual click locks the typewriter onto this language — visually
-  // distinct from the passive .is-active state with a filled background
   &.is-locked {
-    background: rgba(94, 200, 216, 0.12);
+    background: var(--accent-muted);
     border-color: var(--accent);
     color: var(--accent);
   }
@@ -191,10 +223,12 @@
   &:hover {
     border-color: var(--accent);
     color: var(--accent);
+    background: var(--glass-hover);
+    transform: translateY(-2px);
   }
 
   &:focus-visible {
-    outline: 1px solid var(--accent);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 }
@@ -204,7 +238,7 @@
   font-family: var(--font-sans);
   font-weight: 300;
   font-size: clamp(0.6rem, 0.9vw, 0.75rem);
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-dim);
   letter-spacing: 0.15em;
   text-transform: lowercase;
 }
@@ -220,17 +254,22 @@
 .hero-info-item {
   font-family: var(--font-mono);
   font-size: clamp(0.5rem, 0.7vw, 0.6rem);
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-dim);
   letter-spacing: 0.05em;
 }
 
 .hero-info-resume {
   font-family: var(--font-mono);
   font-size: clamp(0.5rem, 0.7vw, 0.6rem);
-  color: rgba(255, 255, 255, 0.12);
+  color: var(--text-ghost);
   letter-spacing: 0.05em;
   cursor: default;
-  opacity: 0.4;
+  opacity: 0.6;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--text-dim);
+  }
 }
 
 .hero-arrow {
@@ -249,58 +288,64 @@
   50% { transform: translateY(10px); }
 }
 
+/* --- Terminal (Glass Card) --- */
 .terminal {
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  backdrop-filter: blur(4px);
   width: min(90vw, 720px);
   position: relative;
-  animation: terminalGlow 4s ease-in-out infinite;
+  animation: terminalGlow 5s ease-in-out infinite;
 }
 
-/* CRT scanlines overlay */
 .terminal::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.06) 2px, rgba(0, 0, 0, 0.06) 4px);
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
   pointer-events: none;
   z-index: 1;
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
 }
 
 @keyframes terminalGlow {
-  0%, 100% { box-shadow: 0 0 20px rgba(94, 200, 216, 0.04); }
-  50% { box-shadow: 0 0 60px rgba(94, 200, 216, 0.1); }
+  0%, 100% { box-shadow: 0 0 20px rgba(125, 211, 252, 0.03); }
+  50% { box-shadow: 0 0 40px rgba(125, 211, 252, 0.08), 0 0 80px rgba(196, 181, 253, 0.04); }
 }
 
 .terminal-bar {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
 }
 
 .terminal-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--text-ghost);
+  transition: background 0.2s ease;
 }
 
-.terminal-dot:nth-child(1) { background: #ff5f56; }
-.terminal-dot:nth-child(2) { background: #ffbd2e; }
-.terminal-dot:nth-child(3) { background: #27c93f; }
+.terminal-dot:nth-child(1) { background: rgba(255, 95, 86, 0.6); }
+.terminal-dot:nth-child(2) { background: rgba(255, 189, 46, 0.6); }
+.terminal-dot:nth-child(3) { background: rgba(39, 201, 63, 0.6); }
+
+.terminal-dot:hover { 
+  filter: brightness(1.3);
+}
 
 .terminal-name {
   margin-left: auto;
   font-family: var(--font-mono);
-  font-size: 0.5rem;
-  color: rgba(255, 255, 255, 0.15);
+  font-size: 0.55rem;
+  color: var(--text-dim);
   letter-spacing: 0.05em;
   display: flex;
   align-items: center;
@@ -314,16 +359,17 @@
 
 .terminal-time {
   font-family: var(--font-mono);
-  font-size: 0.45rem;
-  color: rgba(255, 255, 255, 0.12);
+  font-size: 0.5rem;
+  color: var(--text-dim);
   letter-spacing: 0.05em;
+  opacity: 0.6;
 }
 
 .terminal-body {
-  padding: 16px 18px;
+  padding: 18px 20px;
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.06) transparent;
+  scrollbar-color: var(--border) transparent;
 }
 
 .terminal-body::-webkit-scrollbar {
@@ -335,8 +381,8 @@
 }
 
 .terminal-body::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 0;
+  background: var(--border);
+  border-radius: var(--radius-full);
 }
 
 .hero-contacts {
@@ -349,18 +395,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  color: rgba(255, 255, 255, 0.3);
-  transition: color 0.2s;
+  width: 28px;
+  height: 28px;
+  color: var(--text-dim);
+  transition: color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  border-radius: var(--radius-sm);
+  background: var(--glass);
 
   &:hover,
   &:focus-visible {
     color: var(--accent);
+    background: var(--glass-hover);
+    transform: translateY(-2px);
   }
 
   &:focus-visible {
-    outline: 1px solid var(--accent);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 }
@@ -380,26 +430,26 @@
 }
 
 .hero-stat-value {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.85rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .hero-stat-label {
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--text-dim);
   font-size: 0.6rem;
   letter-spacing: 0.05em;
 }
 
 .hero-stat-sep {
   width: 1px;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.12);
+  height: 12px;
+  background: var(--border);
 }
 
-// Minimal placeholder for the sticky name/role seam — swap for your own
-// component (see the comment on <StickyIdentity> in Hero.jsx). Pinned to
-// the top of the viewport, fades in as `fadeProgress` (the hero's own
-// scroll-out progress) approaches 1.
 .hero-sticky-identity {
   position: fixed;
   top: 1.25rem;
@@ -410,7 +460,7 @@
   gap: 6px;
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   pointer-events: none;
 }
 
@@ -423,12 +473,12 @@
   height: 5px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 4px rgba(94, 200, 216, 0.5);
+  box-shadow: 0 0 4px rgba(232, 228, 223, 0.4);
 }
 
-/* ------------------------------------------------------------------ */
-/*  Mobile                                                            */
-/* ------------------------------------------------------------------ */
+/* =================================================================
+   Mobile
+   ================================================================= */
 
 @media (max-width: 700px) {
   .hero-overlay {
@@ -466,6 +516,10 @@
     height: 40px;
   }
 
+  .hero-avatar-ring {
+    inset: -3px;
+  }
+
   .hero-arrow {
     display: none;
   }
@@ -475,7 +529,7 @@
   }
 
   .terminal-body {
-    padding: 8px 10px;
+    padding: 10px 12px;
   }
 
   .hero-sticky-identity {
@@ -491,11 +545,16 @@
   }
 
   .hero-lang-badge {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
   }
 
   .hero-contacts {
     margin-top: 0.5rem;
+  }
+
+  .hero-contact-link {
+    width: 32px;
+    height: 32px;
   }
 }

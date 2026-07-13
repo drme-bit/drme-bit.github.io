@@ -1,3 +1,8 @@
+/* =================================================================
+   ARCHIVE - Coal-White Theme
+   Glass panels, warm accent highlights
+   ================================================================= */
+
 .archive-overlay {
   position: fixed;
   inset: 0;
@@ -5,17 +10,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .archive {
   width: min(820px, 94vw);
   height: min(580px, 85vh);
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
+  background: #0c0c0c;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -27,13 +38,14 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* --- Title Bar --- */
 .archive-bar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 0.75rem;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.015);
+  border-bottom: 1px solid var(--border);
   user-select: none;
   flex-shrink: 0;
 }
@@ -47,7 +59,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  transition: filter 0.1s;
+  transition: filter 0.15s;
   cursor: pointer;
 
   &--red { background: #ff5f56; }
@@ -60,22 +72,24 @@
 .archive-bar-label {
   font-family: var(--font-mono);
   font-size: 0.55rem;
-  color: rgba(255, 255, 255, 0.1);
-  letter-spacing: 0.04em;
+  color: var(--text-ghost);
+  letter-spacing: 0.05em;
   margin-left: 0.25rem;
   flex: 1;
 }
 
+/* --- Body --- */
 .archive-body {
   flex: 1;
   display: flex;
   overflow: hidden;
 }
 
+/* --- Sidebar --- */
 .archive-sidebar {
   flex: 0 0 140px;
   padding: 0.6rem 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  border-right: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.01);
   overflow-y: auto;
 }
@@ -88,32 +102,33 @@
   border: none;
   font-family: var(--font-mono);
   font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--text-dim);
   padding: 0.35rem 1rem;
   cursor: pointer;
-  transition: color 0.2s, background 0.2s;
+  transition: all 0.2s var(--ease-out);
   letter-spacing: 0.04em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
   &:hover {
-    color: rgba(255, 255, 255, 0.45);
-    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    background: var(--glass);
   }
 
   &.is-active {
     color: var(--accent);
-    background: rgba(94, 200, 216, 0.06);
+    background: rgba(232, 228, 223, 0.04);
   }
 }
 
 .archive-sidebar-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--border);
   margin: 0.4rem 0.75rem;
 }
 
+/* --- Main Grid --- */
 .archive-main {
   flex: 1;
   overflow-y: auto;
@@ -128,24 +143,24 @@
 }
 
 .archive-file {
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   padding: 0.5rem;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: all 0.2s var(--ease-out);
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: var(--glass);
+    border-color: var(--border-hover);
   }
 
   &.is-selected {
-    border-color: var(--accent);
-    background: rgba(94, 200, 216, 0.05);
+    border-color: rgba(232, 228, 223, 0.25);
+    background: rgba(232, 228, 223, 0.03);
   }
 }
 
@@ -155,10 +170,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.015);
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.12);
+  color: var(--text-ghost);
 }
 
 .archive-file-thumb {
@@ -177,7 +192,7 @@
 .archive-file-name {
   font-family: var(--font-mono);
   font-size: 0.55rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -191,21 +206,23 @@
   min-height: 200px;
   font-family: var(--font-mono);
   font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.12);
+  color: var(--text-ghost);
 }
 
+/* --- Status Bar --- */
 .archive-status {
   display: flex;
   justify-content: space-between;
   padding: 0.35rem 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.01);
   font-family: var(--font-mono);
   font-size: 0.48rem;
-  color: rgba(255, 255, 255, 0.15);
+  color: var(--text-ghost);
   flex-shrink: 0;
 }
 
+/* --- Preview Overlay --- */
 .archive-preview-overlay {
   position: fixed;
   inset: 0;
@@ -213,7 +230,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   cursor: pointer;
   animation: previewIn 0.2s ease;
 }
@@ -227,9 +244,10 @@
   max-width: 90vw;
   max-height: 90vh;
   object-fit: contain;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
+/* --- Responsive --- */
 @media (max-width: 700px) {
   .archive {
     width: 98vw;

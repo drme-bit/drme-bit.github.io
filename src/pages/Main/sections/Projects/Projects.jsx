@@ -1,352 +1,231 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useReveal from '@/hooks/useReveal';
-import { useScrollY } from '@/hooks/useRafScroll';
+import useHorizontalScroll from '@/hooks/useHorizontalScroll';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import { PROJECTS } from '@/data/projectsData';
+import { FiArrowRight, FiExternalLink } from 'react-icons/fi';
 import './Projects.scss';
-
-/* ------------------------------------------------------------------ */
-//  Arc/carousel positioning                                          
-/* ------------------------------------------------------------------ */
-
-const ARC_STEP_DEG = 50;   // angular distance between adjacent cards, in degrees
-const ARC_RADIUS_PX = 675; // horizontal arc radius
-const ARC_DROP_PX = 75;    // how far off-center cards drop along the arc's underside
-const MAX_OFFSET_VISIBLE = 2.2; // beyond this offset, treat scale/opacity as fully minimal
-
-function computeCardTransform(offset) {
-  const angleDeg = offset * ARC_STEP_DEG;
-  const angleRad = (angleDeg * Math.PI) / 180;
-
-  const translateX = Math.sin(angleRad) * ARC_RADIUS_PX;
-  const translateY = (1 - Math.cos(angleRad)) * ARC_DROP_PX;
-  const rotateY = -angleDeg;
-
-  const absOffset = Math.min(Math.abs(offset), MAX_OFFSET_VISIBLE);
-  const scale = 1 - (absOffset / MAX_OFFSET_VISIBLE) * 0.35;
-  const opacity = 1 - (absOffset / MAX_OFFSET_VISIBLE) * 0.85;
-  const zIndex = Math.round(1000 - absOffset * 10);
-
-  return { translateX, translateY, rotateY, scale, opacity, zIndex };
-}
-
-/* ------------------------------------------------------------------ */
-//  Fallback canvas — procedural wave animation                       
-/* ------------------------------------------------------------------ */
-
-function makeSignature(seedString) {
-  let seed = 0;
-  for (let i = 0; i < seedString.length; i++) seed = (seed * 31 + seedString.charCodeAt(i)) % 100000;
-  const rand = (n) => { const v = Math.sin(seed + n * 12.9898) * 43758.5453; return v - Math.floor(v); };
-  return {
-    freq1: 0.6 + rand(1) * 3.4,
-    freq2: 1.2 + rand(2) * 5.2,
-    phase: rand(3) * Math.PI * 2,
-    ampRatio: 0.25 + rand(4) * 0.5,
-    speed: 0.5 + rand(5) * 1.1,
-  };
-}
-
-function drawFrame(ctx, w, h, sig, t) {
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, w, h);
-
-  const mid = h / 2;
-  const amp = h * 0.35;
-  const pts = [];
-  for (let x = 0; x <= w; x += 2) {
-    const u = (x / w) * Math.PI * 2;
-    const p = t * sig.speed;
-    const y = mid
-      + Math.sin(u * sig.freq1 + sig.phase + p) * amp * sig.ampRatio
-      + Math.sin(u * sig.freq2 - p * 1.3) * amp * (1 - sig.ampRatio);
-    pts.push({ x, y });
-  }
-
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, h);
-  for (const p of pts) ctx.lineTo(p.x, p.y);
-  ctx.lineTo(pts[pts.length - 1].x, h);
-  ctx.closePath();
-  const g = ctx.createLinearGradient(0, mid - amp, 0, h);
-  g.addColorStop(0, 'rgba(94,200,216,0.12)');
-  g.addColorStop(0.5, 'rgba(94,200,216,0.03)');
-  g.addColorStop(1, 'rgba(94,200,216,0)');
-  ctx.fillStyle = g;
-  ctx.fill();
-
-  ctx.shadowColor = 'rgba(94,200,216,0.25)';
-  ctx.shadowBlur = 12;
-  ctx.strokeStyle = 'rgba(94,200,216,0.5)';
-  ctx.lineWidth = 1.4;
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.stroke();
-
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = 'rgba(94,200,216,0.7)';
-  ctx.lineWidth = 0.8;
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.stroke();
-
-  const last = pts[pts.length - 1];
-  ctx.fillStyle = 'rgba(94,200,216,0.6)';
-  ctx.shadowColor = 'rgba(94,200,216,0.4)';
-  ctx.shadowBlur = 8;
-  ctx.beginPath();
-  ctx.arc(last.x, last.y, 2, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function LivePreview({ seedString }) {
-  const canvasRef = useRef(null);
-  const rafRef = useRef(null);
-  const sig = useRef(makeSignature(seedString));
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
-    const start = performance.now();
-    const loop = (now) => {
-      drawFrame(ctx, w, h, sig.current, (now - start) / 1000);
-      rafRef.current = requestAnimationFrame(loop);
-    };
-    rafRef.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  return <canvas ref={canvasRef} width={400} height={180} className="project-preview-canvas" />;
-}
-
-/* ------------------------------------------------------------------ */
-//  Preview — macOS‑style window       
-/* ------------------------------------------------------------------ */
-
-function ProjectPreview({ project, isCurrent }) {
-  const [idx, setIdx] = useState(0);
-  const [hovered, setHovered] = useState(false);
-  const images = project.images?.filter(Boolean) || [];
-  const hasGallery = images.length > 1;
-
-  useEffect(() => {
-    if (!hasGallery || !isCurrent || hovered) return;
-    const t = setInterval(() => setIdx((i) => (i + 1) % images.length), 3000);
-    return () => clearInterval(t);
-  }, [hasGallery, isCurrent, hovered, images.length]);
-
-  return (
-    <div className="project-window"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div className="project-window-bar">
-        <div className="project-window-dots">
-          <span className="project-window-dot project-window-dot--red" />
-          <span className="project-window-dot project-window-dot--yellow" />
-          <span className="project-window-dot project-window-dot--green" />
-        </div>
-        <span className="project-window-label">{project.id}</span>
-        <span className="project-window-arrow">↗</span>
-      </div>
-      <div className="project-window-body">
-        {!project.image && !hasGallery ? (
-          <LivePreview seedString={project.id} />
-        ) : hasGallery ? (
-          <div className="project-gallery-strip">
-            {images.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt=""
-                className={`project-preview-img${i === idx ? ' is-active' : ''}`}
-                loading="lazy"
-              />
-            ))}
-          </div>
-        ) : (
-          <img
-            src={project.image}
-            alt={`${project.title} screenshot`}
-            className="project-preview-img"
-            loading="lazy"
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-//  Status badge                                                      */
-/* ------------------------------------------------------------------ */
 
 const STATUS_META = {
   ACTIVE: { icon: '●', cls: 'badge--active', label: 'active' },
   ARCHIVED: { icon: '◌', cls: 'badge--archived', label: 'archived' },
 };
 
-/* ------------------------------------------------------------------ */
-//  Project card                                                      */
-/* ------------------------------------------------------------------ */
-
-function formatId(i) {
-  return `ENTRY_${String(i + 1).padStart(3, '0')}`;
-}
-
-function ProjectCard({ project, index, offset, isCurrent }) {
-  const ref = useRef(null);
-  const navigate = useNavigate();
-  const [inView, setInView] = useState(false);
+function ProjectGallery({ project, isActive }) {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const images = project.images?.filter(Boolean) || [];
+  const hasGallery = images.length > 1;
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { threshold: 0.4 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+    if (!hasGallery || !isActive || isHovered) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((i) => (i + 1) % images.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [hasGallery, isActive, isHovered, images.length]);
 
+  if (!hasGallery && !project.image) {
+    return (
+      <div className="project-preview-placeholder">
+        <div className="project-preview-wave" />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="project-gallery"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {hasGallery ? (
+        images.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            className={`project-gallery-img${i === currentIdx ? ' is-active' : ''}`}
+            loading="lazy"
+          />
+        ))
+      ) : (
+        <img
+          src={project.image}
+          alt={`${project.title} screenshot`}
+          className="project-gallery-img is-active"
+          loading="lazy"
+        />
+      )}
+      {hasGallery && (
+        <div className="project-gallery-dots">
+          {images.map((_, i) => (
+            <span
+              key={i}
+              className={`project-gallery-dot${i === currentIdx ? ' is-active' : ''}`}
+              onClick={() => setCurrentIdx(i)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProjectCard({ project, index, isActive }) {
+  const navigate = useNavigate();
   const meta = STATUS_META[project.status] || STATUS_META.ARCHIVED;
 
   const handleClick = () => {
     navigate(`/project/${project.id}`);
   };
 
-  const { translateX, translateY, rotateY, scale, opacity, zIndex } = computeCardTransform(offset);
-
-  const style = {
-    transform: `translate(-50%, 0) translateX(${translateX}px) translateY(${translateY}px) rotateY(${rotateY}deg) scale(${scale})`,
-    opacity,
-    zIndex,
-  };
-
   return (
-    <div
-      ref={ref}
-      role="button"
-      tabIndex={0}
-      className={`project-card${inView ? ' is-inview' : ''}${isCurrent ? ' is-current' : ''}`}
-      style={style}
-      onClick={handleClick}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
-    >
-      <div className="project-card-header">
-        <span className="project-card-id">{formatId(index)}</span>
-        <span className={`project-badge ${meta.cls}`}>
-          <span className="project-badge-dot">{meta.icon}</span>
-          {meta.label}
-        </span>
-        <span className="project-card-link">↗</span>
+    <div className={`project-card${isActive ? ' is-active' : ''}`}>
+      <div className="project-card-image">
+        <ProjectGallery project={project} isActive={isActive} />
       </div>
 
-      <ProjectPreview project={project} isCurrent={isCurrent} />
+      <div className="project-card-content">
+        <div className="project-card-header">
+          <span className="project-card-id">
+            ENTRY_{String(index + 1).padStart(3, '0')}
+          </span>
+          <span className={`project-badge ${meta.cls}`}>
+            <span className="project-badge-dot">{meta.icon}</span>
+            {meta.label}
+          </span>
+        </div>
 
-      <div className="project-card-body">
         <h3 className="project-card-title">{project.title}</h3>
+        <p className="project-card-desc">{project.desc}</p>
+
         <div className="project-card-tech">
-          {project.tech.map((t) => (
+          {project.tech.slice(0, 6).map((t) => (
             <span key={t} className="project-tech-tag">{t}</span>
           ))}
+          {project.tech.length > 6 && (
+            <span className="project-tech-more">+{project.tech.length - 6}</span>
+          )}
         </div>
-        <p className="project-card-desc">{project.desc}</p>
+
+        <div className="project-card-actions">
+          <button className="project-cta" onClick={handleClick}>
+            <span>View Project</span>
+            <FiArrowRight className="project-cta-icon" />
+          </button>
+          {project.url && (
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="project-link"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <FiExternalLink />
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Section                                                           */
-/* ------------------------------------------------------------------ */
-
 export default function Projects() {
-  const outerRef = useRef(null);
-  const [progress, setProgress] = useState(0);
   const [sectionRef, sectionVisible] = useReveal();
-  const scrollY = useScrollY();
-
-  useEffect(() => {
-    const section = outerRef.current;
-    if (!section) return;
-    const rect = section.getBoundingClientRect();
-    const winH = window.innerHeight;
-    const scrollable = rect.height - winH;
-    if (scrollable <= 0) { setProgress(0); return; }
-    setProgress(Math.max(0, Math.min(1, -rect.top / scrollable)));
-  }, [scrollY]);
+  const {
+    progress,
+    currentIndex,
+    containerRef,
+    scrollTo,
+    scrollNext,
+    scrollPrev,
+    handlers,
+  } = useHorizontalScroll({
+    itemCount: PROJECTS.length,
+    snapThreshold: 0.15,
+  });
 
   const count = PROJECTS.length;
 
-  const virtualCurrentIndex = progress * (count - 1);
-  const currentIndex = Math.round(virtualCurrentIndex);
-
   return (
-    <>
-      <section
-        id="projects"
-        ref={(el) => {
-          outerRef.current = el;
-          sectionRef.current = el;
-        }}
-        className={`section section--projects reveal${sectionVisible ? ' is-visible' : ''}`}
-        style={{ height: `${count * 100}vh` }}
-      >
-        <div className="projects-sticky">
-          <div className="projects-inner">
-            <SectionHeader title="system registry" number="04" visible={sectionVisible} />
-            <h2 className="section-title">Selected<span className="section-accent"> work</span></h2>
+    <section
+      id="projects"
+      ref={(el) => {
+        containerRef.current = el;
+        sectionRef.current = el;
+      }}
+      className={`section section--projects reveal${sectionVisible ? ' is-visible' : ''}`}
+      style={{ height: `${count * 100}vh` }}
+    >
+      <div className="projects-sticky">
+        <div className="projects-inner">
+          <SectionHeader title="system registry" number="04" visible={sectionVisible} />
 
+          <div className="projects-header">
+            <h2 className="section-title">
+              Selected<span className="section-accent"> work</span>
+            </h2>
             <div className="projects-counter">
-              <span className="projects-counter-current">{String(currentIndex + 1).padStart(2, '0')}</span>
+              <span className="projects-counter-current">
+                {String(currentIndex + 1).padStart(2, '0')}
+              </span>
               <span className="projects-counter-sep">/</span>
-              <span className="projects-counter-total">{String(count).padStart(2, '0')}</span>
+              <span className="projects-counter-total">
+                {String(count).padStart(2, '0')}
+              </span>
             </div>
+          </div>
 
-            <div className="projects-viewport">
-              <div className="projects-arc">
-                {PROJECTS.map((project, i) => {
-                  const offset = i - virtualCurrentIndex;
-                  return (
-                    <ProjectCard
-                      key={project.id}
-                      project={project}
-                      index={i}
-                      offset={offset}
-                      isCurrent={Math.abs(offset) < 0.5}
-                    />
-                  );
-                })}
-              </div>
+          <div className="projects-viewport" {...handlers}>
+            <div className="projects-track">
+              {PROJECTS.map((project, i) => (
+                <div key={project.id} className="projects-track-item">
+                  <ProjectCard
+                    project={project}
+                    index={i}
+                    isActive={i === currentIndex}
+                  />
+                </div>
+              ))}
             </div>
+          </div>
 
+          <div className="projects-footer">
             <div className="projects-progress">
               <div className="projects-progress-track">
                 <div
                   className="projects-progress-fill"
                   style={{ width: `${(progress * 100).toFixed(1)}%` }}
                 />
-                {PROJECTS.map((_, i) => (
-                  <span
-                    key={i}
-                    className={`projects-progress-dot${i <= currentIndex ? ' is-filled' : ''}`}
-                  />
-                ))}
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-    </>
+            <div className="projects-nav">
+              <button
+                className="projects-nav-btn"
+                onClick={scrollPrev}
+                disabled={currentIndex === 0}
+              >
+                ←
+              </button>
+              <button
+                className="projects-nav-btn"
+                onClick={scrollNext}
+                disabled={currentIndex === count - 1}
+              >
+                →
+              </button>
+            </div>
+          </div>
+
+          <p className="projects-hint">
+            <span className="projects-hint-icon">↕</span>
+            Scroll to explore
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }

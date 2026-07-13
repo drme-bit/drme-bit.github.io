@@ -104,14 +104,8 @@ function useTypewriter(languages, lockedIndex) {
   return { display, activeIndex };
 }
 
-/*
-  Fetches { repos, followers } from the GitHub REST API once per session.
-  `animate` is true only on a fresh network fetch (not a cache hit), so the
-  count-up effect plays once per session rather than every time this
-  component mounts.
-*/
 function useGithubStats(username) {
-  const [stats, setStats] = useState(null); // null = not available, don't render
+  const [stats, setStats] = useState(null);
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
@@ -124,12 +118,10 @@ function useGithubStats(username) {
         const parsed = JSON.parse(cached);
         if (typeof parsed.repos === 'number' && typeof parsed.followers === 'number') {
           setStats(parsed);
-          return; // cache hit: no fetch, no animation
+          return;
         }
       }
-    } catch {
-      // corrupted cache entry — fall through to a fresh fetch
-    }
+    } catch {}
 
     fetch(`https://api.github.com/users/${username}`)
       .then((res) => {
@@ -144,11 +136,9 @@ function useGithubStats(username) {
         }
         setStats(next);
         setAnimate(true);
-        try { sessionStorage.setItem(cacheKey, JSON.stringify(next)); } catch { /* storage full/unavailable — non-fatal */ }
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(next)); } catch {}
       })
-      .catch(() => {
-        // network failure, rate limit, unexpected shape — stay null, render nothing
-      });
+      .catch(() => {});
 
     return () => { cancelled = true; };
   }, [username]);
@@ -186,7 +176,7 @@ function StatsStrip({ username }) {
   const repos = useCountUp(stats?.repos ?? null, animate);
   const followers = useCountUp(stats?.followers ?? null, animate);
 
-  if (!stats) return null; // fetch failed or pending — show nothing, not a broken state
+  if (!stats) return null;
 
   return (
     <div className="hero-stats">
@@ -243,14 +233,14 @@ function HeroParticles() {
     resize();
     window.addEventListener('resize', resize);
 
-    const count = 50;
+    const count = 60;
     const particles = Array.from({ length: count }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.2,
-      vy: -Math.random() * 0.15 - 0.03,
-      r: Math.random() * 1.5 + 0.5,
-      o: Math.random() * 0.25 + 0.05,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: -Math.random() * 0.1 - 0.02,
+      r: Math.random() * 1.2 + 0.3,
+      o: Math.random() * 0.2 + 0.03,
     }));
 
     let raf;
@@ -263,7 +253,7 @@ function HeroParticles() {
         if (p.x < -10 || p.x > canvas.width + 10) { p.x = Math.random() * canvas.width; }
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(94, 200, 216, ${p.o})`;
+        ctx.fillStyle = `rgba(232, 228, 223, ${p.o})`;
         ctx.fill();
       }
       raf = requestAnimationFrame(tick);
@@ -331,11 +321,14 @@ export default function Hero() {
             rel="noopener noreferrer"
             className="hero-avatar-link"
           >
-            <img
-              src={`https://github.com/${GITHUB_USERNAME}.png`}
-              alt={GITHUB_USERNAME}
-              className="hero-avatar"
-            />
+            <div className="hero-avatar-wrapper">
+              <img
+                src={`https://github.com/${GITHUB_USERNAME}.png`}
+                alt={GITHUB_USERNAME}
+                className="hero-avatar"
+              />
+              <div className="hero-avatar-ring" />
+            </div>
           </a>
           <span className="hero-avatar-status" />
           <ContactRow />
@@ -350,7 +343,7 @@ export default function Hero() {
             <div className="hero-intro-name">Vyacheslav Tkachik</div>
             <div className="hero-intro-role">full-stack developer</div>
           </div>
-          <div className="terminal">
+          <div className="terminal glass-card">
             <div className="terminal-bar">
               <span className="terminal-dot" />
               <span className="terminal-dot" />
@@ -404,7 +397,7 @@ export default function Hero() {
 
         </div>
 
-        <svg className="hero-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="hero-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(232, 228, 223, 0.2)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 4v16M18 14l-6 6-6-6" />
         </svg>
       </div>

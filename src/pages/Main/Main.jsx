@@ -17,6 +17,7 @@ import Archive from '../../components/ui/Archive/Archive';
 import BackToTop from '../../components/ui/BackToTop/BackToTop';
 import SoundEffects from '../../components/ui/SoundEffects/SoundEffects';
 import ErrorMessages from '../../components/ui/ErrorMessages/ErrorMessages';
+import Cursor from '../../components/ui/Cursor/Cursor';
 
 const SECTIONS = ['hero', 'about', 'skills', 'experience', 'projects', 'contact'];
 
@@ -55,6 +56,7 @@ export default function Main() {
 
   return (
     <>
+      <Cursor />
       <ScrollProgressBar />
       <GitHubStatus />
       <Scene />

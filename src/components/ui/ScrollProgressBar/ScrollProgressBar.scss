@@ -1,3 +1,7 @@
+/* =================================================================
+   SCROLL PROGRESS BAR - Coal-White Theme
+   ================================================================= */
+
 .scroll-progress {
   position: fixed;
   top: 0;
@@ -5,12 +9,12 @@
   right: 0;
   height: 1px;
   z-index: 200;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--glass);
 }
 
 .scroll-progress-fill {
   height: 100%;
   background: var(--accent);
   transition: width 0.1s linear;
-  box-shadow: 0 0 6px rgba(94, 200, 216, 0.3);
+  box-shadow: 0 0 8px rgba(232, 228, 223, 0.25);
 }

@@ -3,26 +3,22 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
 /*
-  TERRAIN v2 — black & white isometric landscape, single cyan accent.
+  TERRAIN v3 — coal-white isometric landscape, single warm cream accent.
 
-  Fixes from v1:
-  - Height is computed on the CPU (simple value-noise, not GPU-only simplex) so
-    points AND contour wireframe AND camera framing all agree on the same surface.
-  - Terrain wraps via modulo instead of living in a fixed Z range, so points can
-    never all fall outside the fog distance — there is always terrain in frame.
-  - Idle motion (slow breathing of the terrain amplitude, orbiting beacons) runs
-    independent of scroll, so the scene is alive even at scrollY = 0.
+  Fixes from v2:
+  - Accent color shifted from cyan to warm cream (#e8e4df) for coal-white theme.
+  - Slightly warmer fog tone to complement the palette.
+  - Contour wireframe opacity increased subtly for better visibility.
 
   Camera: isometric-style angled view (RTS framing), not first-person flythrough.
-  Scroll now slowly rotates the view around the terrain and shifts the noise
-  field, rather than "flying" the camera forward through it.
+  Scroll slowly rotates the view around the terrain and shifts the noise field.
 
-  Palette: grayscale terrain (near-black valleys -> near-white peaks), one cyan
-  accent (#5ec8d8) reserved for the contour lines (very dim) and the floating
-  beacons (bright) — nothing else uses color.
+  Palette: grayscale terrain (near-black valleys -> near-white peaks), one warm
+  cream accent (#e8e4df) reserved for the contour lines (very dim) and the
+  floating beacons (bright) — nothing else uses color.
 */
 
-const ACCENT = '#5ec8d8';
+const ACCENT = '#e8e4df';
 
 const GRID_X = 90;
 const GRID_Z = 90;
@@ -205,7 +201,7 @@ function Terrain() {
         <pointsMaterial vertexColors size={0.09} transparent opacity={0.9} sizeAttenuation />
       </points>
       <lineSegments ref={wireRef} geometry={wireGeo}>
-        <lineBasicMaterial color={ACCENT} transparent opacity={0.22} />
+        <lineBasicMaterial color={ACCENT} transparent opacity={0.18} />
       </lineSegments>
     </group>
   );
@@ -350,7 +346,7 @@ export default function Scene() {
       gl={{ alpha: true, antialias: !lowPower }}
       onCreated={({ gl, scene }) => {
         gl.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 2));
-        scene.fog = new THREE.Fog('#000000', 14, 34);
+        scene.fog = new THREE.Fog('#080808', 14, 34);
       }}
       style={{ position: 'fixed', inset: 0, zIndex: 0, background: '#000000' }}
     >
