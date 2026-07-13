@@ -47,8 +47,7 @@ export default function Experience() {
     const p = Math.max(0, Math.min(1, total > 0 ? scrolled / total : 0));
     setProgress(p);
 
-    const isMobile = window.innerWidth <= 700;
-    const threshold = isMobile ? p * vh + 30 : vh * 0.1 + p * vh * 0.8;
+    const threshold = vh * 0.1 + p * vh * 0.8;
 
     const next = new Set();
     entryRefs.current.forEach((entryEl, i) => {

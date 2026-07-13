@@ -198,9 +198,9 @@ $head-color: var(--accent);
   }
 
   .timeline-line {
-    position: absolute;
-    top: 0;
-    height: 100%;
+    position: sticky;
+    top: 10vh;
+    height: 80vh;
     width: 2px;
     left: 14px;
     margin-left: 0;
@@ -237,7 +237,7 @@ $head-color: var(--accent);
 
   .tl-dot {
     position: absolute;
-    left: 10px;
+    left: 0;
     top: 4px;
     width: 8px;
     height: 8px;

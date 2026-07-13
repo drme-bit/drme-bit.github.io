@@ -150,6 +150,10 @@
   &.is-dimmed {
     opacity: 0.15;
   }
+
+  &:active {
+    transform: translate(-50%, -50%) scale(0.92);
+  }
 }
 
 .skills-ring-icon {
@@ -497,7 +501,8 @@
   }
 
   .skills-globe-container {
-    max-width: 280px;
+    width: 100vw;
+    max-width: none;
   }
 
   .skill-info-panel {

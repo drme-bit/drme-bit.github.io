@@ -32,7 +32,7 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
   const scrollRef = useRef(scrollProgress)
   const pauseRef = useRef(paused)
   const rafRef = useRef(null)
-  const dragRef = useRef({ active: false, startX: 0, offset: 0 })
+  const dragRef = useRef({ active: false, committed: false, startX: 0, startY: 0, offset: 0 })
 
   scrollRef.current = scrollProgress
   pauseRef.current = paused
@@ -102,19 +102,35 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
   }, [])
 
   const onPointerDown = (e) => {
-    dragRef.current = { active: true, startX: e.clientX, offset: dragRef.current.offset }
-    canvasRef.current?.classList.add('is-dragging')
+    dragRef.current = { active: true, committed: false, startX: e.clientX, startY: e.clientY, offset: dragRef.current.offset }
   }
 
   const onPointerMove = (e) => {
     if (!dragRef.current.active) return
-    dragRef.current.offset = (e.clientX - dragRef.current.startX) * 0.005
+    const dx = e.clientX - dragRef.current.startX
+    const dy = e.clientY - dragRef.current.startY
+
+    // Direction lock: wait for 10px to determine intent
+    if (!dragRef.current.committed) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return
+      // If primarily vertical → release drag, let browser scroll
+      if (Math.abs(dy) > Math.abs(dx)) {
+        dragRef.current = { active: false, committed: false, startX: 0, startY: 0, offset: dragRef.current.offset }
+        return
+      }
+      dragRef.current.committed = true
+      canvasRef.current?.classList.add('is-dragging')
+    }
+
+    dragRef.current.offset = dx * 0.005
   }
 
   const onPointerUp = () => {
     if (!dragRef.current.active) return
-    phiRef.current += dragRef.current.offset
-    dragRef.current = { active: false, startX: 0, offset: 0 }
+    if (dragRef.current.committed) {
+      phiRef.current += dragRef.current.offset
+    }
+    dragRef.current = { active: false, committed: false, startX: 0, startY: 0, offset: 0 }
     canvasRef.current?.classList.remove('is-dragging')
   }
 

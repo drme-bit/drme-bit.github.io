@@ -429,12 +429,17 @@
   }
 
   .h-tools {
-    width: 200px;
+    width: 80vw;
+    max-width: 320px;
     margin-bottom: 1.2rem;
   }
 
+  .h-tools-track {
+    gap: 16px;
+  }
+
   .h-tool-label {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
   }
 
   .h-contacts {

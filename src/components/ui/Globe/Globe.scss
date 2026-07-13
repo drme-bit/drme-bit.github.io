@@ -56,7 +56,12 @@
 }
 
 @media (max-width: 768px) {
-  .globe { }
+  .globe {
+    position: relative;
+    width: 100vw;
+    aspect-ratio: 1;
+    margin: 0 auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

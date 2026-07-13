@@ -288,7 +288,7 @@ function Particles() {
     const ctx = c.getContext('2d');
     const resize = () => { c.width = innerWidth; c.height = innerHeight; };
     resize();
-    addEventListener('resize', resize);
+    window.addEventListener('resize', resize);
 
     const N = 45;
     const LINK = 150;
@@ -306,6 +306,9 @@ function Particles() {
       ctx.clearRect(0, 0, c.width, c.height);
       const mx = mouse.current.x, my = mouse.current.y;
 
+      const accent = getAccentRGB();
+      const ar = accent.r, ag = accent.g, ab = accent.b;
+
       for (let i = 0; i < N; i++) {
         const p = pts[i];
         p.x += p.vx; p.y += p.vy;
@@ -322,8 +325,7 @@ function Particles() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, 6.283);
-        const c = getAccentRGB();
-        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${p.a})`;
+        ctx.fillStyle = `rgba(${ar},${ag},${ab},${p.a})`;
         ctx.fill();
 
         for (let j = i + 1; j < N; j++) {
@@ -334,7 +336,7 @@ function Particles() {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${(1 - ld / LINK) * 0.05})`;
+            ctx.strokeStyle = `rgba(${ar},${ag},${ab},${(1 - ld / LINK) * 0.05})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -343,7 +345,7 @@ function Particles() {
       raf = requestAnimationFrame(draw);
     };
     raf = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(raf); removeEventListener('resize', resize); };
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
   }, []);
 
   return <canvas ref={ref} className="h-canvas" />;
