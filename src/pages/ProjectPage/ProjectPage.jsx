@@ -364,23 +364,23 @@ export default function ProjectPage() {
     if (!project) navigate('/', { replace: true });
   }, [project, navigate]);
 
-  if (!project) return null;
-
-  const meta = STATUS_META[project.status] || STATUS_META.ARCHIVED;
-  const presentation = getPresentation(project);
-  const currentIndex = getProjectIndex(id);
+  const meta = project ? STATUS_META[project.status] || STATUS_META.ARCHIVED : null;
+  const presentation = project ? getPresentation(project) : null;
+  const currentIndex = project ? getProjectIndex(id) : -1;
   const prevProject = currentIndex > 0 ? PROJECTS[currentIndex - 1] : null;
-  const nextProject = currentIndex < PROJECTS.length - 1 ? PROJECTS[currentIndex + 1] : null;
-  const contentSections = Array.isArray(project.sections) && project.sections.length > 0
-    ? project.sections.map(normalizeSection).filter(Boolean)
-    : buildDefaultSections(project);
+  const nextProject = project && currentIndex < PROJECTS.length - 1 ? PROJECTS[currentIndex + 1] : null;
+  const contentSections = project
+    ? (Array.isArray(project.sections) && project.sections.length > 0
+      ? project.sections.map(normalizeSection).filter(Boolean)
+      : buildDefaultSections(project))
+    : [];
   const [activeSection, setActiveSection] = useState(contentSections[0]?.id || 'overview');
 
   const links = [];
-  if (project.url && project.url !== '#') {
+  if (project?.url && project.url !== '#') {
     links.push({ label: 'Live Site', url: project.url });
   }
-  if (project.repo) {
+  if (project?.repo) {
     links.push({ label: 'Source Code', url: project.repo });
   }
 
@@ -388,15 +388,16 @@ export default function ProjectPage() {
     document.getElementById(`section-${sectionId}`)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const stageWeeks = Array.isArray(project.stages)
+  const stageWeeks = project && Array.isArray(project.stages)
     ? project.stages.reduce((acc, s) => {
       const nums = s.duration.match(/\d+/g);
       return nums ? acc + Math.max(...nums.map(Number)) : acc;
     }, 0)
     : 0;
-  const sidebarFacts = buildSidebarFacts(project, meta, stageWeeks);
+  const sidebarFacts = project ? buildSidebarFacts(project, meta, stageWeeks) : [];
 
   useEffect(() => {
+    if (!project) return;
     const observers = contentSections.map((section) => {
       const el = document.getElementById(`section-${section.id}`);
       if (!el) return null;
@@ -412,6 +413,8 @@ export default function ProjectPage() {
 
     return () => observers.forEach((observer) => observer?.disconnect());
   }, [contentSections]);
+
+  if (!project) return null;
 
   return (
     <div className="project-page" ref={scrollRef}>

@@ -78,41 +78,20 @@ function useGithubStats(username) {
     try {
       const c = sessionStorage.getItem(key);
       if (c) { setStats(JSON.parse(c)); return; }
-    } catch {}
+    } catch { /* sessionStorage unavailable */ }
     fetch(`https://api.github.com/users/${username}`)
       .then((r) => r.ok ? r.json() : Promise.reject())
       .then((d) => {
         if (cancelled) return;
         const s = { repos: d.public_repos, followers: d.followers };
         setStats(s);
-        try { sessionStorage.setItem(key, JSON.stringify(s)); } catch {}
+        try { sessionStorage.setItem(key, JSON.stringify(s)); } catch { /* ignore */ }
       })
-      .catch(() => {});
+      .catch(() => { /* network error */ });
     return () => { cancelled = true; };
   }, [username]);
 
   return stats;
-}
-
-function useCountUp(target, duration = 800) {
-  const [val, setVal] = useState(0);
-  const done = useRef(false);
-
-  useEffect(() => {
-    if (target == null || done.current) return;
-    done.current = true;
-    const start = performance.now();
-    let raf;
-    const tick = (now) => {
-      const t = Math.min(1, (now - start) / duration);
-      setVal(Math.round(target * (1 - Math.pow(1 - t, 3))));
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration]);
-
-  return val;
 }
 
 /* ─── Sub-components ────────────────────────────────────────── */
@@ -256,7 +235,7 @@ function Terminals({ heroRef }) {
     <div className="h-terms" aria-hidden="true">
       {TERMINALS.map((term, i) => (
         <div
-          key={i}
+          key={term.title}
           ref={(el) => { termRefs.current[i] = el; }}
           className="h-term"
           style={{ left: `${term.x}%`, top: `${term.y}%`, width: term.w, height: term.h }}
@@ -389,7 +368,7 @@ function ToolStrip() {
     <div className="h-tools">
       <div className="h-tools-track">
         {[...TOOLS, ...TOOLS].map((t, i) => (
-          <span key={i} className="h-tool">
+          <span key={`${t.label}-${i}`} className="h-tool">
             {t.icon({ size: 16 })}
             <span className="h-tool-label">{t.label}</span>
           </span>
@@ -483,7 +462,7 @@ export default function Hero() {
 
           <h1 className="h-name">
             <span className="h-name-first">Vyacheslav</span>
-            <span className="h-name-last">Tkachik</span>
+            <span className="h-name-last">Tkachyk</span>
           </h1>
 
           <p className="h-role">

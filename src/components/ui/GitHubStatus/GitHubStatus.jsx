@@ -10,7 +10,7 @@ export default function GitHubStatus() {
     fetch(`https://api.github.com/users/${USERNAME}`)
       .then((r) => r.json())
       .then((u) => setData({ repos: u.public_repos, followers: u.followers }))
-      .catch(() => {});
+      .catch(() => { /* network error */ });
   }, []);
 
   return (

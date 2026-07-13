@@ -138,8 +138,7 @@ function SelectedConnections({ selected, skills, radius }) {
 
   useFrame(({ clock }) => {
     if (!lineRef.current) return;
-    const target = selected ? 0.35 : 0;
-    lineRef.current.children.forEach((child, i) => {
+    lineRef.current.children.forEach((child) => {
       const mat = child.material;
       const to = positions ? 0.35 : 0;
       mat.opacity += (to - mat.opacity) * 0.04;
@@ -160,7 +159,6 @@ function SelectedConnections({ selected, skills, radius }) {
           mid.clone().add(new THREE.Vector3(0, len * 0.15, 0)),
           to,
         ]);
-        const curvePoints = curve.getPoints(16);
 
         return (
           <mesh key={i} position={[0, 0, 0]}>

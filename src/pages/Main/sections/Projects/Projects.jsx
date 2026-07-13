@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useReveal from '@/hooks/useReveal';
 import useHorizontalScroll from '@/hooks/useHorizontalScroll';

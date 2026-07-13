@@ -27,7 +27,7 @@ function startGyro() {
             window.addEventListener('deviceorientation', handleOrientation);
           }
         })
-        .catch(() => {});
+        .catch(() => { /* permission denied */ });
       document.removeEventListener('pointerup', requestPermission);
     };
     document.addEventListener('pointerup', requestPermission, { once: true });
