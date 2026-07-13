@@ -1,405 +1,507 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import useCursorParallax from '@/hooks/useCursorParallax';
-import { useScrollY } from '@/hooks/useRafScroll';
-import { SiC, SiCplusplus, SiPython, SiJavascript, SiTypescript, SiRust, SiDotnet } from 'react-icons/si';
-import { DiJava } from 'react-icons/di';
-import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
+import { SiReact, SiThreedotjs, SiVite, SiDocker, SiNodedotjs, SiPython, SiRust, SiTypescript, SiGit, SiLinux, SiPostgresql, SiRedis } from 'react-icons/si';
+import { FiGithub, FiLinkedin, FiMail, FiArrowDown } from 'react-icons/fi';
 import './Hero.scss';
 
 const GITHUB_USERNAME = 'drme-bit';
 
-const LANGUAGES = [
-  { label: 'c', name: 'C', icon: SiC, code: '#include <stdio.h>\nint main() {\n printf("Hello, world!");\n return 0; \n}' },
-  { label: 'cpp', name: 'C++', icon: SiCplusplus, code: '#include <iostream>\nint main() {\n std::cout << "Hello, world!" << std::endl;\n return 0; \n}' },
-  { label: 'java', name: 'Java', icon: DiJava, code: 'System.out.println("Hello, world!");' },
-  { label: 'cs', name: 'C#', icon: SiDotnet, code: 'Console.WriteLine("Hello, world!");' },
-  { label: 'py', name: 'Python', icon: SiPython, code: 'print("Hello, world!")' },
-  { label: 'js', name: 'JavaScript', icon: SiJavascript, code: 'console.log("Hello, world!");' },
-  { label: 'ts', name: 'TypeScript', icon: SiTypescript, code: 'console.log("Hello, world!");' },
-  { label: 'rs', name: 'Rust', icon: SiRust, code: 'println!("Hello, world!");' },
+const TOOLS = [
+  { label: 'React', icon: SiReact },
+  { label: 'Three.js', icon: SiThreedotjs },
+  { label: 'Vite', icon: SiVite },
+  { label: 'Docker', icon: SiDocker },
+  { label: 'Node.js', icon: SiNodedotjs },
+  { label: 'Python', icon: SiPython },
+  { label: 'Rust', icon: SiRust },
+  { label: 'TypeScript', icon: SiTypescript },
+  { label: 'Git', icon: SiGit },
+  { label: 'Linux', icon: SiLinux },
+  { label: 'PostgreSQL', icon: SiPostgresql },
+  { label: 'Redis', icon: SiRedis },
 ];
 
-const TYPE_SPEED = 55;
-const HOLD_AFTER_TYPED = 1500;
-const STATS_CACHE_PREFIX = 'gh-stats:';
-const COUNT_UP_DURATION = 900;
+const STATS_CACHE = 'gh-stats:';
 
-function useTypewriter(languages, lockedIndex) {
-  const [display, setDisplay] = useState('');
-  const [activeIndex, setActiveIndex] = useState(0);
+/* ─── Hooks ─────────────────────────────────────────────────── */
 
-  const idxRef = useRef(0);
+function useTypewriter(strings, speed = 50, hold = 2000) {
+  const [text, setText] = useState('');
+  const [idx, setIdx] = useState(0);
+  const [phase, setPhase] = useState('type');
   const charRef = useRef(0);
-  const dirRef = useRef(1);
-  const lockedRef = useRef(lockedIndex);
-  const resumeRef = useRef(false);
-
-  const prevLockedRef = useRef(lockedIndex);
-  useEffect(() => {
-    const wasLocked = prevLockedRef.current !== null;
-    const isLocked = lockedIndex !== null;
-    if (prevLockedRef.current !== lockedIndex) {
-      resumeRef.current = true;
-      if (wasLocked && !isLocked) dirRef.current = -1;
-      prevLockedRef.current = lockedIndex;
-    }
-    lockedRef.current = lockedIndex;
-  }, [lockedIndex]);
 
   useEffect(() => {
-    if (lockedIndex === null) return;
-    idxRef.current = lockedIndex;
     charRef.current = 0;
-    dirRef.current = 1;
-    setActiveIndex(lockedIndex);
-    setDisplay('');
-  }, [lockedIndex]);
+    setText('');
+    setPhase('type');
+  }, [idx]);
 
   useEffect(() => {
-    let paused = false;
-    let pauseTimer;
-
-    const tick = () => {
-      if (resumeRef.current) {
-        resumeRef.current = false;
-        paused = false;
-        clearTimeout(pauseTimer);
+    const s = strings[idx];
+    if (phase === 'type') {
+      if (charRef.current >= s.length) {
+        const t = setTimeout(() => setPhase('hold'), hold);
+        return () => clearTimeout(t);
       }
-      if (paused) return;
-      const locked = lockedRef.current;
-      const line = languages[idxRef.current];
-
-      if (dirRef.current === 1) {
+      const t = setTimeout(() => {
         charRef.current++;
-        if (charRef.current >= line.code.length) {
-          charRef.current = line.code.length;
-          setDisplay(line.code);
-          if (locked !== null) { paused = true; return; }
-          dirRef.current = -1;
-          paused = true;
-          pauseTimer = setTimeout(() => { paused = false; }, HOLD_AFTER_TYPED);
-          return;
-        }
-        setDisplay(line.code.slice(0, charRef.current));
+        setText(s.slice(0, charRef.current));
+      }, speed);
+      return () => clearTimeout(t);
+    }
+    if (phase === 'hold') {
+      const t = setTimeout(() => setPhase('erase'), hold);
+      return () => clearTimeout(t);
+    }
+    if (phase === 'erase') {
+      if (charRef.current <= 0) {
+        setIdx((i) => (i + 1) % strings.length);
         return;
       }
+      const t = setTimeout(() => {
+        charRef.current--;
+        setText(s.slice(0, charRef.current));
+      }, speed / 2);
+      return () => clearTimeout(t);
+    }
+  }, [text, phase, idx, strings, speed, hold]);
 
-      charRef.current--;
-      if (charRef.current < 0) {
-        charRef.current = 0;
-        dirRef.current = 1;
-        idxRef.current = (idxRef.current + 1) % languages.length;
-        setActiveIndex(idxRef.current);
-        setDisplay('');
-        return;
-      }
-      setDisplay(languages[idxRef.current].code.slice(0, charRef.current));
-    };
-
-    const interval = setInterval(tick, TYPE_SPEED);
-    return () => { clearInterval(interval); clearTimeout(pauseTimer); };
-  }, [languages]);
-
-  return { display, activeIndex };
+  return text;
 }
 
 function useGithubStats(username) {
   const [stats, setStats] = useState(null);
-  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    const cacheKey = STATS_CACHE_PREFIX + username;
-
+    const key = STATS_CACHE + username;
     try {
-      const cached = sessionStorage.getItem(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (typeof parsed.repos === 'number' && typeof parsed.followers === 'number') {
-          setStats(parsed);
-          return;
-        }
-      }
+      const c = sessionStorage.getItem(key);
+      if (c) { setStats(JSON.parse(c)); return; }
     } catch {}
-
     fetch(`https://api.github.com/users/${username}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`GitHub API responded ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((d) => {
         if (cancelled) return;
-        const next = { repos: data.public_repos, followers: data.followers };
-        if (typeof next.repos !== 'number' || typeof next.followers !== 'number') {
-          throw new Error('Unexpected GitHub API response shape');
-        }
-        setStats(next);
-        setAnimate(true);
-        try { sessionStorage.setItem(cacheKey, JSON.stringify(next)); } catch {}
+        const s = { repos: d.public_repos, followers: d.followers };
+        setStats(s);
+        try { sessionStorage.setItem(key, JSON.stringify(s)); } catch {}
       })
       .catch(() => {});
-
     return () => { cancelled = true; };
   }, [username]);
 
-  return { stats, animate };
+  return stats;
 }
 
-function useCountUp(target, shouldAnimate) {
-  const [value, setValue] = useState(shouldAnimate ? 0 : target);
-  const startedRef = useRef(false);
+function useCountUp(target, duration = 800) {
+  const [val, setVal] = useState(0);
+  const done = useRef(false);
 
   useEffect(() => {
-    if (target == null) return;
-    if (!shouldAnimate) { setValue(target); return; }
-    if (startedRef.current) return;
-    startedRef.current = true;
-
-    let raf;
+    if (target == null || done.current) return;
+    done.current = true;
     const start = performance.now();
+    let raf;
     const tick = (now) => {
-      const t = Math.min(1, (now - start) / COUNT_UP_DURATION);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setValue(Math.round(target * eased));
+      const t = Math.min(1, (now - start) / duration);
+      setVal(Math.round(target * (1 - Math.pow(1 - t, 3))));
       if (t < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [target, shouldAnimate]);
+  }, [target, duration]);
 
-  return value;
+  return val;
 }
 
-function StatsStrip({ username }) {
-  const { stats, animate } = useGithubStats(username);
-  const repos = useCountUp(stats?.repos ?? null, animate);
-  const followers = useCountUp(stats?.followers ?? null, animate);
+/* ─── Sub-components ────────────────────────────────────────── */
 
-  if (!stats) return null;
+const TERMINALS = [
+  {
+    x: 5, y: -10, w: 360, h: 220,
+    speed: 0.12,
+    title: 'zsh — ~/projects/nexagon',
+    lines: [
+      { prompt: true, path: '~/nexagon', branch: 'main' },
+      { t: 'cargo run --release', c: '#7dd3fc' },
+      { t: '   Compiling nexagon v0.1.0', c: 'rgba(232,228,223,0.35)' },
+      { t: '   Finished release [optimized] (+3.2s)', c: 'rgba(167,243,208,0.6)' },
+      { t: '   Running `target/release/nexagon`', c: 'rgba(232,228,223,0.35)' },
+      { t: '🚀 Server listening on 0.0.0.0:8080', c: 'rgba(167,243,208,0.7)' },
+    ],
+  },
+  {
+    x: 55, y: -30, w: 340, h: 200,
+    speed: 0.09,
+    title: 'zsh — ~/projects/portfolio',
+    lines: [
+      { prompt: true, path: '~/portfolio', branch: 'hero-redesign' },
+      { t: 'npm run dev', c: '#7dd3fc' },
+      { t: '', c: '' },
+      { t: '  VITE v8.1.0  ready in 320ms', c: 'rgba(167,243,208,0.6)' },
+      { t: '', c: '' },
+      { t: '  ➜  Local:   http://localhost:5173/', c: 'rgba(232,228,223,0.45)' },
+      { t: '  ➜  Network: http://192.168.1.5:5173/', c: 'rgba(232,228,223,0.3)' },
+    ],
+  },
+  {
+    x: 30, y: -50, w: 330, h: 190,
+    speed: 0.15,
+    title: 'zsh — ~/leetcode',
+    lines: [
+      { prompt: true, path: '~/leetcode', branch: 'python' },
+      { t: 'python3 solve.py --difficulty medium', c: '#7dd3fc' },
+      { t: '', c: '' },
+      { t: '  [✓] 0015.3sum          48ms', c: 'rgba(167,243,208,0.6)' },
+      { t: '  [✓] 0042.trapping_water  32ms', c: 'rgba(167,243,208,0.6)' },
+      { t: '  [✓] 0076.min_window    61ms', c: 'rgba(167,243,208,0.6)' },
+      { t: '  ─── 12/15 passed ───', c: 'rgba(232,228,223,0.3)' },
+    ],
+  },
+  {
+    x: 65, y: -20, w: 320, h: 180,
+    speed: 0.11,
+    title: 'zsh — ~',
+    lines: [
+      { prompt: true, path: '~', branch: '' },
+      { t: 'docker compose up -d', c: '#7dd3fc' },
+      { t: '', c: '' },
+      { t: '  ✔ Network portfolio_default  Created', c: 'rgba(167,243,208,0.5)' },
+      { t: '  ✔ Container postgres         Started', c: 'rgba(167,243,208,0.5)' },
+      { t: '  ✔ Container redis            Started', c: 'rgba(167,243,208,0.5)' },
+    ],
+  },
+  {
+    x: 10, y: -60, w: 310, h: 170,
+    speed: 0.14,
+    title: 'zsh — ~/projects/nexagon',
+    lines: [
+      { prompt: true, path: '~/nexagon', branch: 'feat/auth' },
+      { t: 'git log --oneline -4', c: '#7dd3fc' },
+      { t: 'f3a1c2d (HEAD → feat/auth) add jwt middleware', c: 'rgba(232,228,223,0.4)' },
+      { t: '8b2e4a1 implement rate limiter', c: 'rgba(232,228,223,0.4)' },
+      { t: 'c7d9f03 setup oauth2 provider', c: 'rgba(232,228,223,0.4)' },
+      { t: 'e1a5b78 init auth module', c: 'rgba(232,228,223,0.4)' },
+    ],
+  },
+  {
+    x: 58, y: -45, w: 300, h: 160,
+    speed: 0.1,
+    title: 'zsh — ~/projects/roblox',
+    lines: [
+      { prompt: true, path: '~/roblox', branch: 'main' },
+      { t: 'pytest tests/ -v', c: '#7dd3fc' },
+      { t: '', c: '' },
+      { t: '  tests/test_solver.py::test_coin_change PASSED', c: 'rgba(167,243,208,0.5)' },
+      { t: '  tests/test_solver.py::test_lru_cache PASSED', c: 'rgba(167,243,208,0.5)' },
+      { t: '  ═══════ 24 passed in 1.82s ═══════', c: 'rgba(232,228,223,0.35)' },
+    ],
+  },
+];
+
+function Terminals({ heroRef }) {
+  const termRefs = useRef([]);
+  const mouse = useRef({ x: -999, y: -999 });
+  const yOffsets = useRef(TERMINALS.map((t) => t.y));
+
+  useEffect(() => {
+    const on = (e) => {
+      const hero = heroRef?.current;
+      if (!hero) { mouse.current = { x: -999, y: -999 }; return; }
+      const r = hero.getBoundingClientRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+        mouse.current = { x: e.clientX, y: e.clientY };
+      } else {
+        mouse.current = { x: -999, y: -999 };
+      }
+    };
+    window.addEventListener('mousemove', on, { passive: true });
+    return () => window.removeEventListener('mousemove', on);
+  }, [heroRef]);
+
+  useEffect(() => {
+    let raf;
+    const tick = () => {
+      const mx = mouse.current.x, my = mouse.current.y;
+      termRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const term = TERMINALS[i];
+
+        yOffsets.current[i] += term.speed;
+        if (yOffsets.current[i] > 110) yOffsets.current[i] = -20;
+
+        const rect = el.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = cx - mx, dy = cy - my;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const radius = 400;
+        let op = 0.02;
+        if (dist < radius) {
+          const t = 1 - dist / radius;
+          op = 0.02 + t * 0.35;
+        }
+
+        el.style.transform = `translateY(${yOffsets.current[i] - term.y}vh)`;
+        el.style.opacity = op;
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   return (
-    <div className="hero-stats">
-      <span className="hero-stat">
-        <span className="hero-stat-value">{repos}</span>
-        <span className="hero-stat-label">repos</span>
-      </span>
-      <span className="hero-stat-sep" />
-      <span className="hero-stat">
-        <span className="hero-stat-value">{followers}</span>
-        <span className="hero-stat-label">followers</span>
-      </span>
-    </div>
-  );
-}
-
-function ContactRow() {
-  const links = [
-    { label: 'GitHub', href: `https://github.com/${GITHUB_USERNAME}`, Icon: FiGithub },
-    { label: 'LinkedIn', href: 'https://linkedin.com/in/vyacheslav-tkachik-2a3b8a277', Icon: FiLinkedin },
-    { label: 'Email', href: 'mailto:vacheslavtkachik@gmail.com', Icon: FiMail },
-  ];
-  return (
-    <div className="hero-contacts">
-      {links.map(({ label, href, Icon }) => (
-        <a
-          key={label}
-          href={href}
-          target={href.startsWith('mailto:') ? undefined : '_blank'}
-          rel={href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-          className="hero-contact-link"
-          aria-label={label}
-          title={label}
+    <div className="h-terms" aria-hidden="true">
+      {TERMINALS.map((term, i) => (
+        <div
+          key={i}
+          ref={(el) => { termRefs.current[i] = el; }}
+          className="h-term"
+          style={{ left: `${term.x}%`, top: `${term.y}%`, width: term.w, height: term.h }}
         >
-          <Icon />
-        </a>
+          <div className="h-term-bar">
+            <span className="h-term-dots">
+              <i className="h-dot-r" /><i className="h-dot-y" /><i className="h-dot-g" />
+            </span>
+            <span className="h-term-title">{term.title}</span>
+          </div>
+          <div className="h-term-body">
+            {term.lines.map((l, li) =>
+              l.prompt ? (
+                <div key={li} className="h-term-line h-term-prompt">
+                  <span className="h-prompt-arrow">➜</span>
+                  <span className="h-prompt-path">{l.path}</span>
+                  {l.branch && <span className="h-prompt-branch"> ({l.branch})</span>}
+                </div>
+              ) : (
+                <div key={li} className="h-term-line" style={{ color: l.c }}>{l.t}</div>
+              )
+            )}
+          </div>
+        </div>
       ))}
     </div>
   );
 }
 
-function HeroParticles() {
+function Particles() {
   const ref = useRef(null);
+  const mouse = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const on = (e) => { mouse.current = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener('mousemove', on, { passive: true });
+    return () => window.removeEventListener('mousemove', on);
+  }, []);
 
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    const resize = () => { c.width = innerWidth; c.height = innerHeight; };
     resize();
-    window.addEventListener('resize', resize);
+    addEventListener('resize', resize);
 
-    const count = 60;
-    const particles = Array.from({ length: count }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.15,
-      vy: -Math.random() * 0.1 - 0.02,
-      r: Math.random() * 1.2 + 0.3,
-      o: Math.random() * 0.2 + 0.03,
+    const N = 45;
+    const LINK = 150;
+    const pts = Array.from({ length: N }, () => ({
+      x: Math.random() * c.width,
+      y: Math.random() * c.height,
+      vx: (Math.random() - 0.5) * 0.1,
+      vy: -Math.random() * 0.06 - 0.01,
+      r: Math.random() * 1.3 + 0.4,
+      a: Math.random() * 0.2 + 0.05,
     }));
 
     let raf;
-    const tick = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
-        if (p.x < -10 || p.x > canvas.width + 10) { p.x = Math.random() * canvas.width; }
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(232, 228, 223, ${p.o})`;
-        ctx.fill();
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
+    const draw = () => {
+      ctx.clearRect(0, 0, c.width, c.height);
+      const mx = mouse.current.x, my = mouse.current.y;
 
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', resize);
+      for (let i = 0; i < N; i++) {
+        const p = pts[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.y < -10) { p.y = c.height + 10; p.x = Math.random() * c.width; }
+        if (p.x < -10 || p.x > c.width + 10) p.x = Math.random() * c.width;
+
+        const dx = p.x - mx, dy = p.y - my;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 100 && d > 0) {
+          const f = (100 - d) / 100 * 0.25;
+          p.x += (dx / d) * f;
+          p.y += (dy / d) * f;
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, 6.283);
+        ctx.fillStyle = `rgba(232,228,223,${p.a})`;
+        ctx.fill();
+
+        for (let j = i + 1; j < N; j++) {
+          const q = pts[j];
+          const lx = p.x - q.x, ly = p.y - q.y;
+          const ld = Math.sqrt(lx * lx + ly * ly);
+          if (ld < LINK) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.strokeStyle = `rgba(232,228,223,${(1 - ld / LINK) * 0.05})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+      raf = requestAnimationFrame(draw);
     };
+    raf = requestAnimationFrame(draw);
+    return () => { cancelAnimationFrame(raf); removeEventListener('resize', resize); };
   }, []);
 
-  return <canvas ref={ref} className="hero-particles" />;
+  return <canvas ref={ref} className="h-canvas" />;
 }
 
-export default function Hero() {
-  const [p, setP] = useState(0);
-  const [lockedIndex, setLockedIndex] = useState(null);
-  const [time, setTime] = useState(new Date());
-  const ref = useRef(null);
+function Avatar() {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className={`h-avatar ${loaded ? 'is-visible' : ''}`}>
+      <a
+        href={`https://github.com/${GITHUB_USERNAME}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="h-avatar-link"
+      >
+        <div className="h-avatar-glow" />
+        <img
+          src={`https://github.com/${GITHUB_USERNAME}.png`}
+          alt={GITHUB_USERNAME}
+          className="h-avatar-img"
+          onLoad={() => setLoaded(true)}
+        />
+      </a>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    const id = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
+function ToolStrip() {
+  return (
+    <div className="h-tools">
+      <div className="h-tools-track">
+        {[...TOOLS, ...TOOLS].map((t, i) => (
+          <span key={i} className="h-tool">
+            {t.icon({ size: 16 })}
+            <span className="h-tool-label">{t.label}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  const { display, activeIndex } = useTypewriter(LANGUAGES, lockedIndex);
-  const parallax = useCursorParallax();
-  const scrollY = useScrollY();
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const h = el.clientHeight;
-    setP(Math.max(0, Math.min(1, (h - r.bottom) / (h * 0.35))));
-  }, [scrollY]);
-
-  const handleBadgeClick = useCallback((index) => {
-    setLockedIndex((current) => (current === index ? null : index));
-  }, []);
-
-  const activeLanguage = LANGUAGES[activeIndex];
-  const faded = p >= 0.98;
-
-  const avatarTransform = `translate(${parallax.x * -8}px, ${parallax.y * -6}px)`;
-  const typeTransform = `translate(${parallax.x * -4}px, ${parallax.y * -3}px)`;
-
+function ContactRow({ stats }) {
+  const links = [
+    { Icon: FiGithub, href: `https://github.com/${GITHUB_USERNAME}`, label: 'GitHub' },
+    { Icon: FiLinkedin, href: 'https://linkedin.com/in/vyacheslav-tkachik-2a3b8a277', label: 'LinkedIn' },
+    { Icon: FiMail, href: 'mailto:vacheslavtkachik@gmail.com', label: 'Email' },
+  ];
 
   return (
-    <section id="hero" ref={ref} className="section section--hero">
+    <div className="h-contacts">
+      {links.map(({ Icon, href, label }) => (
+        <a
+          key={label}
+          href={href}
+          target={href.startsWith('mailto') ? undefined : '_blank'}
+          rel={href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
+          className="h-contact"
+          aria-label={label}
+        >
+          <Icon size={14} />
+        </a>
+      ))}
+      {stats && (
+        <>
+          <span className="h-dot" />
+          <span className="h-stat">{stats.repos} repos</span>
+          <span className="h-dot" />
+          <span className="h-stat">{stats.followers} followers</span>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─── Hero ──────────────────────────────────────────────────── */
+
+export default function Hero() {
+  const [show, setShow] = useState(false);
+  const typed = useTypewriter(
+    ['full-stack developer', 'creative technologist', 'open source contributor'],
+    45,
+    2200,
+  );
+  const stats = useGithubStats(GITHUB_USERNAME);
+  const sectionRef = useRef(null);
+  const [opacity, setOpacity] = useState(1);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShow(true), 200);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const el = sectionRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const h = el.clientHeight;
+      setOpacity(Math.max(0, Math.min(1, rect.bottom / h)));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const scrollDown = useCallback(() => {
+    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  return (
+    <section id="hero" ref={sectionRef} className="section section--hero">
       <div
-        className="hero-overlay"
+        className="h-overlay"
         style={{
-          opacity: 1 - p,
-          visibility: faded ? 'hidden' : 'visible',
-          pointerEvents: faded ? 'none' : undefined,
+          opacity,
+          visibility: opacity < 0.01 ? 'hidden' : undefined,
         }}
       >
-        <HeroParticles />
-        <div className="hero-avatar-col" style={{ transform: avatarTransform }}>
-          <a
-            href={`https://github.com/${GITHUB_USERNAME}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hero-avatar-link"
-          >
-            <div className="hero-avatar-wrapper">
-              <img
-                src={`https://github.com/${GITHUB_USERNAME}.png`}
-                alt={GITHUB_USERNAME}
-                className="hero-avatar"
-              />
-              <div className="hero-avatar-ring" />
-            </div>
-          </a>
-          <span className="hero-avatar-status" />
-          <ContactRow />
+        <Particles />
+        <Terminals heroRef={sectionRef} />
+
+        <div className={`h-main ${show ? 'is-show' : ''}`}>
+          <Avatar />
+
+          <h1 className="h-name">
+            <span className="h-name-first">Vyacheslav</span>
+            <span className="h-name-last">Tkachik</span>
+          </h1>
+
+          <p className="h-role">
+            {'> '}{typed}
+            <span className="h-cursor" />
+          </p>
+
+          <ToolStrip />
+
+          <ContactRow stats={stats} />
+
+          <p className="h-tagline">full-stack · creative · open source</p>
         </div>
 
-        <div className="hero-type-area" style={{ transform: typeTransform }}>
-          <div className="hero-intro">
-            <div className="hero-intro-line">
-              <span className="hero-prompt">$</span>
-              <span className="hero-cmd">whoami</span>
-            </div>
-            <div className="hero-intro-name">Vyacheslav Tkachik</div>
-            <div className="hero-intro-role">full-stack developer</div>
-          </div>
-          <div className="terminal glass-card">
-            <div className="terminal-bar">
-              <span className="terminal-dot" />
-              <span className="terminal-dot" />
-              <span className="terminal-dot" />
-              <span className="terminal-name">
-                <span className="terminal-name-icon">{activeLanguage.icon({ size: 10 })}</span>
-                {activeLanguage.label}
-              </span>
-              <span className="terminal-time">{time.toLocaleTimeString()}</span>
-            </div>
-            <div className="terminal-body">
-              <div className="hero-typewrap">
-                <span className="hero-type-code">
-                  {display}
-                  <span className="hero-type-cursor">|</span>
-                </span>
-              </div>
-            </div>
-          </div>
-          <span className="hero-type-lang">// {activeLanguage.name}</span>
-
-          <div className="hero-langs">
-            {LANGUAGES.map((l, i) => {
-              const isActive = i === activeIndex;
-              const isLocked = i === lockedIndex;
-              return (
-                <span
-                  key={l.label}
-                  className={`hero-lang-badge${isActive ? ' is-active' : ''}${isLocked ? ' is-locked' : ''}`}
-                  title={isLocked ? `${l.name} — click to resume auto-cycle` : l.name}
-                  onClick={() => handleBadgeClick(i)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleBadgeClick(i); }}
-                >
-                  {l.icon({ size: 14 })}
-                </span>
-              );
-            })}
-          </div>
-
-          <StatsStrip username={GITHUB_USERNAME} />
-
-          <p className="hero-tagline">full-stack · creative technology</p>
-
-          <div className="hero-info">
-            <span className="hero-info-item">🌍 remote</span>
-            <span className="hero-info-item">🟢 open to opportunities</span>
-            <span className="hero-info-resume">[ download cv ]</span>
-          </div>
-
-        </div>
-
-        <svg className="hero-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(232, 228, 223, 0.2)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 4v16M18 14l-6 6-6-6" />
-        </svg>
+        <button className="h-scroll" onClick={scrollDown} aria-label="Scroll down">
+          <div className="h-scroll-line" />
+          <FiArrowDown size={13} />
+        </button>
       </div>
     </section>
   );
