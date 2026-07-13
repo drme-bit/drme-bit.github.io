@@ -465,10 +465,17 @@
    ================================================================= */
 
 @media (max-width: 900px) {
+  .skills-sticky {
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: flex-start;
+  }
+
   .skills-phase {
     flex-direction: column;
     gap: 2rem;
     padding: 1rem 0;
+    top: 0;
   }
 
   .skills-globe-container {
@@ -492,6 +499,7 @@
   .skills-sidebar {
     max-width: 100%;
     width: 100%;
+    max-height: none;
   }
 }
 
@@ -507,6 +515,7 @@
 
   .skill-info-panel {
     padding: 1rem;
+    max-height: none;
   }
 
   .skill-info-name {

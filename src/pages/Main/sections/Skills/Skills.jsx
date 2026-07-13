@@ -74,9 +74,14 @@ export default function Skills() {
     let raf;
     let frame = 0;
     const isMobile = window.innerWidth <= 768;
+    const nameIdxMap = new Map(SKILLS_DATA.map((s, i) => [s.name, i]));
+    let cachedAccent = '#7dd3fc';
+    let cachedGhost = 'rgba(255,255,255,0.17)';
+    let colorFrame = 0;
+
     const tick = () => {
       frame++;
-      if (isMobile && frame % 2 !== 0) { raf = requestAnimationFrame(tick); return; }
+      if (isMobile && frame % 3 !== 0) { raf = requestAnimationFrame(tick); return; }
       const globeWrap = globeWrapRef.current;
       const ring = ringRef.current;
       const svg = svgRef.current;
@@ -88,10 +93,13 @@ export default function Skills() {
       const cosPhi = Math.cos(phi);
       const sinPhi = Math.sin(phi);
 
-      // Read computed colors once per frame (CSS vars don't resolve in innerHTML)
-      const cs = getComputedStyle(document.body);
-      const accentSecondary = cs.getPropertyValue('--accent-secondary').trim() || '#7dd3fc';
-      const textGhost = cs.getPropertyValue('--text-ghost').trim() || 'rgba(255,255,255,0.17)';
+      // Read computed colors every 30 frames to avoid getComputedStyle overhead
+      colorFrame++;
+      if (colorFrame % 30 === 0) {
+        const cs = getComputedStyle(document.body);
+        cachedAccent = cs.getPropertyValue('--accent-secondary').trim() || '#7dd3fc';
+        cachedGhost = cs.getPropertyValue('--text-ghost').trim() || 'rgba(255,255,255,0.17)';
+      }
 
       // z → opacity: front (z=1) → 1.0, equator (z=0) → 0.6, behind (z<0) → fades to 0
       const zToOpacity = (z) => {
@@ -104,8 +112,8 @@ export default function Skills() {
       posCache.current.clear();
       itemRefs.current.forEach((el, name) => {
         if (!el) return;
-        const idx = filteredSkills.findIndex(s => s.name === name);
-        if (idx === -1) { el.style.opacity = '0'; return; }
+        const idx = nameIdxMap.get(name);
+        if (idx === undefined) { el.style.opacity = '0'; return; }
         const pos = skillPositions[idx];
         if (!pos) return;
 
@@ -127,13 +135,10 @@ export default function Skills() {
         posCache.current.set(name, { x: cx, y: cy, z: rz });
       });
 
-      // Draw SVG connection lines between related skills
-      if (svg) {
+      // Draw SVG connection lines between related skills (skip on mobile for perf)
+      if (svg && !isMobile) {
         const lines = [];
         const selectedName = selected?.name;
-
-        // Build a flat index: all SKILLS_DATA positions (always same sphere)
-        const allIdxMap = new Map(SKILLS_DATA.map((s, i) => [s.name, i]));
 
         filteredSkills.forEach((skill) => {
           if (!skill.related) return;
@@ -153,8 +158,8 @@ export default function Skills() {
             if (opacity < 0.01) return;
 
             // Compute midpoint on sphere surface for curved path
-            const fi = allIdxMap.get(skill.name);
-            const ti = allIdxMap.get(relName);
+            const fi = nameIdxMap.get(skill.name);
+            const ti = nameIdxMap.get(relName);
             if (fi === undefined || ti === undefined) return;
             const fp = skillPositions[fi];
             const tp = skillPositions[ti];
@@ -177,7 +182,7 @@ export default function Skills() {
             const cpX = midX + (dx / dist) * dist * bulge;
             const cpY = midY + (dy / dist) * dist * bulge;
 
-            const color = isHighlighted ? accentSecondary : textGhost;
+            const color = isHighlighted ? cachedAccent : cachedGhost;
             const dash = isHighlighted ? '' : ' stroke-dasharray="4 4"';
             const sw = isHighlighted ? 1.5 : 0.8;
 
