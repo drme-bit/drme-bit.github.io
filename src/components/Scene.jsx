@@ -297,7 +297,7 @@ function useLowPowerMode() {
 }
 
 function SceneInner({ lowPower }) {
-  if (lowPower) return <IsoCamera />;
+  if (lowPower) return <><IsoCamera /><Terrain /></>;
   return (
     <>
       <IsoCamera />

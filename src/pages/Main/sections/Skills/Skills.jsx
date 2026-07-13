@@ -72,7 +72,11 @@ export default function Skills() {
   // Project skills onto 2D + draw connection lines — runs every frame
   useEffect(() => {
     let raf;
+    let frame = 0;
+    const isMobile = window.innerWidth <= 768;
     const tick = () => {
+      frame++;
+      if (isMobile && frame % 2 !== 0) { raf = requestAnimationFrame(tick); return; }
       const globeWrap = globeWrapRef.current;
       const ring = ringRef.current;
       const svg = svgRef.current;

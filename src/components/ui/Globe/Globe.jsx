@@ -43,7 +43,8 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
 
     const rect = canvas.getBoundingClientRect()
     const size = Math.max(Math.floor(rect.width), 200)
-    const dpr = Math.min(window.devicePixelRatio, 2)
+    const isMobile = window.innerWidth <= 768
+    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2)
 
     if (globeRef.current) {
       globeRef.current.destroy()
@@ -61,7 +62,7 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
       dark: colors.dark,
       diffuse: 1.2,
       scale: 1,
-      mapSamples: 16000,
+      mapSamples: isMobile ? 8000 : 16000,
       mapBrightness: 6,
       baseColor: colors.baseColor,
       markerColor: colors.markerColor,
