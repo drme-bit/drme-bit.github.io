@@ -78,8 +78,8 @@
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(125, 211, 252, 0.08) 0%,
-    rgba(196, 181, 253, 0.04) 40%,
+    color-mix(in srgb, var(--accent-secondary) 8%, transparent) 0%,
+    color-mix(in srgb, var(--accent-tertiary) 4%, transparent) 40%,
     transparent 70%
   );
   pointer-events: none;
@@ -97,6 +97,7 @@
   inset: 0;
   pointer-events: none;
   z-index: 5;
+  clip-path: circle(49.5% at 50% 50%);
 }
 
 .skills-connections {
@@ -115,8 +116,8 @@
   flex-direction: column;
   align-items: center;
   gap: 0.15rem;
-  background: rgba(8, 8, 8, 0.85);
-  border: 1px solid rgba(125, 211, 252, 0.2);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 0.4rem 0.55rem;
   cursor: pointer;
@@ -125,25 +126,25 @@
   z-index: 2;
   will-change: left, top, opacity, transform;
   backdrop-filter: blur(6px);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.6), inset 0 0 12px rgba(125, 211, 252, 0.05);
+  box-shadow: var(--shadow-sm), inset 0 0 12px var(--accent-secondary-glow);
 
   &:hover {
-    background: rgba(12, 12, 12, 0.95);
+    background: var(--bg-elevated);
     border-color: var(--item-color);
-    box-shadow: 0 0 16px rgba(125, 211, 252, 0.2), inset 0 0 16px rgba(125, 211, 252, 0.08);
+    box-shadow: 0 0 16px var(--accent-secondary-glow), inset 0 0 16px var(--accent-secondary-glow);
     z-index: 3;
   }
 
   &.is-selected {
-    background: rgba(12, 12, 12, 0.95);
+    background: var(--bg-elevated);
     border-color: var(--item-color);
-    box-shadow: 0 0 20px rgba(125, 211, 252, 0.3), inset 0 0 20px rgba(125, 211, 252, 0.1);
+    box-shadow: 0 0 20px var(--accent-secondary-glow), inset 0 0 20px var(--accent-secondary-glow);
     z-index: 4;
   }
 
   &.is-related {
-    border-color: rgba(125, 211, 252, 0.35);
-    box-shadow: 0 0 12px rgba(125, 211, 252, 0.15), inset 0 0 12px rgba(125, 211, 252, 0.06);
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 12px var(--accent-secondary-glow), inset 0 0 12px var(--accent-secondary-glow);
   }
 
   &.is-dimmed {
@@ -158,7 +159,7 @@
   transition: color 0.2s var(--ease-out), filter 0.2s var(--ease-out);
 
   .skills-ring-item:not(.is-selected):not(.is-related) & {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-secondary);
     filter: none;
   }
 }
@@ -226,8 +227,8 @@
   }
 
   &:focus {
-    border-color: rgba(125, 211, 252, 0.3);
-    box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.05);
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 0 3px var(--accent-secondary-glow);
   }
 }
 
@@ -247,6 +248,23 @@
   &:hover {
     color: var(--accent-secondary);
   }
+}
+
+.skills-search-count {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--text-ghost);
+  padding: 0 0.2rem;
+  letter-spacing: 0.05em;
+}
+
+.skills-no-results {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--text-ghost);
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+  line-height: 1.6;
 }
 
 /* --- Skill Info Panel --- */
@@ -301,7 +319,7 @@
   transition: all 0.2s var(--ease-out);
 
   &.is-filled {
-    box-shadow: 0 0 8px rgba(125, 211, 252, 0.3);
+    box-shadow: 0 0 8px var(--accent-secondary-glow);
   }
 }
 
@@ -346,7 +364,7 @@
 
   &:hover {
     color: var(--accent-secondary);
-    border-color: rgba(125, 211, 252, 0.2);
+    border-color: var(--accent-secondary-glow);
   }
 }
 

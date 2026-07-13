@@ -162,7 +162,7 @@ $transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .drawer-link.is-active .drawer-link-id {
-  color: rgba(232, 228, 223, 0.4);
+  color: var(--text-dim);
 }
 
 .drawer-link-label {

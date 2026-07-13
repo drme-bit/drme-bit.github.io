@@ -1,0 +1,41 @@
+/* =================================================================
+   CHANGE THEME BUTTON
+   ================================================================= */
+
+.toggleContainer {
+  position: fixed;
+  top: 12px;
+  right: 44px;
+  z-index: 180;
+}
+
+.themeToggle {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s var(--ease-out),
+              background 0.2s var(--ease-out);
+
+  &:hover {
+    color: var(--accent-secondary);
+    background: var(--glass);
+  }
+}
+
+.icon {
+  display: inline-block;
+  font-size: 0.8rem;
+  line-height: 1;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.isLight .icon {
+  transform: rotate(360deg);
+}

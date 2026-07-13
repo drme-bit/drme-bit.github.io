@@ -37,9 +37,9 @@
 }
 
 .back-to-top:hover {
-  border-color: rgba(232, 228, 223, 0.25);
+  border-color: var(--accent-muted);
   color: var(--accent);
-  box-shadow: 0 0 20px rgba(232, 228, 223, 0.08);
+  box-shadow: 0 0 20px var(--accent-glow);
   transform: translateY(-2px);
 }
 

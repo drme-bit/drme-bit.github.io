@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import Scene from '../../components/Scene';
+import Scene from '@/components/Scene';
 import Hero from './sections/Hero/Hero';
 import About from './sections/About/About';
 import Skills from './sections/Skills/Skills';
@@ -7,16 +7,17 @@ import Experience from './sections/Experience/Experience';
 import Projects from './sections/Projects/Projects';
 import Contacts from './sections/Contacts/Contacts';
 import Outro from './sections/Outro/Outro';
-import GitHubStatus from '../../components/ui/GitHubStatus/GitHubStatus';
-import Navbar from '../../components/layout/navbar/Navbar';
-import DrawerMenu from '../../components/layout/DrawerMenu/DrawerMenu';
-import ScrollProgressBar from '../../components/ui/ScrollProgressBar/ScrollProgressBar';
-import SearchBar from '../../components/ui/SearchBar/SearchBar';
-import Mascot, { getMockMessage } from '../../components/ui/Mascot/Mascot';
-import Archive from '../../components/ui/Archive/Archive';
-import BackToTop from '../../components/ui/BackToTop/BackToTop';
-import SoundEffects from '../../components/ui/SoundEffects/SoundEffects';
-import Cursor from '../../components/ui/Cursor/Cursor';
+import GitHubStatus from '@/components/ui/GitHubStatus/GitHubStatus';
+import Navbar from '@/components/layout/navbar/Navbar';
+import DrawerMenu from '@/components/layout/DrawerMenu/DrawerMenu';
+import ScrollProgressBar from '@/components/ui/ScrollProgressBar/ScrollProgressBar';
+import SearchBar from '@/components/ui/SearchBar/SearchBar';
+import Mascot, { getMockMessage } from '@/components/ui/Mascot/Mascot';
+import Archive from '@/components/ui/Archive/Archive';
+import BackToTop from '@/components/ui/BackToTop/BackToTop';
+import SoundEffects from '@/components/ui/SoundEffects/SoundEffects';
+import Cursor from '@/components/ui/Cursor/Cursor';
+import ChangeTheme from '@/components/ui/ChangeTheme/ChangeTheme.jsx';
 
 const SECTIONS = ['hero', 'about', 'skills', 'experience', 'projects', 'contact'];
 
@@ -72,6 +73,7 @@ export default function Main() {
         </svg>
       </button>
       <SearchBar onSearch={handleSearch} />
+      <ChangeTheme />
       <Mascot userMessage={mascotMessage} searchCount={searchCount} onDone={handleMascotDone} />
       <DrawerMenu
         activePage={activeSection}

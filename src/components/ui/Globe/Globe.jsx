@@ -2,6 +2,29 @@ import createGlobe from 'cobe'
 import { useEffect, useRef } from 'react'
 import './Globe.scss'
 
+function hexToRgb01(hex) {
+  const h = hex.replace('#', '')
+  return [
+    parseInt(h.substring(0, 2), 16) / 255,
+    parseInt(h.substring(2, 4), 16) / 255,
+    parseInt(h.substring(4, 6), 16) / 255,
+  ]
+}
+
+function getGlobeColors() {
+  const s = getComputedStyle(document.body)
+  const isLight = document.body.classList.contains('light')
+  const accent = s.getPropertyValue('--accent').trim() || '#e8e4df'
+  const accentSecondary = s.getPropertyValue('--accent-secondary').trim() || '#7dd3fc'
+  const accentTertiary = s.getPropertyValue('--accent-tertiary').trim() || '#c4b5fd'
+  return {
+    dark: isLight ? 1 : 0,
+    baseColor: isLight ? [0.85, 0.83, 0.81] : [0.17, 0.17, 0.17],
+    markerColor: hexToRgb01(accentSecondary),
+    glowColor: hexToRgb01(accent),
+  }
+}
+
 export default function Globe({ className = '', scrollProgress = 0, phiRef: externalPhiRef, paused = false }) {
   const canvasRef = useRef(null)
   const globeRef = useRef(null)
@@ -14,7 +37,7 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
   scrollRef.current = scrollProgress
   pauseRef.current = paused
 
-  useEffect(() => {
+  const createGlobeInstance = () => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -22,24 +45,35 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
     const size = Math.max(Math.floor(rect.width), 200)
     const dpr = Math.min(window.devicePixelRatio, 2)
 
+    if (globeRef.current) {
+      globeRef.current.destroy()
+      globeRef.current = null
+    }
+    canvas.classList.remove('is-ready')
+
+    const colors = getGlobeColors()
     globeRef.current = createGlobe(canvas, {
       devicePixelRatio: dpr,
       width: size,
       height: size,
-      phi: 0,
+      phi: phiRef.current,
       theta: 0.3,
-      dark: 0,           // 0 = fully lit, not dark
+      dark: colors.dark,
       diffuse: 1.2,
       scale: 1,
       mapSamples: 16000,
-      mapBrightness: 6,   // bright map lines
-      baseColor: [0.3, 0.3, 0.3],
-      markerColor: [0.49, 0.83, 0.99],  // sky blue
-      glowColor: [0.91, 0.89, 0.87],    // warm cream
+      mapBrightness: 6,
+      baseColor: colors.baseColor,
+      markerColor: colors.markerColor,
+      glowColor: colors.glowColor,
       offset: [0, 0],
     })
 
     canvas.classList.add('is-ready')
+  }
+
+  useEffect(() => {
+    createGlobeInstance()
 
     const tick = () => {
       if (!dragRef.current.active && !pauseRef.current) {
@@ -54,8 +88,14 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
     }
     rafRef.current = requestAnimationFrame(tick)
 
+    const observer = new MutationObserver(() => {
+      createGlobeInstance()
+    })
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] })
+
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      observer.disconnect()
       globeRef.current?.destroy()
       globeRef.current = null
     }

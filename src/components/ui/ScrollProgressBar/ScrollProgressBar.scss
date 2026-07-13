@@ -16,5 +16,5 @@
   height: 100%;
   background: var(--accent);
   transition: width 0.1s linear;
-  box-shadow: 0 0 8px rgba(232, 228, 223, 0.25);
+  box-shadow: 0 0 8px var(--accent-muted);
 }

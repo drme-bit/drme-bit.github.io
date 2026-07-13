@@ -34,7 +34,7 @@
 
   &:hover {
     border-color: var(--border-hover);
-    box-shadow: var(--shadow-lg), 0 0 40px rgba(232, 228, 223, 0.03);
+    box-shadow: var(--shadow-lg), 0 0 40px var(--accent-glow);
   }
 }
 
@@ -59,9 +59,9 @@
   }
 }
 
-.about-photo-dot:nth-child(1) { background: #ff5f56; }
-.about-photo-dot:nth-child(2) { background: #ffbd2e; }
-.about-photo-dot:nth-child(3) { background: #27c93f; }
+.about-photo-dot:nth-child(1) { background: var(--dot-r); }
+.about-photo-dot:nth-child(2) { background: var(--dot-y); }
+.about-photo-dot:nth-child(3) { background: var(--dot-g); }
 
 .about-photo-body img {
   display: block;

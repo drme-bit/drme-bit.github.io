@@ -4,7 +4,7 @@ import useReveal from '@/hooks/useReveal';
 import useScrollPhase from '@/hooks/useScrollPhase';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import Globe from '@/components/ui/Globe/Globe';
-import { SKILLS_DATA, GROUP_COLORS, ICON_MAP } from './SkillsGlobe';
+import { SKILLS_DATA, GROUP_COLORS, ICON_MAP } from './skillsData';
 import useCursorParallax from '@/hooks/useCursorParallax';
 import { FiSearch, FiX } from 'react-icons/fi';
 import './Skills.scss';
@@ -84,6 +84,18 @@ export default function Skills() {
       const cosPhi = Math.cos(phi);
       const sinPhi = Math.sin(phi);
 
+      // Read computed colors once per frame (CSS vars don't resolve in innerHTML)
+      const cs = getComputedStyle(document.body);
+      const accentSecondary = cs.getPropertyValue('--accent-secondary').trim() || '#7dd3fc';
+      const textGhost = cs.getPropertyValue('--text-ghost').trim() || 'rgba(255,255,255,0.17)';
+
+      // z → opacity: front (z=1) → 1.0, equator (z=0) → 0.6, behind (z<0) → fades to 0
+      const zToOpacity = (z) => {
+        if (z < -0.15) return 0;
+        if (z < 0) return ((z + 0.15) / 0.15) * 0.6;
+        return 0.6 + z * 0.4;
+      };
+
       // Project each skill and cache positions
       posCache.current.clear();
       itemRefs.current.forEach((el, name) => {
@@ -100,39 +112,53 @@ export default function Skills() {
         const cx = w / 2 + rx * (w * 0.48);
         const cy = h / 2 - ry * (h * 0.48);
 
+        const opacity = zToOpacity(rz);
         el.style.left = `${cx}px`;
         el.style.top = `${cy}px`;
-        el.style.opacity = rz > -0.15 ? '1' : '0';
-        el.style.transform = `translate(-50%, -50%) scale(${0.7 + (rz + 1) * 0.3})`;
+        el.style.opacity = opacity;
+        el.style.transform = `translate(-50%, -50%) scale(${0.65 + (rz + 1) * 0.35})`;
         el.style.pointerEvents = rz > 0 ? 'auto' : 'none';
         el.style.zIndex = Math.round((rz + 1) * 5);
 
         posCache.current.set(name, { x: cx, y: cy, z: rz });
       });
 
-      // Draw SVG connection lines between related skills (curved over globe)
+      // Draw SVG connection lines between related skills
       if (svg) {
         const lines = [];
         const selectedName = selected?.name;
 
+        // Build a flat index: all SKILLS_DATA positions (always same sphere)
+        const allIdxMap = new Map(SKILLS_DATA.map((s, i) => [s.name, i]));
+
         filteredSkills.forEach((skill) => {
           if (!skill.related) return;
-          const fromPos = skillPositions[filteredSkills.findIndex(s => s.name === skill.name)];
           const from = posCache.current.get(skill.name);
-          if (!from || from.z < -0.1 || !fromPos) return;
+          if (!from) return;
 
           skill.related.forEach((relName) => {
-            const toPos = skillPositions[filteredSkills.findIndex(s => s.name === relName)];
             const to = posCache.current.get(relName);
-            if (!to || to.z < -0.1 || !toPos) return;
+            if (!to) return;
 
             const isHighlighted = selectedName === skill.name || selectedName === relName;
-            const opacity = isHighlighted ? 0.5 : 0.1;
 
-            // Compute midpoint on sphere surface, then project
-            const mx = fromPos.x + toPos.x;
-            const my = fromPos.y + toPos.y;
-            const mz = fromPos.z + toPos.z;
+            // Fade by average z-depth of both endpoints
+            const avgZ = (from.z + to.z) / 2;
+            const baseOpacity = isHighlighted ? 0.6 : 0.15;
+            const opacity = baseOpacity * zToOpacity(avgZ);
+            if (opacity < 0.01) return;
+
+            // Compute midpoint on sphere surface for curved path
+            const fi = allIdxMap.get(skill.name);
+            const ti = allIdxMap.get(relName);
+            if (fi === undefined || ti === undefined) return;
+            const fp = skillPositions[fi];
+            const tp = skillPositions[ti];
+            if (!fp || !tp) return;
+
+            const mx = fp.x + tp.x;
+            const my = fp.y + tp.y;
+            const mz = fp.z + tp.z;
             const len = Math.sqrt(mx * mx + my * my + mz * mz) || 1;
             const midRx = (mx / len) * cosPhi + (mz / len) * sinPhi;
             const midRy = my / len;
@@ -147,8 +173,12 @@ export default function Skills() {
             const cpX = midX + (dx / dist) * dist * bulge;
             const cpY = midY + (dy / dist) * dist * bulge;
 
+            const color = isHighlighted ? accentSecondary : textGhost;
+            const dash = isHighlighted ? '' : ' stroke-dasharray="4 4"';
+            const sw = isHighlighted ? 1.5 : 0.8;
+
             lines.push(
-              `<path d="M${from.x},${from.y} Q${cpX},${cpY} ${to.x},${to.y}" fill="none" stroke="rgba(125,211,252,${opacity})" stroke-width="1" stroke-dasharray="${isHighlighted ? 'none' : '4 4'}"/>`
+              `<path d="M${from.x},${from.y} Q${cpX},${cpY} ${to.x},${to.y}" fill="none" stroke="${color}" stroke-width="${sw}"${dash} opacity="${opacity}"/>`
             );
           });
         });
@@ -354,6 +384,18 @@ export default function Skills() {
                   </button>
                 )}
               </div>
+
+              {(searchQuery || filterGroup) && (
+                <div className="skills-search-count">
+                  {filteredSkills.length} of {SKILLS_DATA.length} skills
+                </div>
+              )}
+
+              {filteredSkills.length === 0 && (searchQuery || filterGroup) && (
+                <div className="skills-no-results">
+                  No skills found. Try a different search or clear filters.
+                </div>
+              )}
 
               <div
                 className={`skill-info-panel ${selected ? 'is-visible' : ''}`}

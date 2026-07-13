@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import styles from './Navbar.module.scss';
 
 const ITEMS = [
-  { id: 'hero', label: '✦' },
   { id: 'about', label: 'About' },
   { id: 'skills', label: 'Skills' },
   { id: 'experience', label: 'Experience' },

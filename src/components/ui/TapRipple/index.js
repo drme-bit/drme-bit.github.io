@@ -1,2 +1,2 @@
 export { default } from './TapRipple';
-export { useTapRipple } from '../../hooks/useTouch';
+export { useTapRipple } from '@/hooks/useTouch';

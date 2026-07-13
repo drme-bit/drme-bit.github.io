@@ -40,8 +40,8 @@
   opacity: 0.03;
   border-radius: 8px;
   overflow: hidden;
-  background: rgba(18, 18, 18, 0.88);
-  border: 1px solid rgba(232, 228, 223, 0.05);
+  background: var(--terminal-bg);
+  border: 1px solid var(--terminal-border);
   backdrop-filter: blur(2px);
   will-change: transform;
 }
@@ -51,8 +51,8 @@
   align-items: center;
   gap: 8px;
   padding: 7px 12px;
-  background: rgba(232, 228, 223, 0.025);
-  border-bottom: 1px solid rgba(232, 228, 223, 0.04);
+  background: var(--terminal-bar);
+  border-bottom: 1px solid var(--terminal-bar-border);
 }
 
 .h-term-dots {
@@ -66,14 +66,14 @@
   border-radius: 50%;
 }
 
-.h-dot-r { background: #ff5f57; }
-.h-dot-y { background: #febc2e; }
-.h-dot-g { background: #28c840; }
+.h-dot-r { background: var(--dot-r); }
+.h-dot-y { background: var(--dot-y); }
+.h-dot-g { background: var(--dot-g); }
 
 .h-term-title {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.58rem;
-  color: rgba(232, 228, 223, 0.3);
+  color: var(--terminal-title);
 }
 
 .h-term-body {
@@ -95,17 +95,17 @@
 }
 
 .h-prompt-arrow {
-  color: #a7f3cd;
+  color: var(--terminal-prompt-arrow);
   margin-right: 6px;
   font-weight: 600;
 }
 
 .h-prompt-path {
-  color: #7dd3fc;
+  color: var(--terminal-prompt-path);
 }
 
 .h-prompt-branch {
-  color: rgba(196, 181, 253, 0.6);
+  color: var(--terminal-prompt-branch);
 }
 
 .h-fragment {
@@ -114,10 +114,10 @@
   padding: 0.8em 1em;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   line-height: 1.6;
-  color: #e8e4df;
+  color: var(--accent);
   opacity: 0;
-  background: rgba(232, 228, 223, 0.02);
-  border: 1px solid rgba(232, 228, 223, 0.04);
+  background: var(--accent-glow);
+  border: 1px solid var(--border);
   border-radius: 6px;
   white-space: pre;
   animation: h-frag-float linear infinite alternate;
@@ -195,7 +195,7 @@
   position: absolute;
   inset: -16px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(125, 211, 252, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--accent-secondary-glow) 0%, transparent 70%);
   animation: aGlow 4s ease-in-out infinite;
   pointer-events: none;
 }
@@ -209,14 +209,14 @@
   width: clamp(56px, 7vw, 80px);
   height: clamp(56px, 7vw, 80px);
   border-radius: 50%;
-  border: 1.5px solid rgba(232, 228, 223, 0.1);
+  border: 1.5px solid var(--accent-muted);
   object-fit: cover;
   filter: grayscale(0.15);
   transition: filter 0.3s, border-color 0.3s;
 
   &:hover {
     filter: grayscale(0);
-    border-color: rgba(232, 228, 223, 0.25);
+    border-color: var(--accent);
   }
 }
 
@@ -238,7 +238,7 @@
 
 .h-name-first {
   font-size: clamp(2.2rem, 5.5vw, 4.5rem);
-  background: linear-gradient(135deg, #f0eeeb 0%, #e8e4df 40%, #7dd3fc 100%);
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent) 40%, var(--accent-secondary) 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -248,7 +248,7 @@
 
 .h-name-last {
   font-size: clamp(2.2rem, 5.5vw, 4.5rem);
-  color: rgba(232, 228, 223, 0.35);
+  color: var(--text-dim);
 }
 
 @keyframes shimmer {
@@ -301,14 +301,14 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  color: rgba(232, 228, 223, 0.5);
+  color: var(--text-secondary);
   white-space: nowrap;
   flex-shrink: 0;
   transition: color 0.25s ease;
-}
 
-.h-tool:hover {
-  color: #e8e4df;
+  &:hover {
+    color: var(--accent);
+  }
 }
 
 .h-tool-label {
@@ -384,17 +384,17 @@
   border: none;
   cursor: pointer;
   pointer-events: auto;
-  color: rgba(232, 228, 223, 0.25);
+  color: var(--text-dim);
   padding: 6px;
   transition: color 0.3s;
 
-  &:hover { color: rgba(232, 228, 223, 0.5); }
+  &:hover { color: var(--text-secondary); }
 }
 
 .h-scroll-line {
   width: 1px;
   height: 24px;
-  background: linear-gradient(to bottom, transparent, rgba(232, 228, 223, 0.25));
+  background: linear-gradient(to bottom, transparent, var(--text-dim));
   animation: sPulse 2s ease-in-out infinite;
 }
 

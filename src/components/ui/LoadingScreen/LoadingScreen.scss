@@ -29,10 +29,10 @@
 .loading-screen__box {
   width: 24px;
   height: 24px;
-  border: 1px solid var(--accent, #e8e4df);
+  border: 1px solid var(--accent);
   border-radius: 2px;
   animation: pulse-box 1.2s ease-in-out infinite;
-  box-shadow: 0 0 12px rgba(232, 228, 223, 0.15);
+  box-shadow: 0 0 12px var(--accent-muted);
 }
 
 .loading-screen__text {

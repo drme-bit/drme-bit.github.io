@@ -103,11 +103,11 @@ const TERMINALS = [
     title: 'zsh — ~/projects/nexagon',
     lines: [
       { prompt: true, path: '~/nexagon', branch: 'main' },
-      { t: 'cargo run --release', c: '#7dd3fc' },
-      { t: '   Compiling nexagon v0.1.0', c: 'rgba(232,228,223,0.35)' },
-      { t: '   Finished release [optimized] (+3.2s)', c: 'rgba(167,243,208,0.6)' },
-      { t: '   Running `target/release/nexagon`', c: 'rgba(232,228,223,0.35)' },
-      { t: '🚀 Server listening on 0.0.0.0:8080', c: 'rgba(167,243,208,0.7)' },
+      { t: 'cargo run --release', c: 'var(--terminal-cmd)' },
+      { t: '   Compiling nexagon v0.1.0', c: 'var(--terminal-output-faint)' },
+      { t: '   Finished release [optimized] (+3.2s)', c: 'var(--terminal-success)' },
+      { t: '   Running `target/release/nexagon`', c: 'var(--terminal-output-faint)' },
+      { t: '🚀 Server listening on 0.0.0.0:8080', c: 'var(--terminal-success-bright)' },
     ],
   },
   {
@@ -116,12 +116,12 @@ const TERMINALS = [
     title: 'zsh — ~/projects/portfolio',
     lines: [
       { prompt: true, path: '~/portfolio', branch: 'hero-redesign' },
-      { t: 'npm run dev', c: '#7dd3fc' },
+      { t: 'npm run dev', c: 'var(--terminal-cmd)' },
       { t: '', c: '' },
-      { t: '  VITE v8.1.0  ready in 320ms', c: 'rgba(167,243,208,0.6)' },
+      { t: '  VITE v8.1.0  ready in 320ms', c: 'var(--terminal-success)' },
       { t: '', c: '' },
-      { t: '  ➜  Local:   http://localhost:5173/', c: 'rgba(232,228,223,0.45)' },
-      { t: '  ➜  Network: http://192.168.1.5:5173/', c: 'rgba(232,228,223,0.3)' },
+      { t: '  ➜  Local:   http://localhost:5173/', c: 'var(--terminal-output)' },
+      { t: '  ➜  Network: http://192.168.1.5:5173/', c: 'var(--terminal-output-dim)' },
     ],
   },
   {
@@ -130,12 +130,12 @@ const TERMINALS = [
     title: 'zsh — ~/leetcode',
     lines: [
       { prompt: true, path: '~/leetcode', branch: 'python' },
-      { t: 'python3 solve.py --difficulty medium', c: '#7dd3fc' },
+      { t: 'python3 solve.py --difficulty medium', c: 'var(--terminal-cmd)' },
       { t: '', c: '' },
-      { t: '  [✓] 0015.3sum          48ms', c: 'rgba(167,243,208,0.6)' },
-      { t: '  [✓] 0042.trapping_water  32ms', c: 'rgba(167,243,208,0.6)' },
-      { t: '  [✓] 0076.min_window    61ms', c: 'rgba(167,243,208,0.6)' },
-      { t: '  ─── 12/15 passed ───', c: 'rgba(232,228,223,0.3)' },
+      { t: '  [✓] 0015.3sum          48ms', c: 'var(--terminal-success)' },
+      { t: '  [✓] 0042.trapping_water  32ms', c: 'var(--terminal-success)' },
+      { t: '  [✓] 0076.min_window    61ms', c: 'var(--terminal-success)' },
+      { t: '  ─── 12/15 passed ───', c: 'var(--terminal-output-dim)' },
     ],
   },
   {
@@ -144,24 +144,24 @@ const TERMINALS = [
     title: 'zsh — ~',
     lines: [
       { prompt: true, path: '~', branch: '' },
-      { t: 'docker compose up -d', c: '#7dd3fc' },
+      { t: 'docker compose up -d', c: 'var(--terminal-cmd)' },
       { t: '', c: '' },
-      { t: '  ✔ Network portfolio_default  Created', c: 'rgba(167,243,208,0.5)' },
-      { t: '  ✔ Container postgres         Started', c: 'rgba(167,243,208,0.5)' },
-      { t: '  ✔ Container redis            Started', c: 'rgba(167,243,208,0.5)' },
+      { t: '  ✔ Network portfolio_default  Created', c: 'var(--terminal-success-muted)' },
+      { t: '  ✔ Container postgres         Started', c: 'var(--terminal-success-muted)' },
+      { t: '  ✔ Container redis            Started', c: 'var(--terminal-success-muted)' },
     ],
   },
   {
     x: 10, y: -60, w: 310, h: 170,
     speed: 0.14,
-    title: 'zsh — ~/projects/nexagon',
+    title: 'zsh — ~/projects/nexagon (feat/auth)',
     lines: [
       { prompt: true, path: '~/nexagon', branch: 'feat/auth' },
-      { t: 'git log --oneline -4', c: '#7dd3fc' },
-      { t: 'f3a1c2d (HEAD → feat/auth) add jwt middleware', c: 'rgba(232,228,223,0.4)' },
-      { t: '8b2e4a1 implement rate limiter', c: 'rgba(232,228,223,0.4)' },
-      { t: 'c7d9f03 setup oauth2 provider', c: 'rgba(232,228,223,0.4)' },
-      { t: 'e1a5b78 init auth module', c: 'rgba(232,228,223,0.4)' },
+      { t: 'git log --oneline -4', c: 'var(--terminal-cmd)' },
+      { t: 'f3a1c2d (HEAD → feat/auth) add jwt middleware', c: 'var(--terminal-output)' },
+      { t: '8b2e4a1 implement rate limiter', c: 'var(--terminal-output)' },
+      { t: 'c7d9f03 setup oauth2 provider', c: 'var(--terminal-output)' },
+      { t: 'e1a5b78 init auth module', c: 'var(--terminal-output)' },
     ],
   },
   {
@@ -170,11 +170,11 @@ const TERMINALS = [
     title: 'zsh — ~/projects/roblox',
     lines: [
       { prompt: true, path: '~/roblox', branch: 'main' },
-      { t: 'pytest tests/ -v', c: '#7dd3fc' },
+      { t: 'pytest tests/ -v', c: 'var(--terminal-cmd)' },
       { t: '', c: '' },
-      { t: '  tests/test_solver.py::test_coin_change PASSED', c: 'rgba(167,243,208,0.5)' },
-      { t: '  tests/test_solver.py::test_lru_cache PASSED', c: 'rgba(167,243,208,0.5)' },
-      { t: '  ═══════ 24 passed in 1.82s ═══════', c: 'rgba(232,228,223,0.35)' },
+      { t: '  tests/test_solver.py::test_coin_change PASSED', c: 'var(--terminal-success-muted)' },
+      { t: '  tests/test_solver.py::test_lru_cache PASSED', c: 'var(--terminal-success-muted)' },
+      { t: '  ═══════ 24 passed in 1.82s ═══════', c: 'var(--terminal-output-faint)' },
     ],
   },
 ];
@@ -265,6 +265,13 @@ function Terminals({ heroRef }) {
   );
 }
 
+function getAccentRGB() {
+  const v = getComputedStyle(document.body).getPropertyValue('--accent').trim();
+  const m = v.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (m) return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) };
+  return { r: 232, g: 228, b: 223 };
+}
+
 function Particles() {
   const ref = useRef(null);
   const mouse = useRef({ x: 0, y: 0 });
@@ -315,7 +322,8 @@ function Particles() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, 6.283);
-        ctx.fillStyle = `rgba(232,228,223,${p.a})`;
+        const c = getAccentRGB();
+        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${p.a})`;
         ctx.fill();
 
         for (let j = i + 1; j < N; j++) {
@@ -326,7 +334,7 @@ function Particles() {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(232,228,223,${(1 - ld / LINK) * 0.05})`;
+            ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${(1 - ld / LINK) * 0.05})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }

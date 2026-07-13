@@ -1,24 +1,7 @@
 import { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-
-/*
-  TERRAIN v3 — coal-white isometric landscape, single warm cream accent.
-
-  Fixes from v2:
-  - Accent color shifted from cyan to warm cream (#e8e4df) for coal-white theme.
-  - Slightly warmer fog tone to complement the palette.
-  - Contour wireframe opacity increased subtly for better visibility.
-
-  Camera: isometric-style angled view (RTS framing), not first-person flythrough.
-  Scroll slowly rotates the view around the terrain and shifts the noise field.
-
-  Palette: grayscale terrain (near-black valleys -> near-white peaks), one warm
-  cream accent (#e8e4df) reserved for the contour lines (very dim) and the
-  floating beacons (bright) — nothing else uses color.
-*/
-
-const ACCENT = '#e8e4df';
+import { getAccent, getBg } from '@/utils/cssTheme';
 
 const GRID_X = 90;
 const GRID_Z = 90;
@@ -26,7 +9,6 @@ const SPACING = 0.5;
 const HALF_X = (GRID_X - 1) * SPACING * 0.5;
 const HALF_Z = (GRID_Z - 1) * SPACING * 0.5;
 
-// --- simple 2D value noise (CPU), deterministic, cheap ---
 function hash(x, y) {
   const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
   return s - Math.floor(s);
@@ -54,13 +36,14 @@ function terrainHeight(x, z, amplitude) {
 
 function Starfield() {
   const ref = useRef();
+  const matRef = useRef();
   const geometry = useMemo(() => {
     const count = 900;
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const r = 40 + Math.random() * 18;
       const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(Math.random() * 0.6); // bias toward upper hemisphere
+      const phi = Math.acos(Math.random() * 0.6);
       positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
       positions[i * 3 + 1] = Math.abs(r * Math.cos(phi)) * 0.6 + 6;
       positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta) - 20;
@@ -70,16 +53,17 @@ function Starfield() {
     return geo;
   }, []);
 
-  useFrame(({ mouse }) => {
+  useFrame(({ clock, mouse }) => {
     if (!ref.current) return;
     ref.current.rotation.y += 0.00006;
     ref.current.position.x = mouse.x * 0.4;
     ref.current.position.y = mouse.y * 0.2;
+    if (matRef.current) matRef.current.color.set(getAccent());
   });
 
   return (
     <points ref={ref} geometry={geometry}>
-      <pointsMaterial color="#ffffff" size={0.06} transparent opacity={0.5} sizeAttenuation />
+      <pointsMaterial ref={matRef} color={getAccent()} size={0.06} transparent opacity={0.5} sizeAttenuation />
     </points>
   );
 }
@@ -87,6 +71,7 @@ function Starfield() {
 function Terrain() {
   const pointsRef = useRef();
   const wireRef = useRef();
+  const wireMatRef = useRef();
   const scrollT = useRef(0);
   const scrollSmoothed = useRef(0);
   const noiseOffset = useRef(0);
@@ -113,11 +98,8 @@ function Terrain() {
     return geo;
   }, []);
 
-  // contour wireframe: short segments placed wherever a height band crosses
-  // between two neighboring grid points -> reads as topographic contour lines
   const wireGeo = useMemo(() => new THREE.BufferGeometry(), []);
   const wirePositionsScratch = useMemo(() => new Float32Array(GRID_X * GRID_Z * 2 * 3), []);
-
   const heightField = useMemo(() => new Float32Array(GRID_X * GRID_Z), []);
 
   function recompute(offset, amp) {
@@ -134,7 +116,6 @@ function Terrain() {
         positions[idx * 3 + 1] = h;
         positions[idx * 3 + 2] = z;
 
-        // grayscale: map height to luminance, near-black valleys -> near-white peaks
         const t = THREE.MathUtils.clamp((h + amp) / (amp * 2), 0, 1);
         const lum = 0.12 + t * 0.78;
         colors[idx * 3] = lum;
@@ -183,16 +164,14 @@ function Terrain() {
 
   useFrame(({ clock }) => {
     scrollSmoothed.current += (scrollT.current - scrollSmoothed.current) * 0.05;
-
-    // idle breathing + scroll both drive amplitude, so it's never fully static
     const breathing = Math.sin(clock.elapsedTime * 0.15) * 0.08;
     amplitude.current = 0.7 + scrollSmoothed.current * 1.1 + breathing;
     noiseOffset.current += 0.0015 + scrollSmoothed.current * 0.01;
-
     frameCount.current++;
     if (frameCount.current % 2 === 0) {
       recompute(noiseOffset.current, amplitude.current);
     }
+    if (wireMatRef.current) wireMatRef.current.color.set(getAccent());
   });
 
   return (
@@ -201,7 +180,7 @@ function Terrain() {
         <pointsMaterial vertexColors size={0.09} transparent opacity={0.9} sizeAttenuation />
       </points>
       <lineSegments ref={wireRef} geometry={wireGeo}>
-        <lineBasicMaterial color={ACCENT} transparent opacity={0.18} />
+        <lineBasicMaterial ref={wireMatRef} color={getAccent()} transparent opacity={0.18} />
       </lineSegments>
     </group>
   );
@@ -210,6 +189,7 @@ function Terrain() {
 function Beacons() {
   const groupRef = useRef();
   const refs = useRef([]);
+  const matRefs = useRef([]);
   const seeds = useMemo(
     () => Array.from({ length: 5 }, (_, i) => ({
       angle: (i / 5) * Math.PI * 2,
@@ -222,6 +202,7 @@ function Beacons() {
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
+    const c = getAccent();
     seeds.forEach((s, i) => {
       const m = refs.current[i];
       if (!m) return;
@@ -231,6 +212,7 @@ function Beacons() {
       m.position.y = s.height + Math.sin(t * 0.6 + i) * 0.3;
       m.rotation.x = t * 0.4 + i;
       m.rotation.y = t * 0.3 + i;
+      if (matRefs.current[i]) matRefs.current[i].color.set(c);
     });
   });
 
@@ -239,7 +221,7 @@ function Beacons() {
       {seeds.map((_, i) => (
         <mesh key={i} ref={(el) => { refs.current[i] = el; }}>
           <octahedronGeometry args={[0.18, 0]} />
-          <meshBasicMaterial color={ACCENT} transparent opacity={0.85} />
+          <meshBasicMaterial ref={(el) => { matRefs.current[i] = el; }} color={getAccent()} transparent opacity={0.85} />
         </mesh>
       ))}
     </group>
@@ -285,7 +267,6 @@ function IsoCamera() {
 
   useFrame(({ mouse }) => {
     const s = scrollT.current;
-
     const targetAngle = 0.6 + s * 1.4 + dragAngle.current;
     angle.current += (targetAngle - angle.current) * 0.02;
     const dist = 13;
@@ -293,13 +274,10 @@ function IsoCamera() {
     const isoX = Math.cos(a) * dist * 0.82;
     const isoY = 9.2 + mouse.y * 0.4;
     const isoZ = Math.sin(a) * dist * 0.82 - 4;
-
     const t = Math.min(s * 2.5, 1);
-
     const camX = isoX * t;
     const camY = 16 - (16 - isoY) * t;
     const camZ = -4 + (isoZ + 4) * t;
-
     camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.04);
     camera.lookAt(0, 0.3 * t, -4);
   });
@@ -313,19 +291,13 @@ function useLowPowerMode() {
     const isMobile = window.matchMedia('(pointer: coarse)').matches;
     const isLowMem = navigator.deviceMemory && navigator.deviceMemory < 4;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const lowPower = isMobile || isLowMem || prefersReduced;
-    setLow(lowPower);
+    setLow(isMobile || isLowMem || prefersReduced);
   }, []);
   return low;
 }
 
 function SceneInner({ lowPower }) {
-  if (lowPower) {
-    return (
-      <IsoCamera />
-    );
-  }
-
+  if (lowPower) return <IsoCamera />;
   return (
     <>
       <IsoCamera />
@@ -336,20 +308,43 @@ function SceneInner({ lowPower }) {
   );
 }
 
+function FogUpdater() {
+  const { scene } = useThree();
+  useFrame(() => {
+    const isLight = document.body.classList.contains('light');
+    const fogColor = isLight ? getBg() : '#080808';
+    if (!scene.fog || scene.fog.color.getStyle() !== fogColor) {
+      scene.fog = new THREE.Fog(fogColor, 14, 34);
+    }
+  });
+  return null;
+}
+
+function useCssBg() {
+  const [bg, setBg] = useState(getBg);
+  useEffect(() => {
+    const obs = new MutationObserver(() => setBg(getBg()));
+    obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
+  return bg;
+}
+
 export default function Scene() {
   const lowPower = useLowPowerMode();
+  const bg = useCssBg();
 
   return (
     <Canvas
       id="bg"
       camera={{ position: [9, 9.2, 5], fov: 32, near: 0.1, far: 80 }}
       gl={{ alpha: true, antialias: !lowPower }}
-      onCreated={({ gl, scene }) => {
+      onCreated={({ gl }) => {
         gl.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 2));
-        scene.fog = new THREE.Fog('#080808', 14, 34);
       }}
-      style={{ position: 'fixed', inset: 0, zIndex: 0, background: '#000000' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 0, background: bg }}
     >
+      <FogUpdater />
       <SceneInner lowPower={lowPower} />
     </Canvas>
   );

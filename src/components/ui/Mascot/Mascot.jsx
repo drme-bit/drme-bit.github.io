@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useTypingSound } from '../../../hooks/useTypingSound';
-import findAnswer from '../../../data/pageKnowledge';
+import { useState, useEffect, useRef, useCallback, useId } from 'react';
+import { useTheme } from '@/context/ThemeContext';
+import { useTypingSound } from '@/hooks/useTypingSound';
+import findAnswer from '@/data/pageKnowledge';
 import './Mascot.scss';
 
 const FACTS = [
@@ -144,6 +145,10 @@ function pickResponse(text) {
 }
 
 function CompanionCube({ size = 36, onClick, anger = 0, shake = false }) {
+  const uid = useId().replace(/:/g, '_');
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
   const pct = Math.min(anger, 1);
   const r = 240 - Math.round(150 * pct);
   const g = 156 - Math.round(80 * pct);
@@ -152,7 +157,12 @@ function CompanionCube({ size = 36, onClick, anger = 0, shake = false }) {
   const dark = `rgb(${Math.round(r * 0.8)},${Math.round(g * 0.8)},${Math.round(b * 0.8)})`;
   const glow = pct > 0
     ? `drop-shadow(0 0 ${6 + pct * 18}px rgba(${r},${g},${b},${0.3 + pct * 0.4}))`
-    : 'drop-shadow(0 2px 6px rgba(212,132,154,0.4))';
+    : `drop-shadow(0 2px 6px rgba(${isLight ? 120 : 212},${isLight ? 80 : 132},${isLight ? 100 : 154},0.4))`;
+
+  const strokeAlpha = isLight ? '0.12' : '0.15';
+  const thinStroke = isLight ? '0.06' : '0.08';
+  const highlight = isLight ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.15)';
+  const heartOverlay = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.15)';
 
   return (
     <svg
@@ -167,43 +177,42 @@ function CompanionCube({ size = 36, onClick, anger = 0, shake = false }) {
       onClick={onClick}
     >
       <defs>
-        <radialGradient id="cubeBase" cx="30%" cy="30%">
+        <radialGradient id={`cb-${uid}`} cx="30%" cy="30%">
           <stop offset="0%" stopColor={base} />
           <stop offset="100%" stopColor={dark} />
         </radialGradient>
-        <linearGradient id="heartGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={`hg-${uid}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="rgba(255,255,255,0.7)" />
           <stop offset="100%" stopColor="rgba(255,255,255,0.25)" />
         </linearGradient>
       </defs>
-      <rect x="3" y="3" width="54" height="54" rx="9" fill="url(#cubeBase)" />
-      <rect x="3" y="3" width="54" height="54" rx="9" stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
+      <rect x="3" y="3" width="54" height="54" rx="9" fill={`url(#cb-${uid})`} />
+      <rect x="3" y="3" width="54" height="54" rx="9" stroke={`rgba(0,0,0,${strokeAlpha})`} strokeWidth="1" />
       <rect x="5" y="5" width="14" height="14" rx="4" fill={dark} />
-      <rect x="5" y="5" width="14" height="14" rx="4" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
+      <rect x="5" y="5" width="14" height="14" rx="4" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
       <rect x="41" y="5" width="14" height="14" rx="4" fill={dark} />
-      <rect x="41" y="5" width="14" height="14" rx="4" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
+      <rect x="41" y="5" width="14" height="14" rx="4" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
       <rect x="5" y="41" width="14" height="14" rx="4" fill={dark} />
-      <rect x="5" y="41" width="14" height="14" rx="4" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
+      <rect x="5" y="41" width="14" height="14" rx="4" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
       <rect x="41" y="41" width="14" height="14" rx="4" fill={dark} />
-      <rect x="41" y="41" width="14" height="14" rx="4" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
+      <rect x="41" y="41" width="14" height="14" rx="4" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
       {[[12,12],[48,12],[12,48],[48,48]].map(([cx,cy],i) => (
-        <circle key={i} cx={cx} cy={cy} r="1.5" fill="rgba(0,0,0,0.1)" />
+        <circle key={i} cx={cx} cy={cy} r="1.5" fill={`rgba(0,0,0,${thinStroke})`} />
       ))}
       <path
         d="M30 40C30 40 18 30 18 24c0-3.5 2.5-5.5 5-4.5 2.5 1 4 2.5 7 5 3-2.5 4.5-4 7-5 2.5-1 5 1 5 4.5 0 6-12 16-12 16z"
-        fill="url(#heartGrad)"
+        fill={`url(#hg-${uid})`}
       />
       <path
         d="M24 22.5c-1-0.5-2.5 0.5-2.5 2 0 3 5 8 8.5 11 3.5-3 8.5-8 8.5-11 0-1.5-1.5-2.5-2.5-2-1.5 0.5-3 2.5-6 5.5-3-3-4.5-5-6-5.5z"
-        fill="rgba(255,255,255,0.15)"
+        fill={highlight}
       />
-      <line x1="21" y1="3" x2="21" y2="57" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-      <line x1="39" y1="3" x2="39" y2="57" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-      <line x1="3" y1="21" x2="57" y2="21" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-      <line x1="3" y1="39" x2="57" y2="39" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-      <rect x="3" y="3" width="54" height="54" rx="9" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
+      <line x1="21" y1="3" x2="21" y2="57" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
+      <line x1="39" y1="3" x2="39" y2="57" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
+      <line x1="3" y1="21" x2="57" y2="21" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
+      <line x1="3" y1="39" x2="57" y2="39" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
+      <rect x="3" y="3" width="54" height="54" rx="9" stroke={heartOverlay} strokeWidth="0.5" />
 
-      {/* anger steam lines */}
       {anger > 0.3 && (
         <g stroke={`rgb(${r},${g},${b})`} strokeWidth="1.5" strokeLinecap="round" opacity={pct}>
           <line x1="18" y1="8" x2="14" y2="1" />
@@ -342,6 +351,18 @@ export default function Mascot({ userMessage, onDone, searchCount = 0 }) {
 
   useEffect(() => {
     if (chatMode) inputRef.current?.focus();
+  }, [chatMode]);
+
+  useEffect(() => {
+    if (!chatMode) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setChatMode(false);
+        setChatInput('');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [chatMode]);
 
   const handleCubeClick = useCallback(() => {
