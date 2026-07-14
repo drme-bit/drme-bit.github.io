@@ -73,11 +73,13 @@ function Terrain() {
   const pointsRef = useRef();
   const wireRef = useRef();
   const wireMatRef = useRef();
+  const pointsMatRef = useRef();
   const scrollT = useRef(0);
   const scrollSmoothed = useRef(0);
   const noiseOffset = useRef(0);
   const amplitude = useRef(0.9);
   const frameCount = useRef(0);
+  const isLight = useIsLight();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -118,10 +120,17 @@ function Terrain() {
         positions[idx * 3 + 2] = z;
 
         const t = THREE.MathUtils.clamp((h + amp) / (amp * 2), 0, 1);
-        const lum = 0.12 + t * 0.78;
-        colors[idx * 3] = lum;
-        colors[idx * 3 + 1] = lum;
-        colors[idx * 3 + 2] = lum;
+        if (isLight) {
+          const lum = 0.55 + t * 0.25;
+          colors[idx * 3] = lum;
+          colors[idx * 3 + 1] = lum;
+          colors[idx * 3 + 2] = lum;
+        } else {
+          const lum = 0.12 + t * 0.78;
+          colors[idx * 3] = lum;
+          colors[idx * 3 + 1] = lum;
+          colors[idx * 3 + 2] = lum;
+        }
         idx++;
       }
     }
@@ -178,10 +187,10 @@ function Terrain() {
   return (
     <group>
       <points ref={pointsRef} geometry={pointsGeo}>
-        <pointsMaterial vertexColors size={0.09} transparent opacity={0.9} sizeAttenuation />
+        <pointsMaterial ref={pointsMatRef} vertexColors size={0.09} transparent opacity={isLight ? 0.5 : 0.9} sizeAttenuation />
       </points>
       <lineSegments ref={wireRef} geometry={wireGeo}>
-        <lineBasicMaterial ref={wireMatRef} color={getAccent()} transparent opacity={0.18} />
+        <lineBasicMaterial ref={wireMatRef} color={getAccent()} transparent opacity={isLight ? 0.1 : 0.18} />
       </lineSegments>
     </group>
   );
@@ -329,6 +338,16 @@ function useCssBg() {
     return () => obs.disconnect();
   }, []);
   return bg;
+}
+
+function useIsLight() {
+  const [light, setLight] = useState(() => document.body.classList.contains('light'));
+  useEffect(() => {
+    const obs = new MutationObserver(() => setLight(document.body.classList.contains('light')));
+    obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
+  return light;
 }
 
 export default function Scene() {

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { FiSearch } from 'react-icons/fi';
 import './SearchBar.scss';
 
 export default function SearchBar({ onSearch }) {
@@ -37,19 +38,13 @@ export default function SearchBar({ onSearch }) {
     <div className={`searchbar state-${state}`}>
       {state === 'closed' && (
         <button className="searchbar-trigger" onClick={() => setState('open')} aria-label="Search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
+          <FiSearch/>
         </button>
       )}
 
       {(state === 'open' || state === 'hiding') && (
         <form className="searchbar-form" onSubmit={handleSubmit}>
-          <svg className="searchbar-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
+         <FiSearch className="searchbar-icon"/>
           <input
             ref={inputRef}
             className="searchbar-input"

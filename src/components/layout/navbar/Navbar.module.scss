@@ -1,22 +1,23 @@
 /* =================================================================
-   NAVBAR - Floating Glass Navigation
-   Coal-White Theme
+   NAVBAR — Centered Bottom Dock
+   macOS-inspired glass dock with icon indicators and labels
    ================================================================= */
 
-.nav {
+.dock {
   position: fixed;
-  right: 1.5rem;
-  bottom: 1.5rem;
+  bottom: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 150;
   display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 0.5rem 0.9rem;
+  align-items: flex-end;
+  gap: 0.15rem;
+  padding: 0.4rem 0.6rem;
   background: var(--glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 10px;
   font-family: var(--font-mono);
   font-weight: 500;
   transition: background 0.3s var(--ease-out),
@@ -30,76 +31,93 @@
   }
 }
 
+.glow {
+  position: absolute;
+  inset: -4px;
+  border-radius: 10px;
+  background: var(--accent);
+  opacity: 0;
+  filter: blur(12px);
+  transition: opacity 0.4s var(--ease-out);
+  pointer-events: none;
+
+  .dock:hover & {
+    opacity: 0.06;
+  }
+}
+
 .item {
-  display: inline-flex;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-}
-
-.sep {
-  margin: 0 0.35rem;
-  font-size: 0.5rem;
-  color: var(--text-ghost);
-  user-select: none;
-}
-
-.link {
+  gap: 0.2rem;
   background: none;
   border: none;
-  color: var(--text-dim);
-  font-size: 0.6rem;
-  font-family: inherit;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   cursor: pointer;
-  padding: 0.3rem 0.5rem;
+  padding: 0.3rem 0.45rem;
   border-radius: var(--radius-sm);
-  transition: color 0.2s var(--ease-out),
-              background 0.2s var(--ease-out),
-              transform 0.2s var(--ease-out);
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    width: 0;
-    height: 1px;
-    background: var(--accent);
-    transition: width 0.2s var(--ease-out), left 0.2s var(--ease-out);
-    opacity: 0.5;
-  }
+  transition: transform 0.2s var(--ease-out),
+              background 0.2s var(--ease-out);
 
   &:hover {
-    color: var(--text);
-    background: var(--glass);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    background: var(--accent-muted);
+  }
 
-    &::after {
-      width: 60%;
-      left: 20%;
-    }
+  &:active {
+    transform: translateY(0) scale(0.92);
   }
 }
 
-.active {
-  color: var(--accent);
-  background: var(--accent-muted);
+.icon {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  transition: color 0.2s var(--ease-out),
+              filter 0.2s var(--ease-out);
 
-  &::after {
-    width: 40%;
-    left: 30%;
-    opacity: 0.8;
+  .item:hover & {
+    color: var(--text-secondary);
   }
 
-  &:hover {
+  .active & {
     color: var(--accent);
-    background: var(--accent-muted);
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+}
+
+.label {
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  transition: color 0.2s var(--ease-out);
+
+  .item:hover & {
+    color: var(--text);
+  }
+
+  .active & {
+    color: var(--accent);
   }
 }
 
 @media (max-width: 700px) {
-  .nav {
+  .dock {
+    bottom: 0.6rem;
+    padding: 0.3rem 0.4rem;
+    gap: 0.05rem;
+  }
+
+  .item {
+    padding: 0.25rem 0.4rem;
+  }
+
+  .icon {
+    font-size: 0.75rem;
+  }
+
+  .label {
     display: none;
   }
 }

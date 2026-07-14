@@ -1,5 +1,5 @@
 /* =================================================================
-   ABOUT SECTION — Bento Grid Redesign
+   ABOUT SECTION — Terminal Photo + Content
    ================================================================= */
 
 .section--about {
@@ -7,519 +7,239 @@
   flex-direction: column;
 }
 
-/* =================================================================
-   BENTO GRID
-   ================================================================= */
-
-.about-bento {
+/* ── Layout ── */
+.about-layout {
   display: grid;
-  gap: 0.85rem;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto;
-  grid-template-areas:
-    "hero   hero   info"
-    "hero   hero   stats"
-    "phil   appr   dir"
-    "tl     tl     tl";
+  grid-template-columns: 300px 1fr;
+  gap: 3rem;
+  align-items: start;
 }
 
-/* =================================================================
-   BASE CELL
-   ================================================================= */
+/* ── Photo Column ── */
+.about-photo-col {
+  position: sticky;
+  top: 10vh;
+  gap: 1.5rem;
+  left: 1vw;
+}
 
-.about-cell {
-  position: relative;
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition:
-    background 0.25s var(--ease-out),
-    border-color 0.25s var(--ease-out),
-    box-shadow 0.25s var(--ease-out);
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity 0.3s var(--ease-out);
-    pointer-events: none;
-    background: radial-gradient(
-      ellipse at top left,
-      rgba(125, 211, 252, 0.06) 0%,
-      transparent 65%
-    );
-  }
+.about-photo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  filter: grayscale(0.15) contrast(1.05);
+  transition: filter 0.4s var(--ease-out);
 
   &:hover {
-    background: var(--glass-hover);
-    border-color: var(--border-hover);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
-
-    &::before { opacity: 1; }
-  }
-}
-
-.about-cell-label {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: clamp(0.42rem, 0.6vw, 0.52rem);
-  color: var(--accent-secondary);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-  opacity: 0.75;
-}
-
-/* =================================================================
-   HERO CELL
-   ================================================================= */
-
-.about-cell--hero {
-  grid-area: hero;
-  display: flex;
-  gap: 1.5rem;
-  align-items: flex-start;
-  padding: 1.75rem;
-
-  &:hover .about-hero-photo img {
     filter: grayscale(0) contrast(1.1);
   }
 }
 
-.about-hero-photo {
-  position: relative;
-  flex-shrink: 0;
-  width: clamp(120px, 22vw, 220px);
+/* ── Content Column ── */
+.about-content-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.about-name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.about-name-accent {
+  color: var(--text-dim);
+}
+
+.about-role {
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 0.9vw, 0.75rem);
+  color: var(--accent-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.about-bio {
+  font-family: var(--font-sans);
+  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+  color: var(--text-secondary);
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* ── Terminal ── */
+.about-terminal {
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  border: 1px solid var(--border);
-  line-height: 0;
-
-  img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: grayscale(0.2) contrast(1.05);
-    transition: filter 0.3s var(--ease-out);
-  }
+  background: var(--bg-surface);
 }
 
-.about-photo-dots {
-  position: absolute;
-  top: 8px;
-  left: 10px;
-  z-index: 2;
+.about-terminal-bar {
   display: flex;
-  gap: 5px;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--terminal-bar);
+  border-bottom: 1px solid var(--terminal-bar-border);
 }
 
-.about-photo-dot {
+.about-terminal-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  opacity: 0.8;
-
-  &:nth-child(1) { background: var(--dot-r); }
-  &:nth-child(2) { background: var(--dot-y); }
-  &:nth-child(3) { background: var(--dot-g); }
 }
 
-.about-hero-text {
-  flex: 1;
+.about-terminal-dot--r { background: var(--dot-r); }
+.about-terminal-dot--y { background: var(--dot-y); }
+.about-terminal-dot--g { background: var(--dot-g); }
+
+.about-terminal-title {
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--text-ghost);
+}
+
+.about-terminal-body {
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  min-width: 0;
 }
 
-.about-hero-name {
-  font-family: var(--font-display);
-  font-size: clamp(1.4rem, 2.2vw, 2rem);
-  font-weight: 700;
-  color: var(--text);
-  margin: 0;
-  line-height: 1.1;
-  background: var(--gradient-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.about-hero-role {
+.about-terminal-line {
+  display: flex;
+  gap: 0.5rem;
   font-family: var(--font-mono);
-  font-size: clamp(0.55rem, 0.8vw, 0.7rem);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.about-terminal-line--active {
+  margin-top: 0.25rem;
+}
+
+.about-terminal-prompt {
   color: var(--accent-secondary);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin: 0;
-  opacity: 0.85;
+  user-select: none;
 }
 
-.about-hero-bio {
-  font-family: var(--font-sans);
-  font-size: clamp(0.8rem, 1.2vw, 0.9rem);
+.about-terminal-cmd {
   color: var(--text-secondary);
-  line-height: 1.7;
-  margin: 0.5rem 0 0;
-  font-weight: 300;
 }
 
-/* =================================================================
-   INFO CELL
-   ================================================================= */
-
-.about-cell--info {
-  grid-area: info;
-}
-
-.about-info-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.about-info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.02);
-  transition: background 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
-
-  &:hover {
-    background: var(--glass-hover);
-    border-color: var(--border-hover);
-  }
-}
-
-.about-info-label {
-  font-family: var(--font-mono);
-  font-size: clamp(0.38rem, 0.5vw, 0.44rem);
-  color: var(--text-dim);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.about-info-value {
-  font-family: var(--font-sans);
-  font-size: clamp(0.6rem, 0.85vw, 0.72rem);
+.about-terminal-output {
   color: var(--text);
-  line-height: 1.3;
-  font-weight: 400;
 }
 
-/* =================================================================
-   STATS CELL
-   ================================================================= */
+.about-terminal-cursor {
+  opacity: 0;
+  color: var(--accent-secondary);
+  transition: opacity 0.1s;
 
-.about-cell--stats {
-  grid-area: stats;
+  &.is-visible {
+    opacity: 1;
+  }
 }
 
-.about-stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
+/* ── Stats ── */
+.about-stats-row {
+  display: flex;
+  gap: 1.5rem;
 }
 
-.about-stat {
+.about-stat-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 0.2rem;
-  padding: 0.85rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.02);
-  transition:
-    background 0.2s var(--ease-out),
-    border-color 0.2s var(--ease-out),
-    transform 0.2s var(--ease-out);
-
-  &:hover {
-    background: var(--glass-hover);
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-  }
+  animation: statFadeIn 0.5s var(--ease-out) both;
 }
 
 .about-stat-value {
   font-family: var(--font-display);
-  font-size: clamp(1.1rem, 1.8vw, 1.5rem);
-  font-weight: 700;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  color: var(--text);
 }
 
 .about-stat-label {
   font-family: var(--font-mono);
-  font-size: clamp(0.38rem, 0.5vw, 0.44rem);
+  font-size: 0.5rem;
   color: var(--text-dim);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  text-align: center;
 }
 
-/* =================================================================
-   BLOCK CELLS (Philosophy / Approach / Direction)
-   ================================================================= */
-
-.about-cell--block {
-  &:hover .about-block-icon {
-    color: var(--accent-secondary);
-    transform: scale(1.15);
-  }
+@keyframes statFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.about-cell--philosophy { grid-area: phil; }
-.about-cell--approach   { grid-area: appr; }
-.about-cell--direction  { grid-area: dir; }
-
-.about-block-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.85rem;
-}
-
-.about-block-icon {
-  font-size: 0.8rem;
-  color: var(--accent-secondary);
-  opacity: 0.6;
-  transition: color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
-  line-height: 1;
-  margin-top: -0.05em;
-}
-
-.about-block-header .about-cell-label {
-  margin-bottom: 0;
-}
-
-.about-block-text {
-  font-family: var(--font-sans);
-  font-weight: 300;
-  font-size: clamp(0.78rem, 1.1vw, 0.88rem);
-  color: var(--text-secondary);
-  line-height: 1.75;
-  margin: 0 0 0.6em;
-
-  &:last-child { margin-bottom: 0; }
-}
-
-/* =================================================================
-   TIMELINE CELL
-   ================================================================= */
-
-.about-cell--timeline {
-  grid-area: tl;
-}
-
-.about-timeline-track {
-  display: flex;
-  gap: 0;
-
-  /* Horizontal timeline on desktop */
-  flex-direction: row;
-  align-items: flex-start;
-}
-
-.about-tl-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  position: relative;
-  padding-right: 1rem;
-  transition: transform 0.2s var(--ease-out);
-
-  &:hover {
-    transform: translateY(-3px);
-
-    .about-tl-dot {
-      background: var(--accent-secondary);
-      box-shadow: 0 0 14px rgba(125, 211, 252, 0.5);
-    }
-
-    .about-tl-title { color: var(--accent-secondary); }
-  }
-
-  &:last-child { padding-right: 0; }
-}
-
-.about-tl-marker {
-  display: flex;
-  align-items: center;
-  gap: 0;
-}
-
-.about-tl-dot {
-  width: 10px;
-  height: 10px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--text-ghost);
-  border: 1px solid var(--border-hover);
-  transition: background 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
-  z-index: 1;
-}
-
-.about-tl-line {
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-  margin-left: 0.25rem;
-}
-
-.about-tl-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding-top: 0.5rem;
-}
-
-.about-tl-date {
-  font-family: var(--font-mono);
-  font-size: clamp(0.55rem, 0.7vw, 0.62rem);
-  color: var(--accent-secondary);
-  letter-spacing: 0.1em;
-  opacity: 0.8;
-}
-
-.about-tl-title {
-  font-family: var(--font-sans);
-  font-size: clamp(0.7rem, 1vw, 0.82rem);
-  color: var(--text);
-  font-weight: 500;
-  transition: color 0.2s var(--ease-out);
-  line-height: 1.3;
-}
-
-.about-tl-desc {
-  font-family: var(--font-sans);
-  font-size: clamp(0.58rem, 0.75vw, 0.68rem);
-  color: var(--text-dim);
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* =================================================================
-   TAGS
-   ================================================================= */
-
-.about-tags {
+/* ── Tech Tags ── */
+.about-tech {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-top: 0.75rem;
+  gap: 0.4rem;
 }
 
-.about-tag {
+.about-tech-tag {
   font-family: var(--font-mono);
-  font-size: clamp(0.45rem, 0.65vw, 0.55rem);
-  color: var(--accent-secondary);
-  border: 1px solid rgba(125, 211, 252, 0.18);
-  padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-full);
+  font-size: 0.6rem;
   letter-spacing: 0.06em;
-  background: rgba(125, 211, 252, 0.04);
-  transition: all 0.2s var(--ease-out);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-full);
+  background: var(--glass);
+  transition: all 0.25s var(--ease-out);
+  animation: tagSlideIn 0.4s var(--ease-out) both;
 
   &:hover {
-    border-color: rgba(125, 211, 252, 0.35);
-    background: rgba(125, 211, 252, 0.1);
-    transform: translateY(-1px);
+    color: var(--accent-secondary);
+    border-color: var(--accent-muted);
+    background: var(--accent-glow);
+    transform: translateY(-2px);
   }
 }
 
+@keyframes tagSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* =================================================================
-   RESPONSIVE
+   Responsive
    ================================================================= */
 
 @media (max-width: 900px) {
-  .about-bento {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "hero  hero"
-      "info  stats"
-      "phil  appr"
-      "dir   dir"
-      "tl    tl";
+  .about-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 
-  .about-cell--hero {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .about-hero-photo {
-    width: 100%;
-    max-height: 280px;
-
-    img { object-position: center top; }
-  }
-
-  .about-timeline-track {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .about-tl-item {
-    flex-direction: row;
-    flex: none;
-    gap: 0.85rem;
-    padding-right: 0;
-    padding-bottom: 1.25rem;
-
-    &:last-child { padding-bottom: 0; }
-  }
-
-  .about-tl-marker {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .about-tl-line {
-    width: 1px;
-    height: 100%;
-    margin-left: 0;
-    margin-top: 0.25rem;
-    flex: 1;
-    min-height: 2rem;
-  }
-
-  .about-tl-content {
-    padding-top: 0;
-    flex: 1;
+  .about-photo-col {
+    position: static;
+    max-width: 300px;
   }
 }
 
-@media (max-width: 600px) {
-  .about-bento {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "hero"
-      "info"
-      "stats"
-      "phil"
-      "appr"
-      "dir"
-      "tl";
-    gap: 0.65rem;
+@media (max-width: 700px) {
+  .about-stats-row {
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
-  .about-stats-grid {
-    grid-template-columns: repeat(4, 1fr);
+  .about-stat-item {
+    flex: 0 0 calc(50% - 0.5rem);
   }
 }

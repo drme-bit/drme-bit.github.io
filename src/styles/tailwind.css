@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--bg-surface);
+  --color-card-foreground: var(--text);
+  --color-muted: var(--bg-elevated);
+  --color-muted-foreground: var(--text-secondary);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+}

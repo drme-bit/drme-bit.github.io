@@ -1,152 +1,145 @@
+import { useState, useEffect } from 'react';
 import useReveal from '@/hooks/useReveal';
-import useCursorParallax from '@/hooks/useCursorParallax';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
+import Features from '@/components/ui/Features/Features';
 import aboutData from '@/data/aboutData';
 import './About.scss';
 
-const SECTIONS = [
-  {
-    id: 'philosophy',
-    label: 'Philosophy',
-    icon: '◈',
-    paragraphs: [
-      "I don't believe in perfect code. I believe in code that ships, solves a real problem, and can be improved tomorrow.",
-      "Every project teaches me something new — whether it's a tricky bug, a new framework, or a late-night refactor.",
-    ],
-  },
-  {
-    id: 'approach',
-    label: 'Approach',
-    icon: '◆',
-    paragraphs: [
-      'I actively integrate AI tools into my workflow to speed up research, automate repetitive tasks, and explore solutions faster — always with full understanding.',
-      'I believe in using AI as an amplifier, not a replacement for engineering thinking.',
-    ],
-  },
-  {
-    id: 'direction',
-    label: 'Direction',
-    icon: '▸',
-    paragraphs: [
-      "Right now I'm focused on deepening full-stack skills, system architecture, and developer tooling. Always open to interesting challenges.",
-    ],
-  },
-];
+function useTypewriter(texts, speed = 60, pause = 2000) {
+  const [display, setDisplay] = useState('');
+  const [index, setIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-const INFO_ITEMS = [
-  { label: 'Education', value: 'Software Eng. — Jr. Bachelor' },
-  { label: 'Approach', value: 'AI-assisted, human-driven' },
-  { label: 'Focus', value: 'Full-Stack · Backend · Integration' },
-  { label: 'Motto', value: 'Coffee. Sleep. Repeat.' },
+  useEffect(() => {
+    const current = texts[index];
+    let timer;
+
+    if (!isDeleting && charIndex < current.length) {
+      timer = setTimeout(() => {
+        setDisplay(current.slice(0, charIndex + 1));
+        setCharIndex(charIndex + 1);
+      }, speed);
+    } else if (!isDeleting && charIndex === current.length) {
+      timer = setTimeout(() => setIsDeleting(true), pause);
+    } else if (isDeleting && charIndex > 0) {
+      timer = setTimeout(() => {
+        setDisplay(current.slice(0, charIndex - 1));
+        setCharIndex(charIndex - 1);
+      }, speed / 2);
+    } else if (isDeleting && charIndex === 0) {
+      setIsDeleting(false);
+      setIndex((index + 1) % texts.length);
+    }
+
+    return () => clearTimeout(timer);
+  }, [charIndex, isDeleting, index, texts, speed, pause]);
+
+  return display;
+}
+
+const TERMINAL_LINES = [
+  { prompt: '~', cmd: 'cat intro.txt', delay: 0 },
+  { prompt: '~', cmd: 'echo $PASSION', delay: 400 },
+  { prompt: '~', cmd: 'cat /dev/brain | grep ideas', delay: 800 },
 ];
 
 export default function About() {
   const [ref, visible] = useReveal();
-  const { x, y } = useCursorParallax();
+  const [terminalLine, setTerminalLine] = useState(0);
+  const [showCursor, setShowCursor] = useState(true);
 
-  const mainParallax = { transform: `translate(${x * 4}px, ${y * 3}px)` };
-  const subtleParallax = { transform: `translate(${x * 1.5}px, ${y * 1.2}px)` };
+  const typewriterText = useTypewriter([
+    'building elegant solutions',
+    'writing clean code',
+    'exploring new technologies',
+    'solving complex problems',
+  ]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const timers = TERMINAL_LINES.map((line, i) =>
+      setTimeout(() => setTerminalLine(i + 1), line.delay + 600)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [visible]);
+
+  useEffect(() => {
+    const interval = setInterval(() => setShowCursor((v) => !v), 530);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section id="about" ref={ref} className={`section section--about reveal${visible ? ' is-visible' : ''}`}>
       <SectionHeader title="about" number="01" visible={visible} />
 
-      <div className="section-inner" style={mainParallax}>
+      <div className="about-layout">
+        {/* ── Photo Column ── */}
+        <div className="about-photo-col">
+          <img src="/images/17969af76asf9y986ad9fy.jpg" alt="Viacheslav" className="about-photo-img" />
+        </div>
 
-        {/* ── Heading ── */}
-        <h2 className="section-title">
-          About<span className="section-accent"> me</span>
-          <span className="section-title-sub"> — software engineer &amp; lifelong learner</span>
-        </h2>
+        {/* ── Content Column ── */}
+        <div className="about-content-col">
+          <h1 className="about-name">
+            Viacheslav<span className="about-name-accent"> Tkachyk</span>
+          </h1>
+          <p className="about-role">Software Engineer & Lifelong Learner</p>
 
-        {/* ── Bento Grid ── */}
-        <div className="about-bento" style={subtleParallax}>
+          <p className="about-bio">
+            I'm a software engineering graduate with a passion for building elegant,
+            performant solutions. From full-stack web apps to backend systems, I love
+            turning complex problems into clean, maintainable code. Recently completed
+            my Professional Junior Bachelor's degree, and I'm always looking for the
+            next interesting challenge.
+          </p>
 
-          {/* Cell 1: Hero card — photo + intro */}
-          <div className="about-cell about-cell--hero">
-            <div className="about-hero-photo">
-              <div className="about-photo-dots">
-                <span className="about-photo-dot" />
-                <span className="about-photo-dot" />
-                <span className="about-photo-dot" />
-              </div>
-              <img src="/images/17969af76asf9y986ad9fy.jpg" alt="Viacheslav" />
+          {/* ── Terminal ── */}
+          <div className="about-terminal">
+            <div className="about-terminal-bar">
+              <span className="about-terminal-dot about-terminal-dot--r" />
+              <span className="about-terminal-dot about-terminal-dot--y" />
+              <span className="about-terminal-dot about-terminal-dot--g" />
+              <span className="about-terminal-title">viacheslav@portfolio ~ </span>
             </div>
-            <div className="about-hero-text">
-              <p className="about-hero-name">Viacheslav</p>
-              <p className="about-hero-role">Software Engineer</p>
-              <p className="about-hero-bio">
-                Builds things for the web, backend systems, and beyond. Recently completed
-                my Professional Junior Bachelor in Software Engineering — always
-                exploring new tools and ways to solve real problems.
-              </p>
-              <div className="about-tags">
-                {['Full-Stack', 'Backend', 'AI-Assisted Dev', 'Architecture'].map(t => (
-                  <span key={t} className="about-tag">{t}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Cell 2: Quick-info grid */}
-          <div className="about-cell about-cell--info">
-            <span className="about-cell-label">// quick info</span>
-            <div className="about-info-grid">
-              {INFO_ITEMS.map(item => (
-                <div key={item.label} className="about-info-item">
-                  <span className="about-info-label">{item.label}</span>
-                  <span className="about-info-value">{item.value}</span>
+            <div className="about-terminal-body">
+              {TERMINAL_LINES.slice(0, terminalLine).map((line, i) => (
+                <div key={i} className="about-terminal-line">
+                  <span className="about-terminal-prompt">{line.prompt}</span>
+                  <span className="about-terminal-cmd">{line.cmd}</span>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Cell 3: Stats */}
-          <div className="about-cell about-cell--stats">
-            <span className="about-cell-label">// numbers</span>
-            <div className="about-stats-grid">
-              {aboutData.stats.map(s => (
-                <div key={s.label} className="about-stat">
-                  <span className="about-stat-value">{s.value}</span>
-                  <span className="about-stat-label">{s.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Cell 4–6: Philosophy / Approach / Direction */}
-          {SECTIONS.map(section => (
-            <div key={section.id} className={`about-cell about-cell--block about-cell--${section.id}`}>
-              <div className="about-block-header">
-                <span className="about-block-icon">{section.icon}</span>
-                <span className="about-cell-label">// {section.label}</span>
+              <div className="about-terminal-line about-terminal-line--active">
+                <span className="about-terminal-prompt">~</span>
+                <span className="about-terminal-output">
+                  {typewriterText}
+                  <span className={`about-terminal-cursor${showCursor ? ' is-visible' : ''}`}>|</span>
+                </span>
               </div>
-              {section.paragraphs.map((p, i) => (
-                <p key={i} className="about-block-text">{p}</p>
-              ))}
-            </div>
-          ))}
-
-          {/* Cell 7: Timeline */}
-          <div className="about-cell about-cell--timeline">
-            <span className="about-cell-label">// timeline</span>
-            <div className="about-timeline-track">
-              {aboutData.timeline.map((entry, i) => (
-                <div key={i} className="about-tl-item">
-                  <div className="about-tl-marker">
-                    <span className="about-tl-dot" />
-                    {i < aboutData.timeline.length - 1 && <div className="about-tl-line" />}
-                  </div>
-                  <div className="about-tl-content">
-                    <span className="about-tl-date">{entry.date}</span>
-                    <span className="about-tl-title">{entry.title}</span>
-                    <p className="about-tl-desc">{entry.desc}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
+          {/* ── Stats ── */}
+          <div className="about-stats-row">
+            {aboutData.stats.map((stat, i) => (
+              <div key={stat.label} className="about-stat-item" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
+                <span className="about-stat-value">{stat.value}</span>
+                <span className="about-stat-label">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Tech Tags ── */}
+          <div className="about-tech">
+            {['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Python', 'Rust', 'Docker', 'Git'].map((t, i) => (
+              <span key={t} className="about-tech-tag" style={{ animationDelay: `${0.5 + i * 0.05}s` }}>
+                {t}
+              </span>
+            ))}
+          </div>
+
+          {/* ── Features Grid ── */}
+          <Features />
         </div>
       </div>
     </section>

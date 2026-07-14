@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
+import { FiHome, FiUser, FiZap, FiBriefcase, FiGrid, FiMail } from 'react-icons/fi';
 import styles from './Navbar.module.scss';
 
 const ITEMS = [
-  { id: 'about', label: 'About' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'contact', label: 'Contact' },
+  { id: 'hero',      label: 'Home',    Icon: FiHome },
+  { id: 'about',     label: 'About',   Icon: FiUser },
+  { id: 'skills',    label: 'Skills',  Icon: FiZap },
+  { id: 'experience', label: 'Exp',     Icon: FiBriefcase },
+  { id: 'projects',  label: 'Work',    Icon: FiGrid },
+  { id: 'contact',   label: 'Mail',    Icon: FiMail },
 ];
 
 export default function Navbar() {
@@ -34,18 +36,19 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={styles.nav} aria-label="Main navigation">
-      {ITEMS.map((item, i) => (
-        <span key={item.id} className={styles.item}>
-          {i > 0 && <span className={styles.sep}>/</span>}
-          <button
-            type="button"
-            className={`${styles.link} ${active === item.id ? styles.active : ''}`}
-            onClick={() => scrollTo(item.id)}
-          >
-            {item.label}
-          </button>
-        </span>
+    <nav className={styles.dock} aria-label="Main navigation">
+      <div className={styles.glow} />
+      {ITEMS.map(({ id, label, Icon }) => (
+        <button
+          key={id}
+          type="button"
+          className={`${styles.item} ${active === id ? styles.active : ''}`}
+          onClick={() => scrollTo(id)}
+          aria-current={active === id ? 'true' : undefined}
+        >
+          <Icon className={styles.icon} />
+          <span className={styles.label}>{label}</span>
+        </button>
       ))}
     </nav>
   );

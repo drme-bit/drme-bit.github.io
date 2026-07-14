@@ -9,6 +9,18 @@
   left: 1rem;
   z-index: 150;
   max-width: 300px;
+
+  svg {
+    transition: filter 0.3s ease, transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.08);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
 }
 
 .mascot-main {

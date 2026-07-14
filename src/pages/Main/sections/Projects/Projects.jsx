@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useReveal from '@/hooks/useReveal';
 import useHorizontalScroll from '@/hooks/useHorizontalScroll';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
+import Carousel from '@/components/ui/Carousel/Carousel';
 import { PROJECTS } from '@/data/projectsData';
 import { FiArrowRight, FiExternalLink } from 'react-icons/fi';
 import './Projects.scss';
@@ -11,67 +11,6 @@ const STATUS_META = {
   ACTIVE: { icon: '●', cls: 'badge--active', label: 'active' },
   ARCHIVED: { icon: '◌', cls: 'badge--archived', label: 'archived' },
 };
-
-function ProjectGallery({ project, isActive }) {
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const images = project.images?.filter(Boolean) || [];
-  const hasGallery = images.length > 1;
-
-  useEffect(() => {
-    if (!hasGallery || !isActive || isHovered) return;
-    const interval = setInterval(() => {
-      setCurrentIdx((i) => (i + 1) % images.length);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [hasGallery, isActive, isHovered, images.length]);
-
-  if (!hasGallery && !project.image) {
-    return (
-      <div className="project-preview-placeholder">
-        <div className="project-preview-wave" />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="project-gallery"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {hasGallery ? (
-        images.map((src, i) => (
-          <img
-            key={i}
-            src={src}
-            alt=""
-            className={`project-gallery-img${i === currentIdx ? ' is-active' : ''}`}
-            loading="lazy"
-          />
-        ))
-      ) : (
-        <img
-          src={project.image}
-          alt={`${project.title} screenshot`}
-          className="project-gallery-img is-active"
-          loading="lazy"
-        />
-      )}
-      {hasGallery && (
-        <div className="project-gallery-dots">
-          {images.map((_, i) => (
-            <span
-              key={i}
-              className={`project-gallery-dot${i === currentIdx ? ' is-active' : ''}`}
-              onClick={() => setCurrentIdx(i)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function ProjectCard({ project, index, isActive }) {
   const navigate = useNavigate();
@@ -84,13 +23,18 @@ function ProjectCard({ project, index, isActive }) {
   return (
     <div className={`project-card${isActive ? ' is-active' : ''}`}>
       <div className="project-card-image">
-        <ProjectGallery project={project} isActive={isActive} />
+        <Carousel
+          images={project.images?.filter(Boolean) || (project.image ? [project.image] : [])}
+          isActive={isActive}
+          showThumbs={true}
+        />
       </div>
 
       <div className="project-card-content">
         <div className="project-card-header">
           <span className="project-card-id">
-            ENTRY_{String(index + 1).padStart(3, '0')}
+            <span className="project-card-prompt">$</span>
+            ./project_{String(index + 1).padStart(3, '0')}
           </span>
           <span className={`project-badge ${meta.cls}`}>
             <span className="project-badge-dot">{meta.icon}</span>
@@ -99,6 +43,7 @@ function ProjectCard({ project, index, isActive }) {
         </div>
 
         <h3 className="project-card-title">{project.title}</h3>
+        
         <p className="project-card-desc">{project.desc}</p>
 
         <div className="project-card-tech">
@@ -112,7 +57,7 @@ function ProjectCard({ project, index, isActive }) {
 
         <div className="project-card-actions">
           <button className="project-cta" onClick={handleClick}>
-            <span>View Project</span>
+            <span>cat details.md</span>
             <FiArrowRight className="project-cta-icon" />
           </button>
           {project.url && (

@@ -37,6 +37,8 @@ export default function Skills() {
     sectionId: 'skills',
   });
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
   const filteredSkills = useMemo(() => {
     let result = SKILLS_DATA;
     if (filterGroup) result = result.filter((s) => s.group === filterGroup);
@@ -44,6 +46,7 @@ export default function Skills() {
       const q = searchQuery.toLowerCase();
       result = result.filter((s) => s.name.toLowerCase().includes(q));
     }
+    if (isMobile && result.length > 15) result = result.slice(0, 15);
     return result;
   }, [filterGroup, searchQuery]);
 
@@ -79,16 +82,17 @@ export default function Skills() {
     let cachedGhost = 'rgba(255,255,255,0.17)';
     let colorFrame = 0;
 
-    const tick = () => {
+      const tick = () => {
       frame++;
-      if (isMobile && frame % 3 !== 0) { raf = requestAnimationFrame(tick); return; }
+      if (isMobile && frame % 5 !== 0) { raf = requestAnimationFrame(tick); return; }
       const globeWrap = globeWrapRef.current;
       const ring = ringRef.current;
       const svg = svgRef.current;
       if (!globeWrap || !ring) { raf = requestAnimationFrame(tick); return; }
 
-      const w = globeWrap.offsetWidth;
-      const h = globeWrap.offsetHeight;
+      // Read actual dimensions every frame for accurate projection
+      const w = globeWrap.clientWidth;
+      const h = globeWrap.clientHeight;
       const phi = phiRef.current;
       const cosPhi = Math.cos(phi);
       const sinPhi = Math.sin(phi);
@@ -125,10 +129,9 @@ export default function Skills() {
         const cy = h / 2 - ry * (h * 0.48);
 
         const opacity = zToOpacity(rz);
-        el.style.left = `${cx}px`;
-        el.style.top = `${cy}px`;
+        const scale = 0.65 + (rz + 1) * 0.35;
+        el.style.transform = `translate(calc(${cx}px - 50%), calc(${cy}px - 50%)) scale(${scale})`;
         el.style.opacity = opacity;
-        el.style.transform = `translate(-50%, -50%) scale(${0.65 + (rz + 1) * 0.35})`;
         el.style.pointerEvents = rz > 0 ? 'auto' : 'none';
         el.style.zIndex = Math.round((rz + 1) * 5);
 
@@ -256,22 +259,17 @@ export default function Skills() {
   // 0.2→0.5: globe holds, then shrinks to 55% + shifts left, sidebar slides in
   // 0.5→1:   normal layout
 
-  // Phase 1 — Rise (0→20%): globe slides up from below
-  const riseT = Math.min(overallProgress / 0.2, 1);
-  const globeY = (1 - riseT) * 30; // 30vh → 0
+  // On mobile: skip scroll animation, show final layout directly
+  const riseT = isMobile ? 1 : Math.min(overallProgress / 0.2, 1);
+  const globeY = isMobile ? 0 : (1 - riseT) * 30;
 
-  // Phase 2 — Transition (20%→50%): globe shrinks + moves left, sidebar appears
-  const transitionT = Math.min(Math.max((overallProgress - 0.2) / 0.3, 0), 1);
+  const transitionT = isMobile ? 1 : Math.min(Math.max((overallProgress - 0.2) / 0.3, 0), 1);
 
-  // Globe width: full width → 55%
-  const globeFlexPercent = 100 - transitionT * 45;
+  const globeFlexPercent = isMobile ? 55 : 100 - transitionT * 45;
+  const globeTranslateX = isMobile ? 0 : (1 - transitionT);
 
-  // Globe centering: translateX fades as sidebar takes its slot
-  const globeTranslateX = (1 - transitionT);
-
-  // Sidebar: slides in from right
-  const sidebarOpacity = transitionT;
-  const sidebarX = (1 - transitionT) * 60;
+  const sidebarOpacity = isMobile ? 1 : transitionT;
+  const sidebarX = isMobile ? 0 : (1 - transitionT) * 60;
 
   const setItemRef = useCallback((name) => (el) => {
     if (el) itemRefs.current.set(name, el);
@@ -286,7 +284,7 @@ export default function Skills() {
         sectionRef.current = el;
       }}
       className={`section section--skills reveal${visible ? ' is-visible' : ''}`}
-      style={{ height: '200vh' }}
+      style={isMobile ? {} : { height: '200vh' }}
     >
       <div className="skills-sticky">
         <div className="skills-inner">
@@ -294,7 +292,7 @@ export default function Skills() {
 
           <div
             className="skills-intro"
-            style={{ opacity: 1 - Math.min(overallProgress / 0.2, 1) }}
+            style={{ opacity: isMobile ? 1 : 1 - Math.min(overallProgress / 0.2, 1) }}
           >
             <h2 className="section-title">
               My<span className="section-accent"> toolkit</span>
@@ -334,7 +332,6 @@ export default function Skills() {
               <div
                 className="skills-ring"
                 ref={ringRef}
-                style={{ opacity: transitionT }}
               >
                 <svg ref={svgRef} className="skills-connections" />
                 {filteredSkills.map((skill) => {
@@ -349,8 +346,6 @@ export default function Skills() {
                       className={`skills-ring-item${isSelected ? ' is-selected' : ''}${isRelated ? ' is-related' : ''}${!isSelected && !isRelated && filterGroup ? ' is-dimmed' : ''}`}
                       style={{
                         '--item-color': GROUP_COLORS[skill.group],
-                        left: '50%',
-                        top: '50%',
                       }}
                       onClick={() => handleSelect(skill)}
                     >

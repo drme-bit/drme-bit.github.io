@@ -14,7 +14,7 @@ import ScrollProgressBar from '@/components/ui/ScrollProgressBar/ScrollProgressB
 import SearchBar from '@/components/ui/SearchBar/SearchBar';
 import Mascot, { getMockMessage } from '@/components/ui/Mascot/Mascot';
 import Archive from '@/components/ui/Archive/Archive';
-import BackToTop from '@/components/ui/BackToTop/BackToTop';
+
 import SoundEffects from '@/components/ui/SoundEffects/SoundEffects';
 import Cursor from '@/components/ui/Cursor/Cursor';
 import ChangeTheme from '@/components/ui/ChangeTheme/ChangeTheme.jsx';
@@ -83,7 +83,7 @@ export default function Main() {
         onNavigate={(id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })}
         onArchive={() => { setDrawerOpen(false); setArchiveOpen(true); }}
       />
-      <BackToTop />
+
       <SoundEffects />
       <Outro />
       {archiveOpen && <Archive onClose={() => setArchiveOpen(false)} />}

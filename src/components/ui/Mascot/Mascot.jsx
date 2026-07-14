@@ -150,19 +150,21 @@ function CompanionCube({ size = 36, onClick, anger = 0, shake = false }) {
   const isLight = theme === 'light';
 
   const pct = Math.min(anger, 1);
-  const r = 240 - Math.round(150 * pct);
-  const g = 156 - Math.round(80 * pct);
-  const b = 180 - Math.round(110 * pct);
-  const base = `rgb(${r},${g},${b})`;
-  const dark = `rgb(${Math.round(r * 0.8)},${Math.round(g * 0.8)},${Math.round(b * 0.8)})`;
-  const glow = pct > 0
-    ? `drop-shadow(0 0 ${6 + pct * 18}px rgba(${r},${g},${b},${0.3 + pct * 0.4}))`
-    : `drop-shadow(0 2px 6px rgba(${isLight ? 120 : 212},${isLight ? 80 : 132},${isLight ? 100 : 154},0.4))`;
+  const heartR = 220 + Math.round(35 * pct);
+  const heartG = 120 - Math.round(60 * pct);
+  const heartB = 160 - Math.round(40 * pct);
+  const heartColor = `rgb(${heartR},${heartG},${heartB})`;
+  const heartGlow = `drop-shadow(0 0 ${4 + pct * 12}px rgba(${heartR},${heartG},${heartB},${0.4 + pct * 0.4}))`;
 
-  const strokeAlpha = isLight ? '0.12' : '0.15';
-  const thinStroke = isLight ? '0.06' : '0.08';
-  const highlight = isLight ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.15)';
-  const heartOverlay = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.15)';
+  const baseGray = isLight ? '#b8b4af' : '#6b6966';
+  const darkGray = isLight ? '#9a9590' : '#52504d';
+  const lightGray = isLight ? '#d4d0cb' : '#8a8682';
+  const metalStroke = isLight ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.25)';
+  const thinStroke = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.15)';
+
+  const glow = pct > 0
+    ? heartGlow
+    : `drop-shadow(0 2px 6px rgba(${isLight ? 120 : 180},${isLight ? 80 : 130},${isLight ? 100 : 150},0.35))`;
 
   return (
     <svg
@@ -177,48 +179,100 @@ function CompanionCube({ size = 36, onClick, anger = 0, shake = false }) {
       onClick={onClick}
     >
       <defs>
-        <radialGradient id={`cb-${uid}`} cx="30%" cy="30%">
-          <stop offset="0%" stopColor={base} />
-          <stop offset="100%" stopColor={dark} />
+        <radialGradient id={`cube-${uid}`} cx="35%" cy="35%">
+          <stop offset="0%" stopColor={lightGray} />
+          <stop offset="100%" stopColor={baseGray} />
         </radialGradient>
-        <linearGradient id={`hg-${uid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.7)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0.25)" />
+        <radialGradient id={`heart-${uid}`} cx="50%" cy="40%">
+          <stop offset="0%" stopColor={`rgb(${Math.min(heartR+40,255)},${Math.min(heartG+40,255)},${Math.min(heartB+40,255)})`} />
+          <stop offset="100%" stopColor={heartColor} />
+        </radialGradient>
+        <linearGradient id={`corner-${uid}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={lightGray} />
+          <stop offset="100%" stopColor={darkGray} />
         </linearGradient>
+        <filter id={`glow-${uid}`}>
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
-      <rect x="3" y="3" width="54" height="54" rx="9" fill={`url(#cb-${uid})`} />
-      <rect x="3" y="3" width="54" height="54" rx="9" stroke={`rgba(0,0,0,${strokeAlpha})`} strokeWidth="1" />
-      <rect x="5" y="5" width="14" height="14" rx="4" fill={dark} />
-      <rect x="5" y="5" width="14" height="14" rx="4" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
-      <rect x="41" y="5" width="14" height="14" rx="4" fill={dark} />
-      <rect x="41" y="5" width="14" height="14" rx="4" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
-      <rect x="5" y="41" width="14" height="14" rx="4" fill={dark} />
-      <rect x="5" y="41" width="14" height="14" rx="4" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
-      <rect x="41" y="41" width="14" height="14" rx="4" fill={dark} />
-      <rect x="41" y="41" width="14" height="14" rx="4" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
-      {[[12,12],[48,12],[12,48],[48,48]].map(([cx,cy],i) => (
-        <circle key={i} cx={cx} cy={cy} r="1.5" fill={`rgba(0,0,0,${thinStroke})`} />
-      ))}
-      <path
-        d="M30 40C30 40 18 30 18 24c0-3.5 2.5-5.5 5-4.5 2.5 1 4 2.5 7 5 3-2.5 4.5-4 7-5 2.5-1 5 1 5 4.5 0 6-12 16-12 16z"
-        fill={`url(#hg-${uid})`}
-      />
-      <path
-        d="M24 22.5c-1-0.5-2.5 0.5-2.5 2 0 3 5 8 8.5 11 3.5-3 8.5-8 8.5-11 0-1.5-1.5-2.5-2.5-2-1.5 0.5-3 2.5-6 5.5-3-3-4.5-5-6-5.5z"
-        fill={highlight}
-      />
-      <line x1="21" y1="3" x2="21" y2="57" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
-      <line x1="39" y1="3" x2="39" y2="57" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
-      <line x1="3" y1="21" x2="57" y2="21" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
-      <line x1="3" y1="39" x2="57" y2="39" stroke={`rgba(0,0,0,${thinStroke})`} strokeWidth="0.5" />
-      <rect x="3" y="3" width="54" height="54" rx="9" stroke={heartOverlay} strokeWidth="0.5" />
 
+      {/* Main cube body */}
+      <rect x="4" y="4" width="52" height="52" rx="6" fill={`url(#cube-${uid})`} />
+      <rect x="4" y="4" width="52" height="52" rx="6" stroke={metalStroke} strokeWidth="1.2" />
+
+      {/* Inner border lines — metallic panel look */}
+      <rect x="8" y="8" width="44" height="44" rx="3" fill="none" stroke={thinStroke} strokeWidth="0.7" />
+      <line x1="30" y1="8" x2="30" y2="52" stroke={thinStroke} strokeWidth="0.6" />
+      <line x1="8" y1="30" x2="52" y2="30" stroke={thinStroke} strokeWidth="0.6" />
+
+      {/* Corner plates */}
+      {[
+        { x: 5, y: 5, r: 0 },
+        { x: 41, y: 5, r: 1 },
+        { x: 5, y: 41, r: 2 },
+        { x: 41, y: 41, r: 3 },
+      ].map(({ x, y, r: rot }, i) => (
+        <g key={i} transform={`rotate(${rot * 90} ${x + 7} ${y + 7})`}>
+          <rect x={x} y={y} width="14" height="14" rx="3" fill={`url(#corner-${uid})`} />
+          <rect x={x} y={y} width="14" height="14" rx="3" stroke={metalStroke} strokeWidth="0.8" />
+          {/* Cross pattern on corners */}
+          <line x1={x + 4} y1={y + 7} x2={x + 10} y2={y + 7} stroke={thinStroke} strokeWidth="0.5" />
+          <line x1={x + 7} y1={y + 4} x2={x + 7} y2={y + 10} stroke={thinStroke} strokeWidth="0.5" />
+          <circle cx={x + 7} cy={y + 7} r="1.2" fill={darkGray} />
+        </g>
+      ))}
+
+      {/* Central heart — the iconic pink heart */}
+      <g filter={`url(#glow-${uid})`}>
+        <path
+          d="M30 42
+             C30 42 16 32 16 24
+             C16 20 18.5 17 22 17
+             C25 17 27.5 19 30 22
+             C32.5 19 35 17 38 17
+             C41.5 17 44 20 44 24
+             C44 32 30 42 30 42Z"
+          fill={`url(#heart-${uid})`}
+        />
+        {/* Heart highlight */}
+        <path
+          d="M30 40
+             C30 40 18 31 18 24.5
+             C18 21 20 18.5 22.5 18.5
+             C25 18.5 27 20 30 23
+             C33 20 35 18.5 37.5 18.5
+             C40 18.5 42 21 42 24.5
+             C42 31 30 40 30 40Z"
+          fill="rgba(255,255,255,0.2)"
+        />
+      </g>
+
+      {/* Small accent dots around heart */}
+      {[[30, 14], [30, 46], [14, 30], [46, 30]].map(([cx, cy], i) => (
+        <circle key={i} cx={cx} cy={cy} r="1" fill={darkGray} opacity="0.4" />
+      ))}
+
+      {/* Edge notches — mechanical detail */}
+      {[15, 30, 45].map((pos) => (
+        <g key={pos}>
+          <rect x={pos - 1.5} y="4" width="3" height="2" rx="0.5" fill={darkGray} opacity="0.3" />
+          <rect x={pos - 1.5} y="54" width="3" height="2" rx="0.5" fill={darkGray} opacity="0.3" />
+          <rect x="4" y={pos - 1.5} width="2" height="3" rx="0.5" fill={darkGray} opacity="0.3" />
+          <rect x="54" y={pos - 1.5} width="2" height="3" rx="0.5" fill={darkGray} opacity="0.3" />
+        </g>
+      ))}
+
+      {/* Anger marks */}
       {anger > 0.3 && (
-        <g stroke={`rgb(${r},${g},${b})`} strokeWidth="1.5" strokeLinecap="round" opacity={pct}>
-          <line x1="18" y1="8" x2="14" y2="1" />
-          <line x1="22" y1="6" x2="20" y2="0" />
-          <line x1="42" y1="8" x2="46" y2="1" />
-          <line x1="38" y1="6" x2="40" y2="0" />
+        <g stroke={heartColor} strokeWidth="1.5" strokeLinecap="round" opacity={pct}>
+          <line x1="17" y1="9" x2="13" y2="2" />
+          <line x1="21" y1="7" x2="19" y2="1" />
+          <line x1="43" y1="9" x2="47" y2="2" />
+          <line x1="39" y1="7" x2="41" y2="1" />
         </g>
       )}
     </svg>

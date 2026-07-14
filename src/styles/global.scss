@@ -328,8 +328,8 @@ body.light {
 .archive-fab {
   position: fixed;
   right: 1.5rem;
-  bottom: 4rem;
-  z-index: 149;
+  bottom: 1.5rem;
+  z-index: 151;
   background: var(--glass-strong);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -450,7 +450,7 @@ body.light {
 }
 
 @media (max-width: 700px) {
-  .archive-fab { right: 1rem; bottom: 3.5rem; }
+  .archive-fab { right: 1rem; bottom: 4rem; }
   body::after { display: none; }
 }
 

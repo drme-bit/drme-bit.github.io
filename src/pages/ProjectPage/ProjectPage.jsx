@@ -1,30 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FiHome, FiChevronLeft, FiChevronRight, FiGithub, FiExternalLink, FiCheck, FiCode, FiAlertCircle, FiMonitor } from 'react-icons/fi';
+import { FiHome, FiChevronLeft, FiChevronRight, FiGithub, FiExternalLink, FiCheck, FiCode, FiAlertCircle } from 'react-icons/fi';
 import { getProjectById, getProjectIndex, PROJECTS } from '@/data/projectsData';
 import './ProjectPage.scss';
+
+function useIsMobile(breakpoint = 700) {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= breakpoint : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    setIsMobile(mq.matches);
+    return () => mq.removeEventListener('change', handler);
+  }, [breakpoint]);
+  return isMobile;
+}
 
 const STATUS_META = {
   ACTIVE: { icon: '●', cls: 'badge--active', label: 'active' },
   ARCHIVED: { icon: '◌', cls: 'badge--archived', label: 'archived' },
-};
-
-const PRESENTATION_META = {
-  patch: {
-    cls: 'pp-page--patch',
-    eyebrow: 'release notes',
-    hint: 'structured like a patch breakdown',
-  },
-  classic: {
-    cls: 'pp-page--classic',
-    eyebrow: 'project profile',
-    hint: 'structured like a case study',
-  },
-  compact: {
-    cls: 'pp-page--compact',
-    eyebrow: 'snapshot',
-    hint: 'compressed and data-heavy',
-  },
 };
 
 function splitParagraphs(text) {
@@ -99,49 +95,10 @@ function buildDefaultSections(project) {
   return sections;
 }
 
-function normalizeSection(section) {
-  if (!section) return null;
-
-  return {
-    variant: 'default',
-    ...section,
-  };
-}
-
-function buildSidebarFacts(project, meta, stageWeeks) {
-  if (Array.isArray(project.facts) && project.facts.length > 0) {
-    return project.facts;
-  }
-
-  const facts = [{ label: 'Status', value: meta.label }];
-
-  if (Array.isArray(project.tech) && project.tech.length > 0) {
-    facts.push({ label: 'Stack', value: project.tech.join(' · ') });
-  }
-
-  if (stageWeeks > 0) {
-    facts.push({ label: 'Timeline', value: `${stageWeeks}+ weeks` });
-  }
-
-  if (Array.isArray(project.stages) && project.stages.length > 0) {
-    facts.push({ label: 'Stages', value: `${project.stages.length} sections` });
-  }
-
-  if (Array.isArray(project.features) && project.features.length > 0) {
-    facts.push({ label: 'Features', value: `${project.features.length} items` });
-  }
-
-  return facts;
-}
-
-function getPresentation(project) {
-  const preset = project.presentation?.mode || project.presentation?.layout || 'classic';
-  return PRESENTATION_META[preset] || PRESENTATION_META.classic;
-}
-
 function GalleryCarousel({ images }) {
   const [current, setCurrent] = useState(0);
   const [fullscreen, setFullscreen] = useState(null);
+  const isMobile = useIsMobile();
 
   const prev = () => setCurrent(c => (c === 0 ? images.length - 1 : c - 1));
   const next = () => setCurrent(c => (c === images.length - 1 ? 0 : c + 1));
@@ -156,6 +113,8 @@ function GalleryCarousel({ images }) {
     return () => window.removeEventListener('keydown', h);
   }, []);
 
+  const handleImgClick = isMobile ? undefined : () => setFullscreen(images[current] || images[0]);
+
   if (images.length === 1) {
     return (
       <div className="pp-gallery">
@@ -164,10 +123,10 @@ function GalleryCarousel({ images }) {
             src={images[0]}
             alt=""
             className="pp-gallery-img"
-            onClick={() => setFullscreen(images[0])}
+            onClick={isMobile ? undefined : () => setFullscreen(images[0])}
           />
         </div>
-        {fullscreen && (
+        {!isMobile && fullscreen && (
           <div className="pp-gallery-fullscreen" onClick={() => setFullscreen(null)}>
             <img src={fullscreen} alt="" className="pp-gallery-fullscreen-img" />
           </div>
@@ -179,29 +138,31 @@ function GalleryCarousel({ images }) {
   return (
     <div className="pp-gallery">
       <div className="pp-gallery-main">
-        <button className="pp-gallery-arrow pp-gallery-arrow--prev" onClick={prev}>
-          <FiChevronLeft size={18} />
+        <button className="pp-gallery-zone pp-gallery-zone--prev" onClick={prev} aria-label="Previous">
+          <span className="pp-gallery-zone-shadow" />
         </button>
         <img
           src={images[current]}
           alt=""
           className="pp-gallery-img"
-          onClick={() => setFullscreen(images[current])}
+          onClick={handleImgClick}
         />
-        <button className="pp-gallery-arrow pp-gallery-arrow--next" onClick={next}>
-          <FiChevronRight size={18} />
+        <button className="pp-gallery-zone pp-gallery-zone--next" onClick={next} aria-label="Next">
+          <span className="pp-gallery-zone-shadow" />
         </button>
       </div>
-      <div className="pp-gallery-dots">
-        {images.map((_, i) => (
+      <div className="pp-gallery-thumbs">
+        {images.map((src, i) => (
           <button
             key={i}
-            className={`pp-gallery-dot${i === current ? ' is-active' : ''}`}
+            className={`pp-gallery-thumb${i === current ? ' is-active' : ''}`}
             onClick={() => setCurrent(i)}
-          />
+          >
+            <img src={src} alt="" />
+          </button>
         ))}
       </div>
-      {fullscreen && (
+      {!isMobile && fullscreen && (
         <div className="pp-gallery-fullscreen" onClick={() => setFullscreen(null)}>
           <img src={fullscreen} alt="" className="pp-gallery-fullscreen-img" />
         </div>
@@ -213,14 +174,14 @@ function GalleryCarousel({ images }) {
 function renderSectionContent(section) {
   if (section.type === 'timeline' && Array.isArray(section.items)) {
     return (
-      <div className={`pp-stages pp-stages--${section.variant || 'default'}`}>
+      <div className="pp-stages">
         {section.items.map((stage, i) => (
           <div key={stage.title || i} className="pp-stage">
             <div className="pp-stage-marker">
               <span className="pp-stage-num">{String(i + 1).padStart(2, '0')}</span>
               {i < section.items.length - 1 && <div className="pp-stage-line" />}
             </div>
-            <div className="pp-stage-card">
+            <div className="pp-stage-content">
               <div className="pp-stage-head">
                 <h3 className="pp-stage-title">{stage.title}</h3>
                 {stage.duration && <span className="pp-stage-duration">{stage.duration}</span>}
@@ -235,12 +196,10 @@ function renderSectionContent(section) {
 
   if (section.type === 'list' && Array.isArray(section.items)) {
     return (
-      <div className={`pp-features pp-features--${section.variant || 'default'}`}>
+      <div className="pp-features">
         {section.items.map((item, i) => (
           <div key={item} className="pp-feature-item">
-            <div className="pp-feature-check">
-              <FiCheck size={12} />
-            </div>
+            <FiCheck size={14} className="pp-feature-check" />
             <span>{item}</span>
           </div>
         ))}
@@ -250,7 +209,7 @@ function renderSectionContent(section) {
 
   if (section.type === 'cards' && Array.isArray(section.cards)) {
     return (
-      <div className={`pp-arch-cards pp-arch-cards--${section.variant || 'default'}`}>
+      <div className="pp-arch-cards">
         {section.cards.map((card, i) => {
           const CardIcon = card.icon || FiCode;
           return (
@@ -267,79 +226,13 @@ function renderSectionContent(section) {
     );
   }
 
-  if (section.type === 'stats' && Array.isArray(section.items)) {
-    return (
-      <div className={`pp-stats-grid pp-stats-grid--${section.variant || 'default'}`}>
-        {section.items.map((item) => (
-          <div key={item.label} className="pp-stat-card">
-            <span className="pp-stat-label">{item.label}</span>
-            <span className="pp-stat-value">{item.value}</span>
-            {item.note && <span className="pp-stat-note">{item.note}</span>}
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (section.type === 'quote') {
-    return (
-      <blockquote className={`pp-quote pp-quote--${section.variant || 'default'}`}>
-        <p>{section.body}</p>
-        {section.byline && <footer>{section.byline}</footer>}
-      </blockquote>
-    );
-  }
-
-  if (section.type === 'callout') {
-    return (
-      <div className={`pp-callout pp-callout--${section.variant || 'default'}`}>
-        {section.calloutLabel && <span className="pp-callout-label">{section.calloutLabel}</span>}
-        <p>{section.body}</p>
-      </div>
-    );
-  }
-
-  if (section.type === 'grid' && Array.isArray(section.items)) {
-    return (
-      <div className={`pp-grid pp-grid--${section.variant || 'default'}`}>
-        {section.items.map((item) => (
-          <article key={item.title} className="pp-grid-card">
-            <h3>{item.title}</h3>
-            <p>{item.body}</p>
-            {item.meta && <span className="pp-grid-meta">{item.meta}</span>}
-          </article>
-        ))}
-      </div>
-    );
-  }
-
-  if (section.type === 'split' && Array.isArray(section.columns)) {
-    return (
-      <div className={`pp-split pp-split--${section.variant || 'default'}`}>
-        {section.columns.map((column, i) => (
-          <div key={column.title || i} className="pp-split-column">
-            {column.title && <h3>{column.title}</h3>}
-            {(column.body ? splitParagraphs(column.body) : []).map((paragraph, idx) => (
-              <p key={idx}>{paragraph}</p>
-            ))}
-            {Array.isArray(column.items) && (
-              <ul>
-                {column.items.map((item) => <li key={item}>{item}</li>)}
-              </ul>
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   if (section.type === 'gallery' && Array.isArray(section.items)) {
     return <GalleryCarousel images={section.items} />;
   }
 
   if (section.type === 'text') {
     return (
-      <div className={`pp-content-body pp-content-body--${section.variant || 'default'}`}>
+      <div className="pp-content-body">
         {splitParagraphs(Array.isArray(section.body) ? section.body.join('\n\n') : section.body).map((paragraph, i) => (
           <p key={i}>{paragraph}</p>
         ))}
@@ -354,7 +247,7 @@ export default function ProjectPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const project = getProjectById(id);
-  const scrollRef = useRef(null);
+  const [activeSection, setActiveSection] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -365,16 +258,14 @@ export default function ProjectPage() {
   }, [project, navigate]);
 
   const meta = project ? STATUS_META[project.status] || STATUS_META.ARCHIVED : null;
-  const presentation = project ? getPresentation(project) : null;
   const currentIndex = project ? getProjectIndex(id) : -1;
   const prevProject = currentIndex > 0 ? PROJECTS[currentIndex - 1] : null;
   const nextProject = project && currentIndex < PROJECTS.length - 1 ? PROJECTS[currentIndex + 1] : null;
   const contentSections = project
     ? (Array.isArray(project.sections) && project.sections.length > 0
-      ? project.sections.map(normalizeSection).filter(Boolean)
+      ? project.sections
       : buildDefaultSections(project))
     : [];
-  const [activeSection, setActiveSection] = useState(contentSections[0]?.id || 'overview');
 
   const links = [];
   if (project?.url && project.url !== '#') {
@@ -383,18 +274,6 @@ export default function ProjectPage() {
   if (project?.repo) {
     links.push({ label: 'Source Code', url: project.repo });
   }
-
-  const scrollTo = (sectionId) => {
-    document.getElementById(`section-${sectionId}`)?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const stageWeeks = project && Array.isArray(project.stages)
-    ? project.stages.reduce((acc, s) => {
-      const nums = s.duration.match(/\d+/g);
-      return nums ? acc + Math.max(...nums.map(Number)) : acc;
-    }, 0)
-    : 0;
-  const sidebarFacts = project ? buildSidebarFacts(project, meta, stageWeeks) : [];
 
   useEffect(() => {
     if (!project) return;
@@ -405,7 +284,7 @@ export default function ProjectPage() {
         ([entry]) => {
           if (entry.isIntersecting) setActiveSection(section.id);
         },
-        { threshold: 0.35 },
+        { threshold: 0.3 },
       );
       observer.observe(el);
       return observer;
@@ -417,90 +296,77 @@ export default function ProjectPage() {
   if (!project) return null;
 
   return (
-    <div className="project-page" ref={scrollRef}>
-      <div className={`project-page-shell ${presentation.cls}`}>
-
+    <div className="project-page">
+      {/* Top Nav */}
       <nav className="pp-nav">
-        <div className="pp-nav-inner">
-          <Link to="/" className="pp-nav-brand">
-            <FiHome size={16} />
-            home
-          </Link>
-
-          <div className="pp-nav-center">
-            {contentSections.map((s) => (
-              <button
-                key={s.id}
-                className={`pp-nav-link${activeSection === s.id ? ' is-active' : ''}`}
-                onClick={() => scrollTo(s.id)}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="pp-nav-adjacent">
-            {prevProject && (
-              <Link to={`/project/${prevProject.id}`} className="pp-nav-arrow">
-                <FiChevronLeft size={14} />
-              </Link>
-            )}
-            {nextProject && (
-              <Link to={`/project/${nextProject.id}`} className="pp-nav-arrow">
-                <FiChevronRight size={14} />
-              </Link>
-            )}
-          </div>
+        <Link to="/" className="pp-nav-home">
+          <FiHome size={12} />
+        </Link>
+        <div className="pp-nav-divider" />
+        <div className="pp-nav-sections">
+          {contentSections.map((s) => (
+            <button
+              key={s.id}
+              className={`pp-nav-link${activeSection === s.id ? ' is-active' : ''}`}
+              onClick={() => document.getElementById(`section-${s.id}`)?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <div className="pp-nav-divider" />
+        <div className="pp-nav-arrows">
+          {prevProject && (
+            <Link to={`/project/${prevProject.id}`} className="pp-nav-arrow">
+              <FiChevronLeft size={14} />
+            </Link>
+          )}
+          {nextProject && (
+            <Link to={`/project/${nextProject.id}`} className="pp-nav-arrow">
+              <FiChevronRight size={14} />
+            </Link>
+          )}
         </div>
       </nav>
 
+      {/* Hero */}
       <header className="pp-hero">
-        <div className="pp-hero-bg">
-          {project.video ? (
-            <video
-              className="pp-hero-bg-media pp-hero-bg-media--video"
-              src={project.video}
-              autoPlay
-              muted
-              loop
-            />
-          ) : project.image ? (
-            <img
-              className="pp-hero-bg-media pp-hero-bg-media--image"
-              src={project.image}
-              alt=""
-            />
-          ) : null}
-          <div className="pp-hero-bg-overlay" />
-          <div className="pp-hero-bg-fade" />
-          <div className="pp-hero-grid" />
-        </div>
-
-        <div className="pp-hero-inner">
-          <div className="pp-hero-eyebrow-row">
-            <span className="pp-hero-eyebrow">{presentation.eyebrow}</span>
-            <span className="pp-hero-hint">{presentation.hint}</span>
+        {(project.video || project.image) && (
+          <div className="pp-hero-bg">
+            {project.video ? (
+              <video
+                src={project.video}
+                className="pp-hero-bg-video"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            ) : (
+              <img src={project.image} alt="" className="pp-hero-bg-img" />
+            )}
+            <div className="pp-hero-bg-overlay" />
+            <div className="pp-hero-bg-fade" />
           </div>
-
+        )}
+        <div className="pp-hero-inner">
           <div className="pp-hero-breadcrumb">
             <Link to="/">home</Link>
-            <span className="pp-hero-bc-sep">/</span>
-            <span>projects</span>
-            <span className="pp-hero-bc-sep">/</span>
+            <span>/</span>
+            <Link to="/#projects">projects</Link>
+            <span>/</span>
             <span className="pp-hero-bc-current">{project.id}</span>
           </div>
-
-          <div className="pp-hero-title-row">
-            <div className="pp-hero-counter">
-              <span className="pp-hero-counter-current">{String(currentIndex + 1).padStart(2, '0')}</span>
-              <span className="pp-hero-counter-sep">/</span>
-              <span className="pp-hero-counter-total">{String(PROJECTS.length).padStart(2, '0')}</span>
-            </div>
-            <h1 className="pp-hero-title">{project.title}</h1>
-          </div>
-
+          <h1 className="pp-hero-title">{project.title}</h1>
           <p className="pp-hero-desc">{project.desc}</p>
-
+          <div className="pp-hero-meta">
+            <span className={`pp-hero-status ${meta.cls}`}>
+              {meta.icon} {meta.label}
+            </span>
+            <span className="pp-hero-counter">
+              {String(currentIndex + 1).padStart(2, '0')} / {String(PROJECTS.length).padStart(2, '0')}
+            </span>
+          </div>
           <div className="pp-hero-actions">
             {links.map((link) => (
               <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="pp-btn">
@@ -512,129 +378,97 @@ export default function ProjectPage() {
         </div>
       </header>
 
-      <div className="pp-layout">
-        <aside className="pp-sidebar">
-          <div className="pp-sidebar-sticky">
-            {sidebarFacts.map((fact) => (
-              <div key={fact.label} className="pp-sidebar-section">
-                <span className="pp-sidebar-label">{fact.label}</span>
-                {fact.label === 'Status' ? (
-                  <span className={`pp-status ${meta.cls}`}>
-                    <span className="pp-status-dot">{meta.icon}</span>
-                    {fact.value}
-                  </span>
-                ) : fact.label === 'Stack' && typeof fact.value === 'string' && fact.value.includes('·') ? (
-                  <div className="pp-sidebar-tags">
-                    {fact.value.split(' · ').map((item) => (
-                      <span key={item} className="pp-tag">{item}</span>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="pp-sidebar-stat">{fact.value}</span>
-                )}
-              </div>
-            ))}
-
-            <nav className="pp-sidebar-nav">
-              <span className="pp-sidebar-label">On this page</span>
-              {contentSections.map((s) => (
-                <button key={s.id} className="pp-sidebar-nav-link" onClick={() => scrollTo(s.id)}>
-                  {s.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </aside>
-
+      {/* Content */}
+      <div className="pp-content">
+        {/* Main Content */}
         <main className="pp-main">
           {contentSections.map((section, index) => (
-            <section key={section.id} id={`section-${section.id}`} className={`pp-content-section pp-content-section--${section.type || 'text'} pp-content-section--${section.variant || 'default'}`}>
-              <div className="pp-content-header">
-                <span className="pp-content-number">{String(index + 1).padStart(2, '0')}</span>
-                <h2 className="pp-content-title">{section.label}</h2>
-                {section.note && <span className="pp-content-note">{section.note}</span>}
+            <section key={section.id} id={`section-${section.id}`} className="pp-section">
+              <div className="pp-section-header">
+                <span className="pp-section-number">{String(index + 1).padStart(2, '0')}</span>
+                <h2 className="pp-section-title">{section.label}</h2>
               </div>
-
               {renderSectionContent(section)}
             </section>
           ))}
         </main>
 
-        <aside className="pp-right">
-          <div className="pp-right-sticky">
-            {project.logo ? (
-              <div className="pp-right-preview">
-                <img src={project.logo} alt={`${project.title} logo`} />
-              </div>
-            ) : project.image ? (
-              <div className="pp-right-preview">
-                <img src={project.image} alt={project.title} />
-              </div>
-            ) : (
-              <div className="pp-right-preview pp-right-preview--empty">
-                <FiMonitor size={32} />
+        {/* Right Sidebar */}
+        <aside className="pp-right-sidebar">
+          <div className="pp-right-sidebar-sticky">
+            {/* Links */}
+            {links.length > 0 && (
+              <div className="pp-right-section">
+                <span className="pp-right-label">Links</span>
+                <div className="pp-right-links">
+                  {links.map((link) => (
+                    <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="pp-right-link">
+                      {link.label === 'Source Code' ? <FiGithub size={12} /> : <FiExternalLink size={12} />}
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
               </div>
             )}
 
+            {/* Status */}
             <div className="pp-right-section">
-              <span className="pp-right-label">Technologies</span>
-              <div className="pp-right-tech">
+              <span className="pp-right-label">Status</span>
+              <span className={`pp-right-status ${meta.cls}`}>
+                {meta.icon} {meta.label}
+              </span>
+              <span className="pp-right-counter">
+                {String(currentIndex + 1).padStart(2, '0')} / {String(PROJECTS.length).padStart(2, '0')}
+              </span>
+            </div>
+
+            {/* Stack */}
+            <div className="pp-right-section">
+              <span className="pp-right-label">Stack</span>
+              <div className="pp-right-stack">
                 {project.tech.map((t) => (
-                  <div key={t} className="pp-right-tech-item">
-                    <div className="pp-right-tech-dot" />
-                    <span>{t}</span>
-                  </div>
+                  <span key={t} className="pp-right-tag">{t}</span>
                 ))}
               </div>
             </div>
 
+            {/* Navigation */}
             <div className="pp-right-section">
-              <span className="pp-right-label">Quick Links</span>
-              <div className="pp-right-links">
-                {links.map((link) => (
-                  <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="pp-right-link">
-                    <FiExternalLink size={12} />
-                    {link.label}
-                  </a>
+              <span className="pp-right-label">Sections</span>
+              <nav className="pp-right-nav">
+                {contentSections.map((s) => (
+                  <button
+                    key={s.id}
+                    className={`pp-right-nav-link${activeSection === s.id ? ' is-active' : ''}`}
+                    onClick={() => document.getElementById(`section-${s.id}`)?.scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    {s.label}
+                  </button>
                 ))}
-              </div>
+              </nav>
             </div>
           </div>
         </aside>
       </div>
 
-      <nav className="pp-bottom-nav" aria-label="Project navigation">
+      {/* Bottom Nav */}
+      <nav className="pp-bottom-nav">
+        {prevProject && (
+          <Link to={`/project/${prevProject.id}`} className="pp-bottom-nav-btn">
+            <FiChevronLeft size={14} />
+            <span>{prevProject.title}</span>
+          </Link>
+        )}
         <Link to="/" className="pp-bottom-nav-home">
           <FiHome size={14} />
-          home
         </Link>
-
-        <div className="pp-bottom-nav-center">
-          {contentSections.map((s) => (
-            <button
-              key={s.id}
-              className={`pp-bottom-nav-link${activeSection === s.id ? ' is-active' : ''}`}
-              onClick={() => scrollTo(s.id)}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="pp-bottom-nav-adjacent">
-          {prevProject && (
-            <Link to={`/project/${prevProject.id}`} className="pp-bottom-nav-arrow" aria-label="Previous project">
-              <FiChevronLeft size={14} />
-            </Link>
-          )}
-          {nextProject && (
-            <Link to={`/project/${nextProject.id}`} className="pp-bottom-nav-arrow" aria-label="Next project">
-              <FiChevronRight size={14} />
-            </Link>
-          )}
-        </div>
+        {nextProject && (
+          <Link to={`/project/${nextProject.id}`} className="pp-bottom-nav-btn pp-bottom-nav-btn--next">
+            <span>{nextProject.title}</span>
+            <FiChevronRight size={14} />
+          </Link>
+        )}
       </nav>
-      </div>
     </div>
   );
 }

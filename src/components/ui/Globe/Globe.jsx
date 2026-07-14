@@ -75,8 +75,15 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
 
   useEffect(() => {
     createGlobeInstance()
+    let frame = 0
+    const isMobile = window.innerWidth <= 768
 
     const tick = () => {
+      frame++
+      if (isMobile && frame % 3 !== 0) {
+        rafRef.current = requestAnimationFrame(tick)
+        return
+      }
       if (!dragRef.current.active && !pauseRef.current) {
         phiRef.current += 0.004 + scrollRef.current * 0.002
       }
