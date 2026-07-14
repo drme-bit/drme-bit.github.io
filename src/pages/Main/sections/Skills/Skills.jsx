@@ -72,32 +72,25 @@ export default function Skills() {
     []
   );
 
-  // Project skills onto 2D + draw connection lines — runs every frame
+  // Project skills onto 2D + draw connection lines
   useEffect(() => {
-    let raf;
-    let frame = 0;
-    const isMobile = window.innerWidth <= 768;
     const nameIdxMap = new Map(SKILLS_DATA.map((s, i) => [s.name, i]));
     let cachedAccent = '#7dd3fc';
     let cachedGhost = 'rgba(255,255,255,0.17)';
     let colorFrame = 0;
 
-      const tick = () => {
-      frame++;
-      if (isMobile && frame % 5 !== 0) { raf = requestAnimationFrame(tick); return; }
+    const tick = () => {
       const globeWrap = globeWrapRef.current;
       const ring = ringRef.current;
       const svg = svgRef.current;
-      if (!globeWrap || !ring) { raf = requestAnimationFrame(tick); return; }
+      if (!globeWrap || !ring) return;
 
-      // Read actual dimensions every frame for accurate projection
       const w = globeWrap.clientWidth;
       const h = globeWrap.clientHeight;
       const phi = phiRef.current;
       const cosPhi = Math.cos(phi);
       const sinPhi = Math.sin(phi);
 
-      // Read computed colors every 30 frames to avoid getComputedStyle overhead
       colorFrame++;
       if (colorFrame % 30 === 0) {
         const cs = getComputedStyle(document.body);
@@ -105,14 +98,12 @@ export default function Skills() {
         cachedGhost = cs.getPropertyValue('--text-ghost').trim() || 'rgba(255,255,255,0.17)';
       }
 
-      // z → opacity: front (z=1) → 1.0, equator (z=0) → 0.6, behind (z<0) → fades to 0
       const zToOpacity = (z) => {
         if (z < -0.15) return 0;
         if (z < 0) return ((z + 0.15) / 0.15) * 0.6;
         return 0.6 + z * 0.4;
       };
 
-      // Project each skill and cache positions
       posCache.current.clear();
       itemRefs.current.forEach((el, name) => {
         if (!el) return;
@@ -138,8 +129,7 @@ export default function Skills() {
         posCache.current.set(name, { x: cx, y: cy, z: rz });
       });
 
-      // Draw SVG connection lines between related skills (skip on mobile for perf)
-      if (svg && !isMobile) {
+      if (svg) {
         const lines = [];
         const selectedName = selected?.name;
 
@@ -154,13 +144,11 @@ export default function Skills() {
 
             const isHighlighted = selectedName === skill.name || selectedName === relName;
 
-            // Fade by average z-depth of both endpoints
             const avgZ = (from.z + to.z) / 2;
             const baseOpacity = isHighlighted ? 0.6 : 0.15;
             const opacity = baseOpacity * zToOpacity(avgZ);
             if (opacity < 0.01) return;
 
-            // Compute midpoint on sphere surface for curved path
             const fi = nameIdxMap.get(skill.name);
             const ti = nameIdxMap.get(relName);
             if (fi === undefined || ti === undefined) return;
@@ -177,7 +165,6 @@ export default function Skills() {
             const midX = w / 2 + midRx * (w * 0.44);
             const midY = h / 2 - midRy * (h * 0.44);
 
-            // Bulge midpoint outward from globe center
             const dx = (from.x + to.x) / 2 - w / 2;
             const dy = (from.y + to.y) / 2 - h / 2;
             const dist = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -197,11 +184,24 @@ export default function Skills() {
 
         svg.innerHTML = lines.join('');
       }
-
-      raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+
+    // Use setInterval for consistent framerate on mobile, rAF on desktop
+    const isMobile = window.innerWidth <= 768;
+    let intervalId;
+    let rafId;
+
+    if (isMobile) {
+      intervalId = setInterval(tick, 1000 / 30); // 30fps, stable
+    } else {
+      const rafLoop = () => { tick(); rafId = requestAnimationFrame(rafLoop); };
+      rafId = requestAnimationFrame(rafLoop);
+    }
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [skillPositions, filteredSkills, selected]);
 
   const relatedNames = useMemo(() => {
@@ -255,20 +255,16 @@ export default function Skills() {
   ) : null;
 
   // Smooth scroll-driven animation (0→1 over 300vh)
-  // 0→0.2:   globe rises from bottom, only top half visible → fully visible
-  // 0.2→0.5: globe holds, then shrinks to 55% + shifts left, sidebar slides in
-  // 0.5→1:   normal layout
-
-  // On mobile: skip scroll animation, show final layout directly
-  const riseT = isMobile ? 1 : Math.min(overallProgress / 0.2, 1);
-  const globeY = isMobile ? 0 : (1 - riseT) * 30;
+  // On mobile: simplified version — globe takes full width, sidebar below
+  const riseT = isMobile ? Math.min(overallProgress / 0.15 + 0.3, 1) : Math.min(overallProgress / 0.2, 1);
+  const globeY = isMobile ? (1 - riseT) * 20 : (1 - riseT) * 30;
 
   const transitionT = isMobile ? 1 : Math.min(Math.max((overallProgress - 0.2) / 0.3, 0), 1);
 
-  const globeFlexPercent = isMobile ? 55 : 100 - transitionT * 45;
+  const globeFlexPercent = isMobile ? 100 : 100 - transitionT * 45;
   const globeTranslateX = isMobile ? 0 : (1 - transitionT);
 
-  const sidebarOpacity = isMobile ? 1 : transitionT;
+  const sidebarOpacity = isMobile ? (visible ? 1 : 0) : transitionT;
   const sidebarX = isMobile ? 0 : (1 - transitionT) * 60;
 
   const setItemRef = useCallback((name) => (el) => {
@@ -284,7 +280,7 @@ export default function Skills() {
         sectionRef.current = el;
       }}
       className={`section section--skills reveal${visible ? ' is-visible' : ''}`}
-      style={isMobile ? {} : { height: '200vh' }}
+      style={{ height: isMobile ? '150vh' : '200vh' }}
     >
       <div className="skills-sticky">
         <div className="skills-inner">

@@ -485,29 +485,35 @@
 
   .skills-phase {
     flex-direction: column;
-    gap: 2rem;
-    padding: 1rem 0;
+    gap: 0;
+    padding: 0;
     top: 0;
   }
 
   .skills-globe-container {
     flex: none;
-    max-width: 350px;
     width: 100%;
-    aspect-ratio: auto;
-    height: min(350px, 50vh);
+    aspect-ratio: 1;
+    max-height: 50vh;
+    margin: 0 auto 2rem;
+  }
+
+  .skills-ring {
+    clip-path: none;
   }
 
   .skills-ring-item {
-    padding: 0.2rem 0.3rem;
+    padding: 0.2rem 0.35rem;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
 
   .skills-ring-icon {
-    font-size: 0.7rem;
+    font-size: 0.85rem;
   }
 
   .skills-ring-label {
-    font-size: 0.35rem;
+    font-size: 0.4rem;
   }
 
   .skills-sidebar {
@@ -525,6 +531,7 @@
   .skills-globe-container {
     width: 100%;
     max-width: 100%;
+    aspect-ratio: 1;
   }
 
   .skills-phase {
