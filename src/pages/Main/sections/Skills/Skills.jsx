@@ -192,7 +192,7 @@ export default function Skills() {
     let rafId;
 
     if (isMobile) {
-      intervalId = setInterval(tick, 1000 / 30); // 30fps, stable
+      intervalId = setInterval(tick, 1000 / 120); // 120fps, stable
     } else {
       const rafLoop = () => { tick(); rafId = requestAnimationFrame(rafLoop); };
       rafId = requestAnimationFrame(rafLoop);
