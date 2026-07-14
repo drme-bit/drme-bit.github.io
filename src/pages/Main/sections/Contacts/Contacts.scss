@@ -1,150 +1,229 @@
 /* =================================================================
-   CONTACTS SECTION - Coal-White Theme
-   Glass cards, glowing inputs, gradient button
+   CONTACTS SECTION — Glowing Bento Grid
+   Glass cards, glow borders, animated background
    ================================================================= */
 
-/* --- Layout --- */
-.contact-grid {
+/* --- Bento Grid Layout --- */
+.contact-bento {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(140px, auto);
+  gap: 1rem;
   margin-bottom: 2.5rem;
+  position: relative;
 }
 
-/* --- Groups --- */
-.contact-groups {
+/* --- Base Card --- */
+.bento-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-}
-
-.contact-group-heading {
-  font-family: var(--font-mono);
-  font-size: clamp(0.5rem, 0.65vw, 0.6rem);
-  font-weight: 400;
-  color: var(--text-dim);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  margin: 0 0 0.5rem;
-  user-select: none;
-}
-
-.contact-group-bracket {
-  color: var(--text-ghost);
-}
-
-.contact-group-items {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-/* --- Contact Item --- */
-.contact-item {
-  display: grid;
-  grid-template-columns: 1.25rem 4.5rem 1fr 1rem;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.65rem 0.8rem;
-  text-decoration: none;
-  border-radius: var(--radius-sm);
-  transition: background 0.2s var(--ease-out),
-              transform 0.2s var(--ease-out);
-  cursor: pointer;
-  border: none;
-  background: none;
-  font: inherit;
-  text-align: left;
-  width: 100%;
-
-  &:hover {
-    background: var(--glass);
-    transform: translateX(4px);
-  }
-}
-
-.contact-item--disabled {
-  opacity: 0.3;
-  pointer-events: none;
-}
-
-.contact-item-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(0.65rem, 0.85vw, 0.75rem);
-  color: var(--text-ghost);
-  transition: color 0.2s var(--ease-out);
-}
-
-.contact-item:hover .contact-item-icon {
-  color: var(--accent-secondary);
-}
-
-.contact-item-label {
-  font-family: var(--font-mono);
-  font-size: clamp(0.5rem, 0.65vw, 0.55rem);
-  color: var(--text-dim);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  transition: color 0.2s var(--ease-out);
-}
-
-.contact-item:hover .contact-item-label {
-  color: var(--text-secondary);
-}
-
-.contact-item-value {
-  font-family: var(--font-sans);
-  font-weight: 400;
-  font-size: clamp(0.8rem, 1vw, 0.9rem);
-  color: var(--text-secondary);
-  transition: color 0.2s var(--ease-out);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.contact-item:hover .contact-item-value {
-  color: var(--accent-secondary);
-}
-
-.contact-item-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(0.5rem, 0.65vw, 0.55rem);
-  color: var(--text-ghost);
-  transition: color 0.2s var(--ease-out),
-              transform 0.2s var(--ease-out);
-}
-
-.contact-item:hover .contact-item-arrow {
-  color: var(--accent-secondary);
-  transform: translateX(2px);
-}
-
-/* --- Form --- */
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-  padding: 1.5rem 1.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  padding: 1.5rem;
   background: var(--glass);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  height: fit-content;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   transition: border-color 0.3s var(--ease-out),
-              box-shadow 0.3s var(--ease-out);
+              box-shadow 0.4s var(--ease-out),
+              transform 0.2s var(--ease-out);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      color-mix(in srgb, var(--card-color, var(--accent-secondary)) 6%, transparent),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s var(--ease-out);
+    pointer-events: none;
+    z-index: 0;
+  }
 
   &:hover {
-    border-color: var(--border-hover);
+    border-color: color-mix(in srgb, var(--card-color, var(--accent-secondary)) 40%, transparent);
+    box-shadow: 0 0 40px color-mix(in srgb, var(--card-color, var(--accent-secondary)) 12%, transparent),
+                0 0 80px color-mix(in srgb, var(--card-color, var(--accent-secondary)) 6%, transparent),
+                inset 0 0 30px color-mix(in srgb, var(--card-color, var(--accent-secondary)) 4%, transparent);
+    transform: translateY(-3px);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
   }
 }
 
-.contact-form-title {
+/* --- CTA Card (2×2) --- */
+.bento-cta {
+  grid-column: span 2;
+  grid-row: span 2;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 2.5rem;
+}
+
+.bento-cta-tag {
+  display: inline-flex;
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+  background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 20%, transparent);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+.bento-cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--text);
+  margin: 0;
+}
+
+.bento-cta-accent {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bento-cta-sub {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+  color: var(--text-dim);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* --- Contact Card (1×1) --- */
+.bento-contact {
+  --card-color: var(--accent-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.bento-contact-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--card-color) 10%, transparent);
+  color: var(--card-color);
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: background 0.3s var(--ease-out),
+              box-shadow 0.3s var(--ease-out);
+}
+
+.bento-contact:hover .bento-contact-icon {
+  background: color-mix(in srgb, var(--card-color) 18%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--card-color) 25%, transparent);
+}
+
+.bento-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.bento-contact-label {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  transition: color 0.2s var(--ease-out);
+}
+
+.bento-contact:hover .bento-contact-label {
+  color: var(--card-color);
+}
+
+.bento-contact-value {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s var(--ease-out);
+}
+
+.bento-contact:hover .bento-contact-value {
+  color: var(--text);
+}
+
+.bento-contact-arrow {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--text-ghost);
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition: opacity 0.2s var(--ease-out),
+              transform 0.2s var(--ease-out),
+              color 0.2s var(--ease-out);
+}
+
+.bento-contact:hover .bento-contact-arrow {
+  opacity: 1;
+  transform: translate(0, 0);
+  color: var(--card-color);
+}
+
+.bento-contact-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--card-color) 8%, transparent),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out);
+  pointer-events: none;
+}
+
+.bento-contact:hover .bento-contact-glow {
+  opacity: 1;
+}
+
+/* --- Form Card (2×2) --- */
+.bento-form {
+  grid-column: span 2;
+  grid-row: span 2;
+  gap: 1rem;
+}
+
+.bento-form-title {
   font-family: var(--font-mono);
   font-size: clamp(0.7rem, 0.9vw, 0.8rem);
   font-weight: 400;
@@ -152,22 +231,22 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 0.3rem;
+  margin: 0;
   letter-spacing: 0.03em;
 }
 
-.contact-form-prompt {
+.bento-form-prompt {
   color: var(--text-dim);
   margin-right: 0.5em;
 }
 
-.contact-field {
+.bento-field {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 }
 
-.contact-field-label {
+.bento-field-label {
   font-family: var(--font-mono);
   font-size: clamp(0.45rem, 0.55vw, 0.5rem);
   color: var(--text-dim);
@@ -175,7 +254,7 @@
   letter-spacing: 0.12em;
 }
 
-.contact-input {
+.bento-input {
   font-family: var(--font-sans);
   font-weight: 300;
   font-size: clamp(0.8rem, 1vw, 0.9rem);
@@ -207,11 +286,11 @@
   }
 }
 
-.contact-textarea {
+.bento-textarea {
   min-height: 4.5em;
 }
 
-.contact-submit {
+.bento-submit {
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
@@ -232,7 +311,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, 
+    background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.15),
       transparent);
     opacity: 0;
@@ -253,7 +332,7 @@
   }
 }
 
-.contact-form-hint {
+.bento-form-hint {
   font-family: var(--font-sans);
   font-weight: 300;
   font-size: clamp(0.5rem, 0.6vw, 0.55rem);
@@ -262,7 +341,7 @@
   line-height: 1.6;
 }
 
-.contact-form-email {
+.bento-form-email {
   color: var(--text-dim);
   text-decoration: none;
   transition: color 0.2s var(--ease-out);
@@ -272,31 +351,50 @@
   }
 }
 
-/* --- Footnote --- */
-.contact-footnote {
-  font-family: var(--font-sans);
-  font-weight: 300;
-  font-size: clamp(0.6rem, 0.8vw, 0.7rem);
-  color: var(--text-dim);
-  letter-spacing: 0.06em;
-  margin: 0;
-}
-
 /* =================================================================
    Responsive
    ================================================================= */
 
+@media (max-width: 900px) {
+  .contact-bento {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(120px, auto);
+  }
+
+  .bento-cta {
+    grid-column: span 2;
+    grid-row: span 1;
+    padding: 1.5rem 2rem;
+  }
+
+  .bento-form {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+}
+
 @media (max-width: 700px) {
-  .contact-grid {
+  .contact-bento {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-auto-rows: auto;
+    gap: 0.75rem;
   }
 
-  .contact-item {
-    grid-template-columns: 1.25rem 4rem 1fr 1rem;
+  .bento-cta {
+    grid-column: span 1;
+    padding: 1.25rem 1.5rem;
   }
 
-  .contact-form {
+  .bento-cta-title {
+    font-size: 1.5rem;
+  }
+
+  .bento-contact {
+    padding: 1rem 1.25rem;
+  }
+
+  .bento-form {
+    grid-column: span 1;
     padding: 1.25rem 1.5rem;
   }
 }

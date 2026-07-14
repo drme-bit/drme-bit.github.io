@@ -539,10 +539,30 @@
   }
 
   .skills-sidebar {
+    display: flex;
+    flex-direction: column;
     max-height: 45vh;
+    overflow: hidden;
+  }
+
+  .skills-search {
+    flex-shrink: 0;
+  }
+
+  .skill-info-panel {
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .skill-categories {
+    flex-shrink: 0;
   }
 
   .skill-info-panel {
