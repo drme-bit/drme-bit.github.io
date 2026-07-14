@@ -538,6 +538,13 @@
     overflow: hidden;
   }
 
+  .skills-sidebar {
+    max-height: 45vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
   .skill-info-panel {
     padding: 1rem;
     max-height: none;
