@@ -225,17 +225,40 @@
   .about-layout {
     grid-template-columns: 1fr;
     gap: 2rem;
+    justify-items: center;
   }
 
   .about-photo-col {
     position: static;
     max-width: 300px;
+    left: 0;
+  }
+
+  .about-content-col {
+    width: 100%;
+  }
+
+  /* Content entrance: stagger the key blocks in when the section reveals so
+     mobile gets the same "alive" feel the desktop layout has. */
+  .section--about.is-visible {
+    .about-name { animation: aboutItemIn 0.55s var(--ease-out) 0.05s both; }
+    .about-role { animation: aboutItemIn 0.55s var(--ease-out) 0.12s both; }
+    .about-bio { animation: aboutItemIn 0.55s var(--ease-out) 0.19s both; }
+    .about-terminal { animation: aboutItemIn 0.55s var(--ease-out) 0.26s both; }
   }
 }
 
+@keyframes aboutItemIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 700px) {
+  /* Keep the portrait a comfortable size instead of a full-width block that
+     shoves all the content below the fold on a phone. */
   .about-photo-col {
-    max-width: 100%;
+    max-width: 240px;
+    margin: 0 auto;
   }
 
   .about-stats-row {
@@ -253,5 +276,16 @@
 
   .about-stat-label {
     font-size: 0.65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section--about.is-visible {
+    .about-name,
+    .about-role,
+    .about-bio,
+    .about-terminal {
+      animation: none;
+    }
   }
 }

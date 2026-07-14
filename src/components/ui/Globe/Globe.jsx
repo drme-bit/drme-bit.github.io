@@ -49,7 +49,9 @@ export default function Globe({
     const rect = canvas.getBoundingClientRect();
     if (rect.width < 1 || rect.height < 1) return; // not laid out yet, skip
     const isMobile = window.innerWidth <= 768;
-    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
+    // Cap DPR to 1 on mobile: halving the backbuffer pixel count is the single
+    // biggest win for globe perf and lets us render every frame smoothly.
+    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1 : 2);
     const size = Math.max(Math.round(Math.max(rect.width, rect.height) * dpr), 200);
 
     if (globeRef.current) {
@@ -68,7 +70,7 @@ export default function Globe({
       dark: colors.dark,
       diffuse: 1.2,
       scale: 1,
-      mapSamples: isMobile ? 1000 : 16000,
+      mapSamples: isMobile ? 800 : 16000,
       mapBrightness: isMobile ? 4 : 6,
       baseColor: colors.baseColor,
       markerColor: colors.markerColor,
@@ -93,13 +95,18 @@ export default function Globe({
         return
       }
 
-      if (isMobile && frame % 3 !== 0) {
+      // Render every 2nd frame on mobile (was every 3rd). The lighter backbuffer
+      // (DPR 1 + fewer samples) keeps each frame cheap, so 30fps rotation reads
+      // as smooth instead of the previous choppy ~20fps. We compensate the phi
+      // step so the rotation speed stays visually identical to before.
+      if (isMobile && frame % 2 !== 0) {
         rafRef.current = requestAnimationFrame(tick);
         return;
       }
 
       if (!dragRef.current.active && !pauseRef.current) {
-        phiRef.current += 0.004 + scrollRef.current * 0.002
+        const step = isMobile ? 0.006 + scrollRef.current * 0.003 : 0.004 + scrollRef.current * 0.002
+        phiRef.current += step
       }
 
       const currentPhi = phiRef.current + dragRef.current.offset

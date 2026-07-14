@@ -496,6 +496,18 @@
     aspect-ratio: 1;
     max-height: 50vh;
     margin: 0 auto 2rem;
+    /* Mobile entrance: the sticky scroll-jack that drives the globe rise on
+       desktop is disabled here, so instead we animate the globe in when the
+       section reveals — rise + scale + fade to mirror the desktop feel. */
+    opacity: 0;
+    transform: translateY(48px) scale(0.9);
+    transition: opacity 0.9s var(--ease-out), transform 1s var(--ease-out);
+    will-change: transform, opacity;
+  }
+
+  .section--skills.is-visible .skills-globe-container {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 
   .skills-ring {
@@ -580,5 +592,11 @@
   .skills-globe-glow {
     animation: none;
     opacity: 0.7;
+  }
+
+  .skills-globe-container {
+    transition: none;
+    opacity: 1;
+    transform: none;
   }
 }

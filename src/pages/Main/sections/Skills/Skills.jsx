@@ -193,7 +193,9 @@ export default function Skills() {
 
     const rafLoop = () => {
       frameCount++;
-      if (isMobile && frameCount % 3 !== 0) {
+      // Match the globe's mobile cadence (every 2nd frame) so the projected
+      // skill icons stay locked to the sphere rotation instead of drifting.
+      if (isMobile && frameCount % 2 !== 0) {
         rafId = requestAnimationFrame(rafLoop);
         return;
       }
@@ -310,11 +312,15 @@ export default function Skills() {
             <div
               className="skills-globe-container"
               ref={globeWrapRef}
-              style={{
-                flex: `0 0 ${globeFlexPercent}%`,
-                transform: `translateY(${globeY}vh) translateX(${globeTranslateX}px)`,
-                willChange: 'transform',
-              }}
+              style={
+                isMobile
+                  ? { flex: '0 0 100%' }
+                  : {
+                      flex: `0 0 ${globeFlexPercent}%`,
+                      transform: `translateY(${globeY}vh) translateX(${globeTranslateX}px)`,
+                      willChange: 'transform',
+                    }
+              }
             >
               {/* Globe visual — no extra transforms */}
               <div className="skills-globe-visual">
