@@ -312,11 +312,15 @@ export default function Skills() {
             <div
               className="skills-globe-container"
               ref={globeWrapRef}
-              style={{
-                flex: `0 0 ${globeFlexPercent}%`,
-                transform: `translateY(${globeY}vh) translateX(${globeTranslateX}px)`,
-                willChange: 'transform',
-              }}
+              style={
+                isMobile
+                  ? { flex: '0 0 100%' }
+                  : {
+                      flex: `0 0 ${globeFlexPercent}%`,
+                      transform: `translateY(${globeY}vh) translateX(${globeTranslateX}px)`,
+                      willChange: 'transform',
+                    }
+              }
             >
               {/* Globe visual — no extra transforms */}
               <div className="skills-globe-visual">
