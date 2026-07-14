@@ -43,8 +43,8 @@ export default function Globe({ className = '', scrollProgress = 0, phiRef: exte
 
     const rect = canvas.getBoundingClientRect()
     const isMobile = window.innerWidth <= 768
-    const size = Math.max(Math.floor(rect.width), 200)
-    const dpr = isMobile ? 2 : Math.min(window.devicePixelRatio, 2)
+    const dpr = Math.min(window.devicePixelRatio, 2)
+    const size = Math.max(Math.round(Math.max(rect.width, rect.height) * dpr), 200)
 
     if (globeRef.current) {
       globeRef.current.destroy()

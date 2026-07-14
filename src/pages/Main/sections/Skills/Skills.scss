@@ -523,8 +523,12 @@
   }
 
   .skills-globe-container {
-    width: 100vw;
-    max-width: none;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .skills-phase {
+    overflow: hidden;
   }
 
   .skill-info-panel {
