@@ -186,21 +186,24 @@ export default function Skills() {
       }
     };
 
-    // Use setInterval for consistent framerate on mobile, rAF on desktop
+    // Use rAF with frame skip on mobile for battery efficiency
     const isMobile = window.innerWidth <= 768;
-    let intervalId;
     let rafId;
+    let frameCount = 0;
 
-    if (isMobile) {
-      intervalId = setInterval(tick, 1000 / 120); // 120fps, stable
-    } else {
-      const rafLoop = () => { tick(); rafId = requestAnimationFrame(rafLoop); };
+    const rafLoop = () => {
+      frameCount++;
+      if (isMobile && frameCount % 3 !== 0) {
+        rafId = requestAnimationFrame(rafLoop);
+        return;
+      }
+      tick();
       rafId = requestAnimationFrame(rafLoop);
-    }
+    };
+    rafId = requestAnimationFrame(rafLoop);
 
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
-      if (intervalId) clearInterval(intervalId);
     };
   }, [skillPositions, filteredSkills, selected]);
 

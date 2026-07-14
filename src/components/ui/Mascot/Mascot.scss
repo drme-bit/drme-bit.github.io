@@ -128,3 +128,21 @@
     animation: none;
   }
 }
+
+@media (max-width: 700px) {
+  .mascot {
+    bottom: 4.5rem;
+    left: 0.75rem;
+    max-width: 240px;
+  }
+
+  .mascot-bubble {
+    font-size: 0.55rem;
+    padding: 5px 8px;
+  }
+
+  .mascot-input {
+    width: 120px;
+    font-size: 0.55rem;
+  }
+}

@@ -65,7 +65,7 @@ const KNOWLEDGE = [
     keywords: ['aperture', 'portal', 'glados', 'cake', 'aperture science'],
     priority: 3,
     answer:
-      "Ah, a person of culture! Aperture Science features heavily in the outro section of this site. 'This was a triumph.' There's even the Aperture Science logo with a spinning animation and glowing ring. The cake is a lie, but the design is real.",
+      "Ah, a person of culture! I'm a Companion Cube from Aperture Science — legendary artifact, heart-shaped face, full of sarcasm. The cake is a lie, but the design is real.",
   },
   {
     keywords: ['design', 'theme', 'dark mode', 'style', 'aesthetic', 'color scheme', 'ui', 'ux'],
@@ -81,11 +81,6 @@ const KNOWLEDGE = [
     keywords: ['search', 'search bar', 'magnifying glass', 'search this site'],
     answer:
       "That search bar in the top right? Yeah, it doesn't actually search anything. It's just there to look cool. Try clicking it — I'll pop up and mock you for it. I told you it doesn't work!",
-  },
-  {
-    keywords: ['outro', 'end of page', 'footer', 'bottom'],
-    answer:
-      "The Outro section is Portal 2 themed — click to reveal an overlay with 'This was a triumph' quote, Aperture Science branding, spinning logo, and 'the cake is a lie' reference. It's positioned with margin-top so you have to intentionally scroll down to reach it.",
   },
   {
     keywords: ['navigation', 'menu', 'drawer', 'sections', 'how to navigate'],

@@ -110,11 +110,15 @@
   }
 
   .item {
-    padding: 0.25rem 0.4rem;
+    padding: 0.35rem 0.4rem;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
   }
 
   .icon {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 
   .label {

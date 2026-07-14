@@ -170,7 +170,7 @@
 
 .skills-ring-label {
   font-family: var(--font-mono);
-  font-size: 0.5rem;
+  font-size: 0.55rem;
   color: var(--text-dim);
   white-space: nowrap;
   letter-spacing: 0.05em;
@@ -221,7 +221,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: clamp(0.55rem, 0.7vw, 0.6rem);
+  font-size: clamp(0.7rem, 0.7vw, 0.75rem);
   color: var(--text-secondary);
   outline: none;
   transition: all 0.2s var(--ease-out);
@@ -256,7 +256,7 @@
 
 .skills-search-count {
   font-family: var(--font-mono);
-  font-size: 0.5rem;
+  font-size: 0.65rem;
   color: var(--text-ghost);
   padding: 0 0.2rem;
   letter-spacing: 0.05em;
@@ -264,7 +264,7 @@
 
 .skills-no-results {
   font-family: var(--font-mono);
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   color: var(--text-ghost);
   text-align: center;
   padding: 1.5rem 0.5rem;
@@ -303,7 +303,7 @@
 
 .skill-info-group {
   font-family: var(--font-mono);
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--text-dim);
@@ -344,7 +344,7 @@
 .skill-projects-label {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.48rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--text-dim);
@@ -359,10 +359,10 @@
 
 .skill-related-tag {
   font-family: var(--font-mono);
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   color: var(--text-dim);
   border: 1px solid var(--border);
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.5rem;
   border-radius: var(--radius-full);
   transition: all 0.2s var(--ease-out);
 
@@ -385,7 +385,7 @@
 
 .skill-project-link {
   font-family: var(--font-mono);
-  font-size: 0.52rem;
+  font-size: 0.65rem;
   color: var(--accent-secondary);
   text-decoration: none;
   opacity: 0.7;
@@ -409,13 +409,13 @@
   align-items: center;
   gap: 0.6rem;
   font-family: var(--font-mono);
-  font-size: clamp(0.5rem, 0.7vw, 0.6rem);
+  font-size: clamp(0.65rem, 0.7vw, 0.7rem);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-dim);
   background: none;
   border: none;
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.6rem;
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: all 0.2s var(--ease-out);
@@ -456,7 +456,7 @@
 }
 
 .skill-category-count {
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   color: var(--text-ghost);
 }
 
@@ -503,17 +503,17 @@
   }
 
   .skills-ring-item {
-    padding: 0.2rem 0.35rem;
+    padding: 0.4rem 0.5rem;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
   }
 
   .skills-ring-icon {
-    font-size: 0.85rem;
+    font-size: 1rem;
   }
 
   .skills-ring-label {
-    font-size: 0.4rem;
+    font-size: 0.5rem;
   }
 
   .skills-sidebar {

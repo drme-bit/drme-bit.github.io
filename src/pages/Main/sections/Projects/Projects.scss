@@ -331,6 +331,12 @@
   color: var(--text-dim);
   font-size: 1.2rem;
   cursor: pointer;
+  padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: color 0.2s var(--ease-out);
 
   &:hover:not(:disabled) {
@@ -349,7 +355,7 @@
   justify-content: center;
   gap: 0.5rem;
   font-family: var(--font-mono);
-  font-size: clamp(0.5rem, 0.6vw, 0.55rem);
+  font-size: clamp(0.6rem, 0.6vw, 0.65rem);
   color: var(--text-ghost);
   letter-spacing: 0.1em;
   text-transform: uppercase;

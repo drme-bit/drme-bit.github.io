@@ -106,7 +106,7 @@
 .about-terminal-title {
   margin-left: 8px;
   font-family: var(--font-mono);
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   color: var(--text-ghost);
 }
 
@@ -174,7 +174,7 @@
 
 .about-stat-label {
   font-family: var(--font-mono);
-  font-size: 0.5rem;
+  font-size: 0.65rem;
   color: var(--text-dim);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -234,6 +234,10 @@
 }
 
 @media (max-width: 700px) {
+  .about-photo-col {
+    max-width: 100%;
+  }
+
   .about-stats-row {
     flex-wrap: wrap;
     gap: 1rem;
@@ -241,5 +245,13 @@
 
   .about-stat-item {
     flex: 0 0 calc(50% - 0.5rem);
+  }
+
+  .about-terminal-title {
+    font-size: 0.65rem;
+  }
+
+  .about-stat-label {
+    font-size: 0.65rem;
   }
 }
