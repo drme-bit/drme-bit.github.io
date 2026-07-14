@@ -12,8 +12,8 @@ const ProjectPage = lazy(() => import('@/pages/ProjectPage/ProjectPage'));
 export default function App() {
   return (
     <Suspense fallback={<LoadingScreen />}>
-      <Analytics /> // Vercel Analytics
-      <SpeedInsights /> // Vercel Speed Insights
+      <Analytics /> {/* Vercel Analytics */}
+      <SpeedInsights /> {/* Vercel Speed Insights */}
       <Routes>
         <Route
           path="/"
