@@ -5,10 +5,11 @@ import About from './sections/About/About';
 import Skills from './sections/Skills/Skills';
 import Experience from './sections/Experience/Experience';
 import Projects from './sections/Projects/Projects';
+import Blog from './sections/Blog/Blog';
+import Reviews from './sections/Reviews/Reviews';
 import Contacts from './sections/Contacts/Contacts';
 import GitHubStatus from '@/components/ui/GitHubStatus/GitHubStatus';
 import Navbar from '@/components/layout/navbar/Navbar';
-import DrawerMenu from '@/components/layout/DrawerMenu/DrawerMenu';
 import ScrollProgressBar from '@/components/ui/ScrollProgressBar/ScrollProgressBar';
 import SearchBar from '@/components/ui/SearchBar/SearchBar';
 import Mascot, { getMockMessage } from '@/components/ui/Mascot/Mascot';
@@ -18,11 +19,7 @@ import SoundEffects from '@/components/ui/SoundEffects/SoundEffects';
 import Cursor from '@/components/ui/Cursor/Cursor';
 import ChangeTheme from '@/components/ui/ChangeTheme/ChangeTheme.jsx';
 
-const SECTIONS = ['hero', 'about', 'skills', 'experience', 'projects', 'contact'];
-
 export default function Main() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero');
   const [mascotMessage, setMascotMessage] = useState(null);
   const [searchCount, setSearchCount] = useState(0);
   const [archiveOpen, setArchiveOpen] = useState(false);
@@ -39,20 +36,6 @@ export default function Main() {
     setMascotMessage(null);
   }, []);
 
-  useEffect(() => {
-    const observers = SECTIONS.map((id) => {
-      const el = document.getElementById(id);
-      if (!el) return null;
-      const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActiveSection(id); },
-        { threshold: 0.3 },
-      );
-      obs.observe(el);
-      return obs;
-    });
-    return () => observers.forEach((o) => o?.disconnect());
-  }, []);
-
   return (
     <>
       <Cursor />
@@ -64,6 +47,8 @@ export default function Main() {
       <Skills />
       <Experience />
       <Projects />
+      <Blog />
+      <Reviews />
       <Contacts />
       <Navbar />
       <button className="archive-fab" onClick={() => setArchiveOpen(true)} title="archive">
@@ -74,14 +59,6 @@ export default function Main() {
       <SearchBar onSearch={handleSearch} />
       <ChangeTheme />
       <Mascot userMessage={mascotMessage} searchCount={searchCount} onDone={handleMascotDone} />
-      <DrawerMenu
-        activePage={activeSection}
-        open={drawerOpen}
-        onToggle={() => setDrawerOpen((v) => !v)}
-        onClose={() => setDrawerOpen(false)}
-        onNavigate={(id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })}
-        onArchive={() => { setDrawerOpen(false); setArchiveOpen(true); }}
-      />
 
       <SoundEffects />
       {archiveOpen && <Archive onClose={() => setArchiveOpen(false)} />}

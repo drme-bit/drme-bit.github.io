@@ -1,17 +1,28 @@
 import { useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FiHome, FiUser, FiZap, FiBriefcase, FiGrid, FiUsers, FiStar, FiMail, FiFileText } from 'react-icons/fi';
 import './DrawerMenu.scss';
 
-const PAGES = [
-  { id: 'hero', label: 'Home' },
-  { id: 'about', label: 'About' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'contact', label: 'Contact' },
+const SECTIONS = [
+  { id: 'hero', label: 'Home', Icon: FiHome },
+  { id: 'about', label: 'About', Icon: FiUser },
+  { id: 'skills', label: 'Skills', Icon: FiZap },
+  { id: 'experience', label: 'Experience', Icon: FiBriefcase },
+  { id: 'projects', label: 'Projects', Icon: FiGrid },
+  { id: 'blog', label: 'Blog', Icon: FiUsers },
+  { id: 'reviews', label: 'Reviews', Icon: FiStar },
+  { id: 'contact', label: 'Contact', Icon: FiMail },
 ];
 
-export default function DrawerMenu({ activePage, onNavigate, open, onToggle, onClose, onArchive }) {
+const PAGES = [
+  { path: '/', label: 'Home', Icon: FiHome },
+  { path: '/posts', label: 'Posts', Icon: FiFileText },
+];
+
+export default function DrawerMenu({ open, onToggle, onClose }) {
   const panelRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!open) return;
@@ -22,14 +33,25 @@ export default function DrawerMenu({ activePage, onNavigate, open, onToggle, onC
     return () => window.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
-  const handleClick = (id) => {
+  const isMainPage = location.pathname === '/';
+
+  const handleSectionClick = (id) => {
     onClose();
-    onNavigate(id);
+    if (isMainPage) {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/', { state: { scrollTo: id } });
+    }
+  };
+
+  const handlePageClick = (path) => {
+    onClose();
+    navigate(path);
   };
 
   return (
     <>
-      <button className="drawer-trigger" onClick={onToggle} aria-label="Toggle navigation">
+      <button className={`drawer-trigger${open ? ' is-open' : ''}`} onClick={onToggle} aria-label="Toggle navigation">
         <span className="drawer-trigger-line" />
         <span className="drawer-trigger-line" />
         <span className="drawer-trigger-line" />
@@ -38,32 +60,50 @@ export default function DrawerMenu({ activePage, onNavigate, open, onToggle, onC
       <div className={`drawer-overlay${open ? ' is-open' : ''}`} onClick={onClose} />
 
       <div ref={panelRef} className={`drawer-panel${open ? ' is-open' : ''}`}>
-        <div className="drawer-header">// nav</div>
-        <nav className="drawer-nav">
-          {PAGES.map((page, i) => {
-            const isActive = activePage === page.id;
-            return (
-              <button
-                key={page.id}
-                className={`drawer-link${isActive ? ' is-active' : ''}`}
-                onClick={() => handleClick(page.id)}
-              >
-                <span className="drawer-link-id">{String(i + 1).padStart(2, '0')}</span>
-                <span className="drawer-link-label">{page.label}</span>
-                {isActive && <span className="drawer-link-cursor">_</span>}
-              </button>
-            );
-          })}
-          <button
-            className="drawer-link drawer-link--archive"
-            onClick={() => { onClose(); onArchive?.(); }}
-          >
-            <span className="drawer-link-id">~</span>
-            <span className="drawer-link-label">archive</span>
-          </button>
-        </nav>
+        <div className="drawer-header">
+          <span className="drawer-header-cursor">{'>'}</span> navigation
+        </div>
+
+        <div className="drawer-section">
+          <div className="drawer-section-label">// pages</div>
+          <nav className="drawer-nav">
+            {PAGES.map(({ path, label, Icon }) => {
+              const isActive = location.pathname === path;
+              return (
+                <button
+                  key={path}
+                  className={`drawer-link${isActive ? ' is-active' : ''}`}
+                  onClick={() => handlePageClick(path)}
+                >
+                  <Icon className="drawer-link-icon" />
+                  <span className="drawer-link-label">{label}</span>
+                  {isActive && <span className="drawer-link-cursor">_</span>}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {isMainPage && (
+          <div className="drawer-section">
+            <div className="drawer-section-label">// sections</div>
+            <nav className="drawer-nav">
+              {SECTIONS.map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  className="drawer-link"
+                  onClick={() => handleSectionClick(id)}
+                >
+                  <Icon className="drawer-link-icon" />
+                  <span className="drawer-link-label">{label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        )}
+
         <div className="drawer-footer">
-          <span className="drawer-footer-text">$ close [esc]</span>
+          <span className="drawer-footer-text">esc to close</span>
         </div>
       </div>
     </>

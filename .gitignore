@@ -4,3 +4,6 @@ dist
 .idea
 .vscode
 *.log
+.env
+.env.local
+.env.*.local

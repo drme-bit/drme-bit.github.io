@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { FiHome, FiUser, FiZap, FiBriefcase, FiGrid, FiMail } from 'react-icons/fi';
+import { FiHome, FiUser, FiZap, FiBriefcase, FiGrid, FiUsers, FiStar, FiMail } from 'react-icons/fi';
 import styles from './Navbar.module.scss';
 
 const ITEMS = [
-  { id: 'hero',      label: 'Home',    Icon: FiHome },
-  { id: 'about',     label: 'About',   Icon: FiUser },
-  { id: 'skills',    label: 'Skills',  Icon: FiZap },
-  { id: 'experience', label: 'Exp',     Icon: FiBriefcase },
-  { id: 'projects',  label: 'Work',    Icon: FiGrid },
-  { id: 'contact',   label: 'Mail',    Icon: FiMail },
+  { id: 'hero', label: 'Home', Icon: FiHome },
+  { id: 'about', label: 'About', Icon: FiUser },
+  { id: 'skills', label: 'Skills', Icon: FiZap },
+  { id: 'experience', label: 'Exp', Icon: FiBriefcase },
+  { id: 'projects', label: 'Work', Icon: FiGrid },
+  { id: 'blog', label: 'Blog', Icon: FiUsers },
+  { id: 'reviews', label: 'Reviews', Icon: FiStar },
+  { id: 'contact', label: 'Mail', Icon: FiMail },
 ];
 
 export default function Navbar() {

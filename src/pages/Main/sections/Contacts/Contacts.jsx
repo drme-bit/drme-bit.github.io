@@ -165,7 +165,7 @@ export default function Contacts() {
 
   return (
     <section id="contact" ref={ref} className={`section reveal${visible ? ' is-visible' : ''}`}>
-      <SectionHeader title="contact" number="05" visible={visible} />
+      <SectionHeader title="contact" number="07" visible={visible} />
 
       <div
         className="section-inner"
