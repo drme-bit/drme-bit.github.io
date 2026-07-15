@@ -20,8 +20,11 @@ export default function Skills() {
   const [selected, setSelected] = useState(null);
   const [filterGroup, setFilterGroup] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [hoveredSkill, setHoveredSkill] = useState(null);
+  const [animatedItems, setAnimatedItems] = useState(new Set());
   const searchRef = useRef(null);
   const phiRef = useRef(0);
+  const thetaRef = useRef(0.3);
   const globeWrapRef = useRef(null);
   const ringRef = useRef(null);
   const svgRef = useRef(null);
@@ -29,10 +32,7 @@ export default function Skills() {
   const posCache = useRef(new Map());
   const { x, y } = useCursorParallax();
 
-  const {
-    overallProgress,
-    sectionRef,
-  } = useScrollPhase({
+  const { overallProgress, sectionRef } = useScrollPhase({
     phases: SCROLL_PHASES,
     sectionId: 'skills',
   });
@@ -55,7 +55,7 @@ export default function Skills() {
     return filteredSkills.map((_, i) => {
       // Fibonacci sphere with clamped poles to avoid clustering
       const t = (i + 0.5) / n;
-      const y = 1 - 2 * t;                              // 1 → -1
+      const y = 1 - 2 * t; // 1 → -1
       const clampedY = Math.max(-0.82, Math.min(0.82, y)); // avoid poles
       const r = Math.sqrt(1 - clampedY * clampedY);
       const theta = 2.399963 * i;
@@ -69,34 +69,43 @@ export default function Skills() {
         acc[s.group] = (acc[s.group] || 0) + 1;
         return acc;
       }, {}),
-    []
+    [],
   );
 
   // Project skills onto 2D + draw connection lines
   useEffect(() => {
-    const nameIdxMap = new Map(SKILLS_DATA.map((s, i) => [s.name, i]));
-    let cachedAccent = '#7dd3fc';
-    let cachedGhost = 'rgba(255,255,255,0.17)';
-    let colorFrame = 0;
+    const filteredIdxMap = new Map(filteredSkills.map((s, i) => [s.name, i]));
+    const cs = getComputedStyle(document.body);
+    let cachedAccent = cs.getPropertyValue('--accent-secondary').trim() || '#7dd3fc';
+    let cachedGhost = cs.getPropertyValue('--text-ghost').trim() || 'rgba(255,255,255,0.17)';
+    let lastPhi = phiRef.current;
+    let lastTheta = thetaRef.current;
+    let lastLines = '';
 
     const tick = () => {
       const globeWrap = globeWrapRef.current;
       const ring = ringRef.current;
       const svg = svgRef.current;
-      if (!globeWrap || !ring) return;
+      if (!globeWrap || !ring) {
+        rafId = requestAnimationFrame(tick);
+        return;
+      }
+
+      const phi = phiRef.current;
+      const theta = thetaRef.current;
+      if (phi === lastPhi && theta === lastTheta) {
+        rafId = requestAnimationFrame(tick);
+        return;
+      }
+      lastPhi = phi;
+      lastTheta = theta;
 
       const w = globeWrap.clientWidth;
       const h = globeWrap.clientHeight;
-      const phi = phiRef.current;
       const cosPhi = Math.cos(phi);
       const sinPhi = Math.sin(phi);
-
-      colorFrame++;
-      if (colorFrame % 30 === 0) {
-        const cs = getComputedStyle(document.body);
-        cachedAccent = cs.getPropertyValue('--accent-secondary').trim() || '#7dd3fc';
-        cachedGhost = cs.getPropertyValue('--text-ghost').trim() || 'rgba(255,255,255,0.17)';
-      }
+      const cosTheta = Math.cos(theta);
+      const sinTheta = Math.sin(theta);
 
       const zToOpacity = (z) => {
         if (z < -0.15) return 0;
@@ -107,14 +116,22 @@ export default function Skills() {
       posCache.current.clear();
       itemRefs.current.forEach((el, name) => {
         if (!el) return;
-        const idx = nameIdxMap.get(name);
-        if (idx === undefined) { el.style.opacity = '0'; return; }
+        const idx = filteredIdxMap.get(name);
+        if (idx === undefined) {
+          el.style.opacity = '0';
+          return;
+        }
         const pos = skillPositions[idx];
         if (!pos) return;
 
-        const rx = pos.x * cosPhi + pos.z * sinPhi;
-        const ry = pos.y;
-        const rz = -pos.x * sinPhi + pos.z * cosPhi;
+        // Match cobe rotation order: phi (Y-axis) first, then theta (X-axis)
+        const rx0 = pos.x * cosPhi + pos.z * sinPhi;
+        const ry0 = pos.y;
+        const rz0 = -pos.x * sinPhi + pos.z * cosPhi;
+
+        const rx = rx0;
+        const ry = ry0 * cosTheta - rz0 * sinTheta;
+        const rz = ry0 * sinTheta + rz0 * cosTheta;
 
         const cx = w / 2 + rx * (w * 0.48);
         const cy = h / 2 - ry * (h * 0.48);
@@ -149,24 +166,10 @@ export default function Skills() {
             const opacity = baseOpacity * zToOpacity(avgZ);
             if (opacity < 0.01) return;
 
-            const fi = nameIdxMap.get(skill.name);
-            const ti = nameIdxMap.get(relName);
-            if (fi === undefined || ti === undefined) return;
-            const fp = skillPositions[fi];
-            const tp = skillPositions[ti];
-            if (!fp || !tp) return;
-
-            const mx = fp.x + tp.x;
-            const my = fp.y + tp.y;
-            const mz = fp.z + tp.z;
-            const len = Math.sqrt(mx * mx + my * my + mz * mz) || 1;
-            const midRx = (mx / len) * cosPhi + (mz / len) * sinPhi;
-            const midRy = my / len;
-            const midX = w / 2 + midRx * (w * 0.44);
-            const midY = h / 2 - midRy * (h * 0.44);
-
-            const dx = (from.x + to.x) / 2 - w / 2;
-            const dy = (from.y + to.y) / 2 - h / 2;
+            const midX = (from.x + to.x) / 2;
+            const midY = (from.y + to.y) / 2;
+            const dx = midX - w / 2;
+            const dy = midY - h / 2;
             const dist = Math.sqrt(dx * dx + dy * dy) || 1;
             const bulge = 0.3;
             const cpX = midX + (dx / dist) * dist * bulge;
@@ -177,35 +180,25 @@ export default function Skills() {
             const sw = isHighlighted ? 1.5 : 0.8;
 
             lines.push(
-              `<path d="M${from.x},${from.y} Q${cpX},${cpY} ${to.x},${to.y}" fill="none" stroke="${color}" stroke-width="${sw}"${dash} opacity="${opacity}"/>`
+              `<path d="M${from.x},${from.y} Q${cpX},${cpY} ${to.x},${to.y}" fill="none" stroke="${color}" stroke-width="${sw}"${dash} opacity="${opacity}"/>`,
             );
           });
         });
 
-        svg.innerHTML = lines.join('');
+        const newLines = lines.join('');
+        if (newLines !== lastLines) {
+          svg.innerHTML = newLines;
+          lastLines = newLines;
+        }
       }
+
+      rafId = requestAnimationFrame(tick);
     };
 
-    // Use rAF with frame skip on mobile for battery efficiency
-    const isMobile = window.innerWidth <= 768;
-    let rafId;
-    let frameCount = 0;
-
-    const rafLoop = () => {
-      frameCount++;
-      // Match the globe's mobile cadence (every 2nd frame) so the projected
-      // skill icons stay locked to the sphere rotation instead of drifting.
-      if (isMobile && frameCount % 2 !== 0) {
-        rafId = requestAnimationFrame(rafLoop);
-        return;
-      }
-      tick();
-      rafId = requestAnimationFrame(rafLoop);
-    };
-    rafId = requestAnimationFrame(rafLoop);
+    let rafId = requestAnimationFrame(tick);
 
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
+      cancelAnimationFrame(rafId);
     };
   }, [skillPositions, filteredSkills, selected]);
 
@@ -247,6 +240,19 @@ export default function Skills() {
     return () => document.removeEventListener('keydown', handleKey);
   }, [handleKey]);
 
+  // Animate skill items on first visible
+  useEffect(() => {
+    if (!visible) return;
+    const timer = setTimeout(() => {
+      filteredSkills.forEach((skill, i) => {
+        setTimeout(() => {
+          setAnimatedItems(prev => new Set([...prev, skill.name]));
+        }, i * 50);
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [visible, filteredSkills]);
+
   const levelDots = selected ? (
     <div className="skill-level">
       {[1, 2, 3, 4, 5].map((n) => (
@@ -261,21 +267,26 @@ export default function Skills() {
 
   // Smooth scroll-driven animation (0→1 over 300vh)
   // On mobile: simplified version — globe takes full width, sidebar below
-  const riseT = isMobile ? Math.min(overallProgress / 0.15 + 0.3, 1) : Math.min(overallProgress / 0.2, 1);
+  const riseT = isMobile
+    ? Math.min(overallProgress / 0.15 + 0.3, 1)
+    : Math.min(overallProgress / 0.2, 1);
   const globeY = isMobile ? (1 - riseT) * 20 : (1 - riseT) * 30;
 
   const transitionT = isMobile ? 1 : Math.min(Math.max((overallProgress - 0.2) / 0.3, 0), 1);
 
   const globeFlexPercent = isMobile ? 100 : 100 - transitionT * 45;
-  const globeTranslateX = isMobile ? 0 : (1 - transitionT);
+  const globeTranslateX = isMobile ? 0 : 1 - transitionT;
 
   const sidebarOpacity = isMobile ? (visible ? 1 : 0) : transitionT;
   const sidebarX = isMobile ? 0 : (1 - transitionT) * 60;
 
-  const setItemRef = useCallback((name) => (el) => {
-    if (el) itemRefs.current.set(name, el);
-    else itemRefs.current.delete(name);
-  }, []);
+  const setItemRef = useCallback(
+    (name) => (el) => {
+      if (el) itemRefs.current.set(name, el);
+      else itemRefs.current.delete(name);
+    },
+    [],
+  );
 
   return (
     <section
@@ -285,77 +296,75 @@ export default function Skills() {
         sectionRef.current = el;
       }}
       className={`section section--skills reveal${visible ? ' is-visible' : ''}`}
-      style={{ height: isMobile ? '150vh' : '200vh' }}
+      style={{ height: isMobile ? '150vh' : '200vh', transition: 'height 0.3s ease-out', paddingTop: '15vh',  }}
     >
+      <SectionHeader title="skills" number="02" visible={visible} />
+
+      <div
+        className="skills-intro"
+        style={{ opacity: isMobile ? 1 : 1 - Math.min(overallProgress / 0.2, 1) }}
+      >
+        <h2 className="section-title">
+          My<span className="section-accent"> toolkit</span>
+          <span className="section-title-sub"> — technologies I work with daily</span>
+        </h2>
+        <p className="skills-intro-desc">
+          A full-stack skill set spanning frontend frameworks, backend runtimes, databases, and
+          devops tooling — always expanding.
+        </p>
+      </div>
+
       <div className="skills-sticky">
-        <div className="skills-inner">
-          <SectionHeader title="skills" number="02" visible={visible} />
-
+        <div className="skills-phase">
+          {/* Globe + Skill Icons */}
           <div
-            className="skills-intro"
-            style={{ opacity: isMobile ? 1 : 1 - Math.min(overallProgress / 0.2, 1) }}
+            className="skills-globe-container"
+            ref={globeWrapRef}
+            style={{
+              flex: `0 0 ${globeFlexPercent}%`,
+              transform: `translateY(${globeY}vh) translateX(${globeTranslateX}px)`,
+              willChange: 'transform',
+            }}
           >
-            <h2 className="section-title">
-              My<span className="section-accent"> toolkit</span>
-              <span className="section-title-sub"> — technologies I work with daily</span>
-            </h2>
-            <p className="skills-intro-desc">
-              A full-stack skill set spanning frontend frameworks, backend runtimes,
-              databases, and devops tooling — always expanding.
-            </p>
-          </div>
+            {/* Globe visual — no extra transforms */}
+            <div className="skills-globe-visual">
+              <Globe
+                className="skills-globe"
+                scrollProgress={overallProgress}
+                phiRef={phiRef}
+                thetaRef={thetaRef}
+                paused={!!selected}
+              />
+              <div className="skills-globe-glow" />
+            </div>
 
-          <div
-            className="skills-phase"
-          >
-            {/* Globe + Skill Icons */}
-            <div
-              className="skills-globe-container"
-              ref={globeWrapRef}
-              style={
-                isMobile
-                  ? { flex: '0 0 100%' }
-                  : {
-                      flex: `0 0 ${globeFlexPercent}%`,
-                      transform: `translateY(${globeY}vh) translateX(${globeTranslateX}px)`,
-                      willChange: 'transform',
-                    }
-              }
-            >
-              {/* Globe visual — no extra transforms */}
-              <div className="skills-globe-visual">
-                <Globe
-                  className="skills-globe"
-                  scrollProgress={overallProgress}
-                  phiRef={phiRef}
-                  paused={!!selected}
-                />
-                <div className="skills-globe-glow" />
-              </div>
-
-              {/* Skill icons + connection lines */}
-              <div
-                className="skills-ring"
-                ref={ringRef}
-              >
-                <svg ref={svgRef} className="skills-connections" />
-                {filteredSkills.map((skill) => {
+            {/* Skill icons + connection lines */}
+            <div className="skills-ring" ref={ringRef}>
+              <svg ref={svgRef} className="skills-connections" />
+              {filteredSkills.map((skill, i) => {
                   const Icon = ICON_MAP[skill.name] || FiSearch;
                   const isSelected = selected?.name === skill.name;
                   const isRelated = relatedNames.has(skill.name);
+
+                  const isAnimated = animatedItems.has(skill.name);
+                  const isHovered = hoveredSkill === skill.name;
 
                   return (
                     <button
                       key={skill.name}
                       ref={setItemRef(skill.name)}
-                      className={`skills-ring-item${isSelected ? ' is-selected' : ''}${isRelated ? ' is-related' : ''}${!isSelected && !isRelated && filterGroup ? ' is-dimmed' : ''}`}
+                      className={`skills-ring-item${isSelected ? ' is-selected' : ''}${isRelated ? ' is-related' : ''}${!isSelected && !isRelated && filterGroup ? ' is-dimmed' : ''}${isAnimated ? ' is-animated' : ''}${isHovered ? ' is-hovered' : ''}`}
                       style={{
                         '--item-color': GROUP_COLORS[skill.group],
+                        '--anim-delay': `${i * 50}ms`,
                       }}
                       onClick={() => handleSelect(skill)}
+                      onMouseEnter={() => setHoveredSkill(skill.name)}
+                      onMouseLeave={() => setHoveredSkill(null)}
                     >
                       <Icon className="skills-ring-icon" />
-                      <span className="skills-ring-label">{skill.name}</span>
+                      <span className="skills-ring-tooltip">{skill.name}</span>
+                      <span className="skills-ring-pulse" />
                     </button>
                   );
                 })}
@@ -489,14 +498,16 @@ export default function Skills() {
                 ))}
 
                 {(filterGroup || searchQuery) && (
-                  <button className="skill-category skill-category--clear" onClick={clearAllFilters}>
+                  <button
+                    className="skill-category skill-category--clear"
+                    onClick={clearAllFilters}
+                  >
                     <span className="skill-category-label">Clear all</span>
                   </button>
                 )}
               </div>
             </div>
           </div>
-        </div>
       </div>
     </section>
   );

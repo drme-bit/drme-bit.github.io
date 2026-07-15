@@ -10,6 +10,7 @@
   max-height: 100%;
   aspect-ratio: 1;
   margin: 0 auto;
+  contain: layout; // isolates layout so canvas resize doesn't itself trigger parent reflow loops
 }
 
 .globe__canvas {

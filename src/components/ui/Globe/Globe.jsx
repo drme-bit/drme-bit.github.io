@@ -2,6 +2,15 @@ import createGlobe from 'cobe';
 import { useEffect, useRef } from 'react';
 import './Globe.scss';
 
+const BASE_THETA = 0.3;
+const THETA_OFFSET_MIN = -0.32;
+const THETA_OFFSET_MAX = 0.32;
+const MAX_VELOCITY = 0.15;
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}
+
 function hexToRgb01(hex) {
   const h = hex.replace('#', '');
   return [
@@ -29,15 +38,27 @@ export default function Globe({
   className = '',
   scrollProgress = 0,
   phiRef: externalPhiRef,
+  thetaRef: externalThetaRef,
   paused = false,
 }) {
   const canvasRef = useRef(null);
   const globeRef = useRef(null);
   const phiRef = useRef(0);
+  const thetaOffsetRef = useRef(0);
+  const velocityRef = useRef({ phi: 0, theta: 0 });
+  const lastPointerRef = useRef(null);
   const scrollRef = useRef(scrollProgress);
   const pauseRef = useRef(paused);
   const rafRef = useRef(null);
-  const dragRef = useRef({ active: false, committed: false, startX: 0, startY: 0, offset: 0 });
+  const dragRef = useRef({
+    active: false,
+    committed: false,
+    pointerType: 'mouse',
+    startX: 0,
+    startY: 0,
+    offsetPhi: 0,
+    offsetTheta: 0,
+  });
 
   scrollRef.current = scrollProgress;
   pauseRef.current = paused;
@@ -47,12 +68,11 @@ export default function Globe({
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    if (rect.width < 1 || rect.height < 1) return; // not laid out yet, skip
+    if (rect.width < 1 || rect.height < 1) return;
     const isMobile = window.innerWidth <= 768;
-    // Cap DPR to 1 on mobile: halving the backbuffer pixel count is the single
-    // biggest win for globe perf and lets us render every frame smoothly.
-    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1 : 2);
-    const size = Math.max(Math.round(Math.max(rect.width, rect.height) * dpr), 200);
+    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
+    const maxPx = isMobile ? 500 : 800;
+    const size = Math.max(Math.round(Math.min(Math.max(rect.width, rect.height), maxPx) * dpr), 200);
 
     if (globeRef.current) {
       globeRef.current.destroy();
@@ -66,11 +86,11 @@ export default function Globe({
       width: size,
       height: size,
       phi: phiRef.current,
-      theta: 0.3,
+      theta: BASE_THETA + thetaOffsetRef.current,
       dark: colors.dark,
       diffuse: 1.2,
       scale: 1,
-      mapSamples: isMobile ? 800 : 16000,
+      mapSamples: isMobile ? 1000 : 6000,
       mapBrightness: isMobile ? 4 : 6,
       baseColor: colors.baseColor,
       markerColor: colors.markerColor,
@@ -78,63 +98,81 @@ export default function Globe({
       offset: [0, 0],
     });
 
-    canvas.classList.add('is-ready')
-  }
+    canvas.classList.add('is-ready');
+  };
 
   useEffect(() => {
-    createGlobeInstance()
-    let frame = 0
-    let isMobile = window.innerWidth <= 768
-    let isVisible = true
+    createGlobeInstance();
+    let frame = 0;
+    let isMobile = window.innerWidth <= 768;
+    let isVisible = true;
 
     const tick = () => {
       frame++;
-      if (!isVisible) {
-        // Fully skip work while off-screen — no rAF requeue means the
-        // browser doesn't burn cycles rendering a globe nobody sees.
-        return
-      }
-
-      // Render every 2nd frame on mobile (was every 3rd). The lighter backbuffer
-      // (DPR 1 + fewer samples) keeps each frame cheap, so 30fps rotation reads
-      // as smooth instead of the previous choppy ~20fps. We compensate the phi
-      // step so the rotation speed stays visually identical to before.
-      if (isMobile && frame % 2 !== 0) {
+      if (isMobile && frame % 3 !== 0) {
         rafRef.current = requestAnimationFrame(tick);
         return;
       }
 
-      if (!dragRef.current.active && !pauseRef.current) {
-        const step = isMobile ? 0.006 + scrollRef.current * 0.003 : 0.004 + scrollRef.current * 0.002
-        phiRef.current += step
+      const drag = dragRef.current;
+      const isLiveDrag = drag.active && drag.committed;
+      const v = velocityRef.current;
+      const hasVelocity = Math.abs(v.phi) > 0.0001 || Math.abs(v.theta) > 0.0001;
+
+      if (!isVisible && !isLiveDrag && (pauseRef.current || !hasVelocity)) {
+        rafRef.current = requestAnimationFrame(tick);
+        return;
       }
 
-      const currentPhi = phiRef.current + dragRef.current.offset
-      if (externalPhiRef) externalPhiRef.current = currentPhi
-      globeRef.current?.update({
-        phi: currentPhi,
-      });
+      if (isLiveDrag) {
+        // During live drag, phi/theta are driven by drag offsets below
+      } else {
+        if (!pauseRef.current) {
+          phiRef.current += 0.004 + scrollRef.current * 0.002;
+        }
+        if (hasVelocity) {
+          phiRef.current += v.phi;
+          thetaOffsetRef.current += v.theta;
+          v.phi *= 0.95;
+          v.theta *= 0.95;
+        }
+        thetaOffsetRef.current = clamp(thetaOffsetRef.current, THETA_OFFSET_MIN, THETA_OFFSET_MAX);
+      }
+
+      const currentPhi = phiRef.current + (isLiveDrag ? drag.offsetPhi : 0);
+      const currentTheta = clamp(
+        BASE_THETA + thetaOffsetRef.current + (isLiveDrag ? drag.offsetTheta : 0),
+        THETA_OFFSET_MIN + BASE_THETA - 0.05,
+        THETA_OFFSET_MAX + BASE_THETA + 0.05,
+      );
+
+      if (externalPhiRef) externalPhiRef.current = currentPhi;
+      if (externalThetaRef) externalThetaRef.current = currentTheta;
+
+      if (isVisible) {
+        globeRef.current?.update({
+          phi: currentPhi,
+          theta: currentTheta,
+        });
+      }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
 
-    const observer = new MutationObserver(() => {
-      createGlobeInstance();
-    });
-    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-
-    // Recreate the globe at the correct pixel size whenever the canvas's
-    // actual layout box changes — orientation change, window resize, or
-    // the scroll-driven flex-basis animation that shrinks/grows the
-    // container. Without this the WebGL backbuffer stays frozen at the
-    // size it had on mount and just gets stretched/blurred by CSS.
     let resizeTimeout = null;
+    let lastSize = 0;
     const scheduleResize = () => {
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const newSize = Math.round(Math.max(rect.width, rect.height));
+        if (Math.abs(newSize - lastSize) < 30) return;
+        lastSize = newSize;
         isMobile = window.innerWidth <= 768;
         createGlobeInstance();
-      }, 150);
+      }, 400);
     };
 
     const resizeObserver = new ResizeObserver(scheduleResize);
@@ -143,15 +181,9 @@ export default function Globe({
     }
     window.addEventListener('orientationchange', scheduleResize);
 
-    // Pause entirely when scrolled out of view — saves battery/perf on
-    // mobile and avoids a jarring "catch-up" jump when scrolling back in.
     const intersectionObserver = new IntersectionObserver(
       ([entry]) => {
-        const wasVisible = isVisible;
         isVisible = entry.isIntersecting;
-        if (isVisible && !wasVisible) {
-          rafRef.current = requestAnimationFrame(tick);
-        }
       },
       { threshold: 0.01 },
     );
@@ -160,7 +192,6 @@ export default function Globe({
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (resizeTimeout) clearTimeout(resizeTimeout);
-      observer.disconnect();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       window.removeEventListener('orientationchange', scheduleResize);
@@ -170,47 +201,81 @@ export default function Globe({
   }, []);
 
   const onPointerDown = (e) => {
+    const isTouch = e.pointerType === 'touch';
     dragRef.current = {
       active: true,
-      committed: false,
+      // Mouse/pen commit to a drag immediately — desktop has no page-scroll
+      // conflict to worry about. Touch waits for a direction lock below so
+      // a vertical swipe still scrolls the page instead of spinning the globe.
+      committed: !isTouch,
+      pointerType: e.pointerType,
       startX: e.clientX,
       startY: e.clientY,
-      offset: dragRef.current.offset,
+      offsetPhi: 0,
+      offsetTheta: 0,
     };
+    lastPointerRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
+    velocityRef.current = { phi: 0, theta: 0 };
+    if (!isTouch) canvasRef.current?.classList.add('is-dragging');
   };
 
   const onPointerMove = (e) => {
-    if (!dragRef.current.active) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
+    const drag = dragRef.current;
+    if (!drag.active) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    const isTouch = drag.pointerType === 'touch';
 
-    // Direction lock: wait for 10px to determine intent
-    if (!dragRef.current.committed) {
+    if (!drag.committed) {
+      // Direction lock: wait for 10px to determine intent (touch only)
       if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-      // If primarily vertical → release drag, let browser scroll
       if (Math.abs(dy) > Math.abs(dx)) {
-        dragRef.current = {
-          active: false,
-          committed: false,
-          startX: 0,
-          startY: 0,
-          offset: dragRef.current.offset,
-        };
+        // Primarily vertical → release drag, let the browser scroll
+        drag.active = false;
         return;
       }
-      dragRef.current.committed = true;
+      drag.committed = true;
       canvasRef.current?.classList.add('is-dragging');
     }
 
-    dragRef.current.offset = dx * 0.005;
+    drag.offsetPhi = dx * 0.005;
+    // Touch stays horizontal-only so vertical intent always means "scroll".
+    drag.offsetTheta = isTouch ? 0 : dy * 0.003;
+
+    const now = Date.now();
+    const last = lastPointerRef.current;
+    if (last) {
+      const dt = Math.max(now - last.t, 1);
+      velocityRef.current = {
+        phi: clamp(((e.clientX - last.x) / dt) * 0.3, -MAX_VELOCITY, MAX_VELOCITY),
+        theta: isTouch ? 0 : clamp(((e.clientY - last.y) / dt) * 0.08, -MAX_VELOCITY, MAX_VELOCITY),
+      };
+    }
+    lastPointerRef.current = { x: e.clientX, y: e.clientY, t: now };
   };
 
   const onPointerUp = () => {
-    if (!dragRef.current.active) return;
-    if (dragRef.current.committed) {
-      phiRef.current += dragRef.current.offset;
+    const drag = dragRef.current;
+    if (!drag.active) return;
+    if (drag.committed) {
+      phiRef.current += drag.offsetPhi;
+      thetaOffsetRef.current = clamp(
+        thetaOffsetRef.current + drag.offsetTheta,
+        THETA_OFFSET_MIN,
+        THETA_OFFSET_MAX,
+      );
     }
-    dragRef.current = { active: false, committed: false, startX: 0, startY: 0, offset: 0 };
+    // velocityRef is intentionally left as-is so momentum keeps coasting.
+    dragRef.current = {
+      active: false,
+      committed: false,
+      pointerType: drag.pointerType,
+      startX: 0,
+      startY: 0,
+      offsetPhi: 0,
+      offsetTheta: 0,
+    };
+    lastPointerRef.current = null;
     canvasRef.current?.classList.remove('is-dragging');
   };
 

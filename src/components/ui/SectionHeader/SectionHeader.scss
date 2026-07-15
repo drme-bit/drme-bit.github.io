@@ -7,11 +7,11 @@
   align-items: center;
   gap: 0.85rem;
   width: 100%;
-  margin-bottom: 2.5rem;
+  max-width: 1400px;
+  margin: 0 auto 2.5rem;
+  padding: 0 var(--space-xl);
   opacity: 0;
   transition: opacity 0.4s var(--ease-out);
-  position: sticky;
-  top: 1.25rem;
   z-index: 10;
 }
 
