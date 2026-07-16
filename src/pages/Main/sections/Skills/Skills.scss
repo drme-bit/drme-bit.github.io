@@ -57,10 +57,120 @@
 }
 
 /* =================================================================
+   MARKER LABELS — Icons with hover tooltip
+   ================================================================= */
+
+.globe__marker-label {
+  position: absolute;
+  bottom: anchor(top);
+  left: anchor(center);
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 8px;
+  padding: 0;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  border: 2px solid color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 60%, transparent);
+  border-radius: 50%;
+  color: var(--marker-color, var(--accent-secondary));
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+
+  &:hover {
+    transform: translateY(-4px) scale(1.15);
+    box-shadow: 0 6px 24px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 50%, transparent);
+    background: color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 20%, var(--bg));
+  }
+
+  &.is-active {
+    transform: translateY(-4px) scale(1.2);
+    box-shadow: 0 6px 30px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 70%, transparent);
+    background: color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 30%, var(--bg));
+    border-color: var(--marker-color, var(--accent-secondary));
+    animation: marker-pulse 1.5s ease-in-out infinite;
+  }
+
+  /* Tooltip on hover */
+  &::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    translate: -50% 0;
+    padding: 4px 10px;
+    background: var(--bg);
+    border: 1px solid var(--marker-color, var(--accent-secondary));
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--marker-color, var(--accent-secondary));
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: all 0.2s ease;
+    z-index: 100;
+  }
+
+  &:hover::before {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &.is-active::before {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Connector line */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    translate: -50% 0;
+    width: 1px;
+    height: 6px;
+    background: linear-gradient(to bottom, var(--marker-color, var(--accent-secondary)), transparent);
+  }
+}
+
+@keyframes marker-pulse {
+  0%, 100% {
+    box-shadow: 0 6px 30px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 70%, transparent);
+  }
+  50% {
+    box-shadow: 0 6px 40px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 100%, transparent), 0 0 0 6px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 20%, transparent);
+  }
+}
+
+.globe__marker-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+
+  .globe__marker-label:hover & {
+    transform: scale(1.1);
+  }
+
+  .globe__marker-label.is-active & {
+    transform: scale(1.15);
+  }
+}
+
+/* =================================================================
    SKILLS SECTION
    ================================================================= */
 
 .section--skills {
+  margin-top: 15vh;
   background: linear-gradient(
     180deg,
     transparent 0%,
@@ -76,274 +186,90 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
-.skills-inner {
+/* =================================================================
+   HEADER — Left side, fades up on scroll
+   ================================================================= */
+
+.skills-header {
+  position: absolute;
+  left: 8vw;
+  top: 50%;
+  translate: 0 -50%;
+  text-align: left;
+  max-width: 400px;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.skills-header-num {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--accent-secondary);
+  margin-bottom: 4px;
+}
+
+.skills-header-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 10vw, 4.5rem);
+  color: var(--text);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.skills-header-accent {
+  color: var(--accent-secondary);
+}
+
+.skills-header-desc {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+/* =================================================================
+   LAYOUT — Globe + Sidebar
+   ================================================================= */
+
+.skills-layout {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2xl);
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 var(--space-xl);
 }
 
-.skills-intro {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-lg);
-  text-align: center;
-  max-width: 1400px;
-  margin: 0 auto var(--space-3xl);
-  padding: 0 var(--space-xl);
-  transition: opacity 0.5s ease;
-}
-
-.skills-intro .section-title {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 10vw, 3.5rem);
-  line-height: 1.2;
-  color: var(--text);
-  margin-bottom: var(--space-md);
-}
-
-.skills-intro-desc {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  max-width: 500px;
-  line-height: 1.6;
-}
-
-/* =================================================================
-   SKILLS PHASE — Globe + Sidebar layout
-   ================================================================= */
-
-.skills-phase {
-  display: flex;
-  gap: var(--space-2xl);
-  align-items: flex-start;
-}
-
-/* =================================================================
-   GLOBE CONTAINER
-   ================================================================= */
-
-.skills-globe-container {
-  position: relative;
-  flex: 0 0 55%;
+.skills-globe-area {
+  flex: 0 0 60%;
+  max-width: 700px;
   aspect-ratio: 1;
-  transition: flex 0.6s var(--ease-out), transform 0.6s var(--ease-out);
-}
-
-.skills-globe-visual {
   position: relative;
-  width: 100%;
-  height: 100%;
+  transform-origin: center center;
+  will-change: transform;
+  transition: transform 0.6s var(--ease-out);
 }
 
-.skills-globe {
-  width: 100%;
-  height: 100%;
-}
-
-.skills-globe-glow {
-  position: absolute;
-  inset: -15%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--accent-secondary) 6%, transparent) 0%,
-    transparent 60%
-  );
-  pointer-events: none;
-  animation: globe-glow-pulse 4s ease-in-out infinite;
-}
-
-@keyframes globe-glow-pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
+.skills-globe-area {
+  flex: 0 0 100%;
+  max-width: 600px;
+  aspect-ratio: 1;
+  position: relative;
+  transform-origin: center center;
+  will-change: transform;
+  transition: transform 0.6s var(--ease-out);
 }
 
 /* =================================================================
-   SKILLS RING — Icons orbiting the globe
-   ================================================================= */
-
-.skills-ring {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.skills-connections {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: visible;
-
-  path {
-    transition: opacity 0.3s ease, stroke-width 0.3s ease;
-  }
-}
-
-/* =================================================================
-   SKILL RING ITEM — Individual skill icons
-   ================================================================= */
-
-.skills-ring-item {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  pointer-events: auto;
-  outline: none;
-  transform-origin: center;
-  will-change: transform, opacity;
-
-  /* Entrance animation */
-  opacity: 0;
-  transform: scale(0.3);
-  transition: opacity 0.5s var(--ease-out), transform 0.4s var(--ease-out);
-
-  &.is-animated {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  /* Hover state */
-  &.is-hovered,
-  &:hover {
-    .skills-ring-icon {
-      transform: scale(1.2);
-      box-shadow: 0 0 20px var(--item-color), 0 0 40px color-mix(in srgb, var(--item-color) 30%, transparent);
-    }
-
-    .skills-ring-tooltip {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-      pointer-events: auto;
-    }
-
-    .skills-ring-pulse {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  /* Selected state */
-  &.is-selected {
-    .skills-ring-icon {
-      transform: scale(1.3);
-      box-shadow: 0 0 25px var(--item-color), 0 0 50px color-mix(in srgb, var(--item-color) 40%, transparent);
-      border-color: var(--item-color);
-    }
-
-    .skills-ring-tooltip {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-      color: var(--item-color);
-    }
-
-    .skills-ring-pulse {
-      opacity: 0.8;
-      transform: scale(1.5);
-      animation: skill-pulse 1.5s ease-in-out infinite;
-    }
-  }
-
-  /* Related state */
-  &.is-related {
-    .skills-ring-icon {
-      transform: scale(1.1);
-      box-shadow: 0 0 15px color-mix(in srgb, var(--item-color) 50%, transparent);
-    }
-  }
-
-  /* Dimmed state */
-  &.is-dimmed {
-    opacity: 0.3 !important;
-    pointer-events: none;
-
-    .skills-ring-icon {
-      filter: grayscale(0.8);
-    }
-  }
-}
-
-.skills-ring-icon {
-  width: 44px;
-  height: 44px;
-  padding: 10px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
-  border: 1px solid color-mix(in srgb, var(--item-color) 30%, transparent);
-  color: var(--item-color);
-  transition: all 0.3s var(--ease-out);
-  backdrop-filter: blur(8px);
-
-  &:hover {
-    background: color-mix(in srgb, var(--bg) 90%, transparent);
-  }
-}
-
-.skills-ring-tooltip {
-  position: absolute;
-  bottom: -24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  padding: 4px 8px;
-  background: var(--bg);
-  border: 1px solid color-mix(in srgb, var(--item-color) 30%, transparent);
-  border-radius: 6px;
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: var(--text);
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.2s var(--ease-out);
-  z-index: 100;
-}
-
-.skills-ring-pulse {
-  position: absolute;
-  inset: -4px;
-  border-radius: 16px;
-  border: 1px solid var(--item-color);
-  opacity: 0;
-  transform: scale(0.8);
-  transition: all 0.3s var(--ease-out);
-  pointer-events: none;
-}
-
-@keyframes skill-pulse {
-  0%,
-  100% {
-    opacity: 0.8;
-    transform: scale(1.3);
-  }
-  50% {
-    opacity: 0.4;
-    transform: scale(1.5);
-  }
-}
-
-/* =================================================================
-   SKILLS SIDEBAR
+   SIDEBAR
    ================================================================= */
 
 .skills-sidebar {
@@ -354,8 +280,17 @@
   border: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
   border-radius: 16px;
   backdrop-filter: blur(12px);
-  transition: all 0.5s var(--ease-out);
-  overflow: hidden;
+  opacity: 0;
+  transform: translateX(60px) scale(0.95);
+  transition: opacity 0.6s var(--ease-out) 0.1s, transform 0.6s var(--ease-out) 0.1s;
+  pointer-events: none;
+  flex-shrink: 0;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: auto;
+  }
 }
 
 /* =================================================================
@@ -459,6 +394,12 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
+}
+
+.skill-info-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
 .skill-info-name {
@@ -643,58 +584,92 @@
    ================================================================= */
 
 @media (max-width: 900px) {
-  .skills-phase {
-    flex-direction: column;
+  .section--skills {
+    margin-top: 5vh;
   }
 
-  .skills-globe-container {
+  .skills-sticky {
+    height: 100vh;
+  }
+
+  .skills-header {
+    position: absolute;
+    left: var(--space-lg);
+    top: 50%;
+    translate: 0 -70%;
+    text-align: left;
+    width: auto;
+    max-width: 45%;
+    z-index: 20;
+  }
+
+  .skills-header-num {
+    font-size: 0.55rem;
+  }
+
+  .skills-header-title {
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+  }
+
+  .skills-header-desc {
+    font-size: 0.6rem;
+  }
+
+  .skills-layout {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+    padding: 0 var(--space-lg);
+  }
+
+  .skills-globe-area {
     flex: 0 0 auto;
     width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
+    max-width: 350px;
+    transform-origin: center center;
   }
 
   .skills-sidebar {
     flex: 0 0 auto;
     width: 100%;
     max-width: 100%;
-    margin-top: var(--space-lg);
-  }
-
-  .skills-ring-item {
-    padding: 6px;
-
-    .skills-ring-icon {
-      width: 36px;
-      height: 36px;
-      padding: 8px;
-    }
   }
 }
 
 @media (max-width: 700px) {
-  .skills-sticky {
-    height: auto;
-    min-height: 100vh;
-    padding: var(--space-xl) 0;
+  .skills-header {
+    left: var(--space-md);
+    top: 12vh;
+    translate: 0 0;
+    max-width: 50%;
   }
 
-  .skills-inner {
-    padding: 0 var(--space-lg);
+  .skills-header-title {
+    font-size: clamp(1.2rem, 5vw, 1.8rem);
   }
 
-  .skills-globe-container {
-    max-width: 300px;
+  .skills-globe-area {
+    max-width: 280px;
   }
 
-  .skills-ring-item .skills-ring-icon {
-    width: 32px;
-    height: 32px;
-    padding: 7px;
+  .skills-sidebar {
+    padding: var(--space-md);
+    border-radius: 12px;
   }
 
   .skill-info-panel {
     padding: var(--space-md);
+  }
+
+  .globe__marker-label {
+    width: 32px;
+    height: 32px;
+  }
+
+  .globe__marker-icon {
+    width: 14px;
+    height: 14px;
   }
 }
 
@@ -703,21 +678,8 @@
    ================================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  .globe__glow,
-  .skills-globe-glow {
+  .globe__glow {
     animation: none;
     opacity: 0.6;
-  }
-
-  .skills-ring-item {
-    transition: opacity 0.2s ease;
-
-    &.is-animated {
-      transform: none;
-    }
-  }
-
-  .skills-ring-pulse {
-    animation: none !important;
   }
 }

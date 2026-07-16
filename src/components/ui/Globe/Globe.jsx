@@ -1,8 +1,9 @@
 import createGlobe from 'cobe';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
+import { SKILLS_DATA, ICON_MAP, GROUP_COLORS } from '@/pages/Main/sections/Skills/skillsData';
 import './Globe.scss';
 
-const BASE_THETA = 0.3;
+const BASE_THETA = 0.25;
 const THETA_OFFSET_MIN = -0.32;
 const THETA_OFFSET_MAX = 0.32;
 const MAX_VELOCITY = 0.15;
@@ -20,17 +21,67 @@ function hexToRgb01(hex) {
   ];
 }
 
-function getGlobeColors() {
-  const s = getComputedStyle(document.body);
+const GROUP_SIZES = { frontend: 0.06, backend: 0.05, tools: 0.045 };
+
+function buildMarkers(skills) {
+  const n = skills.length;
+  return skills.map((skill, i) => {
+    // Vogel spiral — even distribution on sphere
+    const theta = 2.39996323 * i; // golden angle in radians
+    const r = Math.sqrt(1 - (i / n)); // radius from center
+    const y = 1 - (2 * i) / n; // y: 1 → -1
+    const lat = (Math.asin(y) * 180) / Math.PI;
+    const lng = ((theta * 180) / Math.PI) % 360;
+    return {
+      location: [lat, lng],
+      size: GROUP_SIZES[skill.group] || 0.04,
+      id: skill.name.replace(/[^a-zA-Z]/g, ''),
+      name: skill.name,
+      group: skill.group,
+    };
+  });
+}
+
+function buildArcs(m) {
+  const arcs = [];
+  const byGroup = {};
+  m.forEach((mk) => {
+    if (!byGroup[mk.group]) byGroup[mk.group] = [];
+    byGroup[mk.group].push(mk);
+  });
+  Object.values(byGroup).forEach((group) => {
+    for (let i = 1; i < group.length; i++) {
+      arcs.push({ from: group[i - 1].location, to: group[i].location });
+    }
+  });
+  return arcs;
+}
+
+function getGlobeTheme() {
   const isLight = document.body.classList.contains('light');
-  const accent = s.getPropertyValue('--accent').trim() || '#e8e4df';
-  const accentSecondary = s.getPropertyValue('--accent-secondary').trim() || '#7dd3fc';
-  const accentTertiary = s.getPropertyValue('--accent-tertiary').trim() || '#c4b5fd';
+  if (isLight) {
+    return {
+      dark: 1,
+      diffuse: 2,
+      mapSamples: 16000,
+      mapBrightness: 5,
+      mapBaseBrightness: 0.05,
+      baseColor: [0.88, 0.86, 0.83],
+      markerColor: [0.18, 0.52, 0.78],
+      glowColor: [0.88, 0.86, 0.83],
+      arcColor: [0.18, 0.52, 0.78],
+    };
+  }
   return {
-    dark: isLight ? 1 : 0,
-    baseColor: isLight ? [0.85, 0.83, 0.81] : [0.17, 0.17, 0.17],
-    markerColor: hexToRgb01(accentSecondary),
-    glowColor: hexToRgb01(accent),
+    dark: 0,
+    diffuse: 1.2,
+    mapSamples: 12000,
+    mapBrightness: 6,
+    mapBaseBrightness: 0,
+    baseColor: [0.12, 0.12, 0.12],
+    markerColor: [0.49, 0.83, 0.99],
+    glowColor: [0.27, 0.26, 0.25],
+    arcColor: [0.49, 0.83, 0.99],
   };
 }
 
@@ -40,6 +91,9 @@ export default function Globe({
   phiRef: externalPhiRef,
   thetaRef: externalThetaRef,
   paused = false,
+  onMarkerClick,
+  selectedSkill = null,
+  filteredSkills = null,
 }) {
   const canvasRef = useRef(null);
   const globeRef = useRef(null);
@@ -50,6 +104,7 @@ export default function Globe({
   const scrollRef = useRef(scrollProgress);
   const pauseRef = useRef(paused);
   const rafRef = useRef(null);
+  const themeRef = useRef(getGlobeTheme());
   const dragRef = useRef({
     active: false,
     committed: false,
@@ -62,6 +117,9 @@ export default function Globe({
 
   scrollRef.current = scrollProgress;
   pauseRef.current = paused;
+
+  const markers = useMemo(() => buildMarkers(SKILLS_DATA), []);
+  const arcs = useMemo(() => buildArcs(markers), [markers]);
 
   const createGlobeInstance = () => {
     const canvas = canvasRef.current;
@@ -80,21 +138,30 @@ export default function Globe({
     }
     canvas.classList.remove('is-ready');
 
-    const colors = getGlobeColors();
+    const theme = getGlobeTheme();
+    themeRef.current = theme;
+
     globeRef.current = createGlobe(canvas, {
       devicePixelRatio: dpr,
       width: size,
       height: size,
       phi: phiRef.current,
       theta: BASE_THETA + thetaOffsetRef.current,
-      dark: colors.dark,
-      diffuse: 1.2,
+      dark: theme.dark,
+      diffuse: theme.diffuse,
       scale: 1,
-      mapSamples: isMobile ? 1000 : 6000,
-      mapBrightness: isMobile ? 4 : 6,
-      baseColor: colors.baseColor,
-      markerColor: colors.markerColor,
-      glowColor: colors.glowColor,
+      mapSamples: isMobile ? 6000 : theme.mapSamples,
+      mapBrightness: isMobile ? 4 : theme.mapBrightness,
+      mapBaseBrightness: theme.mapBaseBrightness,
+      baseColor: theme.baseColor,
+      markerColor: theme.markerColor,
+      glowColor: theme.glowColor,
+      markers,
+      arcs,
+      arcColor: theme.arcColor,
+      arcWidth: 0.4,
+      arcHeight: 0.25,
+      markerElevation: 0.01,
       offset: [0, 0],
     });
 
@@ -109,7 +176,7 @@ export default function Globe({
 
     const tick = () => {
       frame++;
-      if (isMobile && frame % 3 !== 0) {
+      if (isMobile && frame !== 0) {
         rafRef.current = requestAnimationFrame(tick);
         return;
       }
@@ -204,9 +271,6 @@ export default function Globe({
     const isTouch = e.pointerType === 'touch';
     dragRef.current = {
       active: true,
-      // Mouse/pen commit to a drag immediately — desktop has no page-scroll
-      // conflict to worry about. Touch waits for a direction lock below so
-      // a vertical swipe still scrolls the page instead of spinning the globe.
       committed: !isTouch,
       pointerType: e.pointerType,
       startX: e.clientX,
@@ -227,10 +291,8 @@ export default function Globe({
     const isTouch = drag.pointerType === 'touch';
 
     if (!drag.committed) {
-      // Direction lock: wait for 10px to determine intent (touch only)
       if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
       if (Math.abs(dy) > Math.abs(dx)) {
-        // Primarily vertical → release drag, let the browser scroll
         drag.active = false;
         return;
       }
@@ -239,7 +301,6 @@ export default function Globe({
     }
 
     drag.offsetPhi = dx * 0.005;
-    // Touch stays horizontal-only so vertical intent always means "scroll".
     drag.offsetTheta = isTouch ? 0 : dy * 0.003;
 
     const now = Date.now();
@@ -265,7 +326,6 @@ export default function Globe({
         THETA_OFFSET_MAX,
       );
     }
-    // velocityRef is intentionally left as-is so momentum keeps coasting.
     dragRef.current = {
       active: false,
       committed: false,
@@ -290,6 +350,26 @@ export default function Globe({
         onPointerLeave={onPointerUp}
       />
       <div className="globe__glow" />
+      {markers.map((m) => {
+        const Icon = ICON_MAP[m.name];
+        const isActive = selectedSkill === m.name;
+        const isDimmed = filteredSkills && !filteredSkills.has(m.name);
+        return (
+          <button
+            key={m.id}
+            className={`globe__marker-label${isActive ? ' is-active' : ''}${isDimmed ? ' is-dimmed' : ''}`}
+            data-tooltip={m.name}
+            style={{
+              positionAnchor: `--cobe-${m.id}`,
+              opacity: isDimmed ? '0.15' : `var(--cobe-visible-${m.id}, 0)`,
+              '--marker-color': GROUP_COLORS[m.group],
+            }}
+            onClick={() => onMarkerClick?.(m.name)}
+          >
+            {Icon && <Icon className="globe__marker-icon" />}
+          </button>
+        );
+      })}
     </div>
   );
 }

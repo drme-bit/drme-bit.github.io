@@ -13,6 +13,20 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "reviews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "email",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "approved",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

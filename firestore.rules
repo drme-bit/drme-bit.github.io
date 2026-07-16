@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /reviews/{reviewId} {
       allow read: if resource.data.approved == true;
-      allow create: if true;
+      allow create: if request.auth != null;
       allow update, delete: if true;
     }
   }

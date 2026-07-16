@@ -54,6 +54,86 @@
   animation: globe-pulse 5s ease-in-out infinite 0.5s;
 }
 
+.globe__marker-label {
+  position: absolute;
+  bottom: anchor(top);
+  left: anchor(center);
+  translate: -50% 0;
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 40%, transparent);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    background: color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 25%, var(--bg));
+    border-color: var(--marker-color, var(--accent-secondary));
+    color: var(--marker-color, var(--accent-secondary));
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 50%, transparent), 0 0 0 1px var(--marker-color, var(--accent-secondary));
+  }
+
+  &.is-active {
+    transform: translateY(-4px) scale(1.2);
+    box-shadow: 0 6px 30px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 70%, transparent);
+    background: color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 30%, var(--bg));
+    border-color: var(--marker-color, var(--accent-secondary));
+    animation: marker-pulse 1.5s ease-in-out infinite;
+  }
+
+  &.is-dimmed {
+    opacity: 0.15 !important;
+    pointer-events: none;
+    filter: grayscale(0.8);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    translate: -50% 0;
+    width: 1px;
+    height: 8px;
+    background: linear-gradient(to bottom, var(--marker-color, var(--accent-secondary)), transparent);
+  }
+}
+
+@keyframes marker-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 60%, transparent), 0 0 0 2px var(--marker-color, var(--accent-secondary));
+  }
+  50% {
+    box-shadow: 0 4px 30px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 80%, transparent), 0 0 0 4px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 50%, transparent);
+  }
+}
+
+.globe__marker-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+
+  .globe__marker-label:hover & {
+    transform: scale(1.15);
+  }
+
+  .globe__marker-label.is-active & {
+    transform: scale(1.2);
+  }
+}
+
 @keyframes globe-pulse {
   0%, 100% { opacity: 0.5; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.02); }
