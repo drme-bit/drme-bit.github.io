@@ -128,8 +128,8 @@ export default function Globe({
     const rect = canvas.getBoundingClientRect();
     if (rect.width < 1 || rect.height < 1) return;
     const isMobile = window.innerWidth <= 768;
-    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
-    const maxPx = isMobile ? 500 : 800;
+    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1.2 : 2);
+    const maxPx = isMobile ? 320 : 800;
     const size = Math.max(Math.round(Math.min(Math.max(rect.width, rect.height), maxPx) * dpr), 200);
 
     if (globeRef.current) {
@@ -141,6 +141,10 @@ export default function Globe({
     const theme = getGlobeTheme();
     themeRef.current = theme;
 
+    // Mobile: fewer samples, fewer markers
+    const mobileMarkers = isMobile ? markers.slice(0, 12) : markers;
+    const mobileArcs = isMobile ? arcs.filter((_, i) => i < 5) : arcs;
+
     globeRef.current = createGlobe(canvas, {
       devicePixelRatio: dpr,
       width: size,
@@ -148,16 +152,16 @@ export default function Globe({
       phi: phiRef.current,
       theta: BASE_THETA + thetaOffsetRef.current,
       dark: theme.dark,
-      diffuse: theme.diffuse,
+      diffuse: isMobile ? 1 : theme.diffuse,
       scale: 1,
-      mapSamples: isMobile ? 6000 : theme.mapSamples,
-      mapBrightness: isMobile ? 4 : theme.mapBrightness,
+      mapSamples: isMobile ? 2000 : theme.mapSamples,
+      mapBrightness: isMobile ? 3 : theme.mapBrightness,
       mapBaseBrightness: theme.mapBaseBrightness,
       baseColor: theme.baseColor,
       markerColor: theme.markerColor,
       glowColor: theme.glowColor,
-      markers,
-      arcs,
+      markers: mobileMarkers,
+      arcs: mobileArcs,
       arcColor: theme.arcColor,
       arcWidth: 0.4,
       arcHeight: 0.25,
@@ -176,10 +180,6 @@ export default function Globe({
 
     const tick = () => {
       frame++;
-      if (isMobile && frame !== 0) {
-        rafRef.current = requestAnimationFrame(tick);
-        return;
-      }
 
       const drag = dragRef.current;
       const isLiveDrag = drag.active && drag.committed;
