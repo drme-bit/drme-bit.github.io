@@ -1,23 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
-import Scene from '@/components/Scene';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Hero from './sections/Hero/Hero';
 import About from './sections/About/About';
-import Skills from './sections/Skills/Skills';
 import Experience from './sections/Experience/Experience';
-import Projects from './sections/Projects/Projects';
 import Blog from './sections/Blog/Blog';
 import Reviews from './sections/Reviews/Reviews';
 import Contacts from './sections/Contacts/Contacts';
+import Footer from '@/components/layout/Footer/Footer';
 import GitHubStatus from '@/components/ui/GitHubStatus/GitHubStatus';
 import Navbar from '@/components/layout/navbar/Navbar';
 import ScrollProgressBar from '@/components/ui/ScrollProgressBar/ScrollProgressBar';
 import SearchBar from '@/components/ui/SearchBar/SearchBar';
 import Mascot, { getMockMessage } from '@/components/ui/Mascot/Mascot';
-import Archive from '@/components/ui/Archive/Archive';
-
 import SoundEffects from '@/components/ui/SoundEffects/SoundEffects';
 import Cursor from '@/components/ui/Cursor/Cursor';
 import ChangeTheme from '@/components/ui/ChangeTheme/ChangeTheme.jsx';
+
+const Scene = lazy(() => import('@/components/Scene'));
+const Skills = lazy(() => import('./sections/Skills/Skills'));
+const Projects = lazy(() => import('./sections/Projects/Projects'));
+const Archive = lazy(() => import('@/components/ui/Archive/Archive'));
 
 export default function Main() {
   const [mascotMessage, setMascotMessage] = useState(null);
@@ -41,15 +42,22 @@ export default function Main() {
       <Cursor />
       <ScrollProgressBar />
       <GitHubStatus />
-      <Scene />
+      <Suspense fallback={null}>
+        <Scene />
+      </Suspense>
       <Hero />
       <About />
-      <Skills />
+      <Suspense fallback={null}>
+        <Skills />
+      </Suspense>
       <Experience />
-      <Projects />
+      <Suspense fallback={null}>
+        <Projects />
+      </Suspense>
       <Blog />
       <Reviews />
       <Contacts />
+      <Footer />
       <Navbar />
       <button className="archive-fab" onClick={() => setArchiveOpen(true)} title="archive">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -61,7 +69,11 @@ export default function Main() {
       <Mascot userMessage={mascotMessage} searchCount={searchCount} onDone={handleMascotDone} />
 
       <SoundEffects />
-      {archiveOpen && <Archive onClose={() => setArchiveOpen(false)} />}
+      {archiveOpen && (
+        <Suspense fallback={null}>
+          <Archive onClose={() => setArchiveOpen(false)} />
+        </Suspense>
+      )}
     </>
   );
 }

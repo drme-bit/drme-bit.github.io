@@ -38,7 +38,7 @@
 .h-term {
   position: absolute;
   opacity: 0.03;
-  border-radius: 8px;
+   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--terminal-bg);
   border: 1px solid var(--terminal-border);
@@ -118,7 +118,7 @@
   opacity: 0;
   background: var(--accent-glow);
   border: 1px solid var(--border);
-  border-radius: 6px;
+   border-radius: var(--radius-sm);
   white-space: pre;
   animation: h-frag-float linear infinite alternate;
 }
@@ -335,7 +335,7 @@
   justify-content: center;
   width: 30px;
   height: 30px;
-  border-radius: 8px;
+   border-radius: var(--radius-sm);
   color: var(--text-dim);
   background: var(--glass);
   transition: all 0.2s var(--ease-out);

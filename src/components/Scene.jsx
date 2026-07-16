@@ -2,6 +2,7 @@ import { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { getAccent, getBg } from '@/utils/cssTheme';
+import { useTerrain } from '@/contexts/TerrainContext';
 
 const _isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 const GRID_X = _isMobile ? 50 : 90;
@@ -80,6 +81,7 @@ function Terrain() {
   const amplitude = useRef(0.9);
   const frameCount = useRef(0);
   const isLight = useIsLight();
+  const terrain = useTerrain();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -173,10 +175,12 @@ function Terrain() {
   }, []);
 
   useFrame(({ clock }) => {
+    if (terrain.paused) return;
+
     scrollSmoothed.current += (scrollT.current - scrollSmoothed.current) * 0.05;
     const breathing = Math.sin(clock.elapsedTime * 0.15) * 0.08;
-    amplitude.current = 0.7 + scrollSmoothed.current * 1.1 + breathing;
-    noiseOffset.current += 0.0015 + scrollSmoothed.current * 0.01;
+    amplitude.current = (0.7 + scrollSmoothed.current * 1.1 + breathing) * terrain.amplitude;
+    noiseOffset.current += (0.0015 + scrollSmoothed.current * 0.01) * terrain.speed;
     frameCount.current++;
     if (frameCount.current % 2 === 0) {
       recompute(noiseOffset.current, amplitude.current);

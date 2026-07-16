@@ -4,6 +4,7 @@ import useReveal from '@/hooks/useReveal';
 import useScrollPhase from '@/hooks/useScrollPhase';
 import Globe from '@/components/ui/Globe/Globe';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
+import { useTerrain } from '@/contexts/TerrainContext';
 import { SKILLS_DATA, GROUP_COLORS, ICON_MAP } from './skillsData';
 import { FiSearch, FiX } from 'react-icons/fi';
 import './Skills.scss';
@@ -22,6 +23,8 @@ export default function Skills() {
   const searchRef = useRef(null);
   const phiRef = useRef(0);
   const thetaRef = useRef(0.3);
+  const terrain = useTerrain();
+  const wasPausedRef = useRef(false);
 
   const { overallProgress, sectionRef } = useScrollPhase({
     phases: SCROLL_PHASES,
@@ -29,6 +32,18 @@ export default function Skills() {
   });
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+  // Pause terrain when Skills section is active
+  useEffect(() => {
+    if (visible && overallProgress > 0 && overallProgress < 0.9) {
+      if (!terrain.paused) {
+        wasPausedRef.current = false;
+        terrain.setPaused(true);
+      }
+    } else if (wasPausedRef.current === false && terrain.paused) {
+      terrain.setPaused(false);
+    }
+  }, [visible, overallProgress]);
 
   const filteredSkills = useMemo(() => {
     let result = SKILLS_DATA;
@@ -107,19 +122,19 @@ export default function Skills() {
   ) : null;
 
   // Scroll-driven animation values (works on both mobile and desktop)
-  const riseT = Math.min(overallProgress / 0.2, 1);
-  const transitionT = Math.min(Math.max((overallProgress - 0.2) / 0.3, 0), 1);
+  const riseT = Math.min(overallProgress / 0.25, 1);
+  const transitionT = Math.min(Math.max((overallProgress - 0.15) / 0.35, 0), 1);
   
   // Globe: starts right and large, shrinks and moves center-left
-  const globeScale = isMobile ? (1.05 - transitionT * -0.25) : (1.15 - transitionT * 0.25);
-  const globeTranslateX = isMobile ? (20 - transitionT * 15) : (25 - transitionT * 35);
+  const globeScale = isMobile ? (1.05 - transitionT * 0.15) : (1.2 - transitionT * 0.3);
+  const globeTranslateX = isMobile ? (20 - transitionT * 18) : (30 - transitionT * 40);
   
-  // Header: fades up on scroll
-  const headerOpacity = 1 - Math.min(overallProgress / 0.15, 1);
-  const headerY = -riseT * 40;
+  // Header: fades up on scroll (starts fading immediately)
+  const headerOpacity = 1 - Math.min(overallProgress / 0.18, 1);
+  const headerY = -riseT * 50;
   
-  // Sidebar: appears after slight scroll
-  const sidebarVisible = overallProgress > 0.05;
+  // Sidebar: appears after globe starts moving
+  const sidebarVisible = overallProgress > 0.1;
 
   return (
     <section

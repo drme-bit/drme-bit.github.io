@@ -63,7 +63,7 @@
   padding: 5px 10px;
   background: color-mix(in srgb, var(--bg) 85%, transparent);
   border: 1px solid color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 40%, transparent);
-  border-radius: 8px;
+   border-radius: var(--radius-sm);
   color: var(--text);
   font-family: var(--font-mono);
   font-size: 0.6rem;

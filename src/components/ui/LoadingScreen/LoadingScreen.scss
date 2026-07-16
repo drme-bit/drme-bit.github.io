@@ -30,7 +30,7 @@
   width: 24px;
   height: 24px;
   border: 1px solid var(--accent);
-  border-radius: 2px;
+   border-radius: var(--radius-xs);
   animation: pulse-box 1.2s ease-in-out infinite;
   box-shadow: 0 0 12px var(--accent-muted);
 }

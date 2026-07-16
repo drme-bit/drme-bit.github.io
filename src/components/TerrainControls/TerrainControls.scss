@@ -1,0 +1,122 @@
+.terrain-controls {
+  position: fixed;
+  bottom: 80px;
+  left: 16px;
+  z-index: 500;
+}
+
+.terrain-controls__toggle {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+   border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  &:hover {
+    color: var(--text);
+    border-color: var(--accent-secondary);
+    background: color-mix(in srgb, var(--accent-secondary) 10%, var(--bg));
+  }
+}
+
+.terrain-controls__panel {
+  position: absolute;
+  bottom: 44px;
+  left: 0;
+  width: 180px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+   border-radius: var(--radius-sm);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: tc-fade-in 0.2s ease;
+}
+
+@keyframes tc-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.terrain-controls__row {
+  display: flex;
+  gap: 6px;
+}
+
+.terrain-controls__btn {
+  flex: 1;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--text-ghost) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
+   border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--text);
+    background: color-mix(in srgb, var(--text-ghost) 25%, transparent);
+  }
+
+  &.is-active {
+    color: var(--accent-secondary);
+    border-color: color-mix(in srgb, var(--accent-secondary) 40%, transparent);
+    background: color-mix(in srgb, var(--accent-secondary) 10%, transparent);
+  }
+}
+
+.terrain-controls__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+
+  input[type="range"] {
+    flex: 1;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: color-mix(in srgb, var(--text-ghost) 30%, transparent);
+    border-radius: var(--radius-xs);
+    outline: none;
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-secondary);
+      cursor: pointer;
+    }
+  }
+}
+
+.terrain-controls__value {
+  min-width: 28px;
+  text-align: right;
+  color: var(--text-ghost);
+}

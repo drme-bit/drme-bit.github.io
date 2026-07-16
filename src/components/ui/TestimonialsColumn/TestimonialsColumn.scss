@@ -1,5 +1,5 @@
 /* =================================================================
-   TESTIMONIALS COLUMN — Infinite Scroll
+   TESTIMONIALS COLUMN — Infinite Scroll (rAF)
    ================================================================= */
 
 .testimonials-column {
@@ -25,13 +25,19 @@
 .testimonials-track {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .testimonials-set {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  padding-bottom: var(--space-lg);
+}
+
+.testimonials-set:last-child {
+  padding-bottom: 0;
 }
 
 .testimonial-card {
@@ -131,4 +137,62 @@
   color: var(--text-ghost);
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* =================================================================
+   RESPONSIVE
+   ================================================================= */
+
+@media (max-width: 700px) {
+  .testimonials-column {
+    max-width: none;
+    mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 85%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 85%,
+      transparent 100%
+    );
+  }
+
+  .testimonial-card {
+    padding: var(--space-md);
+    max-width: none;
+    border-radius: var(--radius-sm);
+  }
+
+  .testimonial-header {
+    font-size: 0.8rem;
+  }
+
+  .testimonial-text {
+    font-size: 0.75rem;
+    line-height: 1.55;
+  }
+
+  .testimonial-footer {
+    margin-top: var(--space-sm);
+  }
+
+  .testimonial-avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .testimonial-name {
+    font-size: 0.7rem;
+  }
+
+  .testimonial-role {
+    font-size: 0.6rem;
+  }
+
+  .testimonial-time {
+    font-size: 0.55rem;
+  }
 }

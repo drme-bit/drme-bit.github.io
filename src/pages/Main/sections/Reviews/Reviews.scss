@@ -235,7 +235,7 @@
   padding: 4px;
   color: var(--text-dim);
   cursor: pointer;
-  border-radius: 4px;
+   border-radius: var(--radius-xs);
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
@@ -398,14 +398,100 @@
 
 /* Responsive */
 @media (max-width: 700px) {
+  .section--reviews {
+    padding-top: 1rem;
+  }
+
+  .reviews-inner {
+    padding: 0 var(--space-md) var(--space-lg);
+  }
+
   .reviews-header-row {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  .reviews-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .reviews-cta {
+    width: 100%;
+    justify-content: center;
+    padding: 0.8em 1em;
+    font-size: 0.7rem;
   }
 
   .reviews-columns-wrapper {
     flex-direction: column;
-    align-items: center;
-    max-height: none;
+    align-items: stretch;
+    max-height: 50vh;
+    overflow: hidden;
+    gap: 0;
+    padding: 0 var(--space-sm);
+  }
+
+  .reviews-loading,
+  .reviews-empty {
+    padding: var(--space-xl) var(--space-md);
+    font-size: 0.7rem;
+  }
+
+  /* Modal full-screen on mobile */
+  .review-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .review-modal {
+    max-width: none;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .review-modal-bar {
+    padding: var(--space-md);
+    position: sticky;
+    top: 0;
+    background: var(--panel-bg, rgba(10, 10, 10, 0.97));
+    z-index: 1;
+  }
+
+  .review-modal-body {
+    padding: var(--space-md);
+  }
+
+  .form-group {
+    input,
+    textarea {
+      font-size: 16px; /* prevent iOS zoom */
+      padding: 0.85em 1em;
+    }
+  }
+
+  .auth-prompt {
+    padding: var(--space-xl) var(--space-sm);
+  }
+
+  .signin-btn {
+    width: 100%;
+    padding: 1em;
+    font-size: 0.85rem;
+  }
+
+  .rating-star svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 1em;
+    font-size: 0.85rem;
   }
 }

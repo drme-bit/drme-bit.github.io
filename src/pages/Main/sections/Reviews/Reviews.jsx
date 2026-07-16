@@ -149,10 +149,16 @@ export default function Reviews() {
 
   const columns = useMemo(() => {
     if (reviews.length === 0) return [[], [], []];
-    const col1 = reviews.filter((_, i) => i % 3 === 0);
-    const col2 = reviews.filter((_, i) => i % 3 === 1);
-    const col3 = reviews.filter((_, i) => i % 3 === 2);
-    return [col1, col2, col3];
+    if (reviews.length <= 3) {
+      return [reviews, reviews, reviews];
+    }
+    const shuffled = [...reviews].sort(() => Math.random() - 0.5);
+    const size = Math.ceil(shuffled.length / 3);
+    return [
+      shuffled.slice(0, size),
+      shuffled.slice(size, size * 2),
+      shuffled.slice(size * 2),
+    ];
   }, [reviews]);
 
   function openModal() {
@@ -188,9 +194,9 @@ export default function Reviews() {
             <div className="reviews-empty">No reviews yet. Be the first!</div>
           ) : (
             <>
-              <TestimonialsColumn testimonials={columns[0]} duration={15} />
-              <TestimonialsColumn testimonials={columns[1]} duration={19} className="reviews-col--desktop" />
-              <TestimonialsColumn testimonials={columns[2]} duration={17} className="reviews-col--wide" />
+              <TestimonialsColumn testimonials={columns[0]} duration={10} />
+              <TestimonialsColumn testimonials={columns[1]} duration={13} className="reviews-col--desktop" />
+              <TestimonialsColumn testimonials={columns[2]} duration={11} className="reviews-col--wide" />
             </>
           )}
         </div>
@@ -232,7 +238,7 @@ export default function Reviews() {
               ) : (
                 <>
                   <div className="user-badge">
-                    <img src={user.photoURL} alt="" className="user-avatar" />
+                    <img src={user.photoURL} alt="" className="user-avatar" loading="lazy" />
                     <span className="user-name">{user.displayName}</span>
                     <button onClick={handleSignOut} className="signout-icon" title="Sign out">
                       <FiLogOut size={14} />

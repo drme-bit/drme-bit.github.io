@@ -7,6 +7,7 @@ import { auth } from '@/config/firebase';
 import { SmoothScrolling } from '@/components/layout/SmoothScrolling/SmoothScrolling';
 import DrawerMenu from '@/components/layout/DrawerMenu/DrawerMenu';
 import LoadingScreen from '@/components/ui/LoadingScreen/LoadingScreen';
+import TerrainControls from '@/components/TerrainControls/TerrainControls';
 import '@/styles/App.scss';
 
 const Main = lazy(() => import('@/pages/Main/Main'));
@@ -36,6 +37,7 @@ export default function App() {
     <Suspense fallback={<LoadingScreen />}>
       <Analytics />
       <SpeedInsights />
+      <TerrainControls />
       <DrawerMenu
         open={drawerOpen}
         onToggle={() => setDrawerOpen((v) => !v)}

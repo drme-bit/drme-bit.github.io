@@ -17,7 +17,7 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border);
-  border-radius: 10px;
+   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-weight: 500;
   transition: background 0.3s var(--ease-out),
@@ -34,7 +34,7 @@
 .glow {
   position: absolute;
   inset: -4px;
-  border-radius: 10px;
+   border-radius: var(--radius-sm);
   background: var(--accent);
   opacity: 0;
   filter: blur(12px);

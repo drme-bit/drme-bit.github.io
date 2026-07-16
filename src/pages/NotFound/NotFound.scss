@@ -19,7 +19,7 @@
   max-width: 500px;
   background: var(--terminal-bg);
   border: 1px solid var(--terminal-border);
-  border-radius: 12px;
+   border-radius: var(--radius-md);
   overflow: hidden;
 }
 
@@ -137,7 +137,7 @@
   font-family: var(--font-mono);
   font-size: 0.85rem;
   padding: 0.7em 1.4em;
-  border-radius: 8px;
+   border-radius: var(--radius-sm);
   cursor: pointer;
   text-decoration: none;
   transition: all 0.25s ease;
