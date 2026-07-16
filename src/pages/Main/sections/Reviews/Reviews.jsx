@@ -18,14 +18,18 @@ export default function Reviews() {
   const [form, setForm] = useState({ rating: 5, text: '' });
 
   useEffect(() => {
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          setUser(result.user);
+        }
+      })
+      .catch((err) => {
+        console.error('Redirect result error:', err);
+      });
+
     const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsubAuth();
-  }, []);
-
-  useEffect(() => {
-    getRedirectResult(auth).catch((err) => {
-      console.error('Redirect result error:', err);
-    });
   }, []);
 
   useEffect(() => {
@@ -48,6 +52,7 @@ export default function Reviews() {
 
   async function handleSignIn() {
     try {
+      setError(null);
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       if (isMobile) {
         await signInWithRedirect(auth, googleProvider);
@@ -56,6 +61,7 @@ export default function Reviews() {
       }
     } catch (err) {
       console.error('Sign in error:', err);
+      setError('Failed to sign in. Please try again.');
     }
   }
 
