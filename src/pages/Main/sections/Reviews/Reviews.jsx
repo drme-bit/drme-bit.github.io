@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, query, where, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from 'firebase/auth';
 import { db, auth, googleProvider } from '@/config/firebase';
 import useReveal from '@/hooks/useReveal';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
@@ -23,6 +23,12 @@ export default function Reviews() {
   }, []);
 
   useEffect(() => {
+    getRedirectResult(auth).catch((err) => {
+      console.error('Redirect result error:', err);
+    });
+  }, []);
+
+  useEffect(() => {
     const q = query(collection(db, 'reviews'), where('approved', '==', true));
     const unsub = onSnapshot(q, (snapshot) => {
       const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -42,7 +48,12 @@ export default function Reviews() {
 
   async function handleSignIn() {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        await signInWithPopup(auth, googleProvider);
+      }
     } catch (err) {
       console.error('Sign in error:', err);
     }
