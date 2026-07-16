@@ -17,12 +17,20 @@ const NotFound = lazy(() => import('@/pages/NotFound/NotFound'));
 
 export default function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    getRedirectResult(auth).catch((err) => {
-      console.error('Redirect result error:', err);
-    });
+    getRedirectResult(auth)
+      .then(() => setAuthReady(true))
+      .catch((err) => {
+        console.error('Redirect result error:', err);
+        setAuthReady(true);
+      });
   }, []);
+
+  if (!authReady) {
+    return <LoadingScreen />;
+  }
 
   return (
     <Suspense fallback={<LoadingScreen />}>

@@ -16,13 +16,9 @@ export default function Reviews() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ rating: 5, text: '' });
-  const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setSigningIn(false);
-    });
+    const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsubAuth();
   }, []);
 
@@ -47,20 +43,21 @@ export default function Reviews() {
   async function handleSignIn() {
     try {
       setError(null);
-      setSigningIn(true);
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      console.log('Signing in, isMobile:', isMobile);
-      if (isMobile) {
-        console.log('Using signInWithRedirect');
-        await signInWithRedirect(auth, googleProvider);
-      } else {
-        console.log('Using signInWithPopup');
-        await signInWithPopup(auth, googleProvider);
-      }
+      await signInWithPopup(auth, googleProvider);
     } catch (err) {
-      console.error('Sign in error:', err);
-      setError(`Sign in failed: ${err.message}`);
-      setSigningIn(false);
+      if (err.code === 'auth/popup-blocked') {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectErr) {
+          setError(`Redirect failed: ${redirectErr.message}`);
+          return;
+        }
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        setError('Sign in cancelled.');
+      } else {
+        setError(`Sign in failed: ${err.message}`);
+      }
     }
   }
 
@@ -117,9 +114,9 @@ export default function Reviews() {
             {!user ? (
               <div className="auth-prompt">
                 <p>Sign in with Google to leave a review</p>
-                <button onClick={handleSignIn} className="signin-btn" disabled={signingIn}>
+                <button onClick={handleSignIn} className="signin-btn">
                   <FiLogIn size={14} />
-                  <span>{signingIn ? 'Redirecting...' : 'Sign in with Google'}</span>
+                  <span>Sign in with Google</span>
                 </button>
                 {error && (
                   <div className="form-error" style={{ marginTop: '0.5rem' }}>
