@@ -1,7 +1,9 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { getRedirectResult } from 'firebase/auth';
+import { auth } from '@/config/firebase';
 import { SmoothScrolling } from '@/components/layout/SmoothScrolling/SmoothScrolling';
 import DrawerMenu from '@/components/layout/DrawerMenu/DrawerMenu';
 import LoadingScreen from '@/components/ui/LoadingScreen/LoadingScreen';
@@ -15,6 +17,12 @@ const NotFound = lazy(() => import('@/pages/NotFound/NotFound'));
 
 export default function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    getRedirectResult(auth).catch((err) => {
+      console.error('Redirect result error:', err);
+    });
+  }, []);
 
   return (
     <Suspense fallback={<LoadingScreen />}>

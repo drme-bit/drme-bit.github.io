@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, query, where, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, onAuthStateChanged, signOut } from 'firebase/auth';
 import { db, auth, googleProvider } from '@/config/firebase';
 import useReveal from '@/hooks/useReveal';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
@@ -18,16 +18,6 @@ export default function Reviews() {
   const [form, setForm] = useState({ rating: 5, text: '' });
 
   useEffect(() => {
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result) {
-          setUser(result.user);
-        }
-      })
-      .catch((err) => {
-        console.error('Redirect result error:', err);
-      });
-
     const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsubAuth();
   }, []);
