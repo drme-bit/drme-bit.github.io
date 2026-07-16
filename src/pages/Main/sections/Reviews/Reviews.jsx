@@ -16,9 +16,13 @@ export default function Reviews() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ rating: 5, text: '' });
+  const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
+    const unsubAuth = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setSigningIn(false);
+    });
     return () => unsubAuth();
   }, []);
 
@@ -43,15 +47,20 @@ export default function Reviews() {
   async function handleSignIn() {
     try {
       setError(null);
+      setSigningIn(true);
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      console.log('Signing in, isMobile:', isMobile);
       if (isMobile) {
+        console.log('Using signInWithRedirect');
         await signInWithRedirect(auth, googleProvider);
       } else {
+        console.log('Using signInWithPopup');
         await signInWithPopup(auth, googleProvider);
       }
     } catch (err) {
       console.error('Sign in error:', err);
-      setError('Failed to sign in. Please try again.');
+      setError(`Sign in failed: ${err.message}`);
+      setSigningIn(false);
     }
   }
 
@@ -108,10 +117,16 @@ export default function Reviews() {
             {!user ? (
               <div className="auth-prompt">
                 <p>Sign in with Google to leave a review</p>
-                <button onClick={handleSignIn} className="signin-btn">
+                <button onClick={handleSignIn} className="signin-btn" disabled={signingIn}>
                   <FiLogIn size={14} />
-                  <span>Sign in with Google</span>
+                  <span>{signingIn ? 'Redirecting...' : 'Sign in with Google'}</span>
                 </button>
+                {error && (
+                  <div className="form-error" style={{ marginTop: '0.5rem' }}>
+                    <FiAlertCircle size={14} />
+                    <span>{error}</span>
+                  </div>
+                )}
               </div>
             ) : submitted ? (
               <div className="form-success">
