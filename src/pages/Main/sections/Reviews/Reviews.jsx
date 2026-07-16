@@ -5,6 +5,7 @@ import { db, auth, googleProvider } from '@/config/firebase';
 import useReveal from '@/hooks/useReveal';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import TestimonialsColumn from '@/components/ui/TestimonialsColumn';
+import { SkeletonCard } from '@/components/ui/Skeleton/Skeleton';
 import { FiStar, FiSend, FiCheck, FiAlertCircle, FiLogIn, FiLogOut, FiX, FiMessageSquare } from 'react-icons/fi';
 import './Reviews.scss';
 
@@ -189,7 +190,11 @@ export default function Reviews() {
 
         <div className="reviews-columns-wrapper">
           {loading ? (
-            <div className="reviews-loading">Loading reviews...</div>
+            <div className="reviews-skeleton">
+              {Array.from({ length: 3 }, (_, i) => (
+                <SkeletonCard key={i} lines={2} />
+              ))}
+            </div>
           ) : reviews.length === 0 ? (
             <div className="reviews-empty">No reviews yet. Be the first!</div>
           ) : (

@@ -177,6 +177,12 @@ export default function Globe({
     const tick = () => {
       frame++;
 
+      // Throttle on mobile: skip every other frame for WebGL render
+      if (isMobile && frame % 2 !== 0) {
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
       const drag = dragRef.current;
       const isLiveDrag = drag.active && drag.committed;
       const v = velocityRef.current;

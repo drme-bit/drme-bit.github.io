@@ -74,6 +74,18 @@
   width: 100vw;
 }
 
+.reviews-skeleton {
+  display: flex;
+  gap: var(--space-lg);
+  width: 100%;
+  justify-content: center;
+}
+
+.reviews-skeleton .skeleton-card {
+  flex: 1;
+  max-width: 380px;
+}
+
 .reviews-col--desktop {
   display: none;
 

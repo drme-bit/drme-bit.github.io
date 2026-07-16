@@ -39,6 +39,7 @@ function terrainHeight(x, z, amplitude) {
 function Starfield() {
   const ref = useRef();
   const matRef = useRef();
+  const { invalidate } = useThree();
   const geometry = useMemo(() => {
     const count = 900;
     const positions = new Float32Array(count * 3);
@@ -61,6 +62,7 @@ function Starfield() {
     ref.current.position.x = mouse.x * 0.4;
     ref.current.position.y = mouse.y * 0.2;
     if (matRef.current) matRef.current.color.set(getAccent());
+    invalidate();
   });
 
   return (
@@ -82,6 +84,7 @@ function Terrain() {
   const frameCount = useRef(0);
   const isLight = useIsLight();
   const terrain = useTerrain();
+  const { invalidate } = useThree();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -186,6 +189,7 @@ function Terrain() {
       recompute(noiseOffset.current, amplitude.current);
     }
     if (wireMatRef.current) wireMatRef.current.color.set(getAccent());
+    invalidate();
   });
 
   return (
@@ -204,6 +208,7 @@ function Beacons() {
   const groupRef = useRef();
   const refs = useRef([]);
   const matRefs = useRef([]);
+  const { invalidate } = useThree();
   const seeds = useMemo(
     () => Array.from({ length: 5 }, (_, i) => ({
       angle: (i / 5) * Math.PI * 2,
@@ -228,6 +233,7 @@ function Beacons() {
       m.rotation.y = t * 0.3 + i;
       if (matRefs.current[i]) matRefs.current[i].color.set(c);
     });
+    invalidate();
   });
 
   return (
@@ -323,13 +329,14 @@ function SceneInner({ lowPower }) {
 }
 
 function FogUpdater() {
-  const { scene } = useThree();
+  const { scene, invalidate } = useThree();
   useFrame(() => {
     const isLight = document.body.classList.contains('light');
     const fogColor = isLight ? getBg() : '#080808';
     if (!scene.fog || scene.fog.color.getStyle() !== fogColor) {
       scene.fog = new THREE.Fog(fogColor, 14, 34);
     }
+    invalidate();
   });
   return null;
 }
@@ -363,6 +370,7 @@ export default function Scene() {
       id="bg"
       camera={{ position: [9, 9.2, 5], fov: 32, near: 0.1, far: 80 }}
       gl={{ alpha: true, antialias: !lowPower }}
+      frameloop="demand"
       onCreated={({ gl }) => {
         gl.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 2));
       }}

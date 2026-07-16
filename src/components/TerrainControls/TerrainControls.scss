@@ -5,6 +5,14 @@
   z-index: 500;
 }
 
+@media (max-width: 700px) {
+  .terrain-controls {
+    bottom: calc(4.5rem + 50px + env(safe-area-inset-bottom));
+    left: auto;
+    right: 16px;
+  }
+}
+
 .terrain-controls__toggle {
   width: 36px;
   height: 36px;

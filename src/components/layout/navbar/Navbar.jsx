@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FiHome, FiUser, FiZap, FiBriefcase, FiGrid, FiUsers, FiStar, FiMail } from 'react-icons/fi';
 import styles from './Navbar.module.scss';
 
@@ -15,6 +15,8 @@ const ITEMS = [
 
 export default function Navbar() {
   const [active, setActive] = useState('hero');
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
 
   useEffect(() => {
     const observers = ITEMS.map(({ id }) => {
@@ -33,12 +35,43 @@ export default function Navbar() {
     return () => observers.forEach((o) => o?.disconnect());
   }, []);
 
+  useEffect(() => {
+    let ticking = false;
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const delta = y - lastY.current;
+
+        if (y < 50) {
+          setHidden(false);
+        } else if (delta > 10) {
+          setHidden(true);
+        } else if (delta < -10) {
+          setHidden(false);
+        }
+
+        lastY.current = y;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <nav className={styles.dock} aria-label="Main navigation">
+    <nav
+      className={`${styles.dock} ${hidden ? styles.hidden : ''}`}
+      aria-label="Main navigation"
+    >
       <div className={styles.glow} />
       {ITEMS.map(({ id, label, Icon }) => (
         <button

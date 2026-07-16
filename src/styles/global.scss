@@ -1,5 +1,13 @@
 *, *::before, *::after { box-sizing: border-box; }
 
+html {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 :root {
   --bg: #0a0a0a;
   --bg-elevated: #111111;
@@ -457,7 +465,7 @@ body.light {
 }
 
 @media (max-width: 700px) {
-  .archive-fab { right: 1rem; bottom: 4rem; }
+  .archive-fab { right: 1rem; bottom: calc(4rem + env(safe-area-inset-bottom)); }
   body::after { display: none; }
 }
 
