@@ -18,6 +18,12 @@ const SCROLL_PHASES = [
 
 const GROUP_OPTIONS = Object.entries(GROUP_COLORS).map(([key, color]) => ({ key, color }));
 
+// Memoized group counts — computed once
+const GROUP_COUNTS = {};
+GROUP_OPTIONS.forEach(({ key }) => {
+  GROUP_COUNTS[key] = SKILLS_DATA.filter((s) => s.group === key).length;
+});
+
 function openSkillModal(openModal, skill, onClose) {
   const Icon = ICON_MAP[skill.name];
   const related = SKILLS_DATA.find((s) => s.name === skill.name)?.related || [];
@@ -165,19 +171,17 @@ export default function Skills() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [dropdownOpen]);
 
-  const isMobile = window.innerWidth < 768;
-
   // Scroll-driven animation values
   const riseT = Math.min(overallProgress / 0.25, 1);
   const transitionT = Math.min(Math.max((overallProgress - 0.15) / 0.35, 0), 1);
 
   // Header fades up and out as scroll progresses
   const headerOpacity = 1 - Math.min(overallProgress / 0.2, 1);
-  const headerY = isMobile ? (riseT * -30) : (riseT * -60);
+  const headerY = riseT * -60;
 
   // Globe starts right, moves to center on scroll
-  const globeX = isMobile ? (0 - transitionT * 0) : (5 - transitionT * 25); // 25vw → 5vw
-  const globeScale = isMobile ? (1.05 - transitionT * -0.25) : (1.05 - transitionT * 0.1);
+  const globeX = 5 - transitionT * 25;
+  const globeScale = 1.05 - transitionT * 0.1;
 
   const filtersVisible = overallProgress > 0.3;
 
@@ -212,7 +216,7 @@ export default function Skills() {
         </div>
 
         {/* Compact filter bar — centered top */}
-        <div className={`skills-filters ${filtersVisible ? 'is-visible' : ''}`} style={{ top: isMobile ? '-10vh' : '10vh' }}>
+        <div className={`skills-filters ${filtersVisible ? 'is-visible' : ''}`}>
           <div className="skills-search">
             <FiSearch className="skills-search-icon" />
             <input
@@ -261,7 +265,7 @@ export default function Skills() {
                     <span className="skills-filter-dot" style={{ background: color }} />
                     {key}
                     <span className="skills-filter-option-count">
-                      {SKILLS_DATA.filter((s) => s.group === key).length}
+                      {GROUP_COUNTS[key]}
                     </span>
                   </button>
                 ))}

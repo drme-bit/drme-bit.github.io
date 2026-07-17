@@ -1,12 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
- * useScrollPhase — Detects scroll phases for multi-stage animations
- *
- * @param {Object} options
- * @param {Array} options.phases - Array of phase definitions with start/end percentages
- * @param {string} options.sectionId - ID of the section to observe
- * @returns {Object} Phase state and progress
+ * useScrollPhase — Detects scroll phases for multi-stage animations.
+ * Throttled to ~30fps to avoid excessive re-renders.
  */
 export default function useScrollPhase({
   phases = [
@@ -20,8 +16,9 @@ export default function useScrollPhase({
   const [phaseProgress, setPhaseProgress] = useState(0);
   const [overallProgress, setOverallProgress] = useState(0);
   const sectionRef = useRef(null);
+  const ticking = useRef(false);
+  const lastUpdate = useRef(0);
 
-  // Find which phase we're in based on progress
   const findPhase = useCallback(
     (progress) => {
       for (const phase of phases) {
@@ -34,7 +31,6 @@ export default function useScrollPhase({
     [phases]
   );
 
-  // Calculate progress within current phase
   const calculatePhaseProgress = useCallback(
     (progress, phase) => {
       const phaseRange = phase.end - phase.start;
@@ -49,58 +45,66 @@ export default function useScrollPhase({
     if (!section) return;
 
     const handleScroll = () => {
-      const rect = section.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const scrollableHeight = rect.height - windowHeight;
+      if (ticking.current) return;
+      ticking.current = true;
 
-      if (scrollableHeight <= 0) {
-        setOverallProgress(0);
-        setCurrentPhase(phases[0]?.id || 'intro');
-        setPhaseProgress(0);
-        return;
-      }
+      requestAnimationFrame(() => {
+        const now = performance.now();
+        // Throttle to ~30fps (33ms)
+        if (now - lastUpdate.current < 33) {
+          ticking.current = false;
+          return;
+        }
+        lastUpdate.current = now;
 
-      // Calculate overall progress through section
-      const scrolled = -rect.top;
-      const progress = Math.max(0, Math.min(1, scrolled / scrollableHeight));
-      setOverallProgress(progress);
+        const rect = section.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const scrollableHeight = rect.height - windowHeight;
 
-      // Find current phase
-      const phase = findPhase(progress);
-      setCurrentPhase(phase.id);
+        if (scrollableHeight <= 0) {
+          setOverallProgress(0);
+          setCurrentPhase(phases[0]?.id || 'intro');
+          setPhaseProgress(0);
+          ticking.current = false;
+          return;
+        }
 
-      // Calculate phase-specific progress
-      const phaseProg = calculatePhaseProgress(progress, phase);
-      setPhaseProgress(phaseProg);
+        const scrolled = -rect.top;
+        const progress = Math.max(0, Math.min(1, scrolled / scrollableHeight));
+        setOverallProgress(progress);
+
+        const phase = findPhase(progress);
+        setCurrentPhase(phase.id);
+
+        const phaseProg = calculatePhaseProgress(progress, phase);
+        setPhaseProgress(phaseProg);
+
+        ticking.current = false;
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, [sectionId, phases, findPhase, calculatePhaseProgress]);
 
-  // Helper to check if we're in a specific phase
   const isInPhase = useCallback(
-    (phaseId) => {
-      return currentPhase === phaseId;
-    },
+    (phaseId) => currentPhase === phaseId,
     [currentPhase]
   );
 
-  // Helper to get phase index
-  const getPhaseIndex = useCallback(() => {
-    return phases.findIndex((p) => p.id === currentPhase);
-  }, [phases, currentPhase]);
+  const getPhaseIndex = useCallback(
+    () => phases.findIndex((p) => p.id === currentPhase),
+    [phases, currentPhase]
+  );
 
-  // Helper to check if we're past a specific phase
   const isPastPhase = useCallback(
     (phaseId) => {
       const phaseIndex = phases.findIndex((p) => p.id === phaseId);
-      const currentIndex = getPhaseIndex();
-      return currentIndex > phaseIndex;
+      return getPhaseIndex() > phaseIndex;
     },
-    [phases, currentPhase, getPhaseIndex]
+    [phases, getPhaseIndex]
   );
 
   return {

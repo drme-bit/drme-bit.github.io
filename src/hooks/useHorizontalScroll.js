@@ -2,11 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * useHorizontalScroll — Converts vertical scroll to horizontal movement.
- * Uses refs for animation state to avoid per-frame React re-renders.
+ * Single rAF loop, DOM-direct updates, throttled state.
  */
 export default function useHorizontalScroll({
   itemCount = 1,
-  snapThreshold = 0.1,
 } = {}) {
   const [progress, setProgress] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -14,14 +13,14 @@ export default function useHorizontalScroll({
   const containerRef = useRef(null);
   const animProgress = useRef(0);
   const targetProgress = useRef(0);
-  const isSnapping = useRef(false);
-  const rafId = useRef(null);
-  const velocity = useRef(0);
-  const lastClientX = useRef(0);
   const isDragging = useRef(false);
   const currentIndexRef = useRef(0);
+  const rafId = useRef(null);
+  const lastClientX = useRef(0);
+  const lastReportTime = useRef(0);
+  const lastRectTop = useRef(null);
+  const lastRectTime = useRef(0);
 
-  // Smooth animation loop — updates DOM directly via transform, only snaps to state
   const tick = useCallback(() => {
     const el = containerRef.current;
     if (!el) {
@@ -29,18 +28,22 @@ export default function useHorizontalScroll({
       return;
     }
 
-    // Read scroll position
-    const rect = el.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    const scrollableHeight = rect.height - windowHeight;
+    // Throttle getBoundingClientRect — max 15x/sec
+    const now = performance.now();
+    if (now - lastRectTime.current > 66) {
+      const rect = el.getBoundingClientRect();
+      lastRectTop.current = rect.top;
+      lastRectTime.current = now;
 
-    if (scrollableHeight > 0 && !isDragging.current) {
-      const scrolled = -rect.top;
-      const rawProgress = Math.max(0, Math.min(1, scrolled / scrollableHeight));
-      targetProgress.current = rawProgress;
+      const windowHeight = window.innerHeight;
+      const scrollableHeight = rect.height - windowHeight;
+      if (scrollableHeight > 0 && !isDragging.current) {
+        const scrolled = -rect.top;
+        targetProgress.current = Math.max(0, Math.min(1, scrolled / scrollableHeight));
+      }
     }
 
-    // Smooth interpolation towards target
+    // Smooth interpolation
     const diff = targetProgress.current - animProgress.current;
     if (Math.abs(diff) > 0.0001) {
       animProgress.current += diff * 0.12;
@@ -48,51 +51,43 @@ export default function useHorizontalScroll({
       animProgress.current = targetProgress.current;
     }
 
-    // Update DOM directly — no React state update
+    // Update DOM directly
     const track = el.querySelector('.projects-track');
     if (track) {
       const offset = -animProgress.current * (itemCount - 1) * 100;
       track.style.transform = `translateX(${offset}%)`;
     }
 
-    // Only update React state when snapping to a new index (avoid 60fps re-renders)
-    const newIndex = Math.round(animProgress.current * (itemCount - 1));
-    const clamped = Math.max(0, Math.min(itemCount - 1, newIndex));
-    setCurrentIndex((prev) => {
-      if (prev !== clamped) {
-        currentIndexRef.current = clamped;
-        return clamped;
-      }
-      return prev;
-    });
+    // Throttle React state updates — max 20x/sec
+    if (now - lastReportTime.current > 50) {
+      lastReportTime.current = now;
+      const newIndex = Math.round(animProgress.current * (itemCount - 1));
+      const clamped = Math.max(0, Math.min(itemCount - 1, newIndex));
+      setCurrentIndex((prev) => {
+        if (prev !== clamped) {
+          currentIndexRef.current = clamped;
+          return clamped;
+        }
+        return prev;
+      });
+      setProgress(animProgress.current);
+    }
 
     rafId.current = requestAnimationFrame(tick);
   }, [itemCount]);
 
-  // Start animation loop
+  // Single rAF loop — cleanup cancels it properly
   useEffect(() => {
     rafId.current = requestAnimationFrame(tick);
     return () => {
-      if (rafId.current) cancelAnimationFrame(rafId.current);
+      if (rafId.current) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
     };
   }, [tick]);
 
-  // Expose progress for React rendering (update less frequently)
-  useEffect(() => {
-    let lastReported = 0;
-    const report = () => {
-      const p = animProgress.current;
-      if (Math.abs(p - lastReported) > 0.005) {
-        lastReported = p;
-        setProgress(p);
-      }
-      if (rafId.current) requestAnimationFrame(report);
-    };
-    const id = requestAnimationFrame(report);
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  // Snap to a specific index — scroll container vertically to match
+  // Scroll to index — smooth vertical scroll
   const scrollTo = useCallback(
     (index) => {
       const el = containerRef.current;
@@ -118,13 +113,11 @@ export default function useHorizontalScroll({
   const handleDragStart = useCallback((clientX) => {
     isDragging.current = true;
     lastClientX.current = clientX;
-    velocity.current = 0;
   }, []);
 
   const handleDragMove = useCallback((clientX) => {
     if (!isDragging.current) return;
     const delta = clientX - lastClientX.current;
-    velocity.current = delta;
     lastClientX.current = clientX;
 
     const containerWidth = containerRef.current?.offsetWidth || 1;
@@ -138,7 +131,6 @@ export default function useHorizontalScroll({
 
   const handleDragEnd = useCallback(() => {
     isDragging.current = false;
-    // Snap to nearest index
     const nearest = Math.round(targetProgress.current * (itemCount - 1));
     const clamped = Math.max(0, Math.min(itemCount - 1, nearest));
     targetProgress.current = clamped / (itemCount - 1);
