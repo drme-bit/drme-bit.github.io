@@ -128,9 +128,8 @@ export default function Globe({
 
     const rect = canvas.getBoundingClientRect();
     if (rect.width < 1 || rect.height < 1) return;
-    const isMobile = window.innerWidth <= 768;
-    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1 : 2);
-    const maxPx = isMobile ? 350 : 800;
+    const dpr = Math.min(window.devicePixelRatio, 2);
+    const maxPx = 800;
     const size = Math.max(Math.round(Math.min(Math.max(rect.width, rect.height), maxPx) * dpr), 200);
 
     if (globeRef.current) {
@@ -151,8 +150,8 @@ export default function Globe({
       dark: theme.dark,
       diffuse: theme.diffuse,
       scale: 1,
-      mapSamples: isMobile ? 4000 : theme.mapSamples,
-      mapBrightness: isMobile ? 5 : theme.mapBrightness,
+      mapSamples: theme.mapSamples,
+      mapBrightness: theme.mapBrightness,
       mapBaseBrightness: theme.mapBaseBrightness,
       baseColor: theme.baseColor,
       markerColor: theme.markerColor,
@@ -171,7 +170,6 @@ export default function Globe({
 
   useEffect(() => {
     createGlobeInstance();
-    let isMobile = window.innerWidth <= 768;
     let isVisible = true;
     let isTabHidden = false;
 
@@ -237,7 +235,6 @@ export default function Globe({
         const newSize = Math.round(Math.max(rect.width, rect.height));
         if (Math.abs(newSize - lastSize) < 30) return;
         lastSize = newSize;
-        isMobile = window.innerWidth <= 768;
         createGlobeInstance();
       }, 400);
     };

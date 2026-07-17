@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { SceneProvider, useScene } from '@/contexts/SceneContext';
 import Hero from './sections/Hero/Hero';
 import About from './sections/About/About';
 import Experience from './sections/Experience/Experience';
@@ -20,10 +21,11 @@ const Skills = lazy(() => import('./sections/Skills/Skills'));
 const Projects = lazy(() => import('./sections/Projects/Projects'));
 const Archive = lazy(() => import('@/components/ui/Archive/Archive'));
 
-export default function Main() {
+function MainInner() {
   const [mascotMessage, setMascotMessage] = useState(null);
   const [searchCount, setSearchCount] = useState(0);
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const { sceneOpacity } = useScene();
 
   const handleSearch = useCallback(() => {
     setSearchCount((c) => c + 1);
@@ -42,9 +44,18 @@ export default function Main() {
       <Cursor />
       <ScrollProgressBar />
       <GitHubStatus />
-      <Suspense fallback={null}>
-        <Scene />
-      </Suspense>
+      <div
+        style={{
+          opacity: sceneOpacity,
+          visibility: sceneOpacity < 0.01 ? 'hidden' : 'visible',
+          transition: 'opacity 0.05s linear',
+          willChange: 'opacity',
+        }}
+      >
+        <Suspense fallback={null}>
+          <Scene />
+        </Suspense>
+      </div>
       <Hero />
       <About />
       <Suspense fallback={null}>
@@ -75,5 +86,13 @@ export default function Main() {
         </Suspense>
       )}
     </>
+  );
+}
+
+export default function Main() {
+  return (
+    <SceneProvider>
+      <MainInner />
+    </SceneProvider>
   );
 }

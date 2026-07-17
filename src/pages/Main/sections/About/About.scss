@@ -238,8 +238,6 @@
     width: 100%;
   }
 
-  /* Content entrance: stagger the key blocks in when the section reveals so
-     mobile gets the same "alive" feel the desktop layout has. */
   .section--about.is-visible {
     .about-name { animation: aboutItemIn 0.55s var(--ease-out) 0.05s both; }
     .about-role { animation: aboutItemIn 0.55s var(--ease-out) 0.12s both; }
@@ -254,28 +252,110 @@
 }
 
 @media (max-width: 700px) {
-  /* Keep the portrait a comfortable size instead of a full-width block that
-     shoves all the content below the fold on a phone. */
+  /* Photo + name/role side by side */
+  .about-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
   .about-photo-col {
-    max-width: 240px;
-    margin: 0 auto;
+    position: static;
+    max-width: none;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .about-photo-img {
+    width: 100px;
+    height: 100px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    margin: 0;
+  }
+
+  .about-content-col {
+    gap: 1.2rem;
+  }
+
+  .about-name {
+    font-size: 1.4rem;
+  }
+
+  .about-name-accent {
+    display: block;
+  }
+
+  .about-role {
+    font-size: 0.6rem;
+  }
+
+  .about-bio {
+    font-size: 0.8rem;
+    line-height: 1.6;
   }
 
   .about-stats-row {
-    flex-wrap: wrap;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
 
   .about-stat-item {
-    flex: 0 0 calc(50% - 0.5rem);
+    flex: none;
+  }
+
+  .about-stat-value {
+    font-size: 1.1rem;
   }
 
   .about-terminal-title {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
   }
 
   .about-stat-label {
+    font-size: 0.6rem;
+  }
+
+  .about-tech {
+    gap: 0.3rem;
+  }
+
+  .about-tech-tag {
+    font-size: 0.55rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .feature-card {
+    padding: 0.8rem;
+  }
+
+  .feature-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.6rem;
+  }
+
+  .feature-icon .icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .feature-title {
+    font-size: 0.75rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .feature-desc {
     font-size: 0.65rem;
+    line-height: 1.5;
   }
 }
 

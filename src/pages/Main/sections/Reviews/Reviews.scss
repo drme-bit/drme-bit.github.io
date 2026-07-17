@@ -106,40 +106,6 @@
    MODAL
    ================================================================= */
 
-.review-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  animation: modalFadeIn 0.2s ease;
-  padding: var(--space-md);
-}
-
-@keyframes modalFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.review-modal {
-  width: 100%;
-  max-width: 440px;
-  background: var(--panel-bg, rgba(10, 10, 10, 0.97));
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes modalSlideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
 .review-modal-bar {
   display: flex;
   align-items: center;
@@ -153,23 +119,6 @@
   font-size: 0.7rem;
   color: var(--text-dim);
   letter-spacing: 0.12em;
-}
-
-.review-modal-close {
-  background: none;
-  border: none;
-  padding: 4px;
-  color: var(--text-dim);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  transition: all 0.2s ease;
-
-  &:hover {
-    color: var(--text);
-    background: var(--glass);
-  }
 }
 
 .review-modal-body {

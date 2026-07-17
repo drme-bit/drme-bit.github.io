@@ -1,0 +1,129 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: modalOverlayIn 0.2s ease;
+  padding: var(--space-md);
+
+  &.is-closing {
+    animation: modalOverlayOut 0.2s ease forwards;
+  }
+}
+
+@keyframes modalOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalOverlayOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--panel-bg, rgba(10, 10, 10, 0.97));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  animation: modalPanelIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &.is-closing {
+    animation: modalPanelOut 0.2s ease forwards;
+  }
+}
+
+@keyframes modalPanelIn {
+  from { transform: translateY(20px) scale(0.97); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes modalPanelOut {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to { transform: translateY(12px) scale(0.97); opacity: 0; }
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  z-index: 1;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+
+.modal-close:hover {
+  color: var(--text);
+  background: var(--accent-muted, rgba(255, 255, 255, 0.08));
+}
+
+/* ── Skills sheet variant ── */
+.modal-panel--skills-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: auto;
+  max-width: none;
+  max-height: 75vh;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  animation: modalSheetIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+
+  &.is-closing {
+    animation: modalSheetOut 0.25s ease forwards;
+  }
+}
+
+@keyframes modalSheetIn {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes modalSheetOut {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+.modal-panel--skills-sheet .modal-close {
+  top: var(--space-lg);
+  right: var(--space-lg);
+}
+
+/* ── Reviews variant ── */
+.modal-panel--reviews {
+  max-width: 440px;
+}
+
+@media (max-width: 700px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-panel--reviews {
+    max-width: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation: modalSheetIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+
+    &.is-closing {
+      animation: modalSheetOut 0.25s ease forwards;
+    }
+  }
+}

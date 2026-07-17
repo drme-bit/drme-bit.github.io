@@ -6,7 +6,8 @@ import useReveal from '@/hooks/useReveal';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import TestimonialsColumn from '@/components/ui/TestimonialsColumn';
 import { SkeletonCard } from '@/components/ui/Skeleton/Skeleton';
-import { FiStar, FiSend, FiCheck, FiAlertCircle, FiLogIn, FiLogOut, FiX, FiMessageSquare } from 'react-icons/fi';
+import { useModal } from '@/contexts/ModalContext';
+import { FiStar, FiSend, FiCheck, FiAlertCircle, FiLogIn, FiLogOut, FiMessageSquare } from 'react-icons/fi';
 import './Reviews.scss';
 
 export default function Reviews() {
@@ -18,8 +19,8 @@ export default function Reviews() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ rating: 5, text: '', header: '', role: '' });
-  const [modalOpen, setModalOpen] = useState(false);
   const [hasReviewed, setHasReviewed] = useState(false);
+  const { openModal } = useModal();
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
@@ -135,17 +136,13 @@ export default function Reviews() {
       setSubmitted(true);
       setHasReviewed(true);
       setForm({ rating: 5, text: '', header: '', role: '' });
-      setTimeout(() => { setModalOpen(false); setSubmitted(false); }, 2000);
+      setTimeout(() => setSubmitted(false), 2000);
     } catch (err) {
       setError(`Failed to submit: ${err.message}`);
       console.error('Error adding review:', err);
     } finally {
       setSubmitting(false);
     }
-  }
-
-  function handleRatingClick(rating) {
-    setForm(prev => ({ ...prev, rating }));
   }
 
   const columns = useMemo(() => {
@@ -162,7 +159,7 @@ export default function Reviews() {
     ];
   }, [reviews]);
 
-  function openModal() {
+  function openReviewModal() {
     if (!user) {
       handleSignIn();
       return;
@@ -170,9 +167,125 @@ export default function Reviews() {
     if (hasReviewed) {
       setError('You have already left a review.');
     }
-    setModalOpen(true);
-    setError(null);
     setSubmitted(false);
+    setError(null);
+
+    openModal({
+      className: 'modal-panel--reviews',
+      content: (
+        <div className="review-modal-body">
+          <div className="review-modal-bar">
+            <span className="review-modal-title">// leave a review</span>
+          </div>
+
+          {!user ? (
+            <div className="auth-prompt">
+              <p>Sign in with Google to leave a review</p>
+              <button onClick={handleSignIn} className="signin-btn">
+                <FiLogIn size={14} />
+                <span>Sign in with Google</span>
+              </button>
+            </div>
+          ) : hasReviewed && !submitted ? (
+            <div className="form-success">
+              <FiCheck size={24} />
+              <p>You have already left a review.</p>
+              <button onClick={handleSignOut} className="signout-link">
+                <FiLogOut size={12} />
+                <span>Sign out</span>
+              </button>
+            </div>
+          ) : submitted ? (
+            <div className="form-success">
+              <FiCheck size={24} />
+              <p>Thank you! Your review will appear after moderation.</p>
+            </div>
+          ) : (
+            <>
+              <div className="user-badge">
+                <img src={user.photoURL} alt="" className="user-avatar" loading="lazy" />
+                <span className="user-name">{user.displayName}</span>
+                <button onClick={handleSignOut} className="signout-icon" title="Sign out">
+                  <FiLogOut size={14} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="review-form">
+                <div className="form-group">
+                  <label htmlFor="review-header">Header</label>
+                  <input
+                    id="review-header"
+                    type="text"
+                    value={form.header}
+                    onChange={e => setForm(prev => ({ ...prev, header: e.target.value }))}
+                    placeholder="Short headline..."
+                    maxLength={80}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="review-role">Role</label>
+                  <input
+                    id="review-role"
+                    type="text"
+                    value={form.role}
+                    onChange={e => setForm(prev => ({ ...prev, role: e.target.value }))}
+                    placeholder="Your role / title..."
+                    maxLength={60}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Rating</label>
+                  <div className="rating-input">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button
+                        key={star}
+                        type="button"
+                        className={`rating-star ${form.rating >= star ? 'active' : ''}`}
+                        onClick={() => setForm(prev => ({ ...prev, rating: star }))}
+                        aria-label={`${star} star${star > 1 ? 's' : ''}`}
+                      >
+                        <FiStar />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="review-text">Review</label>
+                  <textarea
+                    id="review-text"
+                    value={form.text}
+                    onChange={e => setForm(prev => ({ ...prev, text: e.target.value }))}
+                    placeholder="Your review..."
+                    required
+                    rows={3}
+                    maxLength={500}
+                  />
+                </div>
+
+                {error && (
+                  <div className="form-error">
+                    <FiAlertCircle size={14} />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={submitting || !form.text.trim()}
+                >
+                  <FiSend size={14} />
+                  <span>{submitting ? 'Submitting...' : 'Submit Review'}</span>
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      ),
+    });
   }
 
   return (
@@ -182,7 +295,7 @@ export default function Reviews() {
       <div className="reviews-inner">
         <div className="reviews-header-row">
           <p className="reviews-subtitle">What people think about working with me</p>
-          <button className="reviews-cta" onClick={openModal}>
+          <button className="reviews-cta" onClick={openReviewModal}>
             <FiMessageSquare size={14} />
             <span>Leave a review</span>
           </button>
@@ -206,127 +319,6 @@ export default function Reviews() {
           )}
         </div>
       </div>
-
-      {modalOpen && (
-        <div className="review-modal-overlay" onClick={() => setModalOpen(false)}>
-          <div className="review-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="review-modal-bar">
-              <span className="review-modal-title">// leave a review</span>
-              <button className="review-modal-close" onClick={() => setModalOpen(false)}>
-                <FiX size={14} />
-              </button>
-            </div>
-
-            <div className="review-modal-body">
-              {!user ? (
-                <div className="auth-prompt">
-                  <p>Sign in with Google to leave a review</p>
-                  <button onClick={handleSignIn} className="signin-btn">
-                    <FiLogIn size={14} />
-                    <span>Sign in with Google</span>
-                  </button>
-                </div>
-              ) : hasReviewed && !submitted ? (
-                <div className="form-success">
-                  <FiCheck size={24} />
-                  <p>You have already left a review.</p>
-                  <button onClick={handleSignOut} className="signout-link">
-                    <FiLogOut size={12} />
-                    <span>Sign out</span>
-                  </button>
-                </div>
-              ) : submitted ? (
-                <div className="form-success">
-                  <FiCheck size={24} />
-                  <p>Thank you! Your review will appear after moderation.</p>
-                </div>
-              ) : (
-                <>
-                  <div className="user-badge">
-                    <img src={user.photoURL} alt="" className="user-avatar" loading="lazy" />
-                    <span className="user-name">{user.displayName}</span>
-                    <button onClick={handleSignOut} className="signout-icon" title="Sign out">
-                      <FiLogOut size={14} />
-                    </button>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="review-form">
-                    <div className="form-group">
-                      <label htmlFor="review-header">Header</label>
-                      <input
-                        id="review-header"
-                        type="text"
-                        value={form.header}
-                        onChange={e => setForm(prev => ({ ...prev, header: e.target.value }))}
-                        placeholder="Short headline..."
-                        maxLength={80}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="review-role">Role</label>
-                      <input
-                        id="review-role"
-                        type="text"
-                        value={form.role}
-                        onChange={e => setForm(prev => ({ ...prev, role: e.target.value }))}
-                        placeholder="Your role / title..."
-                        maxLength={60}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Rating</label>
-                      <div className="rating-input">
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <button
-                            key={star}
-                            type="button"
-                            className={`rating-star ${form.rating >= star ? 'active' : ''}`}
-                            onClick={() => handleRatingClick(star)}
-                            aria-label={`${star} star${star > 1 ? 's' : ''}`}
-                          >
-                            <FiStar />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="review-text">Review</label>
-                      <textarea
-                        id="review-text"
-                        value={form.text}
-                        onChange={e => setForm(prev => ({ ...prev, text: e.target.value }))}
-                        placeholder="Your review..."
-                        required
-                        rows={3}
-                        maxLength={500}
-                      />
-                    </div>
-
-                    {error && (
-                      <div className="form-error">
-                        <FiAlertCircle size={14} />
-                        <span>{error}</span>
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      className="submit-btn"
-                      disabled={submitting || !form.text.trim()}
-                    >
-                      <FiSend size={14} />
-                      <span>{submitting ? 'Submitting...' : 'Submit Review'}</span>
-                    </button>
-                  </form>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

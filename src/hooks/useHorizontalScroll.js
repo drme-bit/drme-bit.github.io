@@ -19,6 +19,7 @@ export default function useHorizontalScroll({
   const velocity = useRef(0);
   const lastClientX = useRef(0);
   const isDragging = useRef(false);
+  const currentIndexRef = useRef(0);
 
   // Smooth animation loop — updates DOM directly via transform, only snaps to state
   const tick = useCallback(() => {
@@ -57,7 +58,13 @@ export default function useHorizontalScroll({
     // Only update React state when snapping to a new index (avoid 60fps re-renders)
     const newIndex = Math.round(animProgress.current * (itemCount - 1));
     const clamped = Math.max(0, Math.min(itemCount - 1, newIndex));
-    setCurrentIndex((prev) => (prev !== clamped ? clamped : prev));
+    setCurrentIndex((prev) => {
+      if (prev !== clamped) {
+        currentIndexRef.current = clamped;
+        return clamped;
+      }
+      return prev;
+    });
 
     rafId.current = requestAnimationFrame(tick);
   }, [itemCount]);
@@ -85,25 +92,27 @@ export default function useHorizontalScroll({
     return () => cancelAnimationFrame(id);
   }, []);
 
-  // Snap to a specific index
+  // Snap to a specific index — scroll container vertically to match
   const scrollTo = useCallback(
     (index) => {
+      const el = containerRef.current;
+      if (!el) return;
       const clamped = Math.max(0, Math.min(itemCount - 1, index));
-      targetProgress.current = itemCount > 1 ? clamped / (itemCount - 1) : 0;
-      animProgress.current = targetProgress.current;
-      setProgress(targetProgress.current);
-      setCurrentIndex(clamped);
+      const rect = el.getBoundingClientRect();
+      const scrollTop = window.scrollY + rect.top;
+      const targetScrollTop = scrollTop + clamped * window.innerHeight;
+      window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
     },
     [itemCount]
   );
 
   const scrollNext = useCallback(() => {
-    scrollTo(currentIndex + 1);
-  }, [currentIndex, scrollTo]);
+    scrollTo(currentIndexRef.current + 1);
+  }, [scrollTo]);
 
   const scrollPrev = useCallback(() => {
-    scrollTo(currentIndex - 1);
-  }, [currentIndex, scrollTo]);
+    scrollTo(currentIndexRef.current - 1);
+  }, [scrollTo]);
 
   // Drag handlers
   const handleDragStart = useCallback((clientX) => {
@@ -143,10 +152,22 @@ export default function useHorizontalScroll({
     scrollNext,
     scrollPrev,
     handlers: {
-      onPointerDown: (e) => handleDragStart(e.clientX),
-      onPointerMove: (e) => handleDragMove(e.clientX),
-      onPointerUp: handleDragEnd,
-      onPointerLeave: handleDragEnd,
+      onPointerDown: (e) => {
+        if (window.innerWidth <= 768) return;
+        handleDragStart(e.clientX);
+      },
+      onPointerMove: (e) => {
+        if (window.innerWidth <= 768) return;
+        handleDragMove(e.clientX);
+      },
+      onPointerUp: () => {
+        if (window.innerWidth <= 768) return;
+        handleDragEnd();
+      },
+      onPointerLeave: () => {
+        if (window.innerWidth <= 768) return;
+        handleDragEnd();
+      },
     },
   };
 }

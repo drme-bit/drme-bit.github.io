@@ -64,7 +64,32 @@
 
 @media (max-width: 700px) {
   .features-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .feature-card {
+    padding: 0.8rem;
+  }
+
+  .feature-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.6rem;
+  }
+
+  .feature-icon .icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .feature-title {
+    font-size: 0.75rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .feature-desc {
+    font-size: 0.65rem;
+    line-height: 1.5;
   }
 }

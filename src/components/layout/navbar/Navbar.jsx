@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FiHome, FiUser, FiZap, FiBriefcase, FiGrid, FiUsers, FiStar, FiMail } from 'react-icons/fi';
+import { FiHome, FiUser, FiZap, FiBriefcase, FiGrid, FiUsers, FiStar, FiMail, FiChevronUp } from 'react-icons/fi';
 import styles from './Navbar.module.scss';
 
 const ITEMS = [
@@ -15,7 +15,7 @@ const ITEMS = [
 
 export default function Navbar() {
   const [active, setActive] = useState('hero');
-  const [hidden, setHidden] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const lastY = useRef(0);
 
   useEffect(() => {
@@ -47,11 +47,11 @@ export default function Navbar() {
         const delta = y - lastY.current;
 
         if (y < 50) {
-          setHidden(false);
+          setCollapsed(false);
         } else if (delta > 10) {
-          setHidden(true);
+          setCollapsed(true);
         } else if (delta < -10) {
-          setHidden(false);
+          setCollapsed(false);
         }
 
         lastY.current = y;
@@ -68,23 +68,38 @@ export default function Navbar() {
   };
 
   return (
-    <nav
-      className={`${styles.dock} ${hidden ? styles.hidden : ''}`}
-      aria-label="Main navigation"
-    >
-      <div className={styles.glow} />
-      {ITEMS.map(({ id, label, Icon }) => (
+    <>
+      <nav
+        className={`${styles.dock} ${collapsed ? styles.collapsed : ''}`}
+        aria-label="Main navigation"
+      >
+        <div className={styles.glow} />
+        {ITEMS.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            type="button"
+            className={`${styles.item} ${active === id ? styles.active : ''}`}
+            onClick={() => scrollTo(id)}
+            aria-current={active === id ? 'true' : undefined}
+          >
+            <Icon className={styles.icon} />
+            <span className={styles.label}>{label}</span>
+          </button>
+        ))}
+      </nav>
+
+      {collapsed && (
         <button
-          key={id}
-          type="button"
-          className={`${styles.item} ${active === id ? styles.active : ''}`}
-          onClick={() => scrollTo(id)}
-          aria-current={active === id ? 'true' : undefined}
+          className={styles.expandBtn}
+          onClick={() => {
+            setCollapsed(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          aria-label="Show navigation"
         >
-          <Icon className={styles.icon} />
-          <span className={styles.label}>{label}</span>
+          <FiChevronUp />
         </button>
-      ))}
-    </nav>
+      )}
+    </>
   );
 }
