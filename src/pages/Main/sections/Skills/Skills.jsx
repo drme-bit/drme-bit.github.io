@@ -208,8 +208,8 @@ export default function Skills() {
   const headerX = isMobile ? -35 - riseT : riseT * 10;
 
   // Globe starts right, moves to center on scroll
-  const globeX = isMobile ? 10 - transitionT * 10 : -15 - transitionT * 15;
-  const globeY = isMobile ? 5 - transitionT : 5 - transitionT * 5;
+  const globeX = isMobile ? 10 - transitionT * 10 : -15 - transitionT * 5;
+  const globeY = isMobile ? 5 - transitionT * -2.5 : 5 - transitionT * 5;
   const globeScale = 1.05 - transitionT * -0.15;
 
   const filtersVisible = overallProgress > 0.3;

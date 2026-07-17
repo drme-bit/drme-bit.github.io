@@ -12,6 +12,7 @@ export default function Mascot({ userMessage, onDone, searchCount = 0 }) {
   const [typed, setTyped] = useState('');
   const [chatInput, setChatInput] = useState('');
   const [chatMode, setChatMode] = useState(false);
+  const [visible, setVisible] = useState(false);
   const timers = useRef([]);
   const inputRef = useRef(null);
   const factIdx = useRef(Math.floor(Math.random() * FACTS.length));
@@ -19,7 +20,13 @@ export default function Mascot({ userMessage, onDone, searchCount = 0 }) {
   const { play: playTyping, dispose: disposeSounds } = useTypingSound();
 
   const anger = Math.min(searchCount / 3, 1);
-  const cubeSize = Math.max(16, 36 - Math.floor(typed.length / 5));
+  const cubeSize = Math.max(18, 34 - Math.floor(typed.length / 6));
+
+  // Entrance animation
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 600);
+    return () => clearTimeout(t);
+  }, []);
 
   const clearTimers = useCallback(() => {
     timers.current.forEach((t) => { clearInterval(t); clearTimeout(t); });
@@ -43,7 +50,7 @@ export default function Mascot({ userMessage, onDone, searchCount = 0 }) {
           clearInterval(t);
           cb?.();
         }
-      }, 30);
+      }, 28);
       addTimer(t);
     },
     [clearTimers, addTimer, playTyping],
@@ -61,7 +68,7 @@ export default function Mascot({ userMessage, onDone, searchCount = 0 }) {
             return '';
           }
         });
-      }, 15);
+      }, 12);
       addTimer(t);
     },
     [addTimer],
@@ -171,27 +178,40 @@ export default function Mascot({ userMessage, onDone, searchCount = 0 }) {
   );
 
   return (
-    <div className={`mascot${replying.current ? ' is-replying' : ''}`}>
+    <div className={`mascot ${visible ? 'is-visible' : ''} ${replying.current ? 'is-replying' : ''}`}>
       <div className="mascot-main">
         <CompanionCube size={cubeSize} onClick={handleCubeClick} anger={anger} shake={anger > 0.3} />
+
         {chatMode ? (
-          <form className="mascot-input-wrap" onSubmit={handleChatSubmit}>
-            <span className="mascot-prompt">&gt;</span>
-            <input
-              ref={inputRef}
-              className="mascot-input"
-              type="text"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              placeholder="type something..."
-              onBlur={() => { if (!chatInput) setChatMode(false); }}
-            />
+          <form className="mascot-bubble mascot-input-bubble" onSubmit={handleChatSubmit}>
+            <div className="mascot-bubble-header">
+              <span className="mascot-prompt-icon">&gt;</span>
+              <span className="mascot-prompt-label">ask cube</span>
+            </div>
+            <div className="mascot-input-row">
+              <span className="mascot-prompt-char">&gt;</span>
+              <input
+                ref={inputRef}
+                className="mascot-input"
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder=""
+                onBlur={() => { if (!chatInput) setChatMode(false); }}
+              />
+              <span className="mascot-input-cursor" />
+            </div>
           </form>
         ) : (
           <div className="mascot-bubble">
-            {typed}
-            {!replying.current && <span className="mascot-cursor">|</span>}
-            <div className="mascot-bubble-arrow" />
+            <div className="mascot-bubble-header">
+              <span className="mascot-prompt-icon">&gt;</span>
+              <span className="mascot-prompt-label">cube.exe</span>
+            </div>
+            <div className="mascot-typed">
+              {typed}
+              <span className="mascot-cursor" />
+            </div>
           </div>
         )}
       </div>

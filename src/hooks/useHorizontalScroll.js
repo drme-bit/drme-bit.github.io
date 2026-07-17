@@ -21,9 +21,6 @@ export default function useHorizontalScroll({
   const rafId = useRef(null);
   const lastClientX = useRef(0);
   const lastReportTime = useRef(0);
-  const cachedOffsetTop = useRef(null);
-  const cachedHeight = useRef(null);
-  const cacheTime = useRef(0);
 
   const tick = useCallback(() => {
     const el = containerRef.current;
@@ -32,17 +29,11 @@ export default function useHorizontalScroll({
       return;
     }
 
-    // Throttle DOM reads — max 15x/sec
-    const now = performance.now();
-    if (now - cacheTime.current > 66) {
-      cachedOffsetTop.current = el.offsetTop;
-      cachedHeight.current = el.offsetHeight;
-      cacheTime.current = now;
-
+    if (!isDragging.current) {
       const windowHeight = window.innerHeight;
-      const scrollRange = cachedHeight.current - windowHeight;
-      if (scrollRange > 0 && !isDragging.current) {
-        const scrolled = window.scrollY - cachedOffsetTop.current;
+      const scrollRange = el.offsetHeight - windowHeight;
+      if (scrollRange > 0) {
+        const scrolled = window.scrollY - el.offsetTop;
         targetProgress.current = Math.max(0, Math.min(1, scrolled / scrollRange));
       }
     }
@@ -97,8 +88,7 @@ export default function useHorizontalScroll({
       const el = containerRef.current;
       if (!el) return;
       const clamped = Math.max(0, Math.min(itemCount - 1, index));
-      const rect = el.getBoundingClientRect();
-      const scrollTop = window.scrollY + rect.top;
+      const scrollTop = window.scrollY + el.offsetTop;
       const targetScrollTop = scrollTop + clamped * window.innerHeight;
       window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
     },

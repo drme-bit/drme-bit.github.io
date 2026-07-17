@@ -223,6 +223,7 @@ export default function Globe({
 
     let resizeTimeout = null;
     let lastSize = 0;
+    let lastRecreate = 0;
     const scheduleResize = () => {
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
@@ -231,16 +232,18 @@ export default function Globe({
         const rect = canvas.getBoundingClientRect();
         const newSize = Math.round(Math.max(rect.width, rect.height));
         if (Math.abs(newSize - lastSize) < 30) return;
+        const now = Date.now();
+        if (now - lastRecreate < 1000) return;
+        lastRecreate = now;
         lastSize = newSize;
         createGlobeInstance();
-      }, 400);
+      }, 800);
     };
 
     const resizeObserver = new ResizeObserver(scheduleResize);
     if (canvasRef.current?.parentElement) {
       resizeObserver.observe(canvasRef.current.parentElement);
     }
-    window.addEventListener('orientationchange', scheduleResize);
 
     const onVisibilityChange = () => {
       isTabHidden = document.hidden;
@@ -261,7 +264,6 @@ export default function Globe({
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', onVisibilityChange);
-      window.removeEventListener('orientationchange', scheduleResize);
       globeRef.current?.destroy();
       globeRef.current = null;
     };

@@ -17,9 +17,6 @@ export default function useScrollPhase({
   const [overallProgress, setOverallProgress] = useState(0);
   const sectionRef = useRef(null);
   const ticking = useRef(false);
-  const cachedOffsetTop = useRef(null);
-  const cachedHeight = useRef(null);
-  const cacheTime = useRef(0);
 
   const findPhase = useCallback(
     (progress) => {
@@ -51,16 +48,8 @@ export default function useScrollPhase({
       ticking.current = true;
 
       requestAnimationFrame(() => {
-        const now = performance.now();
-        // Throttle DOM reads to ~15fps (66ms)
-        if (now - cacheTime.current > 66) {
-          cachedOffsetTop.current = section.offsetTop;
-          cachedHeight.current = section.offsetHeight;
-          cacheTime.current = now;
-        }
-
-        const sectionTop = cachedOffsetTop.current;
-        const sectionHeight = cachedHeight.current;
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
         const windowHeight = window.innerHeight;
         const scrollRange = sectionHeight - windowHeight;
 
