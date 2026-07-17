@@ -1,0 +1,13 @@
+// Mixins for repeated patterns across the codebase
+
+@mixin backdrop-blur($radius: 16px) {
+  backdrop-filter: blur($radius);
+  -webkit-backdrop-filter: blur($radius);
+}
+
+@mixin glass-card($bg: var(--glass-strong)) {
+  background: $bg;
+  @include backdrop-blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}

@@ -1,5 +1,5 @@
 import createGlobe from 'cobe';
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, memo } from 'react';
 import { SKILLS_DATA, ICON_MAP, GROUP_COLORS } from '@/pages/Main/sections/Skills/skillsData';
 import './Globe.scss';
 
@@ -12,13 +12,33 @@ function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
-function hexToRgb01(hex) {
-  const h = hex.replace('#', '');
-  return [
-    parseInt(h.substring(0, 2), 16) / 255,
-    parseInt(h.substring(2, 4), 16) / 255,
-    parseInt(h.substring(4, 6), 16) / 255,
-  ];
+function getGlobeTheme() {
+  const isLight = document.body.classList.contains('light');
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  if (isLight) {
+    return {
+      dark: 1,
+      diffuse: 2,
+      mapSamples: isMobile ? 6000 : 16000,
+      mapBrightness: 5,
+      mapBaseBrightness: 0.05,
+      baseColor: [0.88, 0.86, 0.83],
+      markerColor: [0.18, 0.52, 0.78],
+      glowColor: [0.88, 0.86, 0.83],
+      arcColor: [0.18, 0.52, 0.78],
+    };
+  }
+  return {
+    dark: 0,
+    diffuse: 1.2,
+    mapSamples: isMobile ? 6000 : 12000,
+    mapBrightness: 6,
+    mapBaseBrightness: 0,
+    baseColor: [0.12, 0.12, 0.12],
+    markerColor: [0.49, 0.83, 0.99],
+    glowColor: [0.27, 0.26, 0.25],
+    arcColor: [0.49, 0.83, 0.99],
+  };
 }
 
 const GROUP_SIZES = { frontend: 0.06, backend: 0.05, tools: 0.045 };
@@ -55,34 +75,6 @@ function buildArcs(m) {
     }
   });
   return arcs;
-}
-
-function getGlobeTheme() {
-  const isLight = document.body.classList.contains('light');
-  if (isLight) {
-    return {
-      dark: 1,
-      diffuse: 2,
-      mapSamples: 16000,
-      mapBrightness: 5,
-      mapBaseBrightness: 0.05,
-      baseColor: [0.88, 0.86, 0.83],
-      markerColor: [0.18, 0.52, 0.78],
-      glowColor: [0.88, 0.86, 0.83],
-      arcColor: [0.18, 0.52, 0.78],
-    };
-  }
-  return {
-    dark: 0,
-    diffuse: 1.2,
-    mapSamples: 12000,
-    mapBrightness: 6,
-    mapBaseBrightness: 0,
-    baseColor: [0.12, 0.12, 0.12],
-    markerColor: [0.49, 0.83, 0.99],
-    glowColor: [0.27, 0.26, 0.25],
-    arcColor: [0.49, 0.83, 0.99],
-  };
 }
 
 export default function Globe({
@@ -128,8 +120,9 @@ export default function Globe({
 
     const rect = canvas.getBoundingClientRect();
     if (rect.width < 1 || rect.height < 1) return;
-    const dpr = Math.min(window.devicePixelRatio, 2);
-    const maxPx = 800;
+    const isMobile = window.innerWidth <= 768;
+    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio, 2);
+    const maxPx = isMobile ? 400 : 800;
     const size = Math.max(Math.round(Math.min(Math.max(rect.width, rect.height), maxPx) * dpr), 200);
 
     if (globeRef.current) {
@@ -201,6 +194,10 @@ export default function Globe({
           v.phi *= 0.95;
           v.theta *= 0.95;
         }
+        // Desktop parallax — lerp toward target
+        const p = parallaxRef.current;
+        p.current += (p.target - p.current) * 0.06;
+        thetaOffsetRef.current += p.current * 0.02;
         thetaOffsetRef.current = clamp(thetaOffsetRef.current, THETA_OFFSET_MIN, THETA_OFFSET_MAX);
       }
 
@@ -271,10 +268,11 @@ export default function Globe({
   }, []);
 
   const onPointerDown = (e) => {
-    const isTouch = e.pointerType === 'touch';
+    // Disable touch drag on mobile — let page scroll naturally
+    if (e.pointerType === 'touch') return;
     dragRef.current = {
       active: true,
-      committed: !isTouch,
+      committed: true,
       pointerType: e.pointerType,
       startX: e.clientX,
       startY: e.clientY,
@@ -283,39 +281,52 @@ export default function Globe({
     };
     lastPointerRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
     velocityRef.current = { phi: 0, theta: 0 };
-    if (!isTouch) canvasRef.current?.classList.add('is-dragging');
+    canvasRef.current?.classList.add('is-dragging');
   };
 
+  // Desktop parallax — subtle theta shift on hover
+  const parallaxRef = useRef({ target: 0, current: 0 });
   const onPointerMove = (e) => {
     const drag = dragRef.current;
-    if (!drag.active) return;
-    const dx = e.clientX - drag.startX;
-    const dy = e.clientY - drag.startY;
-    const isTouch = drag.pointerType === 'touch';
+    if (drag.active && drag.pointerType !== 'touch') {
+      // existing drag logic
+      const dx = e.clientX - drag.startX;
+      const dy = e.clientY - drag.startY;
+      const isTouch = drag.pointerType === 'touch';
 
-    if (!drag.committed) {
-      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-      if (Math.abs(dy) > Math.abs(dx)) {
-        drag.active = false;
-        return;
+      if (!drag.committed) {
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+        if (Math.abs(dy) > Math.abs(dx)) {
+          drag.active = false;
+          return;
+        }
+        drag.committed = true;
+        canvasRef.current?.classList.add('is-dragging');
       }
-      drag.committed = true;
-      canvasRef.current?.classList.add('is-dragging');
+
+      drag.offsetPhi = dx * 0.005;
+      drag.offsetTheta = isTouch ? 0 : dy * 0.003;
+
+      const now = Date.now();
+      const last = lastPointerRef.current;
+      if (last) {
+        const dt = Math.max(now - last.t, 1);
+        velocityRef.current = {
+          phi: clamp(((e.clientX - last.x) / dt) * 0.3, -MAX_VELOCITY, MAX_VELOCITY),
+          theta: isTouch ? 0 : clamp(((e.clientY - last.y) / dt) * 0.08, -MAX_VELOCITY, MAX_VELOCITY),
+        };
+      }
+      lastPointerRef.current = { x: e.clientX, y: e.clientY, t: now };
+      return;
     }
 
-    drag.offsetPhi = dx * 0.005;
-    drag.offsetTheta = isTouch ? 0 : dy * 0.003;
-
-    const now = Date.now();
-    const last = lastPointerRef.current;
-    if (last) {
-      const dt = Math.max(now - last.t, 1);
-      velocityRef.current = {
-        phi: clamp(((e.clientX - last.x) / dt) * 0.3, -MAX_VELOCITY, MAX_VELOCITY),
-        theta: isTouch ? 0 : clamp(((e.clientY - last.y) / dt) * 0.08, -MAX_VELOCITY, MAX_VELOCITY),
-      };
-    }
-    lastPointerRef.current = { x: e.clientX, y: e.clientY, t: now };
+    // Parallax on hover (desktop only)
+    if (e.pointerType === 'touch') return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const cy = (e.clientY - rect.top) / rect.height; // 0..1
+    parallaxRef.current.target = (cy - 0.5) * 0.08; // subtle tilt
   };
 
   const onPointerUp = () => {
@@ -342,6 +353,13 @@ export default function Globe({
     canvasRef.current?.classList.remove('is-dragging');
   };
 
+  const markerElements = useMemo(() => {
+    return markers.map((m) => {
+      const Icon = ICON_MAP[m.name];
+      return { m, Icon };
+    });
+  }, [markers]);
+
   return (
     <div className={`globe ${className}`}>
       <canvas
@@ -353,8 +371,7 @@ export default function Globe({
         onPointerLeave={onPointerUp}
       />
       <div className="globe__glow" />
-      {markers.map((m) => {
-        const Icon = ICON_MAP[m.name];
+      {markerElements.map(({ m, Icon }) => {
         const isActive = selectedSkill === m.name;
         const isDimmed = filteredSkills && !filteredSkills.has(m.name);
         return (

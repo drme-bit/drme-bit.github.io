@@ -1,183 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { SiReact, SiThreedotjs, SiVite, SiDocker, SiNodedotjs, SiPython, SiRust, SiTypescript, SiGit, SiLinux, SiPostgresql, SiRedis } from 'react-icons/si';
 import { FiGithub, FiLinkedin, FiMail, FiArrowDown } from 'react-icons/fi';
+import useTypewriter from '@/hooks/useTypewriter';
+import useGithubStats from '@/hooks/useGithubStats';
+import { getAccentRGB } from '@/utils/color';
+import { TOOLS } from '@/data/hero/tools';
+import { TERMINALS } from '@/data/hero/terminals';
+import { TYPEWRITER_STRINGS, GITHUB_USERNAME } from '@/data/hero/config';
 import './Hero.scss';
 
-const GITHUB_USERNAME = 'drme-bit';
-
-const TOOLS = [
-  { label: 'React', icon: SiReact },
-  { label: 'Three.js', icon: SiThreedotjs },
-  { label: 'Vite', icon: SiVite },
-  { label: 'Docker', icon: SiDocker },
-  { label: 'Node.js', icon: SiNodedotjs },
-  { label: 'Python', icon: SiPython },
-  { label: 'Rust', icon: SiRust },
-  { label: 'TypeScript', icon: SiTypescript },
-  { label: 'Git', icon: SiGit },
-  { label: 'Linux', icon: SiLinux },
-  { label: 'PostgreSQL', icon: SiPostgresql },
-  { label: 'Redis', icon: SiRedis },
-];
-
-const STATS_CACHE = 'gh-stats:';
-
-/* ─── Hooks ─────────────────────────────────────────────────── */
-
-function useTypewriter(strings, speed = 50, hold = 2000) {
-  const [text, setText] = useState('');
-  const [idx, setIdx] = useState(0);
-  const [phase, setPhase] = useState('type');
-  const charRef = useRef(0);
-
-  useEffect(() => {
-    charRef.current = 0;
-    setText('');
-    setPhase('type');
-  }, [idx]);
-
-  useEffect(() => {
-    const s = strings[idx];
-    if (phase === 'type') {
-      if (charRef.current >= s.length) {
-        const t = setTimeout(() => setPhase('hold'), hold);
-        return () => clearTimeout(t);
-      }
-      const t = setTimeout(() => {
-        charRef.current++;
-        setText(s.slice(0, charRef.current));
-      }, speed);
-      return () => clearTimeout(t);
-    }
-    if (phase === 'hold') {
-      const t = setTimeout(() => setPhase('erase'), hold);
-      return () => clearTimeout(t);
-    }
-    if (phase === 'erase') {
-      if (charRef.current <= 0) {
-        setIdx((i) => (i + 1) % strings.length);
-        return;
-      }
-      const t = setTimeout(() => {
-        charRef.current--;
-        setText(s.slice(0, charRef.current));
-      }, speed / 2);
-      return () => clearTimeout(t);
-    }
-  }, [text, phase, idx, strings, speed, hold]);
-
-  return text;
-}
-
-function useGithubStats(username) {
-  const [stats, setStats] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const key = STATS_CACHE + username;
-    try {
-      const c = sessionStorage.getItem(key);
-      if (c) { setStats(JSON.parse(c)); return; }
-    } catch { /* sessionStorage unavailable */ }
-    fetch(`https://api.github.com/users/${username}`)
-      .then((r) => r.ok ? r.json() : Promise.reject())
-      .then((d) => {
-        if (cancelled) return;
-        const s = { repos: d.public_repos, followers: d.followers };
-        setStats(s);
-        try { sessionStorage.setItem(key, JSON.stringify(s)); } catch { /* ignore */ }
-      })
-      .catch(() => { /* network error */ });
-    return () => { cancelled = true; };
-  }, [username]);
-
-  return stats;
-}
-
 /* ─── Sub-components ────────────────────────────────────────── */
-
-const TERMINALS = [
-  {
-    x: 5, y: -10, w: 360, h: 220,
-    speed: 0.12,
-    title: 'zsh — ~/projects/nexagon',
-    lines: [
-      { prompt: true, path: '~/nexagon', branch: 'main' },
-      { t: 'cargo run --release', c: 'var(--terminal-cmd)' },
-      { t: '   Compiling nexagon v0.1.0', c: 'var(--terminal-output-faint)' },
-      { t: '   Finished release [optimized] (+3.2s)', c: 'var(--terminal-success)' },
-      { t: '   Running `target/release/nexagon`', c: 'var(--terminal-output-faint)' },
-      { t: '🚀 Server listening on 0.0.0.0:8080', c: 'var(--terminal-success-bright)' },
-    ],
-  },
-  {
-    x: 55, y: -30, w: 340, h: 200,
-    speed: 0.09,
-    title: 'zsh — ~/projects/portfolio',
-    lines: [
-      { prompt: true, path: '~/portfolio', branch: 'hero-redesign' },
-      { t: 'npm run dev', c: 'var(--terminal-cmd)' },
-      { t: '', c: '' },
-      { t: '  VITE v8.1.0  ready in 320ms', c: 'var(--terminal-success)' },
-      { t: '', c: '' },
-      { t: '  ➜  Local:   http://localhost:5173/', c: 'var(--terminal-output)' },
-      { t: '  ➜  Network: http://192.168.1.5:5173/', c: 'var(--terminal-output-dim)' },
-    ],
-  },
-  {
-    x: 30, y: -50, w: 330, h: 190,
-    speed: 0.15,
-    title: 'zsh — ~/leetcode',
-    lines: [
-      { prompt: true, path: '~/leetcode', branch: 'python' },
-      { t: 'python3 solve.py --difficulty medium', c: 'var(--terminal-cmd)' },
-      { t: '', c: '' },
-      { t: '  [✓] 0015.3sum          48ms', c: 'var(--terminal-success)' },
-      { t: '  [✓] 0042.trapping_water  32ms', c: 'var(--terminal-success)' },
-      { t: '  [✓] 0076.min_window    61ms', c: 'var(--terminal-success)' },
-      { t: '  ─── 12/15 passed ───', c: 'var(--terminal-output-dim)' },
-    ],
-  },
-  {
-    x: 65, y: -20, w: 320, h: 180,
-    speed: 0.11,
-    title: 'zsh — ~',
-    lines: [
-      { prompt: true, path: '~', branch: '' },
-      { t: 'docker compose up -d', c: 'var(--terminal-cmd)' },
-      { t: '', c: '' },
-      { t: '  ✔ Network portfolio_default  Created', c: 'var(--terminal-success-muted)' },
-      { t: '  ✔ Container postgres         Started', c: 'var(--terminal-success-muted)' },
-      { t: '  ✔ Container redis            Started', c: 'var(--terminal-success-muted)' },
-    ],
-  },
-  {
-    x: 10, y: -60, w: 310, h: 170,
-    speed: 0.14,
-    title: 'zsh — ~/projects/nexagon (feat/auth)',
-    lines: [
-      { prompt: true, path: '~/nexagon', branch: 'feat/auth' },
-      { t: 'git log --oneline -4', c: 'var(--terminal-cmd)' },
-      { t: 'f3a1c2d (HEAD → feat/auth) add jwt middleware', c: 'var(--terminal-output)' },
-      { t: '8b2e4a1 implement rate limiter', c: 'var(--terminal-output)' },
-      { t: 'c7d9f03 setup oauth2 provider', c: 'var(--terminal-output)' },
-      { t: 'e1a5b78 init auth module', c: 'var(--terminal-output)' },
-    ],
-  },
-  {
-    x: 58, y: -45, w: 300, h: 160,
-    speed: 0.1,
-    title: 'zsh — ~/projects/roblox',
-    lines: [
-      { prompt: true, path: '~/roblox', branch: 'main' },
-      { t: 'pytest tests/ -v', c: 'var(--terminal-cmd)' },
-      { t: '', c: '' },
-      { t: '  tests/test_solver.py::test_coin_change PASSED', c: 'var(--terminal-success-muted)' },
-      { t: '  tests/test_solver.py::test_lru_cache PASSED', c: 'var(--terminal-success-muted)' },
-      { t: '  ═══════ 24 passed in 1.82s ═══════', c: 'var(--terminal-output-faint)' },
-    ],
-  },
-];
 
 function Terminals({ heroRef }) {
   const termRefs = useRef([]);
@@ -265,96 +96,6 @@ function Terminals({ heroRef }) {
   );
 }
 
-function getAccentRGB() {
-  const v = getComputedStyle(document.body).getPropertyValue('--accent').trim();
-  const m = v.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
-  if (m) return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) };
-  return { r: 232, g: 228, b: 223 };
-}
-
-function Particles() {
-  const ref = useRef(null);
-  const mouse = useRef({ x: 0, y: 0 });
-  const isMobile = window.matchMedia('(pointer: coarse)').matches;
-
-  useEffect(() => {
-    if (isMobile) return;
-    const on = (e) => { mouse.current = { x: e.clientX, y: e.clientY }; };
-    window.addEventListener('mousemove', on, { passive: true });
-    return () => window.removeEventListener('mousemove', on);
-  }, [isMobile]);
-
-  useEffect(() => {
-    if (isMobile) return;
-    const c = ref.current;
-    if (!c) return;
-    const ctx = c.getContext('2d');
-    const resize = () => { c.width = innerWidth; c.height = innerHeight; };
-    resize();
-    window.addEventListener('resize', resize);
-
-    const N = 45;
-    const LINK = 150;
-    const pts = Array.from({ length: N }, () => ({
-      x: Math.random() * c.width,
-      y: Math.random() * c.height,
-      vx: (Math.random() - 0.5) * 0.1,
-      vy: -Math.random() * 0.06 - 0.01,
-      r: Math.random() * 1.3 + 0.4,
-      a: Math.random() * 0.2 + 0.05,
-    }));
-
-    let raf;
-    const draw = () => {
-      ctx.clearRect(0, 0, c.width, c.height);
-      const mx = mouse.current.x, my = mouse.current.y;
-
-      const accent = getAccentRGB();
-      const ar = accent.r, ag = accent.g, ab = accent.b;
-
-      for (let i = 0; i < N; i++) {
-        const p = pts[i];
-        p.x += p.vx; p.y += p.vy;
-        if (p.y < -10) { p.y = c.height + 10; p.x = Math.random() * c.width; }
-        if (p.x < -10 || p.x > c.width + 10) p.x = Math.random() * c.width;
-
-        const dx = p.x - mx, dy = p.y - my;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d < 100 && d > 0) {
-          const f = (100 - d) / 100 * 0.25;
-          p.x += (dx / d) * f;
-          p.y += (dy / d) * f;
-        }
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, 6.283);
-        ctx.fillStyle = `rgba(${ar},${ag},${ab},${p.a})`;
-        ctx.fill();
-
-        for (let j = i + 1; j < N; j++) {
-          const q = pts[j];
-          const lx = p.x - q.x, ly = p.y - q.y;
-          const ld = Math.sqrt(lx * lx + ly * ly);
-          if (ld < LINK) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(${ar},${ag},${ab},${(1 - ld / LINK) * 0.05})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      }
-      raf = requestAnimationFrame(draw);
-    };
-    raf = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
-  }, [isMobile]);
-
-  if (isMobile) return null;
-  return <canvas ref={ref} className="h-canvas" />;
-}
-
 function Avatar() {
   const [loaded, setLoaded] = useState(false);
   return (
@@ -429,11 +170,7 @@ function ContactRow({ stats }) {
 
 export default function Hero() {
   const [show, setShow] = useState(false);
-  const typed = useTypewriter(
-    ['full-stack developer', 'creative technologist', 'open source contributor'],
-    45,
-    2200,
-  );
+  const typed = useTypewriter(TYPEWRITER_STRINGS, 45, 2200);
   const stats = useGithubStats(GITHUB_USERNAME);
   const sectionRef = useRef(null);
   const [opacity, setOpacity] = useState(1);
@@ -468,7 +205,6 @@ export default function Hero() {
           visibility: opacity < 0.01 ? 'hidden' : undefined,
         }}
       >
-        <Particles />
         <Terminals heroRef={sectionRef} />
 
         <div className={`h-main ${show ? 'is-show' : ''}`}>

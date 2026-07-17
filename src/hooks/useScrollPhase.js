@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * useScrollPhase — Detects scroll phases for multi-stage animations.
- * Throttled to ~30fps to avoid excessive re-renders.
+ * Uses offsetTop + scrollY (works correctly with position: sticky).
  */
 export default function useScrollPhase({
   phases = [
@@ -17,7 +17,9 @@ export default function useScrollPhase({
   const [overallProgress, setOverallProgress] = useState(0);
   const sectionRef = useRef(null);
   const ticking = useRef(false);
-  const lastUpdate = useRef(0);
+  const cachedOffsetTop = useRef(null);
+  const cachedHeight = useRef(null);
+  const cacheTime = useRef(0);
 
   const findPhase = useCallback(
     (progress) => {
@@ -50,18 +52,19 @@ export default function useScrollPhase({
 
       requestAnimationFrame(() => {
         const now = performance.now();
-        // Throttle to ~30fps (33ms)
-        if (now - lastUpdate.current < 33) {
-          ticking.current = false;
-          return;
+        // Throttle DOM reads to ~15fps (66ms)
+        if (now - cacheTime.current > 66) {
+          cachedOffsetTop.current = section.offsetTop;
+          cachedHeight.current = section.offsetHeight;
+          cacheTime.current = now;
         }
-        lastUpdate.current = now;
 
-        const rect = section.getBoundingClientRect();
+        const sectionTop = cachedOffsetTop.current;
+        const sectionHeight = cachedHeight.current;
         const windowHeight = window.innerHeight;
-        const scrollableHeight = rect.height - windowHeight;
+        const scrollRange = sectionHeight - windowHeight;
 
-        if (scrollableHeight <= 0) {
+        if (scrollRange <= 0 || sectionHeight <= windowHeight) {
           setOverallProgress(0);
           setCurrentPhase(phases[0]?.id || 'intro');
           setPhaseProgress(0);
@@ -69,8 +72,8 @@ export default function useScrollPhase({
           return;
         }
 
-        const scrolled = -rect.top;
-        const progress = Math.max(0, Math.min(1, scrolled / scrollableHeight));
+        const scrolled = window.scrollY - sectionTop;
+        const progress = Math.max(0, Math.min(1, scrolled / scrollRange));
         setOverallProgress(progress);
 
         const phase = findPhase(progress);

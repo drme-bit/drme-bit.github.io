@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import useReducedMotion from '@/hooks/useReducedMotion';
 import './TapRipple.scss';
 
 /**
@@ -22,19 +23,11 @@ export default function TapRipple({
 }) {
   const [ripples, setRipples] = useState([]);
   const containerRef = useRef(null);
-  const prefersReducedMotion = useRef(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      prefersReducedMotion.current = window.matchMedia(
-        '(prefers-reduced-motion: reduce)'
-      ).matches;
-    }
-  }, []);
+  const prefersReducedMotion = useReducedMotion();
 
   const createRipple = useCallback(
     (e) => {
-      if (prefersReducedMotion.current) return;
+      if (prefersReducedMotion) return;
 
       const container = containerRef.current;
       if (!container) return;

@@ -13,8 +13,6 @@
     "@react-three/fiber": "^9.6.1",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "cobe": "^2.0.1",
     "firebase": "^12.16.0",
     "lenis": "^1.3.25",
@@ -23,17 +21,14 @@
     "react-dom": "^19.2.7",
     "react-icons": "^5.7.0",
     "react-router-dom": "^7.18.1",
-    "tailwind-merge": "^3.6.0",
     "three": "^0.185.1"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.2",
     "@vitejs/plugin-react": "^6.0.0",
     "eslint": "^10.7.0",
     "lucide-react": "^1.24.0",
     "prettier": "^3.9.5",
     "sass": "^1.101.0",
-    "tailwindcss": "^4.3.2",
     "vite": "^8.1.5"
   }
 }

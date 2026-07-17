@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
+import useIsMobile from '@/hooks/useIsMobile';
+import useReducedMotion from '@/hooks/useReducedMotion';
 import './SwipeIndicator.scss';
 
 /**
@@ -20,23 +22,14 @@ export default function SwipeIndicator({
   const [visible, setVisible] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const timeoutRef = useRef(null);
-  const prefersReducedMotion = useRef(false);
+  const isMobile = useIsMobile();
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      prefersReducedMotion.current = window.matchMedia(
-        '(prefers-reduced-motion: reduce)'
-      ).matches;
-
-      // Only show on touch devices
-      const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-      const hasScrolled = window.scrollY > 100;
-
-      if (isTouchDevice && !hasScrolled && !prefersReducedMotion.current) {
-        setVisible(true);
-      }
+    if (isMobile && !prefersReducedMotion && window.scrollY <= 100) {
+      setVisible(true);
     }
-  }, []);
+  }, [isMobile, prefersReducedMotion]);
 
   useEffect(() => {
     if (!visible || hasInteracted) return;

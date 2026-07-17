@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import useReducedMotion from '@/hooks/useReducedMotion';
 
 /*
   Enhanced Sound Effects System
@@ -19,15 +20,7 @@ const SOUNDS = {
 export default function SoundEffects() {
   const ctxRef = useRef(null);
   const lastScrollTick = useRef(0);
-  const prefersReduced = useRef(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    prefersReduced.current = mq.matches;
-    const handler = (e) => { prefersReduced.current = e.matches; };
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
+  const prefersReduced = useReducedMotion();
 
   const getCtx = useCallback(() => {
     if (ctxRef.current) return ctxRef.current;
@@ -41,7 +34,7 @@ export default function SoundEffects() {
   }, []);
 
   const playSound = useCallback((soundName) => {
-    if (prefersReduced.current) return;
+    if (prefersReduced) return;
     const ctx = getCtx();
     if (!ctx) return;
 

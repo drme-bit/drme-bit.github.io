@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import useReveal from '@/hooks/useReveal';
 import useScrollPhase from '@/hooks/useScrollPhase';
+import useIsMobile from '@/hooks/useIsMobile';
 import Globe from '@/components/ui/Globe/Globe';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import { useScene } from '@/contexts/SceneContext';
@@ -92,12 +93,14 @@ export default function Skills() {
   const [ref, visible] = useReveal();
   const [filterGroup, setFilterGroup] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState(null);
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
   const phiRef = useRef(0);
   const thetaRef = useRef(0.3);
+  const debounceRef = useRef(null);
   const { showScene, hideScene } = useScene();
   const { openModal } = useModal();
 
@@ -114,6 +117,21 @@ export default function Skills() {
       showScene();
     }
   }, [overallProgress, hideScene, showScene]);
+
+  // Search input — immediate display, debounced filter
+  const handleSearchInput = useCallback((value) => {
+    setInputValue(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearchQuery(value);
+    }, 200);
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setInputValue('');
+    setSearchQuery('');
+  }, []);
 
   const filteredSkills = useMemo(() => {
     let result = SKILLS_DATA;
@@ -143,12 +161,16 @@ export default function Skills() {
   }, []);
 
   const clearAllFilters = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setFilterGroup(null);
+    setInputValue('');
     setSearchQuery('');
   }, []);
 
   const handleKey = useCallback((e) => {
     if (e.key === 'Escape') {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      setInputValue('');
       setSearchQuery('');
       searchRef.current?.blur();
       setDropdownOpen(false);
@@ -157,7 +179,10 @@ export default function Skills() {
 
   useEffect(() => {
     document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [handleKey]);
 
   useEffect(() => {
@@ -171,17 +196,21 @@ export default function Skills() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [dropdownOpen]);
 
+  const isMobile = useIsMobile();
+
   // Scroll-driven animation values
   const riseT = Math.min(overallProgress / 0.25, 1);
   const transitionT = Math.min(Math.max((overallProgress - 0.15) / 0.35, 0), 1);
 
   // Header fades up and out as scroll progresses
   const headerOpacity = 1 - Math.min(overallProgress / 0.2, 1);
-  const headerY = riseT * -60;
+  const headerY = isMobile ? 15 - riseT : riseT * -60;
+  const headerX = isMobile ? -35 - riseT : riseT * 10;
 
   // Globe starts right, moves to center on scroll
-  const globeX = 5 - transitionT * 25;
-  const globeScale = 1.05 - transitionT * 0.1;
+  const globeX = isMobile ? 10 - transitionT * 10 : -15 - transitionT * 15;
+  const globeY = isMobile ? 5 - transitionT : 5 - transitionT * 5;
+  const globeScale = 1.05 - transitionT * -0.15;
 
   const filtersVisible = overallProgress > 0.3;
 
@@ -203,7 +232,7 @@ export default function Skills() {
           className="skills-header"
           style={{
             opacity: headerOpacity,
-            transform: `translateY(${headerY}px)`,
+            transform: `translateY(${headerY}vh) translateX(${headerX}vw)`,
           }}
         >
           <span className="skills-header-num">02</span>
@@ -224,11 +253,11 @@ export default function Skills() {
               className="skills-search-input"
               type="text"
               placeholder="Search skills..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={inputValue}
+              onChange={(e) => handleSearchInput(e.target.value)}
             />
-            {searchQuery && (
-              <button className="skills-search-clear" onClick={() => setSearchQuery('')} tabIndex={-1}>
+            {inputValue && (
+              <button className="skills-search-clear" onClick={clearSearch} tabIndex={-1}>
                 <FiX />
               </button>
             )}
@@ -291,7 +320,7 @@ export default function Skills() {
           <div
             className="skills-globe-area"
             style={{
-              transform: `translateX(${globeX}vw) scale(${globeScale})`,
+              transform: `translateX(${globeX}vw) scale(${globeScale}) translateY(${globeY}vh)`,
             }}
           >
             <Globe

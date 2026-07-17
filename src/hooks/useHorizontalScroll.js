@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import useIsMobile from './useIsMobile';
 
 /**
  * useHorizontalScroll — Converts vertical scroll to horizontal movement.
+ * Uses offsetTop + scrollY (works correctly with position: sticky).
  * Single rAF loop, DOM-direct updates, throttled state.
  */
 export default function useHorizontalScroll({
@@ -9,6 +11,7 @@ export default function useHorizontalScroll({
 } = {}) {
   const [progress, setProgress] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const isMobile = useIsMobile();
 
   const containerRef = useRef(null);
   const animProgress = useRef(0);
@@ -18,8 +21,9 @@ export default function useHorizontalScroll({
   const rafId = useRef(null);
   const lastClientX = useRef(0);
   const lastReportTime = useRef(0);
-  const lastRectTop = useRef(null);
-  const lastRectTime = useRef(0);
+  const cachedOffsetTop = useRef(null);
+  const cachedHeight = useRef(null);
+  const cacheTime = useRef(0);
 
   const tick = useCallback(() => {
     const el = containerRef.current;
@@ -28,18 +32,18 @@ export default function useHorizontalScroll({
       return;
     }
 
-    // Throttle getBoundingClientRect — max 15x/sec
+    // Throttle DOM reads — max 15x/sec
     const now = performance.now();
-    if (now - lastRectTime.current > 66) {
-      const rect = el.getBoundingClientRect();
-      lastRectTop.current = rect.top;
-      lastRectTime.current = now;
+    if (now - cacheTime.current > 66) {
+      cachedOffsetTop.current = el.offsetTop;
+      cachedHeight.current = el.offsetHeight;
+      cacheTime.current = now;
 
       const windowHeight = window.innerHeight;
-      const scrollableHeight = rect.height - windowHeight;
-      if (scrollableHeight > 0 && !isDragging.current) {
-        const scrolled = -rect.top;
-        targetProgress.current = Math.max(0, Math.min(1, scrolled / scrollableHeight));
+      const scrollRange = cachedHeight.current - windowHeight;
+      if (scrollRange > 0 && !isDragging.current) {
+        const scrolled = window.scrollY - cachedOffsetTop.current;
+        targetProgress.current = Math.max(0, Math.min(1, scrolled / scrollRange));
       }
     }
 
@@ -145,19 +149,19 @@ export default function useHorizontalScroll({
     scrollPrev,
     handlers: {
       onPointerDown: (e) => {
-        if (window.innerWidth <= 768) return;
+        if (isMobile) return;
         handleDragStart(e.clientX);
       },
       onPointerMove: (e) => {
-        if (window.innerWidth <= 768) return;
+        if (isMobile) return;
         handleDragMove(e.clientX);
       },
       onPointerUp: () => {
-        if (window.innerWidth <= 768) return;
+        if (isMobile) return;
         handleDragEnd();
       },
       onPointerLeave: () => {
-        if (window.innerWidth <= 768) return;
+        if (isMobile) return;
         handleDragEnd();
       },
     },

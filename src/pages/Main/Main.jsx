@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { SceneProvider, useScene } from '@/contexts/SceneContext';
+import useLockOrientation from '@/hooks/useLockOrientation';
 import Hero from './sections/Hero/Hero';
 import About from './sections/About/About';
 import Experience from './sections/Experience/Experience';
@@ -26,6 +27,7 @@ function MainInner() {
   const [searchCount, setSearchCount] = useState(0);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const { sceneOpacity } = useScene();
+  useLockOrientation();
 
   const handleSearch = useCallback(() => {
     setSearchCount((c) => c + 1);

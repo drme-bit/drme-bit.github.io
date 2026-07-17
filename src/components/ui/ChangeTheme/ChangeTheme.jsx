@@ -1,4 +1,4 @@
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { FiSun, FiMoon } from 'react-icons/fi';
 
 import styles from './ChangeTheme.module.scss';

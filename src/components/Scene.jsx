@@ -1,8 +1,9 @@
 import { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { getAccent, getBg } from '@/utils/cssTheme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useTerrain } from '@/contexts/TerrainContext';
+import useReducedMotion from '@/hooks/useReducedMotion';
 
 const _isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 const GRID_X = _isMobile ? 50 : 90;
@@ -39,6 +40,7 @@ function terrainHeight(x, z, amplitude) {
 function Starfield() {
   const ref = useRef();
   const matRef = useRef();
+  const { colors } = useTheme();
   const { invalidate } = useThree();
   const geometry = useMemo(() => {
     const count = 900;
@@ -61,13 +63,13 @@ function Starfield() {
     ref.current.rotation.y += 0.00006;
     ref.current.position.x = mouse.x * 0.4;
     ref.current.position.y = mouse.y * 0.2;
-    if (matRef.current) matRef.current.color.set(getAccent());
+    if (matRef.current) matRef.current.color.set(colors.accent);
     invalidate();
   });
 
   return (
     <points ref={ref} geometry={geometry}>
-      <pointsMaterial ref={matRef} color={getAccent()} size={0.06} transparent opacity={0.5} sizeAttenuation />
+      <pointsMaterial ref={matRef} color={colors.accent} size={0.06} transparent opacity={0.5} sizeAttenuation />
     </points>
   );
 }
@@ -82,7 +84,7 @@ function Terrain() {
   const noiseOffset = useRef(0);
   const amplitude = useRef(0.9);
   const frameCount = useRef(0);
-  const isLight = useIsLight();
+  const { theme, colors } = useTheme();
   const terrain = useTerrain();
   const { invalidate } = useThree();
 
@@ -125,7 +127,7 @@ function Terrain() {
         positions[idx * 3 + 2] = z;
 
         const t = THREE.MathUtils.clamp((h + amp) / (amp * 2), 0, 1);
-        if (isLight) {
+        if (theme === 'light') {
           const lum = 0.55 + t * 0.25;
           colors[idx * 3] = lum;
           colors[idx * 3 + 1] = lum;
@@ -188,17 +190,17 @@ function Terrain() {
     if (frameCount.current % 2 === 0) {
       recompute(noiseOffset.current, amplitude.current);
     }
-    if (wireMatRef.current) wireMatRef.current.color.set(getAccent());
+    if (wireMatRef.current) wireMatRef.current.color.set(colors.accent);
     invalidate();
   });
 
   return (
     <group>
       <points ref={pointsRef} geometry={pointsGeo}>
-        <pointsMaterial ref={pointsMatRef} vertexColors size={0.09} transparent opacity={isLight ? 0.5 : 0.9} sizeAttenuation />
+        <pointsMaterial ref={pointsMatRef} vertexColors size={0.09} transparent opacity={theme === 'light' ? 0.5 : 0.9} sizeAttenuation />
       </points>
       <lineSegments ref={wireRef} geometry={wireGeo}>
-        <lineBasicMaterial ref={wireMatRef} color={getAccent()} transparent opacity={isLight ? 0.1 : 0.18} />
+        <lineBasicMaterial ref={wireMatRef} color={colors.accent} transparent opacity={theme === 'light' ? 0.1 : 0.18} />
       </lineSegments>
     </group>
   );
@@ -208,6 +210,7 @@ function Beacons() {
   const groupRef = useRef();
   const refs = useRef([]);
   const matRefs = useRef([]);
+  const { colors } = useTheme();
   const { invalidate } = useThree();
   const seeds = useMemo(
     () => Array.from({ length: 5 }, (_, i) => ({
@@ -221,7 +224,7 @@ function Beacons() {
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
-    const c = getAccent();
+    const c = colors.accent;
     seeds.forEach((s, i) => {
       const m = refs.current[i];
       if (!m) return;
@@ -241,7 +244,7 @@ function Beacons() {
       {seeds.map((_, i) => (
         <mesh key={i} ref={(el) => { refs.current[i] = el; }}>
           <octahedronGeometry args={[0.18, 0]} />
-          <meshBasicMaterial ref={(el) => { matRefs.current[i] = el; }} color={getAccent()} transparent opacity={0.85} />
+          <meshBasicMaterial ref={(el) => { matRefs.current[i] = el; }} color={colors.accent} transparent opacity={0.85} />
         </mesh>
       ))}
     </group>
@@ -306,13 +309,13 @@ function IsoCamera() {
 }
 
 function useLowPowerMode() {
-  const [low, setLow] = useState(true);
+  const isMobile = _isMobile;
+  const isLowMem = typeof navigator !== 'undefined' && navigator.deviceMemory && navigator.deviceMemory < 4;
+  const prefersReduced = useReducedMotion();
+  const [low, setLow] = useState(isMobile || isLowMem || prefersReduced);
   useEffect(() => {
-    const isMobile = window.matchMedia('(pointer: coarse)').matches;
-    const isLowMem = navigator.deviceMemory && navigator.deviceMemory < 4;
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     setLow(isMobile || isLowMem || prefersReduced);
-  }, []);
+  }, [isMobile, isLowMem, prefersReduced]);
   return low;
 }
 
@@ -330,9 +333,9 @@ function SceneInner({ lowPower }) {
 
 function FogUpdater() {
   const { scene, invalidate } = useThree();
+  const { theme, colors } = useTheme();
   useFrame(() => {
-    const isLight = document.body.classList.contains('light');
-    const fogColor = isLight ? getBg() : '#080808';
+    const fogColor = theme === 'light' ? colors.bg : '#080808';
     if (!scene.fog || scene.fog.color.getStyle() !== fogColor) {
       scene.fog = new THREE.Fog(fogColor, 14, 34);
     }
@@ -341,29 +344,9 @@ function FogUpdater() {
   return null;
 }
 
-function useCssBg() {
-  const [bg, setBg] = useState(getBg);
-  useEffect(() => {
-    const obs = new MutationObserver(() => setBg(getBg()));
-    obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    return () => obs.disconnect();
-  }, []);
-  return bg;
-}
-
-function useIsLight() {
-  const [light, setLight] = useState(() => document.body.classList.contains('light'));
-  useEffect(() => {
-    const obs = new MutationObserver(() => setLight(document.body.classList.contains('light')));
-    obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    return () => obs.disconnect();
-  }, []);
-  return light;
-}
-
 export default function Scene() {
   const lowPower = useLowPowerMode();
-  const bg = useCssBg();
+  const { colors } = useTheme();
 
   return (
     <Canvas
@@ -374,7 +357,7 @@ export default function Scene() {
       onCreated={({ gl }) => {
         gl.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 2));
       }}
-      style={{ position: 'fixed', inset: 0, zIndex: 0, background: bg }}
+      style={{ position: 'fixed', inset: 0, zIndex: 0, background: colors.bg }}
     >
       <FogUpdater />
       <SceneInner lowPower={lowPower} />
