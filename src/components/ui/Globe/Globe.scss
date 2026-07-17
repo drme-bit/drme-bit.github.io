@@ -98,6 +98,10 @@
     filter: grayscale(0.8);
   }
 
+  &.is-disabled {
+    pointer-events: none;
+  }
+
   &::after {
     content: '';
     position: absolute;

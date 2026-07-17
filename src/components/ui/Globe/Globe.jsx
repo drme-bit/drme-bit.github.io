@@ -94,6 +94,7 @@ export default function Globe({
   onMarkerClick,
   selectedSkill = null,
   filteredSkills = null,
+  markersDisabled = false,
 }) {
   const canvasRef = useRef(null);
   const globeRef = useRef(null);
@@ -128,8 +129,8 @@ export default function Globe({
     const rect = canvas.getBoundingClientRect();
     if (rect.width < 1 || rect.height < 1) return;
     const isMobile = window.innerWidth <= 768;
-    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
-    const maxPx = isMobile ? 500 : 800;
+    const dpr = Math.min(window.devicePixelRatio, isMobile ? 1 : 2);
+    const maxPx = isMobile ? 350 : 800;
     const size = Math.max(Math.round(Math.min(Math.max(rect.width, rect.height), maxPx) * dpr), 200);
 
     if (globeRef.current) {
@@ -150,7 +151,7 @@ export default function Globe({
       dark: theme.dark,
       diffuse: theme.diffuse,
       scale: 1,
-      mapSamples: isMobile ? 8000 : theme.mapSamples,
+      mapSamples: isMobile ? 4000 : theme.mapSamples,
       mapBrightness: isMobile ? 5 : theme.mapBrightness,
       mapBaseBrightness: theme.mapBaseBrightness,
       baseColor: theme.baseColor,
@@ -170,15 +171,12 @@ export default function Globe({
 
   useEffect(() => {
     createGlobeInstance();
-    let frame = 0;
     let isMobile = window.innerWidth <= 768;
     let isVisible = true;
+    let isTabHidden = false;
 
     const tick = () => {
-      frame++;
-
-      // Throttle on mobile: skip every other frame for WebGL render
-      if (isMobile && frame % 2 !== 0) {
+      if (isTabHidden || (!isVisible && !dragRef.current.active)) {
         rafRef.current = requestAnimationFrame(tick);
         return;
       }
@@ -250,6 +248,11 @@ export default function Globe({
     }
     window.addEventListener('orientationchange', scheduleResize);
 
+    const onVisibilityChange = () => {
+      isTabHidden = document.hidden;
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
     const intersectionObserver = new IntersectionObserver(
       ([entry]) => {
         isVisible = entry.isIntersecting;
@@ -263,6 +266,7 @@ export default function Globe({
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('orientationchange', scheduleResize);
       globeRef.current?.destroy();
       globeRef.current = null;
@@ -359,7 +363,7 @@ export default function Globe({
         return (
           <button
             key={m.id}
-            className={`globe__marker-label${isActive ? ' is-active' : ''}${isDimmed ? ' is-dimmed' : ''}`}
+            className={`globe__marker-label${isActive ? ' is-active' : ''}${isDimmed ? ' is-dimmed' : ''}${markersDisabled ? ' is-disabled' : ''}`}
             data-tooltip={m.name}
             style={{
               positionAnchor: `--cobe-${m.id}`,

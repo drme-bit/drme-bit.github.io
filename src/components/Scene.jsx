@@ -370,7 +370,7 @@ export default function Scene() {
       id="bg"
       camera={{ position: [9, 9.2, 5], fov: 32, near: 0.1, far: 80 }}
       gl={{ alpha: true, antialias: !lowPower }}
-      frameloop="demand"
+      frameloop="always"
       onCreated={({ gl }) => {
         gl.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 2));
       }}

@@ -180,9 +180,10 @@ export default function Skills() {
               phiRef={phiRef}
               thetaRef={thetaRef}
               paused={!!selected}
-              onMarkerClick={handleMarkerClick}
+              onMarkerClick={transitionT >= 1 ? handleMarkerClick : undefined}
               selectedSkill={selected?.name}
               filteredSkills={filteredSkillNames}
+              markersDisabled={transitionT < 1}
             />
           </div>
 
