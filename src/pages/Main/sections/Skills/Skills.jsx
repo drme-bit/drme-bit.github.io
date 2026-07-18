@@ -1,9 +1,9 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useCallback, useMemo, useRef, useEffect, lazy } from 'react';
 import useReveal from '@/hooks/useReveal';
 import useScrollPhase from '@/hooks/useScrollPhase';
 import useIsMobile from '@/hooks/useIsMobile';
-import Globe from '@/components/ui/Globe/Globe';
+
+const Globe = lazy(() => import('@/components/ui/Globe/Globe'));
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import { useScene } from '@/contexts/SceneContext';
 import { useModal } from '@/contexts/ModalContext';
@@ -11,15 +11,8 @@ import { SKILLS_DATA, GROUP_COLORS, ICON_MAP } from './skillsData';
 import { FiSearch, FiX, FiChevronDown } from 'react-icons/fi';
 import './Skills.scss';
 
-const SCROLL_PHASES = [
-  { id: 'intro', start: 0, end: 0.25 },
-  { id: 'transition', start: 0.25, end: 0.6 },
-  { id: 'interactive', start: 0.6, end: 1 },
-];
-
 const GROUP_OPTIONS = Object.entries(GROUP_COLORS).map(([key, color]) => ({ key, color }));
 
-// Memoized group counts — computed once
 const GROUP_COUNTS = {};
 GROUP_OPTIONS.forEach(({ key }) => {
   GROUP_COUNTS[key] = SKILLS_DATA.filter((s) => s.group === key).length;
@@ -59,27 +52,25 @@ function openSkillModal(openModal, skill, onClose) {
           ))}
         </div>
 
-        <p className="skills-mobile-sheet-desc">{skill.desc}</p>
+        {skill.desc && <p className="skills-sheet-desc">{skill.desc}</p>}
 
         {related.length > 0 && (
-          <div className="skills-mobile-sheet-section">
-            <span className="skills-mobile-sheet-label">Related</span>
-            <div className="skills-mobile-sheet-tags">
-              {related.map((name) => (
-                <span key={name} className="skill-related-tag">{name}</span>
+          <div className="skills-sheet-section">
+            <h4 className="skills-sheet-section-title">Related</h4>
+            <div className="skills-sheet-tags">
+              {related.map((r) => (
+                <span key={r} className="skills-sheet-tag">{r}</span>
               ))}
             </div>
           </div>
         )}
 
         {projects.length > 0 && (
-          <div className="skills-mobile-sheet-section">
-            <span className="skills-mobile-sheet-label">Used in</span>
-            <div className="skills-mobile-sheet-tags">
-              {projects.map((pid) => (
-                <Link key={pid} to={`/project/${pid}`} className="skill-project-link">
-                  {pid}
-                </Link>
+          <div className="skills-sheet-section">
+            <h4 className="skills-sheet-section-title">Used in</h4>
+            <div className="skills-sheet-tags">
+              {projects.map((p) => (
+                <span key={p} className="skills-sheet-tag skills-sheet-tag--project">{p}</span>
               ))}
             </div>
           </div>
@@ -92,127 +83,142 @@ function openSkillModal(openModal, skill, onClose) {
 export default function Skills() {
   const [ref, visible] = useReveal();
   const [filterGroup, setFilterGroup] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [selectedSkill, setSelectedSkill] = useState(null);
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
+  const globeRef = useRef(null);
+  const sectionElRef = useRef(null);
   const phiRef = useRef(0);
-  const thetaRef = useRef(0.3);
+  const thetaRef = useRef(0);
   const debounceRef = useRef(null);
   const { showScene, hideScene } = useScene();
   const { openModal } = useModal();
+  const isMobile = useIsMobile();
 
-  const { overallProgress, sectionRef } = useScrollPhase({
-    phases: SCROLL_PHASES,
+  const { getProgress, sectionRef } = useScrollPhase({
+    phases: [
+      { id: 'intro', start: 0, end: 0.25 },
+      { id: 'transition', start: 0.25, end: 0.6 },
+      { id: 'interactive', start: 0.6, end: 1 },
+    ],
     sectionId: 'skills',
   });
 
-  // Smooth scene visibility — crossfade
-  useEffect(() => {
-    if (overallProgress > 0.02 && overallProgress < 0.96) {
-      hideScene();
-    } else {
-      showScene();
-    }
-  }, [overallProgress, hideScene, showScene]);
+  // ── DOM-direct scroll animation (zero React re-renders) ──
+  const wasSceneVisible = useRef(true);
+  const wasGlobeDisabled = useRef(true);
+  const wasFiltersVisible = useRef(false);
 
-  // Search input — immediate display, debounced filter
+  useEffect(() => {
+    const el = sectionElRef.current;
+    if (!el) return;
+    let rafId;
+
+    const tick = () => {
+      const p = getProgress();
+
+      // CSS custom properties — drives all scroll-based styles
+      el.style.setProperty('--sp', p);
+      el.style.setProperty('--rise', Math.min(p / 0.25, 1));
+      el.style.setProperty('--transition', Math.min(Math.max((p - 0.15) / 0.35, 0), 1));
+      el.style.setProperty('--header-opacity', 1 - Math.min(p / 0.2, 1));
+
+      // Scene crossfade — only call context when crossing threshold
+      const sceneVisible = p <= 0.02 || p >= 0.96;
+      if (sceneVisible !== wasSceneVisible.current) {
+        wasSceneVisible.current = sceneVisible;
+        if (sceneVisible) showScene(); else hideScene();
+      }
+
+      // Globe disabled state — only call when crossing threshold
+      const globeDisabled = p < 0.6;
+      if (globeDisabled !== wasGlobeDisabled.current) {
+        wasGlobeDisabled.current = globeDisabled;
+        globeRef.current?.setDisabled(globeDisabled);
+      }
+
+      // Filters visibility — toggle CSS class directly
+      const filtersVis = p > 0.3;
+      if (filtersVis !== wasFiltersVisible.current) {
+        wasFiltersVisible.current = filtersVis;
+        el.classList.toggle('filters-visible', filtersVis);
+      }
+
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [getProgress, showScene, hideScene]);
+
+  // Search — immediate display, debounced filter via manager
   const handleSearchInput = useCallback((value) => {
     setInputValue(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      setSearchQuery(value);
+      globeRef.current?.search(value || null);
     }, 200);
   }, []);
 
   const clearSearch = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setInputValue('');
-    setSearchQuery('');
+    globeRef.current?.search(null);
   }, []);
 
-  const filteredSkills = useMemo(() => {
-    let result = SKILLS_DATA;
-    if (filterGroup) result = result.filter((s) => s.group === filterGroup);
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter((s) => s.name.toLowerCase().includes(q));
-    }
-    return result;
-  }, [filterGroup, searchQuery]);
-
-  const filteredSkillNames = useMemo(() => {
-    if (!filterGroup && !searchQuery) return null;
-    return new Set(filteredSkills.map((s) => s.name));
-  }, [filteredSkills, filterGroup, searchQuery]);
-
-  const handleMarkerClick = useCallback((skillName) => {
-    const skill = SKILLS_DATA.find((s) => s.name === skillName);
-    if (!skill) return;
-    setSelectedSkill(skillName);
-    openSkillModal(openModal, skill, () => setSelectedSkill(null));
-  }, [openModal]);
-
+  // Filter by group via manager
   const handleFilterGroup = useCallback((group) => {
-    setFilterGroup((prev) => (prev === group ? null : group));
+    const next = filterGroup === group ? null : group;
+    setFilterGroup(next);
     setDropdownOpen(false);
-  }, []);
+    globeRef.current?.setFilter(next ? [next] : null);
+  }, [filterGroup]);
 
   const clearAllFilters = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setFilterGroup(null);
     setInputValue('');
-    setSearchQuery('');
+    globeRef.current?.reset();
   }, []);
 
-  const handleKey = useCallback((e) => {
-    if (e.key === 'Escape') {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      setInputValue('');
-      setSearchQuery('');
-      searchRef.current?.blur();
-      setDropdownOpen(false);
-    }
-  }, []);
+  // Marker click via manager
+  const handleMarkerClick = useCallback((skillName) => {
+    const skill = SKILLS_DATA.find((s) => s.name === skillName);
+    if (!skill) return;
+    globeRef.current?.select(skillName);
+    openSkillModal(openModal, skill, () => globeRef.current?.select(null));
+  }, [openModal]);
 
+  // Keyboard
   useEffect(() => {
-    document.addEventListener('keydown', handleKey);
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        setInputValue('');
+        globeRef.current?.search(null);
+        searchRef.current?.blur();
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('keydown', handleKey);
+      document.removeEventListener('keydown', onKey);
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [handleKey]);
+  }, []);
 
+  // Close dropdown on outside click
   useEffect(() => {
     if (!dropdownOpen) return;
     const handleClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [dropdownOpen]);
 
-  const isMobile = useIsMobile();
-
-  // Scroll-driven animation values
-  const riseT = Math.min(overallProgress / 0.25, 1);
-  const transitionT = Math.min(Math.max((overallProgress - 0.15) / 0.35, 0), 1);
-
-  // Header fades up and out as scroll progresses
-  const headerOpacity = 1 - Math.min(overallProgress / 0.2, 1);
-  const headerY = isMobile ? 15 - riseT : riseT * -60;
-  const headerX = isMobile ? -35 - riseT : riseT * 10;
-
-  // Globe starts right, moves to center on scroll
-  const globeX = isMobile ? 10 - transitionT * 10 : -15 - transitionT * 5;
-  const globeY = isMobile ? 5 - transitionT * -2.5 : 5 - transitionT * 5;
-  const globeScale = 1.05 - transitionT * -0.15;
-
-  const filtersVisible = overallProgress > 0.3;
+  const hasFilters = filterGroup || inputValue;
 
   return (
     <section
@@ -220,6 +226,7 @@ export default function Skills() {
       ref={(el) => {
         ref.current = el;
         sectionRef.current = el;
+        sectionElRef.current = el;
       }}
       className={`section section--skills reveal${visible ? ' is-visible' : ''}`}
       style={{ height: '200vh' }}
@@ -227,14 +234,7 @@ export default function Skills() {
       <SectionHeader title="skills" number="02" visible={visible} />
 
       <div className="skills-sticky">
-        {/* Header — left side, fades up on scroll */}
-        <div
-          className="skills-header"
-          style={{
-            opacity: headerOpacity,
-            transform: `translateY(${headerY}vh) translateX(${headerX}vw)`,
-          }}
-        >
+        <div className="skills-header">
           <span className="skills-header-num">02</span>
           <h2 className="skills-header-title">
             skills<span className="skills-header-accent">_</span>
@@ -244,8 +244,7 @@ export default function Skills() {
           </p>
         </div>
 
-        {/* Compact filter bar — centered top */}
-        <div className={`skills-filters ${filtersVisible ? 'is-visible' : ''}`}>
+        <div className="skills-filters">
           <div className="skills-search">
             <FiSearch className="skills-search-icon" />
             <input
@@ -293,45 +292,29 @@ export default function Skills() {
                   >
                     <span className="skills-filter-dot" style={{ background: color }} />
                     {key}
-                    <span className="skills-filter-option-count">
-                      {GROUP_COUNTS[key]}
-                    </span>
+                    <span className="skills-filter-option-count">{GROUP_COUNTS[key]}</span>
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {(searchQuery || filterGroup) && (
-            <span className="skills-filter-count">
-              {filteredSkills.length}/{SKILLS_DATA.length}
-            </span>
-          )}
-
-          {(searchQuery || filterGroup) && (
+          {hasFilters && (
             <button className="skills-filter-clear" onClick={clearAllFilters}>
               <FiX size={12} />
             </button>
           )}
         </div>
 
-        {/* Globe — right side, moves to center on scroll */}
         <div className="skills-layout">
-          <div
-            className="skills-globe-area"
-            style={{
-              transform: `translateX(${globeX}vw) scale(${globeScale}) translateY(${globeY}vh)`,
-            }}
-          >
+          <div className="skills-globe-area">
             <Globe
+              ref={globeRef}
               className="skills-globe"
               phiRef={phiRef}
               thetaRef={thetaRef}
               paused={false}
-              onMarkerClick={transitionT >= 1 ? handleMarkerClick : undefined}
-              selectedSkill={selectedSkill}
-              filteredSkills={filteredSkillNames}
-              markersDisabled={transitionT < 1}
+              onMarkerClick={handleMarkerClick}
             />
           </div>
         </div>

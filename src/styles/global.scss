@@ -76,9 +76,6 @@ body {
   --card-bg: rgba(26, 26, 26, 0.85);
   --card-border: rgba(255, 255, 255, 0.06);
 
-  --scrollbar-thumb: rgba(232, 228, 223, 0.15);
-  --scrollbar-thumb-hover: rgba(232, 228, 223, 0.25);
-
   --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
@@ -113,27 +110,41 @@ body {
   --z-max: 9999;
 }
 
-html, body, #root {
+html {
   padding: 0;
   margin: 0;
   height: 100%;
   width: 100%;
-  background: var(--accent);
+  background: var(--bg);
+  scrollbar-width: none;
+}
+
+body, #root {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb);
 }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: var(--radius-full);
-  &:hover { background: var(--scrollbar-thumb-hover); }
+body, #root {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+
 
 ::selection {
   background: var(--accent-secondary);
@@ -145,7 +156,7 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: var(--z-max);
+  z-index: 1;
   pointer-events: none;
   background-image: radial-gradient(circle, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
@@ -153,7 +164,7 @@ body::after {
 }
 
 /* Light theme */
-body.light {
+:is(html.light, body.light) {
   --bg: #f5f3f0;
   --bg-elevated: #eae7e3;
   --bg-surface: #ffffff;
@@ -218,9 +229,6 @@ body.light {
   --terminal-success: rgba(5, 150, 105, 0.7);
   --terminal-success-bright: rgba(5, 150, 105, 0.8);
   --terminal-success-muted: rgba(5, 150, 105, 0.6);
-
-  --scrollbar-thumb: rgb(255 255 255);
-  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
 
   --card-bg: rgba(255, 255, 255, 0.9);
   --card-border: rgba(0, 0, 0, 0.06);

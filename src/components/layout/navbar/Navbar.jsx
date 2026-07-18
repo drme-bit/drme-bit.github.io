@@ -21,75 +21,85 @@ export default function Navbar() {
   const [collapsed, setCollapsed] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState(-1);
   const [tooltip, setTooltip] = useState(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [mounted, setMounted] = useState(false);
   const lastY = useRef(0);
   const dockRef = useRef(null);
   const itemRefs = useRef([]);
   const indicatorRef = useRef(null);
+  const activeRef = useRef('hero');
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
     return () => clearTimeout(t);
   }, []);
 
-  useEffect(() => {
-    const observers = ITEMS.map(({ id }) => {
-      const el = document.getElementById(id);
-      if (!el) return null;
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActive(id);
-        },
-        { threshold: 0.3 },
-      );
-      observer.observe(el);
-      return observer;
-    });
-    return () => observers.forEach((o) => o?.disconnect());
-  }, []);
-
+  // Active section + collapse + indicator — all in one rAF
   useEffect(() => {
     let ticking = false;
+
+    const updateIndicator = (activeId) => {
+      const idx = ITEMS.findIndex((it) => it.id === activeId);
+      const el = itemRefs.current[idx];
+      const indicator = indicatorRef.current;
+      if (!el || !indicator) return;
+
+      const dock = dockRef.current;
+      if (!dock) return;
+      const dockRect = dock.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+
+      indicator.style.transform = `translateX(${elRect.left - dockRect.left}px)`;
+      indicator.style.width = `${elRect.width}px`;
+    };
+
+    const tick = () => {
+      ticking = false;
+      const scrollY = window.scrollY;
+      const vh = window.innerHeight;
+      let best = 'hero';
+      let bestScore = Infinity;
+
+      for (const { id } of ITEMS) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        const score = Math.abs(rect.top);
+        if (score < bestScore) {
+          bestScore = score;
+          best = id;
+        }
+      }
+
+      if (best !== activeRef.current) {
+        activeRef.current = best;
+        setActive(best);
+      }
+
+      // Update indicator immediately (same frame as detection)
+      updateIndicator(best);
+
+      // Collapse/expand
+      const delta = scrollY - lastY.current;
+      if (scrollY < 50) {
+        setCollapsed(false);
+      } else if (delta > 10) {
+        setCollapsed(true);
+      } else if (delta < -10) {
+        setCollapsed(false);
+      }
+      lastY.current = scrollY;
+    };
+
     const onScroll = () => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-        const delta = y - lastY.current;
-
-        if (y < 50) {
-          setCollapsed(false);
-        } else if (delta > 10) {
-          setCollapsed(true);
-        } else if (delta < -10) {
-          setCollapsed(false);
-        }
-        lastY.current = y;
-
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        setScrollProgress(docHeight > 0 ? Math.min(y / docHeight, 1) : 0);
-
-        ticking = false;
-      });
+      requestAnimationFrame(tick);
     };
+
     window.addEventListener('scroll', onScroll, { passive: true });
+    tick(); // initial
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  useEffect(() => {
-    const idx = ITEMS.findIndex((it) => it.id === active);
-    const el = itemRefs.current[idx];
-    const indicator = indicatorRef.current;
-    if (!el || !indicator) return;
-
-    const dock = dockRef.current;
-    const dockRect = dock.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-
-    indicator.style.transform = `translateX(${elRect.left - dockRect.left}px)`;
-    indicator.style.width = `${elRect.width}px`;
-  }, [active, collapsed]);
 
   const handleMouseMove = useCallback((e) => {
     const dock = dockRef.current;
@@ -147,13 +157,6 @@ export default function Navbar() {
         onMouseMove={!collapsed ? handleMouseMove : undefined}
         onMouseLeave={handleMouseLeave}
       >
-        <div className={styles.progressBar}>
-          <div
-            className={styles.progressFill}
-            style={{ transform: `scaleX(${scrollProgress})` }}
-          />
-        </div>
-
         <div className={styles.innerGlow} />
 
         <div

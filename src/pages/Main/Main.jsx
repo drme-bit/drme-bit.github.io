@@ -43,6 +43,7 @@ function MainInner() {
 
   return (
     <>
+
       <Cursor />
       <ScrollProgressBar />
       <GitHubStatus />

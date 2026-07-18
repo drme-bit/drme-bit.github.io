@@ -29,6 +29,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     document.body.classList.toggle('light', theme === 'light');
+    document.documentElement.classList.toggle('light', theme === 'light');
     try { localStorage.setItem('theme', theme); } catch {}
     setColors(readColors());
   }, [theme]);

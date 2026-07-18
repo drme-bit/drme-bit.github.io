@@ -1,4 +1,5 @@
 import { useMemo, useRef, useCallback, useEffect } from 'react';
+import CarouselScroller from './CarouselScroller';
 import './TestimonialsColumn.scss';
 
 function timeAgo(date) {
@@ -17,64 +18,22 @@ function timeAgo(date) {
 
 export default function TestimonialsColumn({ testimonials, duration = 10, className = '' }) {
   const trackRef = useRef(null);
-  const posRef = useRef(0);
-  const speedRef = useRef(1);
-  const targetSpeedRef = useRef(1);
-  const rafRef = useRef(null);
-  const setHeightRef = useRef(0);
+  const scrollerRef = useRef(null);
 
   const sets = testimonials.length <= 2 ? 6 : testimonials.length <= 4 ? 4 : 3;
 
   useEffect(() => {
     const track = trackRef.current;
-    if (!track || !track.parentElement) return;
+    if (!track) return;
 
-    const measure = () => {
-      const children = track.children;
-      if (!children.length) return;
-      const firstSet = children[0];
-      const gap = parseFloat(getComputedStyle(track).gap) || 0;
-      setHeightRef.current = firstSet.offsetHeight + gap;
-    };
-
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(track);
-
-    let prev = performance.now();
-
-    const tick = (now) => {
-      const dt = (now - prev) / 1000;
-      prev = now;
-
-      speedRef.current += (targetSpeedRef.current - speedRef.current) * Math.min(dt * 4, 1);
-
-      const pxPerSec = (setHeightRef.current / duration) * speedRef.current;
-      posRef.current += pxPerSec * dt;
-
-      if (setHeightRef.current > 0 && posRef.current >= setHeightRef.current) {
-        posRef.current -= setHeightRef.current;
-      }
-
-      track.style.transform = `translate3d(0,${-posRef.current}px,0)`;
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      ro.disconnect();
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    const s = new CarouselScroller(track, duration);
+    scrollerRef.current = s;
+    s.start();
+    return () => s.stop();
   }, [testimonials, duration, sets]);
 
-  const onMouseEnter = useCallback(() => {
-    targetSpeedRef.current = 0.3;
-  }, []);
-
-  const onMouseLeave = useCallback(() => {
-    targetSpeedRef.current = 1;
-  }, []);
+  const onMouseEnter = useCallback(() => scrollerRef.current?.pause(), []);
+  const onMouseLeave = useCallback(() => scrollerRef.current?.resume(), []);
 
   return (
     <div

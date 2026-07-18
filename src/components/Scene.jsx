@@ -357,7 +357,7 @@ export default function Scene() {
       onCreated={({ gl }) => {
         gl.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 2));
       }}
-      style={{ position: 'fixed', inset: 0, zIndex: 0, background: colors.bg }}
+      style={{ position: 'fixed', inset: 0, zIndex: 0, background: colors.bg, transformStyle: 'preserve-3d'}}
     >
       <FogUpdater />
       <SceneInner lowPower={lowPower} />

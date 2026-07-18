@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 
 /**
  * useScrollPhase — Detects scroll phases for multi-stage animations.
- * Uses offsetTop + scrollY (works correctly with position: sticky).
+ * overallProgress is a REF (no re-renders). Use getProgress() to read it.
+ * currentPhase/phaseProgress are also refs.
  */
 export default function useScrollPhase({
   phases = [
@@ -12,11 +13,11 @@ export default function useScrollPhase({
   ],
   sectionId = '',
 } = {}) {
-  const [currentPhase, setCurrentPhase] = useState(phases[0]?.id || 'intro');
-  const [phaseProgress, setPhaseProgress] = useState(0);
-  const [overallProgress, setOverallProgress] = useState(0);
   const sectionRef = useRef(null);
   const ticking = useRef(false);
+  const progressRef = useRef(0);
+  const phaseRef = useRef(phases[0]?.id || 'intro');
+  const phaseProgressRef = useRef(0);
 
   const findPhase = useCallback(
     (progress) => {
@@ -28,15 +29,6 @@ export default function useScrollPhase({
       return phases[phases.length - 1];
     },
     [phases]
-  );
-
-  const calculatePhaseProgress = useCallback(
-    (progress, phase) => {
-      const phaseRange = phase.end - phase.start;
-      if (phaseRange === 0) return 0;
-      return Math.max(0, Math.min(1, (progress - phase.start) / phaseRange));
-    },
-    []
   );
 
   useEffect(() => {
@@ -54,22 +46,22 @@ export default function useScrollPhase({
         const scrollRange = sectionHeight - windowHeight;
 
         if (scrollRange <= 0 || sectionHeight <= windowHeight) {
-          setOverallProgress(0);
-          setCurrentPhase(phases[0]?.id || 'intro');
-          setPhaseProgress(0);
+          progressRef.current = 0;
+          phaseRef.current = phases[0]?.id || 'intro';
+          phaseProgressRef.current = 0;
           ticking.current = false;
           return;
         }
 
         const scrolled = window.scrollY - sectionTop;
         const progress = Math.max(0, Math.min(1, scrolled / scrollRange));
-        setOverallProgress(progress);
+        progressRef.current = progress;
 
         const phase = findPhase(progress);
-        setCurrentPhase(phase.id);
+        phaseRef.current = phase.id;
 
-        const phaseProg = calculatePhaseProgress(progress, phase);
-        setPhaseProgress(phaseProg);
+        const phaseRange = phase.end - phase.start;
+        phaseProgressRef.current = phaseRange === 0 ? 0 : Math.max(0, Math.min(1, (progress - phase.start) / phaseRange));
 
         ticking.current = false;
       });
@@ -79,34 +71,17 @@ export default function useScrollPhase({
     handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [sectionId, phases, findPhase, calculatePhaseProgress]);
+  }, [sectionId, phases, findPhase]);
 
-  const isInPhase = useCallback(
-    (phaseId) => currentPhase === phaseId,
-    [currentPhase]
-  );
-
-  const getPhaseIndex = useCallback(
-    () => phases.findIndex((p) => p.id === currentPhase),
-    [phases, currentPhase]
-  );
-
-  const isPastPhase = useCallback(
-    (phaseId) => {
-      const phaseIndex = phases.findIndex((p) => p.id === phaseId);
-      return getPhaseIndex() > phaseIndex;
-    },
-    [phases, getPhaseIndex]
-  );
+  const getProgress = useCallback(() => progressRef.current, []);
+  const getPhase = useCallback(() => phaseRef.current, []);
+  const getPhaseProgress = useCallback(() => phaseProgressRef.current, []);
 
   return {
-    currentPhase,
-    phaseProgress,
-    overallProgress,
+    getProgress,
+    getPhase,
+    getPhaseProgress,
     sectionRef,
-    isInPhase,
-    isPastPhase,
-    getPhaseIndex,
     phases,
   };
 }

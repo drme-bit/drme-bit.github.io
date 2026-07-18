@@ -54,6 +54,7 @@ export default function useHorizontalScroll({
     }
 
     // Throttle React state updates — max 20x/sec
+    const now = performance.now();
     if (now - lastReportTime.current > 50) {
       lastReportTime.current = now;
       const newIndex = Math.round(animProgress.current * (itemCount - 1));
