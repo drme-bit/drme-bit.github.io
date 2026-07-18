@@ -32,9 +32,15 @@ function stopRaf() {
 
 export function useScrollProgress() {
   const [pct, setPct] = useState(0);
+  const valRef = useRef(0);
 
   useEffect(() => {
-    const fn = (_sy, sp) => setPct(sp);
+    const fn = (_sy, sp) => {
+      if (sp !== valRef.current) {
+        valRef.current = sp;
+        setPct(sp);
+      }
+    };
     listeners.add(fn);
     ensureRaf();
     fn(scrollY, scrollPct, winH);
@@ -49,9 +55,15 @@ export function useScrollProgress() {
 
 export function useScrollY() {
   const [y, setY] = useState(0);
+  const valRef = useRef(0);
 
   useEffect(() => {
-    const fn = (sy) => setY(sy);
+    const fn = (sy) => {
+      if (sy !== valRef.current) {
+        valRef.current = sy;
+        setY(sy);
+      }
+    };
     listeners.add(fn);
     ensureRaf();
     fn(scrollY, scrollPct, winH);

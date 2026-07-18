@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { SceneProvider, useScene } from '@/contexts/SceneContext';
 import useLockOrientation from '@/hooks/useLockOrientation';
 import Hero from './sections/Hero/Hero';
@@ -26,7 +26,8 @@ function MainInner() {
   const [mascotMessage, setMascotMessage] = useState(null);
   const [searchCount, setSearchCount] = useState(0);
   const [archiveOpen, setArchiveOpen] = useState(false);
-  const { sceneOpacity } = useScene();
+  const { setSceneNode } = useScene();
+  const sceneRef = useCallback((node) => { setSceneNode(node); }, [setSceneNode]);
   useLockOrientation();
 
   const handleSearch = useCallback(() => {
@@ -48,9 +49,9 @@ function MainInner() {
       <ScrollProgressBar />
       <GitHubStatus />
       <div
+        ref={sceneRef}
         style={{
-          opacity: sceneOpacity,
-          visibility: sceneOpacity < 0.01 ? 'hidden' : 'visible',
+          opacity: 1,
           transition: 'opacity 0.05s linear',
           willChange: 'opacity',
         }}

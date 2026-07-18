@@ -10,7 +10,7 @@
   max-height: 100%;
   aspect-ratio: 1;
   margin: 0 auto;
-  contain: layout; // isolates layout so canvas resize doesn't itself trigger parent reflow loops
+  contain: layout paint size;; // isolates layout so canvas resize doesn't itself trigger parent reflow loops
 }
 
 .globe__canvas {
@@ -63,9 +63,7 @@
 
 .globe__marker-label {
   position: absolute;
-  bottom: anchor(top);
-  left: anchor(center);
-  translate: -50% 0;
+  translate: -50% -100%;
   margin-bottom: 10px;
   padding: 6px 10px;
   background: color-mix(in srgb, var(--bg) 85%, transparent);
@@ -78,7 +76,7 @@
   white-space: nowrap;
   pointer-events: auto;
   cursor: pointer;
-  transition: all 0.25s var(--ease-out);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), background 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -89,6 +87,7 @@
   justify-content: center;
   border-radius: 50%;
   transform-style: preserve-3d;
+  will-change: left, top, opacity;
 
   &:hover {
     background: color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 25%, var(--bg));
@@ -99,17 +98,18 @@
   }
 
   &.is-active {
-    transform: translateY(-4px) scale(1.25);
-    box-shadow: 0 6px 30px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 70%, transparent), 0 0 0 2px var(--marker-color, var(--accent-secondary));
-    background: color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 30%, var(--bg));
+    transform: translateY(-4px) scale(1.35);
+    box-shadow: 0 6px 30px color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 80%, transparent), 0 0 0 2px var(--marker-color, var(--accent-secondary));
+    background: color-mix(in srgb, var(--marker-color, var(--accent-secondary)) 35%, var(--bg));
     border-color: var(--marker-color, var(--accent-secondary));
     animation: marker-pulse 1.5s ease-in-out infinite;
+    z-index: 10;
   }
 
   &.is-dimmed {
-    opacity: 0.15 !important;
+    opacity: 0.8;
     pointer-events: none;
-    filter: grayscale(0.8);
+    filter: grayscale(1);
   }
 
   &.is-disabled {

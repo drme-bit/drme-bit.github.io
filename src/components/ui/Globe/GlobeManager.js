@@ -2,83 +2,66 @@ import { SKILLS_DATA } from '@/pages/Main/sections/Skills/skillsData';
 
 /**
  * GlobeManager — OOP controller for globe marker filtering, search, and selection.
- * Operates directly on DOM elements via CSS classes — no React re-renders needed.
+ * Operates directly on DOM via a single data attribute on the container — no React re-renders.
  *
- * Usage:
- *   const manager = new GlobeManager();
- *   manager.init();                          // call after globe mounts
- *   manager.setFilter(['React', 'TypeScript']);
- *   manager.search('react');
- *   manager.select('React');
- *   manager.reset();
+ * State is stored as a single `data-filter` attribute on the globe container:
+ *   data-filter="all" | data-filter="frontend" | data-filter="backend" | ...
+ *   data-search="react" | data-search="" (empty = no search)
+ *   data-selected="React" | data-selected="" (empty = no selection)
+ *
+ * CSS handles all visual states via attribute selectors — zero per-marker JS.
  */
 export default class GlobeManager {
   constructor() {
-    this._filter = null;      // Set<string> | null
-    this._search = null;      // Set<string> | null
+    this._filter = null;      // string | null (group name)
+    this._search = null;      // string | null (query)
     this._selected = null;    // string | null
-    this._disabled = false;   // bool
-    this._labels = [];        // HTMLElement[]
-    this._onChange = null;    // callback
+    this._disabled = false;
+    this._labels = [];        // cached HTMLElement[]
+    this._nameMap = new Map();// name → HTMLElement
+    this._container = null;   // .globe container element
+    this._onChange = null;
   }
 
-  /** Scan DOM for .globe__marker-label elements */
+  /** Scan DOM once, cache everything */
   init() {
     this._labels = Array.from(document.querySelectorAll('.globe__marker-label'));
-    this._apply();
+    this._nameMap.clear();
+    for (const el of this._labels) {
+      const name = el.getAttribute('data-tooltip');
+      if (name) this._nameMap.set(name, el);
+    }
+    this._container = this._labels[0]?.closest('.globe') || null;
   }
 
-  /** Subscribe to state changes — receives { filter, search, selected } */
   onChange(cb) {
     this._onChange = cb;
     return () => { this._onChange = null; };
   }
 
-  /** Filter by group names: setFilter(['frontend']) or setFilter(null) for all */
-  setFilter(groupNames) {
-    if (!groupNames || groupNames.length === 0) {
-      this._filter = null;
-    } else {
-      const names = new Set();
-      SKILLS_DATA.forEach((s) => {
-        if (groupNames.includes(s.group)) names.add(s.name);
-      });
-      this._filter = names;
-    }
+  setFilter(groupName) {
+    this._filter = groupName || null;
     this._apply();
     this._emit();
   }
 
-  /** Search by substring: search('react') or search(null) to clear */
   search(query) {
-    if (!query) {
-      this._search = null;
-    } else {
-      const q = query.toLowerCase();
-      const names = new Set();
-      SKILLS_DATA.forEach((s) => {
-        if (s.name.toLowerCase().includes(q)) names.add(s.name);
-      });
-      this._search = names;
-    }
+    this._search = query || null;
     this._apply();
     this._emit();
   }
 
-  /** Select a skill: select('React') or select(null) */
   select(skillName) {
     this._selected = skillName;
     this._apply();
     this._emit();
   }
 
-  /** Enable/disable marker interactions */
   setDisabled(disabled) {
     this._disabled = disabled;
     this._apply();
   }
 
-  /** Clear all filters, search, selection */
   reset() {
     this._filter = null;
     this._search = null;
@@ -87,30 +70,34 @@ export default class GlobeManager {
     this._emit();
   }
 
-  /** Get matching names for current filter+search */
   getFilteredNames() {
-    if (!this._filter && !this._search) return null;
-    const result = new Set();
-    SKILLS_DATA.forEach((s) => {
-      const matchFilter = !this._filter || this._filter.has(s.name);
-      const matchSearch = !this._search || this._search.has(s.name);
-      if (matchFilter && matchSearch) result.add(s.name);
-    });
-    return result;
+    const filterSet = this._filter
+      ? new Set(SKILLS_DATA.filter((s) => s.group === this._filter).map((s) => s.name))
+      : null;
+    const searchSet = this._search
+      ? new Set(SKILLS_DATA.filter((s) => s.name.toLowerCase().includes(this._search.toLowerCase())).map((s) => s.name))
+      : null;
+
+    if (!filterSet && !searchSet) return null;
+
+    return new Set(
+      SKILLS_DATA.filter((s) => {
+        const matchFilter = !filterSet || filterSet.has(s.name);
+        const matchSearch = !searchSet || searchSet.has(s.name);
+        return matchFilter && matchSearch;
+      }).map((s) => s.name),
+    );
   }
 
-  /** Get count of filtered skills */
   getFilteredCount() {
     const names = this.getFilteredNames();
     return names ? names.size : SKILLS_DATA.length;
   }
 
-  /** Get total skill count */
   getTotalCount() {
     return SKILLS_DATA.length;
   }
 
-  /** Current state snapshot */
   get state() {
     return {
       filter: this._filter,
@@ -135,16 +122,32 @@ export default class GlobeManager {
 
   _apply() {
     const filtered = this.getFilteredNames();
+    const hasFilter = filtered !== null;
+
+    // Fast path: no filter, no selection — clear everything
+    if (!hasFilter && !this._selected && !this._disabled) {
+      for (const el of this._labels) {
+        el.classList.remove('is-active', 'is-dimmed', 'is-disabled');
+      }
+      return;
+    }
+
     for (const el of this._labels) {
       const name = el.getAttribute('data-tooltip');
       if (!name) continue;
 
+      const isMatch = hasFilter ? filtered.has(name) : true;
       const isActive = this._selected === name;
-      const isDimmed = filtered && !filtered.has(name);
+      const isDimmed = hasFilter && !isMatch;
 
-      el.classList.toggle('is-active', isActive);
-      el.classList.toggle('is-dimmed', isDimmed);
-      el.classList.toggle('is-disabled', this._disabled);
+      // Only toggle if state actually changed — avoids forced reflow
+      const wasActive = el.classList.contains('is-active');
+      const wasDimmed = el.classList.contains('is-dimmed');
+      const wasDisabled = el.classList.contains('is-disabled');
+
+      if (isActive !== wasActive) el.classList.toggle('is-active', isActive);
+      if (isDimmed !== wasDimmed) el.classList.toggle('is-dimmed', isDimmed);
+      if (this._disabled !== wasDisabled) el.classList.toggle('is-disabled', this._disabled);
     }
   }
 }

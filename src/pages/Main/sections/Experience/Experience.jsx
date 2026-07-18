@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import useReveal from '@/hooks/useReveal';
 import useCursorParallax from '@/hooks/useCursorParallax';
-import { useScrollY } from '@/hooks/useRafScroll';
 import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
 import './Experience.scss';
 
@@ -31,10 +30,8 @@ export default function Experience() {
   const { x, y } = useCursorParallax();
   const timelineRef = useRef(null);
   const entryRefs = useRef([]);
-  const [progress, setProgress] = useState(0);
-  const [visibleSet, setVisibleSet] = useState(new Set());
-
-  const scrollY = useScrollY();
+  const tailRef = useRef(null);
+  const headRef = useRef(null);
 
   const update = useCallback(() => {
     const el = timelineRef.current;
@@ -45,30 +42,41 @@ export default function Experience() {
     const total = rect.height - vh;
     const scrolled = -rect.top;
     const p = Math.max(0, Math.min(1, total > 0 ? scrolled / total : 0));
-    setProgress(p);
+
+    if (tailRef.current) tailRef.current.style.height = `${p * 100}%`;
+    if (headRef.current) headRef.current.style.top = `${p * 100}%`;
 
     const threshold = vh * 0.1 + p * vh * 0.8;
 
-    const next = new Set();
     entryRefs.current.forEach((entryEl, i) => {
       if (!entryEl) return;
       const dot = entryEl.querySelector('.tl-dot');
       if (!dot) return;
       const dotRect = dot.getBoundingClientRect();
-      if (threshold >= dotRect.top + dotRect.height / 2) next.add(i);
-    });
-
-    setVisibleSet(prev => {
-      if (prev.size === next.size && [...prev].every(v => next.has(v))) return prev;
-      return next;
+      if (threshold >= dotRect.top + dotRect.height / 2) {
+        entryEl.classList.add('is-visible');
+      }
     });
   }, []);
 
   useEffect(() => {
+    let rafId;
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        update();
+      });
+    };
     update();
+    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, [update, scrollY]);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', update);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [update]);
 
   return (
     <section id="experience" ref={ref} className={`section section--experience reveal${visible ? ' is-visible' : ''}`}>
@@ -78,15 +86,15 @@ export default function Experience() {
 
         <div className="timeline" ref={timelineRef}>
           <div className="timeline-line">
-            <span className="tl-tail" style={{ height: `${progress * 100}%` }} />
-            <span className="tl-head" style={{ top: `${progress * 100}%` }} />
+            <span ref={tailRef} className="tl-tail" />
+            <span ref={headRef} className="tl-head" />
           </div>
 
           {ENTRIES.map((e, i) => (
             <div
               key={i}
               ref={el => { entryRefs.current[i] = el; }}
-              className={`timeline-entry ${i % 2 === 0 ? 'tl-left' : 'tl-right'}${visibleSet.has(i) ? ' is-visible' : ''}`}
+              className={`timeline-entry ${i % 2 === 0 ? 'tl-left' : 'tl-right'}`}
             >
               <span className="tl-dot" />
               <div className="tl-body">

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useContext, createContext } from 'react';
+import { useCallback, useRef, useContext, createContext } from 'react';
 
 const SceneContext = createContext(null);
 
@@ -9,21 +9,27 @@ export function useScene() {
 }
 
 export function SceneProvider({ children }) {
-  const [sceneOpacity, setSceneOpacity] = useState(1);
   const rafRef = useRef(null);
   const targetRef = useRef(1);
   const currentRef = useRef(1);
+  const domRef = useRef(null);
 
   const animate = useCallback(() => {
     const diff = targetRef.current - currentRef.current;
     if (Math.abs(diff) < 0.01) {
       currentRef.current = targetRef.current;
-      setSceneOpacity(targetRef.current);
+      if (domRef.current) {
+        domRef.current.style.opacity = currentRef.current;
+        domRef.current.style.visibility = currentRef.current < 0.01 ? 'hidden' : 'visible';
+      }
       rafRef.current = null;
       return;
     }
     currentRef.current += diff * 0.12;
-    setSceneOpacity(currentRef.current);
+    if (domRef.current) {
+      domRef.current.style.opacity = currentRef.current;
+      domRef.current.style.visibility = currentRef.current < 0.01 ? 'hidden' : 'visible';
+    }
     rafRef.current = requestAnimationFrame(animate);
   }, []);
 
@@ -37,8 +43,12 @@ export function SceneProvider({ children }) {
     if (!rafRef.current) rafRef.current = requestAnimationFrame(animate);
   }, [animate]);
 
+  const setSceneNode = useCallback((node) => {
+    domRef.current = node;
+  }, []);
+
   return (
-    <SceneContext.Provider value={{ sceneOpacity, showScene, hideScene }}>
+    <SceneContext.Provider value={{ showScene, hideScene, setSceneNode }}>
       {children}
     </SceneContext.Provider>
   );

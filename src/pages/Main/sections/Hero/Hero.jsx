@@ -173,7 +173,7 @@ export default function Hero() {
   const typed = useTypewriter(TYPEWRITER_STRINGS, 45, 2200);
   const stats = useGithubStats(GITHUB_USERNAME);
   const sectionRef = useRef(null);
-  const [opacity, setOpacity] = useState(1);
+  const overlayRef = useRef(null);
 
   useEffect(() => {
     const t = setTimeout(() => setShow(true), 200);
@@ -181,15 +181,26 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
+    let rafId;
     const onScroll = () => {
-      const el = sectionRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const h = el.clientHeight;
-      setOpacity(Math.max(0, Math.min(1, rect.bottom / h)));
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        const el = sectionRef.current;
+        const overlay = overlayRef.current;
+        if (!el || !overlay) return;
+        const rect = el.getBoundingClientRect();
+        const h = el.clientHeight;
+        const next = Math.max(0, Math.min(1, rect.bottom / h));
+        overlay.style.opacity = next;
+        overlay.style.visibility = next < 0.01 ? 'hidden' : 'visible';
+      });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const scrollDown = useCallback(() => {
@@ -199,11 +210,8 @@ export default function Hero() {
   return (
     <section id="hero" ref={sectionRef} className="section section--hero">
       <div
+        ref={overlayRef}
         className="h-overlay"
-        style={{
-          opacity,
-          visibility: opacity < 0.01 ? 'hidden' : undefined,
-        }}
       >
         <Terminals heroRef={sectionRef} />
 

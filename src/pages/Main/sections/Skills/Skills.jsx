@@ -172,7 +172,7 @@ export default function Skills() {
     const next = filterGroup === group ? null : group;
     setFilterGroup(next);
     setDropdownOpen(false);
-    globeRef.current?.setFilter(next ? [next] : null);
+    globeRef.current?.setFilter(next);
   }, [filterGroup]);
 
   const clearAllFilters = useCallback(() => {
@@ -313,7 +313,6 @@ export default function Skills() {
               className="skills-globe"
               phiRef={phiRef}
               thetaRef={thetaRef}
-              paused={false}
               onMarkerClick={handleMarkerClick}
             />
           </div>

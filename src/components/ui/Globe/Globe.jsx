@@ -46,7 +46,7 @@ function getGlobeTheme() {
     return {
       dark: 1,
       diffuse: 2,
-      mapSamples: mobile ? 6000 : 8000,
+      mapSamples: mobile ? 8000 : 12000,
       mapBrightness: 5,
       mapBaseBrightness: 0.05,
 
@@ -61,7 +61,7 @@ function getGlobeTheme() {
     dark: 0,
     diffuse: 1.2,
 
-    mapSamples: mobile ? 6000 : 8000,
+    mapSamples: mobile ? 8000 : 12000,
     mapBrightness: 6,
     mapBaseBrightness: 0,
 
@@ -138,6 +138,8 @@ const Globe = forwardRef(function Globe(
   const rafRef = useRef(null);
   const dragRef = useRef({ active: false, committed: false, pointerType: 'mouse', startX: 0, startY: 0, offsetPhi: 0, offsetTheta: 0 });
   const parallaxRef = useRef({ target: 0, current: 0 });
+  const restartTickRef = useRef(null);
+  const anchorMapRef = useRef(null);
 
   scrollRef.current = scrollProgress;
   pauseRef.current = paused;
@@ -187,7 +189,7 @@ const Globe = forwardRef(function Globe(
     markerElevation: 0.01,
     offset: [0, 0],
     context: {
-      antialias: false,
+      antialias: true,
       alpha: true,
       powerPreference: 'default',
       depth: true,
@@ -200,7 +202,7 @@ const Globe = forwardRef(function Globe(
     globeRef.current = globe;
     canvas.classList.add('is-ready');
 
-    setTimeout(() => {
+    const initTimeout = setTimeout(() => {
       if (managerRef.current) managerRef.current.init();
     }, 100);
 
@@ -223,16 +225,14 @@ const Globe = forwardRef(function Globe(
     observer.observe(canvas);
 
     function tick() {
-      if (isTabHidden || hiddenRef.current) return;
+      if (isTabHidden || hiddenRef.current || pauseRef.current) return;
 
       const drag = dragRef.current;
       const liveDrag = drag.active && drag.committed;
       const velocity = velocityRef.current;
 
       if (!liveDrag) {
-        if (!pauseRef.current) {
-          phiRef.current += 0.004 + scrollRef.current * 0.002;
-        }
+        phiRef.current += 0.004 + scrollRef.current * 0.002;
         if (Math.abs(velocity.phi) > 0.0001 || Math.abs(velocity.theta) > 0.0001) {
           phiRef.current += velocity.phi;
           thetaOffsetRef.current += velocity.theta;
@@ -254,6 +254,47 @@ const Globe = forwardRef(function Globe(
 
       globe.update({ phi: currentPhi, theta: currentTheta });
 
+      const refs = markerRefs.current;
+      if (refs.length && !anchorMapRef.current) {
+        const wrapper = canvasRef.current?.parentElement;
+        if (wrapper) {
+          const anchorDivs = wrapper.querySelectorAll('div[style*="anchor-name"]');
+          const map = new Map();
+          for (const anchor of anchorDivs) {
+            const name = anchor.style.anchorName || '';
+            const cid = name.replace('--cobe-', '');
+            for (let i = 0; i < refs.length; i++) {
+              if (markerElements[i].m.id === cid) {
+                map.set(cid, { anchor, ref: refs[i] });
+                break;
+              }
+            }
+          }
+          anchorMapRef.current = map;
+        }
+      }
+
+      const map = anchorMapRef.current;
+      if (map) {
+        const cs = getComputedStyle(document.documentElement);
+        let hasDimmed = false;
+        for (const [, { ref: el }] of map) {
+          if (el.classList.contains('is-dimmed')) { hasDimmed = true; break; }
+        }
+        for (const [cid, { anchor, ref: el }] of map) {
+          el.style.left = anchor.style.left;
+          el.style.top = anchor.style.top;
+          if (el.classList.contains('is-dimmed')) {
+            el.style.opacity = '0.12';
+          } else if (hasDimmed) {
+            el.style.opacity = '0.9';
+          } else {
+            const vis = cs.getPropertyValue(`--cobe-visible-${cid}`).trim();
+            el.style.opacity = vis === 'N' ? '1' : '0';
+          }
+        }
+      }
+
       if (externalPhiRef) externalPhiRef.current = currentPhi;
       if (externalThetaRef) externalThetaRef.current = currentTheta;
 
@@ -262,49 +303,28 @@ const Globe = forwardRef(function Globe(
 
     function restartTick() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(tick);
+      if (!pauseRef.current) rafRef.current = requestAnimationFrame(tick);
     }
+    restartTickRef.current = restartTick;
     restartTick();
 
-    // ── Safari WebGL context recovery ──
-    const onContextLost = (e) => {
-      e.preventDefault();
-      cancelAnimationFrame(rafRef.current);
-      globe.destroy();
-      globeRef.current = null;
-    };
-
-    const onContextRestored = () => {
-      globe.destroy();
-      requestAnimationFrame(() => {
-        globeRef.current = createGlobe(canvas, {
-          devicePixelRatio: dpr, width: size, height: size,
-          phi: phiRef.current, theta: BASE_THETA + thetaOffsetRef.current,
-          dark: theme.dark, diffuse: theme.diffuse, scale: 1,
-          mapSamples: theme.mapSamples, mapBrightness: theme.mapBrightness,
-          mapBaseBrightness: theme.mapBaseBrightness, baseColor: theme.baseColor,
-          markerColor: theme.markerColor, glowColor: theme.glowColor,
-          markers, arcs, arcColor: theme.arcColor, arcWidth: 0.4, arcHeight: 0.25,
-          markerElevation: 0.01, offset: [0, 0],
-          context: { antialias: true, alpha: true, powerPreference: 'high-performance', depth: true, stencil: true },
-        });
-        canvas.classList.add('is-ready');
-      });
-    };
-
-    canvas.addEventListener('webglcontextlost', onContextLost);
-    canvas.addEventListener('webglcontextrestored', onContextRestored);
-
     return () => {
+      clearTimeout(initTimeout);
       cancelAnimationFrame(rafRef.current);
       observer.disconnect();
       document.removeEventListener('visibilitychange', onVisibilityChange);
-      canvas.removeEventListener('webglcontextlost', onContextLost);
-      canvas.removeEventListener('webglcontextrestored', onContextRestored);
       globe.destroy();
       globeRef.current = null;
+      anchorMapRef.current = null;
     };
   }, []);
+
+  // Resume tick loop when paused transitions to false
+  useEffect(() => {
+    if (!paused && restartTickRef.current) {
+      restartTickRef.current();
+    }
+  }, [paused]);
 
   // ── Drag handlers (desktop only) ──
   const onPointerDown = (e) => {
@@ -363,6 +383,7 @@ const Globe = forwardRef(function Globe(
   };
 
   const markerElements = useMemo(() => markers.map((m) => ({ m, Icon: ICON_MAP[m.name] })), [markers]);
+  const markerRefs = useRef([]);
 
   return (
     <div className={`globe ${className}`}>
@@ -375,16 +396,14 @@ const Globe = forwardRef(function Globe(
         onPointerLeave={onPointerUp}
       />
       <div className="globe__glow" />
-      {markerElements.map(({ m, Icon }) => (
+      {markerElements.map(({ m, Icon }, i) => (
         <button
           key={m.id}
+          ref={(el) => { markerRefs.current[i] = el; }}
           className="globe__marker-label"
           data-tooltip={m.name}
-          style={{
-            positionAnchor: `--cobe-${m.id}`,
-            opacity: `var(--cobe-visible-${m.id}, 0)`,
-            '--marker-color': GROUP_COLORS[m.group],
-          }}
+          data-group={m.group}
+          style={{ '--marker-color': GROUP_COLORS[m.group] }}
           onClick={() => onMarkerClick?.(m.name)}
         >
           {Icon && <Icon className="globe__marker-icon" />}

@@ -79,10 +79,10 @@
 /* ── Active indicator pill ── */
 .indicator {
   position: absolute;
-  top: 50%;
+  top: 0;
   left: 0;
   height: calc(100% - 0.4rem);
-  transform: translateY(-50%) translateX(0);
+  transform: translateY(0%) translateX(0);
   background: var(--accent-muted);
   border-radius: var(--radius-md);
   pointer-events: none;
@@ -194,8 +194,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--glass);
   backdrop-filter: blur(16px);
@@ -235,14 +235,29 @@
               color 0.2s,
               box-shadow 0.3s var(--ease-out);
 
+  /* Pulse glow when visible */
+  animation: expandPulse 2s ease-in-out infinite 1s;
+
   &:hover {
     transform: translateX(-50%) translateY(-3px) scale(1.15);
+    animation: none;
+  }
+}
+
+@keyframes expandPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--accent-glow),
+                0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 16px 4px var(--accent-glow),
+                0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
   }
 }
 
 .expandIcon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   transition: transform 0.3s var(--ease-out);
 
   .expandBtnVisible:hover & {
@@ -287,7 +302,7 @@
 
   .expandBtn {
     bottom: calc(0.5rem + env(safe-area-inset-bottom));
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
 }

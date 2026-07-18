@@ -17,8 +17,6 @@ const MAGNETIC_RADIUS = 120;
 const MAGNETIC_MAX_SCALE = 1.45;
 
 export default function Navbar() {
-  const [active, setActive] = useState('hero');
-  const [collapsed, setCollapsed] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState(-1);
   const [tooltip, setTooltip] = useState(null);
   const [mounted, setMounted] = useState(false);
@@ -27,13 +25,15 @@ export default function Navbar() {
   const itemRefs = useRef([]);
   const indicatorRef = useRef(null);
   const activeRef = useRef('hero');
+  const collapsedRef = useRef(false);
+  const expandBtnRef = useRef(null);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
     return () => clearTimeout(t);
   }, []);
 
-  // Active section + collapse + indicator — all in one rAF
+  // Active section + collapse + indicator — all DOM-direct, zero React re-renders
   useEffect(() => {
     let ticking = false;
 
@@ -70,22 +70,32 @@ export default function Navbar() {
         }
       }
 
+      // Update active class via DOM
       if (best !== activeRef.current) {
+        const prevEl = itemRefs.current[ITEMS.findIndex((it) => it.id === activeRef.current)];
+        const nextEl = itemRefs.current[ITEMS.findIndex((it) => it.id === best)];
+        if (prevEl) prevEl.classList.remove(styles.active);
+        if (nextEl) nextEl.classList.add(styles.active);
         activeRef.current = best;
-        setActive(best);
       }
 
-      // Update indicator immediately (same frame as detection)
+      // Update indicator
       updateIndicator(best);
 
-      // Collapse/expand
+      // Collapse/expand via DOM
       const delta = scrollY - lastY.current;
+      let shouldCollapse = collapsedRef.current;
       if (scrollY < 50) {
-        setCollapsed(false);
+        shouldCollapse = false;
       } else if (delta > 10) {
-        setCollapsed(true);
+        shouldCollapse = true;
       } else if (delta < -10) {
-        setCollapsed(false);
+        shouldCollapse = false;
+      }
+      if (shouldCollapse !== collapsedRef.current) {
+        collapsedRef.current = shouldCollapse;
+        dockRef.current?.classList.toggle(styles.collapsed, shouldCollapse);
+        expandBtnRef.current?.classList.toggle(styles.expandBtnVisible, shouldCollapse);
       }
       lastY.current = scrollY;
     };
@@ -97,7 +107,7 @@ export default function Navbar() {
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    tick(); // initial
+    tick();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
@@ -152,9 +162,9 @@ export default function Navbar() {
     <>
       <nav
         ref={dockRef}
-        className={`${styles.dock} ${collapsed ? styles.collapsed : ''} ${mounted ? styles.mounted : ''}`}
+        className={`${styles.dock} ${mounted ? styles.mounted : ''}`}
         aria-label="Main navigation"
-        onMouseMove={!collapsed ? handleMouseMove : undefined}
+        onMouseMove={!collapsedRef.current ? handleMouseMove : undefined}
         onMouseLeave={handleMouseLeave}
       >
         <div className={styles.innerGlow} />
@@ -167,7 +177,7 @@ export default function Navbar() {
 
         {ITEMS.map(({ id, label, Icon }, i) => {
           const distFromCenter = Math.abs(i - centerIdx);
-          const staggerDelay = collapsed
+          const staggerDelay = collapsedRef.current
             ? `${distFromCenter * 30 + 50}ms`
             : `${distFromCenter * 25}ms`;
 
@@ -176,10 +186,10 @@ export default function Navbar() {
               key={id}
               ref={(el) => (itemRefs.current[i] = el)}
               type="button"
-              className={`${styles.item} ${active === id ? styles.active : ''} ${hoveredIdx === i ? styles.hovered : ''}`}
+              className={`${styles.item} ${id === 'hero' ? styles.active : ''} ${hoveredIdx === i ? styles.hovered : ''}`}
               onClick={() => scrollTo(id)}
-              onMouseEnter={() => !collapsed && handleItemHover(i)}
-              aria-current={active === id ? 'true' : undefined}
+              onMouseEnter={() => !collapsedRef.current && handleItemHover(i)}
+              aria-current={id === 'hero' ? 'true' : undefined}
               style={{ transitionDelay: staggerDelay }}
             >
               <Icon className={styles.icon} />
@@ -189,7 +199,7 @@ export default function Navbar() {
         })}
       </nav>
 
-      {tooltip && !collapsed && (
+      {tooltip && !collapsedRef.current && (
         <div
           className={styles.tooltip}
           style={{ left: tooltip.x, top: tooltip.y }}
@@ -199,9 +209,12 @@ export default function Navbar() {
       )}
 
       <button
-        className={`${styles.expandBtn} ${collapsed ? styles.expandBtnVisible : ''}`}
+        ref={expandBtnRef}
+        className={styles.expandBtn}
         onClick={() => {
-          setCollapsed(false);
+          collapsedRef.current = false;
+          dockRef.current?.classList.remove(styles.collapsed);
+          expandBtnRef.current?.classList.remove(styles.expandBtnVisible);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         aria-label="Show navigation"
