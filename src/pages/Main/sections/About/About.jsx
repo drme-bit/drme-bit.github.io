@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import useReveal from '@/hooks/useReveal';
-import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
+import SectionTitle from '@/components/ui/SectionTitle/SectionTitle';
 import Features from '@/components/ui/Features/Features';
 import aboutData from '@/data/aboutData';
 import './About.scss';
@@ -70,28 +70,59 @@ export default function About() {
   }, []);
 
   return (
-    <section id="about" ref={ref} className={`section section--about reveal${visible ? ' is-visible' : ''}`}>
-      <SectionHeader title="about" number="01" visible={visible} />
+    <section
+      id="about"
+      ref={ref}
+      className={`section section--about reveal${visible ? ' is-visible' : ''}`}
+    >
+      <SectionTitle
+        title="about"
+        accent="_"
+        visible={visible}
+      />
 
       <div className="about-layout">
         {/* ── Photo Column ── */}
         <div className="about-photo-col">
-          <img src="/images/17969af76asf9y986ad9fy.jpg" alt="Viacheslav" className="about-photo-img" />
+          <img
+            src="/images/17969af76asf9y986ad9fy.jpg"
+            alt="Viacheslav"
+            className="about-photo-img"
+          />
         </div>
 
         {/* ── Content Column ── */}
         <div className="about-content-col">
-          <h1 className="about-name">
-            Viacheslav<span className="about-name-accent"> Tkachyk</span>
-          </h1>
           <p className="about-role">Software Engineer & Lifelong Learner</p>
 
           <p className="about-bio">
-            I'm a software engineering graduate with a passion for building elegant,
-            performant solutions. From full-stack web apps to backend systems, I love
-            turning complex problems into clean, maintainable code. Recently completed
-            my Professional Junior Bachelor's degree, and I'm always looking for the
-            next interesting challenge.
+            Hello there! I’m Vyacheslav, a software engineer from Ukraine. \n
+          </p>
+
+          <p className="about-bio">
+            I spend my days turning coffee into code and my nights wondering why it worked
+            yesterday. \n
+          </p>
+
+          <p className="about-bio">
+            I love building things—from web applications and backend services to developer tools
+            that make life just a little easier. I enjoy solving problems, optimizing performance,
+            and turning messy ideas into clean, reliable software. The bigger the challenge, the
+            more interesting it becomes. \n
+          </p>
+
+          <p className="about-bio">
+            I recently graduated with a Professional Junior Bachelor’s degree in Software
+            Engineering and have been constantly exploring new technologies ever since. Lately, I’ve
+            been working with modern web stacks, backend development, APIs, databases, cloud
+            infrastructure, and a bit of everything that catches my curiosity. \n
+          </p>
+
+          <p className="about-bio">
+            I believe the best way to learn is to build. That’s why you’ll usually find me
+            experimenting with new projects, rewriting something “just because it can be better,” or
+            diving into technologies I’ve never used before. I’m always looking for the next
+            challenge… though sometimes it’s just another excuse to open my IDE.
           </p>
 
           {/* ── Terminal ── */}
@@ -113,7 +144,9 @@ export default function About() {
                 <span className="about-terminal-prompt">~</span>
                 <span className="about-terminal-output">
                   {typewriterText}
-                  <span className={`about-terminal-cursor${showCursor ? ' is-visible' : ''}`}>|</span>
+                  <span className={`about-terminal-cursor${showCursor ? ' is-visible' : ''}`}>
+                    |
+                  </span>
                 </span>
               </div>
             </div>
@@ -122,7 +155,11 @@ export default function About() {
           {/* ── Stats ── */}
           <div className="about-stats-row">
             {aboutData.stats.map((stat, i) => (
-              <div key={stat.label} className="about-stat-item" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
+              <div
+                key={stat.label}
+                className="about-stat-item"
+                style={{ animationDelay: `${0.3 + i * 0.1}s` }}
+              >
                 <span className="about-stat-value">{stat.value}</span>
                 <span className="about-stat-label">{stat.label}</span>
               </div>
@@ -131,8 +168,21 @@ export default function About() {
 
           {/* ── Tech Tags ── */}
           <div className="about-tech">
-            {['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Python', 'Rust', 'Docker', 'Git'].map((t, i) => (
-              <span key={t} className="about-tech-tag" style={{ animationDelay: `${0.5 + i * 0.05}s` }}>
+            {[
+              'React',
+              'TypeScript',
+              'Node.js',
+              'PostgreSQL',
+              'Python',
+              'Rust',
+              'Docker',
+              'Git',
+            ].map((t, i) => (
+              <span
+                key={t}
+                className="about-tech-tag"
+                style={{ animationDelay: `${0.5 + i * 0.05}s` }}
+              >
                 {t}
               </span>
             ))}

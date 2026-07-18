@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import useReveal from '@/hooks/useReveal';
 import useHorizontalScroll from '@/hooks/useHorizontalScroll';
-import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
+import SectionTitle from '@/components/ui/SectionTitle/SectionTitle';
 import Carousel from '@/components/ui/Carousel/Carousel';
 import { PROJECTS } from '@/data/projectsData';
 import { FiArrowRight, FiExternalLink } from 'react-icons/fi';
@@ -106,12 +106,13 @@ export default function Projects() {
     >
       <div className="projects-sticky">
         <div className="projects-inner">
-          <SectionHeader title="system registry" number="04" visible={sectionVisible} />
+          <SectionTitle
+            title="system registry"
+            accent="_"
+            visible={sectionVisible}
+          />
 
           <div className="projects-header">
-            <h2 className="section-title">
-              Selected<span className="section-accent"> work</span>
-            </h2>
             <div className="projects-counter">
               <span className="projects-counter-current">
                 {String(currentIndex + 1).padStart(2, '0')}

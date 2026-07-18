@@ -1,14 +1,16 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { collection, addDoc, query, where, onSnapshot, getDocs, serverTimestamp } from 'firebase/firestore';
 import { signInWithPopup, signInWithRedirect, onAuthStateChanged, signOut } from 'firebase/auth';
+import { motion } from 'motion/react';
 import { db, auth, googleProvider } from '@/config/firebase';
 import useReveal from '@/hooks/useReveal';
-import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
-import TestimonialsColumn from '@/components/ui/TestimonialsColumn';
-import { SkeletonCard } from '@/components/ui/Skeleton/Skeleton';
 import { useModal } from '@/contexts/ModalContext';
-import { FiStar, FiSend, FiCheck, FiAlertCircle, FiLogIn, FiLogOut, FiMessageSquare } from 'react-icons/fi';
+import { FiStar, FiSend, FiCheck, FiAlertCircle, FiLogIn, FiLogOut, FiMessageSquare, FiArrowRight } from 'react-icons/fi';
 import './Reviews.scss';
+
+const WORLD_W = 4000;
+const WORLD_H = 2500;
+const FOCUS_INTERVAL = 16000;
 
 export default function Reviews() {
   const [ref, visible] = useReveal();
@@ -72,92 +74,175 @@ export default function Reviews() {
 
   async function handleSignIn() {
     try {
-      setError(null);
       await signInWithPopup(auth, googleProvider);
-    } catch (err) {
-      if (err.code === 'auth/popup-blocked') {
-        try {
-          await signInWithRedirect(auth, googleProvider);
-          return;
-        } catch (redirectErr) {
-          setError(`Redirect failed: ${redirectErr.message}`);
-          return;
-        }
-      } else if (err.code === 'auth/popup-closed-by-user') {
-        setError('Sign in cancelled.');
-      } else {
-        setError(`Sign in failed: ${err.message}`);
-      }
+    } catch (e) {
+      console.error('Sign-in error:', e);
     }
   }
 
   async function handleSignOut() {
     try {
       await signOut(auth);
-      setSubmitted(false);
-    } catch (err) {
-      console.error('Sign out error:', err);
+      setHasReviewed(false);
+    } catch (e) {
+      console.error('Sign-out error:', e);
     }
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!user || !form.text.trim()) return;
+  const [draggedId, setDraggedId] = useState(null);
+  const [canvasDragging, setCanvasDragging] = useState(false);
+  const topZ = useRef(1);
+  const worldRef = useRef(null);
+  const focusIdx = useRef(0);
+  const posRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(null);
+  const targetRef = useRef({ x: 0, y: 0 });
+  const [isBlurred, setIsBlurred] = useState(false);
+  const userInteractedAt = useRef(0);
+  const focusedId = useRef(null);
+  const RESUME_DELAY = 5000;
+  const [hintHidden, setHintHidden] = useState(false);
 
-    setSubmitting(true);
-    setError(null);
+  // Auto-hide drag hint after 6s
+  useEffect(() => {
+    const t = setTimeout(() => setHintHidden(true), 6000);
+    return () => clearTimeout(t);
+  }, []);
 
-    try {
-      const dupCheck = query(
-        collection(db, 'reviews'),
-        where('email', '==', user.email),
-        where('approved', '==', true)
-      );
-      const dupSnap = await getDocs(dupCheck);
+  // Skeleton positions (same scatter logic, 6 placeholders)
+  const skeletonPositions = useMemo(() => {
+    const seededRandom = (seed) => {
+      const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+      return x - Math.floor(x);
+    };
+    return Array.from({ length: 6 }, (_, i) => {
+      const angle = (i / 6) * Math.PI * 2 * 1.618;
+      const radius = 200 + seededRandom(i + 500) * 800;
+      const x = WORLD_W / 2 + Math.cos(angle) * radius - 140;
+      const y = WORLD_H / 2 + Math.sin(angle) * radius - 80;
+      const rotation = (seededRandom(i + 700) - 0.5) * 12;
+      return {
+        x: Math.max(60, Math.min(WORLD_W - 340, x)),
+        y: Math.max(60, Math.min(WORLD_H - 200, y)),
+        rotation,
+      };
+    });
+  }, []);
 
-      if (!dupSnap.empty) {
-        setError('You have already left a review.');
-        setHasReviewed(true);
-        setSubmitting(false);
-        return;
-      }
-
-      await addDoc(collection(db, 'reviews'), {
-        name: user.displayName || user.email,
-        email: user.email,
-        photoURL: user.photoURL,
-        header: form.header.trim() || null,
-        role: form.role.trim() || null,
-        rating: form.rating,
-        text: form.text.trim(),
-        approved: false,
-        createdAt: serverTimestamp(),
-      });
-      setSubmitted(true);
-      setHasReviewed(true);
-      setForm({ rating: 5, text: '', header: '', role: '' });
-      setTimeout(() => setSubmitted(false), 2000);
-    } catch (err) {
-      setError(`Failed to submit: ${err.message}`);
-      console.error('Error adding review:', err);
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  const columns = useMemo(() => {
-    if (reviews.length === 0) return [[], [], []];
-    if (reviews.length <= 3) {
-      return [reviews, reviews, reviews];
-    }
-    const shuffled = [...reviews].sort(() => Math.random() - 0.5);
-    const size = Math.ceil(shuffled.length / 3);
-    return [
-      shuffled.slice(0, size),
-      shuffled.slice(size, size * 2),
-      shuffled.slice(size * 2),
-    ];
+  // Scatter cards across the infinite world
+  const cardPositions = useMemo(() => {
+    if (reviews.length === 0) return [];
+    const count = reviews.length;
+    const seededRandom = (seed) => {
+      const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+      return x - Math.floor(x);
+    };
+    // Spiral-ish scatter across the world
+    return reviews.map((_, i) => {
+      const angle = (i / count) * Math.PI * 2 * 1.618; // golden angle
+      const radius = 200 + seededRandom(i) * 800;
+      const x = WORLD_W / 2 + Math.cos(angle) * radius - 140;
+      const y = WORLD_H / 2 + Math.sin(angle) * radius - 80;
+      const rotation = (seededRandom(i + 200) - 0.5) * 12;
+      return {
+        x: Math.max(60, Math.min(WORLD_W - 340, x)),
+        y: Math.max(60, Math.min(WORLD_H - 200, y)),
+        rotation,
+      };
+    });
   }, [reviews]);
+
+  // Smooth pan to target
+  const animateToTarget = useCallback(() => {
+    const el = worldRef.current;
+    if (!el) return;
+
+    const lerp = 0.04;
+    posRef.current.x += (targetRef.current.x - posRef.current.x) * lerp;
+    posRef.current.y += (targetRef.current.y - posRef.current.y) * lerp;
+
+    el.style.transform = `translate(${-posRef.current.x}px, ${-posRef.current.y}px)`;
+
+    const dx = Math.abs(targetRef.current.x - posRef.current.x);
+    const dy = Math.abs(targetRef.current.y - posRef.current.y);
+    if (dx > 0.5 || dy > 0.5) {
+      rafRef.current = requestAnimationFrame(animateToTarget);
+    }
+  }, []);
+
+  const panTo = useCallback((x, y) => {
+    targetRef.current = { x, y };
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(animateToTarget);
+  }, [animateToTarget]);
+
+  // Auto-focus: cycle through cards
+  useEffect(() => {
+    if (reviews.length === 0) return;
+
+    // Start centered on world
+    const startX = WORLD_W / 2 - window.innerWidth / 2;
+    const startY = WORLD_H / 2 - window.innerHeight / 2;
+    posRef.current = { x: startX, y: startY };
+    targetRef.current = { x: startX, y: startY };
+
+    const interval = setInterval(() => {
+      // Skip if user recently interacted
+      if (Date.now() - userInteractedAt.current < RESUME_DELAY) return;
+
+      focusIdx.current = (focusIdx.current + 1) % reviews.length;
+      const pos = cardPositions[focusIdx.current];
+      if (pos) {
+        focusedId.current = reviews[focusIdx.current].id;
+        setIsBlurred(true);
+        panTo(pos.x - window.innerWidth / 2 + 140, pos.y - window.innerHeight * 0.10);
+        // Unblur after pan settles
+        setTimeout(() => setIsBlurred(false), 1200);
+      }
+    }, FOCUS_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [reviews.length, cardPositions, panTo]);
+
+  // Manual drag to reposition viewport
+  const isDragging = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+
+  const handleWorldMouseDown = useCallback((e) => {
+    if (e.target.closest('.reviews-drag-card') || e.target.closest('.reviews-hero')) return;
+    isDragging.current = true;
+    setCanvasDragging(true);
+    userInteractedAt.current = Date.now();
+    focusedId.current = null;
+    setIsBlurred(false);
+    setHintHidden(true);
+    dragStart.current = { x: e.clientX + posRef.current.x, y: e.clientY + posRef.current.y };
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const handleWorldMouseMove = useCallback((e) => {
+    if (!isDragging.current) return;
+    const x = dragStart.current.x - e.clientX;
+    const y = dragStart.current.y - e.clientY;
+    posRef.current = { x, y };
+    targetRef.current = { x, y };
+    worldRef.current.style.transform = `translate(${-x}px, ${-y}px)`;
+  }, []);
+
+  const handleWorldMouseUp = useCallback(() => {
+    isDragging.current = false;
+    setCanvasDragging(false);
+    setDraggedId(null);
+  }, []);
+
+  const handleDragStart = useCallback((id) => {
+    setDraggedId(id);
+    setCanvasDragging(true);
+    userInteractedAt.current = Date.now();
+    focusedId.current = null;
+    setIsBlurred(false);
+    topZ.current += 1;
+  }, []);
 
   function openReviewModal() {
     if (!user) {
@@ -290,33 +375,115 @@ export default function Reviews() {
 
   return (
     <section id="reviews" ref={ref} className={`section section--reviews reveal${visible ? ' is-visible' : ''}`}>
-      <SectionHeader title="reviews" number="06" visible={visible} />
-
-      <div className="reviews-inner">
-        <div className="reviews-header-row">
-          <p className="reviews-subtitle">What people think about working with me</p>
+      <div
+        className={`reviews-canvas${isBlurred ? ' reviews-canvas--blurred' : ''}${canvasDragging ? ' reviews-canvas--dragging' : ''} ${visible ? 'is-revealed' : ''}`}
+        onMouseDown={handleWorldMouseDown}
+        onMouseMove={handleWorldMouseMove}
+        onMouseUp={handleWorldMouseUp}
+        onMouseLeave={handleWorldMouseUp}
+      >
+        {/* ── Hero overlay (fixed center of viewport) ── */}
+        <div className="reviews-hero">
+          <h3 className="reviews-hero-title">
+            What people say<span className="reviews-hero-accent">_</span>
+          </h3>
+          <p className="reviews-hero-desc">
+            Real feedback from colleagues and collaborators
+          </p>
           <button className="reviews-cta" onClick={openReviewModal}>
             <FiMessageSquare size={14} />
             <span>Leave a review</span>
           </button>
         </div>
 
-        <div className="reviews-columns-wrapper">
-          {loading ? (
-            <div className="reviews-skeleton">
-              {Array.from({ length: 3 }, (_, i) => (
-                <SkeletonCard key={i} lines={2} />
-              ))}
+        {/* ── Drag hint ── */}
+        <div className={`reviews-drag-hint${hintHidden ? ' is-hidden' : ''}`}>
+          <span>drag to explore</span>
+          <FiArrowRight size={10} />
+        </div>
+
+        <div
+          ref={worldRef}
+          className="reviews-world"
+          style={{ width: WORLD_W, height: WORLD_H }}
+        >
+          {/* ── Skeleton cards while loading ── */}
+          {loading && skeletonPositions.map((pos, i) => (
+            <div
+              key={`skeleton-${i}`}
+              className="reviews-skeleton"
+              style={{
+                left: pos.x,
+                top: pos.y,
+                transform: `rotate(${pos.rotation}deg)`,
+              }}
+            >
+              <div className="reviews-skeleton-footer" />
             </div>
-          ) : reviews.length === 0 ? (
-            <div className="reviews-empty">No reviews yet. Be the first!</div>
-          ) : (
-            <>
-              <TestimonialsColumn testimonials={columns[0]} duration={10} />
-              <TestimonialsColumn testimonials={columns[1]} duration={13} className="reviews-col--desktop" />
-              <TestimonialsColumn testimonials={columns[2]} duration={11} className="reviews-col--wide" />
-            </>
+          ))}
+
+          {/* ── Review Cards scattered across world ── */}
+          {!loading && reviews.length === 0 && (
+            <div className="reviews-empty" style={{ left: WORLD_W / 2, top: WORLD_H / 2 }}>
+              No reviews yet. Be the first!
+            </div>
           )}
+          {!loading && reviews.map((review, i) => {
+            const pos = cardPositions[i];
+            if (!pos) return null;
+            return (
+              <motion.div
+                key={review.id}
+                className={`reviews-drag-card${focusedId.current === review.id ? ' is-focused' : ''}${draggedId === review.id ? ' is-dragged' : ''}`}
+                drag
+                dragMomentum={false}
+                dragElastic={0.1}
+                onDragStart={() => handleDragStart(review.id)}
+                initial={{
+                  left: pos.x,
+                  top: pos.y,
+                  rotate: pos.rotation,
+                }}
+                animate={{
+                  rotate: pos.rotation,
+                  transition: { delay: 0.08 * i, duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+                }}
+                whileDrag={{ scale: 1.04, rotate: 0 }}
+                style={{ zIndex: focusedId.current === review.id ? 3 : 1 }}
+              >
+                {review.header && (
+                  <div className="review-card-header">{review.header}</div>
+                )}
+                <p className="review-card-text">{review.text}</p>
+                <div className="review-card-footer">
+                  <div className="review-card-author">
+                    {review.photoURL ? (
+                      <img src={review.photoURL} alt="" className="review-card-avatar" />
+                    ) : (
+                      <div className="review-card-avatar--fallback">
+                        {(review.name || '?')[0].toUpperCase()}
+                      </div>
+                    )}
+                    <div className="review-card-info">
+                      <span className="review-card-name">{review.name}</span>
+                      {review.role && <span className="review-card-role">{review.role}</span>}
+                    </div>
+                  </div>
+                  {review.rating && (
+                    <div className="review-card-stars">
+                      {Array.from({ length: 5 }, (_, s) => (
+                        <FiStar
+                          key={s}
+                          size={11}
+                          className={s < review.rating ? 'star-filled' : 'star-empty'}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

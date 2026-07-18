@@ -11,7 +11,7 @@
 .projects-sticky {
   position: sticky;
   top: 0;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -388,7 +388,8 @@
 
 @media (max-width: 700px) {
   .projects-inner {
-    padding: 1.5rem 1rem;
+    padding: 1rem 1rem;
+    height: 95vh;
   }
 
   .projects-header {

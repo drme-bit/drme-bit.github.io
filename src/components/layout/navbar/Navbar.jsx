@@ -153,7 +153,7 @@ export default function Navbar() {
   }, []);
 
   const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById(id)?.scrollIntoView();
   };
 
   const centerIdx = Math.floor(ITEMS.length / 2);
@@ -215,7 +215,6 @@ export default function Navbar() {
           collapsedRef.current = false;
           dockRef.current?.classList.remove(styles.collapsed);
           expandBtnRef.current?.classList.remove(styles.expandBtnVisible);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         aria-label="Show navigation"
       >

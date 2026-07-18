@@ -1,98 +1,65 @@
-'use client'
-
-import createGlobe from "cobe";
-import {
-  useEffect,
-  useRef,
-  useMemo,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import { useEffect, useRef, useState, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import { Color, Vector3 } from 'three';
+import ThreeGlobe from 'three-globe';
+import countries from '@/data/globe.json';
 
 import {
   SKILLS_DATA,
-  ICON_MAP,
   GROUP_COLORS,
-} from "@/pages/Main/sections/Skills/skillsData";
+  ICON_MAP,
+} from '@/pages/Main/sections/Skills/skillsData';
 
-import GlobeManager from "./GlobeManager";
+import GlobeManager from './GlobeManager';
 
-import "./Globe.scss";
+import './Globe.scss';
 
-const BASE_THETA = 0.25;
+const _isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
-const THETA_OFFSET_MIN = -0.32;
-const THETA_OFFSET_MAX = 0.32;
+const cameraZ = 300;
 
-const MAX_VELOCITY = 0.15;
-
-const GROUP_SIZES = {
-  frontend: 0.06,
-  backend: 0.05,
-  tools: 0.045,
-};
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) }
+    : null;
 }
 
-function getGlobeTheme() {
-  const light = document.body.classList.contains("light");
-  const mobile =
-    typeof window !== "undefined" &&
-    window.innerWidth <= 768;
+function getVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
 
-  if (light) {
-    return {
-      dark: 1,
-      diffuse: 2,
-      mapSamples: mobile ? 8000 : 12000,
-      mapBrightness: 5,
-      mapBaseBrightness: 0.05,
+function getGroupColor(group) {
+  const varName = GROUP_COLORS[group];
+  if (!varName) return '#888888';
+  const cssVar = varName.replace('var(', '').replace(')', '');
+  const val = getVar(cssVar);
+  if (val && val.startsWith('#')) return val;
+  return getVar('--accent') || '#6db3f2';
+}
 
-      baseColor: [0.88, 0.86, 0.83],
-      markerColor: [0.18, 0.52, 0.78],
-      glowColor: [0.88, 0.86, 0.83],
-      arcColor: [0.18, 0.52, 0.78],
-    };
-  }
-
-  return {
-    dark: 0,
-    diffuse: 1.2,
-
-    mapSamples: mobile ? 8000 : 12000,
-    mapBrightness: 6,
-    mapBaseBrightness: 0,
-
-    baseColor: [0.12, 0.12, 0.12],
-    markerColor: [0.49, 0.83, 0.99],
-    glowColor: [0.27, 0.26, 0.25],
-    arcColor: [0.49, 0.83, 0.99],
-  };
+function getArcColorStr(group) {
+  const hex = getGroupColor(group);
+  const rgb = hexToRgb(hex);
+  if (!rgb) return 'rgba(109,179,242,0.5)';
+  return `rgba(${rgb.r},${rgb.g},${rgb.b},0.5)`;
 }
 
 function buildMarkers(skills) {
   const n = skills.length;
-
   return skills.map((skill, i) => {
     const theta = 2.39996323 * i;
-
     const y = 1 - (2 * i) / n;
-
     const lat = (Math.asin(y) * 180) / Math.PI;
-
     const lng = ((theta * 180) / Math.PI) % 360;
-
     return {
-      location: [lat, lng],
-
-      size: GROUP_SIZES[skill.group] ?? 0.04,
-
       id: skill.name.replace(/[^a-zA-Z]/g, ''),
-
       name: skill.name,
       group: skill.group,
+      lat,
+      lng,
+      size: skill.level || 1,
     };
   });
 }
@@ -100,315 +67,384 @@ function buildMarkers(skills) {
 function buildArcs(markers) {
   const groups = {};
   const arcs = [];
-
-  for (const marker of markers) {
-    if (!groups[marker.group]) {
-      groups[marker.group] = [];
-    }
-
-    groups[marker.group].push(marker);
+  for (const m of markers) {
+    if (!groups[m.group]) groups[m.group] = [];
+    groups[m.group].push(m);
   }
 
+  // Intra-group: connect every consecutive pair
   Object.values(groups).forEach((group) => {
     for (let i = 1; i < group.length; i++) {
       arcs.push({
-        from: group[i - 1].location,
-        to: group[i].location,
+        startLat: group[i - 1].lat,
+        startLng: group[i - 1].lng,
+        endLat: group[i].lat,
+        endLng: group[i].lng,
+        color: getArcColorStr(group[i].group),
+        arcAlt: 0.12 + Math.random() * 0.18,
+        order: i,
+        group: group[i].group,
       });
     }
   });
 
+  // Intra-group: connect every 2nd pair (skip-1)
+  Object.values(groups).forEach((group) => {
+    for (let i = 2; i < group.length; i++) {
+      arcs.push({
+        startLat: group[i - 2].lat,
+        startLng: group[i - 2].lng,
+        endLat: group[i].lat,
+        endLng: group[i].lng,
+        color: getArcColorStr(group[i].group),
+        arcAlt: 0.15 + Math.random() * 0.2,
+        order: i + 100,
+        group: group[i].group,
+      });
+    }
+  });
+
+  // Cross-group: first skill of each group to first skill of next group
+  const groupKeys = Object.keys(groups);
+  for (let i = 0; i < groupKeys.length; i++) {
+    const a = groups[groupKeys[i]];
+    const b = groups[groupKeys[(i + 1) % groupKeys.length]];
+    if (a.length && b.length) {
+      arcs.push({
+        startLat: a[0].lat,
+        startLng: a[0].lng,
+        endLat: b[0].lat,
+        endLng: b[0].lng,
+        color: 'rgba(255,255,255,0.15)',
+        arcAlt: 0.25 + Math.random() * 0.15,
+        order: 200 + i,
+        group: 'cross',
+      });
+    }
+  }
+
+  // Cross-group: connect highest-level skill of each pair of groups
+  const topSkills = Object.values(groups).map((g) =>
+    g.reduce((best, s) => (s.size > best.size ? s : best), g[0]),
+  );
+  for (let i = 0; i < topSkills.length; i++) {
+    for (let j = i + 1; j < topSkills.length; j++) {
+      arcs.push({
+        startLat: topSkills[i].lat,
+        startLng: topSkills[i].lng,
+        endLat: topSkills[j].lat,
+        endLng: topSkills[j].lng,
+        color: 'rgba(255,255,255,0.12)',
+        arcAlt: 0.3 + Math.random() * 0.1,
+        order: 300 + i * 10 + j,
+        group: 'cross',
+      });
+    }
+  }
+
   return arcs;
 }
 
-const Globe = forwardRef(function Globe(
-  { className = '', scrollProgress = 0, phiRef: externalPhiRef, thetaRef: externalThetaRef, paused = false, onMarkerClick },
-  ref,
-) {
-  const canvasRef = useRef(null);
-  const hiddenRef = useRef(false);
-  const globeRef = useRef(null);
-  const managerRef = useRef(null);
-  const phiRef = useRef(0);
-  const thetaOffsetRef = useRef(0);
-  const velocityRef = useRef({ phi: 0, theta: 0 });
-  const lastPointerRef = useRef(null);
-  const scrollRef = useRef(scrollProgress);
-  const pauseRef = useRef(paused);
-  const rafRef = useRef(null);
-  const dragRef = useRef({ active: false, committed: false, pointerType: 'mouse', startX: 0, startY: 0, offsetPhi: 0, offsetTheta: 0 });
-  const parallaxRef = useRef({ target: 0, current: 0 });
-  const restartTickRef = useRef(null);
-  const anchorMapRef = useRef(null);
+function getThemeColors() {
+  const isLight = document.body.classList.contains('light');
+  return {
+    globeColor: isLight ? '#e8e4df' : '#0a0a12',
+    emissive: isLight ? '#e8e4df' : '#0a0a12',
+    emissiveIntensity: isLight ? 0.03 : 0.1,
+    shininess: 0.5,
+    polygonColor: isLight ? 'rgba(100,100,100,0.45)' : 'rgba(255,255,255,0.28)',
+    atmosphereColor: isLight ? '#a0c4e8' : '#4a90d9',
+    atmosphereAltitude: isLight ? 0.12 : 0.2,
+    ambientLight: isLight ? '#ffffff' : '#303040',
+    directionalLeftLight: '#ffffff',
+    directionalTopLight: '#ffffff',
+    pointLight: '#ffffff',
+  };
+}
 
-  scrollRef.current = scrollProgress;
-  pauseRef.current = paused;
+// ── Single marker (React component) ──
+function Marker({ name, group, lat, lng, onClick, elemRef }) {
+  const Icon = ICON_MAP[name];
+  return (
+    <div
+      ref={elemRef}
+      className="globe__marker-label"
+      data-skill={name}
+      onPointerDown={(e) => { e.stopPropagation(); onClick?.(name); }}
+    >
+      <div
+        className="globe__marker-inner"
+        style={{ '--marker-color': getGroupColor(group) }}
+      >
+        {Icon && <span className="globe__marker-icon"><Icon /></span>}
+        <div className="globe__marker-tooltip">{name}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── Inner R3F scene ──
+function GlobeInner({ markers, arcs, globeObjRef, markerRefsRef }) {
+  const { camera, gl } = useThree();
+  const groupRef = useRef();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const worldPos = useMemo(() => new Vector3(), []);
+  const canvasSize = useRef({ w: 0, h: 0 });
+
+  // Create ThreeGlobe imperatively
+  useEffect(() => {
+    if (!globeObjRef.current && groupRef.current) {
+      const globe = new ThreeGlobe();
+      globeObjRef.current = globe;
+      groupRef.current.add(globe);
+      gl.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      setIsInitialized(true);
+    }
+  }, []);
+
+  // Build material
+  useEffect(() => {
+    if (!globeObjRef.current || !isInitialized) return;
+    const tc = getThemeColors();
+    const gm = globeObjRef.current.globeMaterial();
+    gm.color = new Color(tc.globeColor);
+    gm.emissive = new Color(tc.emissive);
+    gm.emissiveIntensity = tc.emissiveIntensity;
+    gm.shininess = tc.shininess;
+  }, [isInitialized]);
+
+  // Build arcs
+  useEffect(() => {
+    if (!globeObjRef.current || !isInitialized) return;
+    const tc = getThemeColors();
+    const globe = globeObjRef.current;
+
+    globe
+      .hexPolygonsData(countries.features)
+      .hexPolygonResolution(3)
+      .hexPolygonMargin(0.7)
+      .showAtmosphere(true)
+      .atmosphereColor(tc.atmosphereColor)
+      .atmosphereAltitude(tc.atmosphereAltitude)
+      .hexPolygonColor(() => tc.polygonColor);
+
+    globe
+      .arcsData(arcs)
+      .arcStartLat('startLat')
+      .arcStartLng('startLng')
+      .arcEndLat('endLat')
+      .arcEndLng('endLng')
+      .arcColor((d) => d.color)
+      .arcAltitude((d) => d.arcAlt || 0.15)
+      .arcStroke(() => [0.4, 0.35, 0.45][Math.round(Math.random() * 2)])
+      .arcDashLength(0.6)
+      .arcDashInitialGap((d) => (d.order || 0) * 0.2)
+      .arcDashGap(15)
+      .arcDashAnimateTime(3000);
+  }, [isInitialized]);
+
+  // Canvas resize
+  useEffect(() => {
+    const update = () => {
+      const rect = gl.domElement.getBoundingClientRect();
+      canvasSize.current = { w: rect.width, h: rect.height };
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(gl.domElement);
+    return () => ro.disconnect();
+  }, [gl]);
+
+  // Project coordinates → update DOM positions every frame
+  useFrame(() => {
+    const refs = markerRefsRef.current;
+    const globe = globeObjRef.current;
+    const mgr = window.__globeManager;
+    if (!refs || !globe || !mgr) return;
+
+    const { w, h } = canvasSize.current;
+    if (w === 0 || h === 0) return;
+
+    // Ensure camera matrices are up-to-date for projection
+    camera.updateMatrixWorld();
+
+    const camX = camera.position.x;
+    const camY = camera.position.y;
+    const camZ = camera.position.z;
+
+    const filtered = mgr.getFilteredNames();
+    const hasFilter = filtered !== null;
+    const isDisabled = mgr.state.disabled;
+    const selectedName = mgr.state.selected;
+
+    for (const name in refs) {
+      const entry = refs[name];
+      const { el, lat, lng } = entry;
+      if (!el) continue;
+
+      const phi = (90 - lat) * (Math.PI / 180);
+      const theta = (lng + 180) * (Math.PI / 180);
+      const r = 100;
+
+      const localX = -r * Math.sin(phi) * Math.cos(theta);
+      const localY = r * Math.cos(phi);
+      const localZ = r * Math.sin(phi) * Math.sin(theta);
+
+      // Normalized dot product of radial direction and camera position → [-1, 1]
+      const len = Math.sqrt(localX * localX + localY * localY + localZ * localZ) * Math.sqrt(camX * camX + camY * camY + camZ * camZ);
+      const facing = len > 0 ? (localX * camX + localY * camY + localZ * camZ) / len : 0;
+
+      // Smooth fade near horizon: 1 = fully visible, 0 = behind globe
+      // horizonFade defines the normalized dot range for the transition (0.0–0.15)
+      const horizonFade = 0.15;
+      const facingFade = Math.max(0, Math.min(1, (facing + horizonFade) / (horizonFade * 2)));
+
+      // Project local coords through camera (local = world since group is identity)
+      worldPos.set(localX, localY, localZ);
+      worldPos.project(camera);
+
+      const screenX = (worldPos.x * 0.5 + 0.5) * w;
+      const screenY = (-worldPos.y * 0.5 + 0.5) * h;
+
+      el.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%)`;
+
+      // Compute opacity: horizon fade × filter state
+      const dimmed = !isDisabled && hasFilter && !filtered.has(name);
+      const active = selectedName === name;
+
+      let opacity = facingFade;
+      if (dimmed && !active) opacity *= 0.12;
+      if (isDisabled) opacity *= 0.5;
+
+      el.style.opacity = opacity < 0.01 ? '0' : String(opacity);
+      el.style.pointerEvents = opacity < 0.05 ? 'none' : '';
+
+      // Dimmed visual: scale + grayscale via inline style on inner
+      const inner = el.firstElementChild;
+      if (inner) {
+        if (dimmed && !active && facingFade > 0.01) {
+          inner.style.transform = 'scale(0.8)';
+          inner.style.filter = 'grayscale(1) brightness(0.6)';
+        } else if (active && facingFade > 0.01) {
+          inner.style.transform = 'scale(1.4)';
+          inner.style.filter = '';
+        } else {
+          inner.style.transform = '';
+          inner.style.filter = '';
+        }
+      }
+
+      // CSS classes for active pulse animation only
+      const cls = el.classList;
+      const wantActive = active && facingFade > 0.01;
+      if (cls.contains('is-active') !== wantActive) cls.toggle('is-active', wantActive);
+    }
+  });
+
+  return <group ref={groupRef} />;
+}
+
+// ── Main component ──
+const Globe = forwardRef(function Globe({ className = '', onMarkerClick }, ref) {
+  const [mounted, setMounted] = useState(false);
+  const globeObjRef = useRef(null);
+  const managerRef = useRef(new GlobeManager());
+  const markerRefsRef = useRef({});
+  const overlayRef = useRef(null);
 
   const markers = useMemo(() => buildMarkers(SKILLS_DATA), []);
   const arcs = useMemo(() => buildArcs(markers), [markers]);
 
-  // Expose GlobeManager via ref
-  useImperativeHandle(ref, () => {
-    if (!managerRef.current) managerRef.current = new GlobeManager();
-    return managerRef.current;
+  // Expose GlobeManager via forwarded ref + global
+  useEffect(() => {
+    window.__globeManager = managerRef.current;
+    return () => { window.__globeManager = null; };
   }, []);
 
+  useImperativeHandle(ref, () => managerRef.current, []);
+
+  // Marker click callback
+  const handleMarkerClick = useCallback((skillName) => {
+    if (!onMarkerClick) return;
+    onMarkerClick(skillName);
+  }, [onMarkerClick]);
+
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width < 1 || rect.height < 1) return;
-
-  const isMobile = window.innerWidth <= 768;
-  const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 640 ? 1.8 : 2);
-  const maxPx = isMobile ? 600 : 800;
-  const size = Math.max(Math.round(Math.min(Math.max(rect.width, rect.height), maxPx)), 200);
-  const theme = getGlobeTheme();
-
-  const globe = createGlobe(canvas, {
-    devicePixelRatio: dpr,
-    width: size,
-    height: size,
-    phi: phiRef.current,
-    theta: BASE_THETA + thetaOffsetRef.current,
-    dark: theme.dark,
-    diffuse: theme.diffuse,
-    scale: 1,
-    mapSamples: theme.mapSamples,
-    mapBrightness: theme.mapBrightness,
-    mapBaseBrightness: theme.mapBaseBrightness,
-    baseColor: theme.baseColor,
-    markerColor: theme.markerColor,
-    glowColor: theme.glowColor,
-    markers,
-    arcs,
-    arcColor: theme.arcColor,
-    arcWidth: 0.4,
-    arcHeight: 0.25,
-    markerElevation: 0.01,
-    offset: [0, 0],
-    context: {
-      antialias: true,
-      alpha: true,
-      powerPreference: 'default',
-      depth: true,
-      stencil: false,
-      preserveDrawingBuffer: false,
-      desynchronized: true,
-    },
-  });
-
-    globeRef.current = globe;
-    canvas.classList.add('is-ready');
-
-    const initTimeout = setTimeout(() => {
-      if (managerRef.current) managerRef.current.init();
-    }, 100);
-
-    // ── Animation loop (stop when off-screen) ──
-    let isTabHidden = false;
-
-    const onVisibilityChange = () => {
-      isTabHidden = document.hidden;
-      if (!isTabHidden && !hiddenRef.current) restartTick();
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        hiddenRef.current = !entry.isIntersecting;
-        if (entry.isIntersecting && !isTabHidden) restartTick();
-      },
-      { threshold: 0 },
-    );
-    observer.observe(canvas);
-
-    function tick() {
-      if (isTabHidden || hiddenRef.current || pauseRef.current) return;
-
-      const drag = dragRef.current;
-      const liveDrag = drag.active && drag.committed;
-      const velocity = velocityRef.current;
-
-      if (!liveDrag) {
-        phiRef.current += 0.004 + scrollRef.current * 0.002;
-        if (Math.abs(velocity.phi) > 0.0001 || Math.abs(velocity.theta) > 0.0001) {
-          phiRef.current += velocity.phi;
-          thetaOffsetRef.current += velocity.theta;
-          velocity.phi *= 0.95;
-          velocity.theta *= 0.95;
-        }
-        const p = parallaxRef.current;
-        p.current += (p.target - p.current) * 0.06;
-        thetaOffsetRef.current += p.current * 0.02;
-        thetaOffsetRef.current = clamp(thetaOffsetRef.current, THETA_OFFSET_MIN, THETA_OFFSET_MAX);
-      }
-
-      const currentPhi = phiRef.current + (liveDrag ? drag.offsetPhi : 0);
-      const currentTheta = clamp(
-        BASE_THETA + thetaOffsetRef.current + (liveDrag ? drag.offsetTheta : 0),
-        THETA_OFFSET_MIN + BASE_THETA - 0.05,
-        THETA_OFFSET_MAX + BASE_THETA + 0.05,
-      );
-
-      globe.update({ phi: currentPhi, theta: currentTheta });
-
-      const refs = markerRefs.current;
-      if (refs.length && !anchorMapRef.current) {
-        const wrapper = canvasRef.current?.parentElement;
-        if (wrapper) {
-          const anchorDivs = wrapper.querySelectorAll('div[style*="anchor-name"]');
-          const map = new Map();
-          for (const anchor of anchorDivs) {
-            const name = anchor.style.anchorName || '';
-            const cid = name.replace('--cobe-', '');
-            for (let i = 0; i < refs.length; i++) {
-              if (markerElements[i].m.id === cid) {
-                map.set(cid, { anchor, ref: refs[i] });
-                break;
-              }
-            }
-          }
-          anchorMapRef.current = map;
-        }
-      }
-
-      const map = anchorMapRef.current;
-      if (map) {
-        const cs = getComputedStyle(document.documentElement);
-        let hasDimmed = false;
-        for (const [, { ref: el }] of map) {
-          if (el.classList.contains('is-dimmed')) { hasDimmed = true; break; }
-        }
-        for (const [cid, { anchor, ref: el }] of map) {
-          el.style.left = anchor.style.left;
-          el.style.top = anchor.style.top;
-          if (el.classList.contains('is-dimmed')) {
-            el.style.opacity = '0.12';
-          } else if (hasDimmed) {
-            el.style.opacity = '0.9';
-          } else {
-            const vis = cs.getPropertyValue(`--cobe-visible-${cid}`).trim();
-            el.style.opacity = vis === 'N' ? '1' : '0';
-          }
-        }
-      }
-
-      if (externalPhiRef) externalPhiRef.current = currentPhi;
-      if (externalThetaRef) externalThetaRef.current = currentTheta;
-
-      rafRef.current = requestAnimationFrame(tick);
-    }
-
-    function restartTick() {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (!pauseRef.current) rafRef.current = requestAnimationFrame(tick);
-    }
-    restartTickRef.current = restartTick;
-    restartTick();
-
-    return () => {
-      clearTimeout(initTimeout);
-      cancelAnimationFrame(rafRef.current);
-      observer.disconnect();
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      globe.destroy();
-      globeRef.current = null;
-      anchorMapRef.current = null;
-    };
+    setMounted(true);
   }, []);
 
-  // Resume tick loop when paused transitions to false
-  useEffect(() => {
-    if (!paused && restartTickRef.current) {
-      restartTickRef.current();
+  const tc = getThemeColors();
+
+  // Store marker refs for useFrame projection
+  const setMarkerRef = useCallback((name, el) => {
+    const marker = markers.find((m) => m.name === name);
+    if (marker && el) {
+      markerRefsRef.current[name] = { el, lat: marker.lat, lng: marker.lng };
     }
-  }, [paused]);
+  }, [markers]);
 
-  // ── Drag handlers (desktop only) ──
-  const onPointerDown = (e) => {
-    if (e.pointerType === 'touch') return;
-    dragRef.current = {
-      active: true, committed: false, pointerType: e.pointerType,
-      startX: e.clientX, startY: e.clientY, offsetPhi: 0, offsetTheta: 0,
-    };
-    lastPointerRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
-    velocityRef.current = { phi: 0, theta: 0 };
-    canvasRef.current?.classList.add('is-dragging');
-  };
-
-  const onPointerMove = (e) => {
-    const drag = dragRef.current;
-    if (drag.active && drag.pointerType !== 'touch') {
-      const dx = e.clientX - drag.startX;
-      const dy = e.clientY - drag.startY;
-      if (!drag.committed) {
-        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-        drag.committed = true;
-        canvasRef.current?.classList.add('is-dragging');
-      }
-      drag.offsetPhi = dx * 0.005;
-      drag.offsetTheta = dy * 0.003;
-      const now = Date.now();
-      const last = lastPointerRef.current;
-      if (last) {
-        const dt = Math.max(now - last.t, 1);
-        velocityRef.current = {
-          phi: clamp(((e.clientX - last.x) / dt) * 0.3, -MAX_VELOCITY, MAX_VELOCITY),
-          theta: clamp(((e.clientY - last.y) / dt) * 0.08, -MAX_VELOCITY, MAX_VELOCITY),
-        };
-      }
-      lastPointerRef.current = { x: e.clientX, y: e.clientY, t: now };
-      return;
-    }
-    if (e.pointerType === 'touch') return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const cy = (e.clientY - rect.top) / rect.height;
-    parallaxRef.current.target = (cy - 0.5) * 0.08;
-  };
-
-  const onPointerUp = () => {
-    const drag = dragRef.current;
-    if (!drag.active) return;
-    if (drag.committed) {
-      phiRef.current += drag.offsetPhi;
-      thetaOffsetRef.current = clamp(thetaOffsetRef.current + drag.offsetTheta, THETA_OFFSET_MIN, THETA_OFFSET_MAX);
-    }
-    dragRef.current = { active: false, committed: false, pointerType: drag.pointerType, startX: 0, startY: 0, offsetPhi: 0, offsetTheta: 0 };
-    lastPointerRef.current = null;
-    canvasRef.current?.classList.remove('is-dragging');
-  };
-
-  const markerElements = useMemo(() => markers.map((m) => ({ m, Icon: ICON_MAP[m.name] })), [markers]);
-  const markerRefs = useRef([]);
+  if (!mounted) return <div className={`globe ${className}`} />;
 
   return (
     <div className={`globe ${className}`}>
-      <canvas
-        ref={canvasRef}
-        className="globe__canvas"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-      />
-      <div className="globe__glow" />
-      {markerElements.map(({ m, Icon }, i) => (
-        <button
-          key={m.id}
-          ref={(el) => { markerRefs.current[i] = el; }}
-          className="globe__marker-label"
-          data-tooltip={m.name}
-          data-group={m.group}
-          style={{ '--marker-color': GROUP_COLORS[m.group] }}
-          onClick={() => onMarkerClick?.(m.name)}
-        >
-          {Icon && <Icon className="globe__marker-icon" />}
-        </button>
-      ))}
+      <Canvas
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: 'default',
+          desynchronized: true,
+        }}
+        camera={{ fov: 50, near: 180, far: 1800, position: [0, 0, cameraZ] }}
+        style={{ background: 'transparent' }}
+      >
+        <ambientLight color={tc.ambientLight} intensity={0.6} />
+        <directionalLight
+          color={tc.directionalLeftLight}
+          position={new Vector3(-400, 100, 400)}
+        />
+        <directionalLight
+          color={tc.directionalTopLight}
+          position={new Vector3(-200, 500, 200)}
+        />
+        <pointLight
+          color={tc.pointLight}
+          position={new Vector3(-200, 500, 200)}
+          intensity={0.8}
+        />
+        {!_isMobile && (
+          <OrbitControls
+            enablePan={false}
+            enableZoom={false}
+            minDistance={cameraZ}
+            maxDistance={cameraZ}
+            autoRotate
+            autoRotateSpeed={0.5}
+            minPolarAngle={Math.PI / 3.5}
+            maxPolarAngle={Math.PI - Math.PI / 3}
+          />
+        )}
+        <GlobeInner
+          markers={markers}
+          arcs={arcs}
+          globeObjRef={globeObjRef}
+          markerRefsRef={markerRefsRef}
+        />
+      </Canvas>
+
+      {/* HTML marker overlay */}
+      <div ref={overlayRef} className="globe__overlay">
+        {markers.map((m) => (
+          <Marker
+            key={m.name}
+            name={m.name}
+            group={m.group}
+            lat={m.lat}
+            lng={m.lng}
+            onClick={handleMarkerClick}
+            elemRef={(el) => setMarkerRef(m.name, el)}
+          />
+        ))}
+      </div>
     </div>
   );
 });

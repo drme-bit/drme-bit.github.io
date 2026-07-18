@@ -89,8 +89,6 @@ export default function Skills() {
   const dropdownRef = useRef(null);
   const globeRef = useRef(null);
   const sectionElRef = useRef(null);
-  const phiRef = useRef(0);
-  const thetaRef = useRef(0);
   const debounceRef = useRef(null);
   const { showScene, hideScene } = useScene();
   const { openModal } = useModal();
@@ -311,8 +309,6 @@ export default function Skills() {
             <Globe
               ref={globeRef}
               className="skills-globe"
-              phiRef={phiRef}
-              thetaRef={thetaRef}
               onMarkerClick={handleMarkerClick}
             />
           </div>

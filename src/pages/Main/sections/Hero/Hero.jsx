@@ -204,7 +204,7 @@ export default function Hero() {
   }, []);
 
   const scrollDown = useCallback(() => {
-    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('about')?.scrollIntoView();
   }, []);
 
   return (

@@ -6,8 +6,8 @@ import { useTerrain } from '@/contexts/TerrainContext';
 import useReducedMotion from '@/hooks/useReducedMotion';
 
 const _isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-const GRID_X = _isMobile ? 50 : 90;
-const GRID_Z = _isMobile ? 50 : 90;
+const GRID_X = _isMobile ? 65 : 90;
+const GRID_Z = _isMobile ? 65 : 90;
 const SPACING = 0.5;
 const HALF_X = (GRID_X - 1) * SPACING * 0.5;
 const HALF_Z = (GRID_Z - 1) * SPACING * 0.5;
@@ -197,7 +197,7 @@ function Terrain() {
   return (
     <group>
       <points ref={pointsRef} geometry={pointsGeo}>
-        <pointsMaterial ref={pointsMatRef} vertexColors size={0.09} transparent opacity={theme === 'light' ? 0.5 : 0.9} sizeAttenuation />
+        <pointsMaterial ref={pointsMatRef} vertexColors size={_isMobile ? 0.14 : 0.09} transparent opacity={theme === 'light' ? 0.5 : 0.9} sizeAttenuation />
       </points>
       <lineSegments ref={wireRef} geometry={wireGeo}>
         <lineBasicMaterial ref={wireMatRef} color={colors.accent} transparent opacity={theme === 'light' ? 0.1 : 0.18} />
@@ -337,7 +337,7 @@ function FogUpdater() {
   useFrame(() => {
     const fogColor = theme === 'light' ? colors.bg : '#080808';
     if (!scene.fog || scene.fog.color.getStyle() !== fogColor) {
-      scene.fog = new THREE.Fog(fogColor, 14, 34);
+      scene.fog = new THREE.Fog(fogColor, _isMobile ? 10 : 14, _isMobile ? 28 : 34);
     }
     invalidate();
   });

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import useReveal from '@/hooks/useReveal';
-import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
+import SectionTitle from '@/components/ui/SectionTitle/SectionTitle';
 import { BLOG_POSTS } from '@/data/blogData';
 import { FiArrowRight, FiClock, FiTag } from 'react-icons/fi';
 import './Blog.scss';
@@ -74,7 +74,7 @@ export default function Blog() {
 
   return (
     <section id="blog" ref={ref} className={`section section--blog reveal${visible ? ' is-visible' : ''}`}>
-      <SectionHeader title="blog" number="05" visible={visible} />
+      <SectionTitle title="blog" accent="_" visible={visible} />
 
       <div className="blog-grid">
         {featured.map((post, i) => (

@@ -6,7 +6,7 @@ import {
 } from 'react-icons/fi';
 import useReveal from '@/hooks/useReveal';
 import useCursorParallax from '@/hooks/useCursorParallax';
-import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
+import SectionTitle from '@/components/ui/SectionTitle/SectionTitle';
 import './Contacts.scss';
 
 /* ------------------------------------------------------------------ */
@@ -165,7 +165,7 @@ export default function Contacts() {
 
   return (
     <section id="contact" ref={ref} className={`section reveal${visible ? ' is-visible' : ''}`}>
-      <SectionHeader title="contact" number="07" visible={visible} />
+      <SectionTitle title="contact" accent="_" visible={visible} />
 
       <div
         className="section-inner"

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import useReveal from '@/hooks/useReveal';
 import useCursorParallax from '@/hooks/useCursorParallax';
-import SectionHeader from '@/components/ui/SectionHeader/SectionHeader';
+import SectionTitle from '@/components/ui/SectionTitle/SectionTitle';
 import './Experience.scss';
 
 const ENTRIES = [
@@ -55,6 +55,8 @@ export default function Experience() {
       const dotRect = dot.getBoundingClientRect();
       if (threshold >= dotRect.top + dotRect.height / 2) {
         entryEl.classList.add('is-visible');
+      } else {
+        entryEl.classList.remove('is-visible');
       }
     });
   }, []);
@@ -80,9 +82,12 @@ export default function Experience() {
 
   return (
     <section id="experience" ref={ref} className={`section section--experience reveal${visible ? ' is-visible' : ''}`}>
-      <SectionHeader title="experience" number="03" visible={visible} />
+      <SectionTitle
+        title="experience"
+        accent=" & background"
+        visible={visible}
+      />
       <div className="section-inner" style={{ transform: `translate(${x * 4}px, ${y * 3}px)` }}>
-        <h2 className="section-title">Experience &<span className="section-accent"> background</span></h2>
 
         <div className="timeline" ref={timelineRef}>
           <div className="timeline-line">

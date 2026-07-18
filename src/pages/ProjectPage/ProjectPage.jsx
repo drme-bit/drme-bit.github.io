@@ -308,7 +308,7 @@ export default function ProjectPage() {
             <button
               key={s.id}
               className={`pp-nav-link${activeSection === s.id ? ' is-active' : ''}`}
-              onClick={() => document.getElementById(`section-${s.id}`)?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById(`section-${s.id}`)?.scrollIntoView()}
             >
               {s.label}
             </button>
@@ -440,7 +440,7 @@ export default function ProjectPage() {
                   <button
                     key={s.id}
                     className={`pp-right-nav-link${activeSection === s.id ? ' is-active' : ''}`}
-                    onClick={() => document.getElementById(`section-${s.id}`)?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById(`section-${s.id}`)?.scrollIntoView()}
                   >
                     {s.label}
                   </button>

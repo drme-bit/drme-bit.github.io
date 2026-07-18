@@ -38,7 +38,7 @@ export default function DrawerMenu({ open, onToggle, onClose }) {
   const handleSectionClick = (id) => {
     onClose();
     if (isMainPage) {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById(id)?.scrollIntoView();
     } else {
       navigate('/', { state: { scrollTo: id } });
     }
