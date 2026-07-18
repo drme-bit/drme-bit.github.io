@@ -295,9 +295,9 @@
   position: relative;
   transform-origin: center center;
   will-change: transform;
-  /* Driven by CSS custom properties from rAF loop */
-  transform: translateX(calc((-15 - var(--transition, 0) * 5) * 1vw))
-             translateY(calc((5 - var(--transition, 0) * 5) * 1vh))
+  /* Driven by CSS custom properties from rAF loop — centered */
+  transform: translateX(calc((-5 + var(--transition, 0) * 5) * 1vw))
+             translateY(calc((-2 + var(--transition, 0) * 2) * 1vh))
              scale(calc(1.05 + var(--transition, 0) * 0.15));
 }
 
@@ -497,9 +497,9 @@
   .skills-globe-area {
     width: 100%;
     height: 100%;
-    /* Mobile: different transform formula */
-    transform: translateX(calc((10 - var(--transition, 0) * 10) * 1vw))
-               translateY(calc((5 + var(--transition, 0) * 2.5) * 1vh))
+    /* Mobile: centered */
+    transform: translateX(calc((-5 + var(--transition, 0) * 5) * 1vw))
+               translateY(calc((-2 + var(--transition, 0) * 2) * 1vh))
                scale(calc(1.05 + var(--transition, 0) * 0.15));
   }
 }

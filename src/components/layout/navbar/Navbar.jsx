@@ -30,7 +30,10 @@ export default function Navbar() {
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   // Active section + collapse + indicator — all DOM-direct, zero React re-renders
@@ -111,25 +114,35 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const rafRef = useRef(0);
+  const mousePos = useRef({ x: 0, y: 0 });
+
   const handleMouseMove = useCallback((e) => {
     const dock = dockRef.current;
     if (!dock) return;
     const dockRect = dock.getBoundingClientRect();
-    const mouseX = e.clientX - dockRect.left;
-    const mouseY = e.clientY - dockRect.top;
+    mousePos.current.x = e.clientX - dockRect.left;
+    mousePos.current.y = e.clientY - dockRect.top;
 
-    itemRefs.current.forEach((el, i) => {
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const itemCenterX = rect.left - dockRect.left + rect.width / 2;
-      const itemCenterY = rect.top - dockRect.top + rect.height / 2;
-      const dx = mouseX - itemCenterX;
-      const dy = mouseY - itemCenterY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const influence = Math.max(0, 1 - dist / MAGNETIC_RADIUS);
-      const scale = 1 + (MAGNETIC_MAX_SCALE - 1) * influence * influence;
-      el.style.transform = `scale(${scale}) translateY(${-2 * influence}px)`;
-    });
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = 0;
+        const { x: mouseX, y: mouseY } = mousePos.current;
+        const currentDockRect = dock.getBoundingClientRect();
+        itemRefs.current.forEach((el) => {
+          if (!el) return;
+          const rect = el.getBoundingClientRect();
+          const itemCenterX = rect.left - currentDockRect.left + rect.width / 2;
+          const itemCenterY = rect.top - currentDockRect.top + rect.height / 2;
+          const dx = mouseX - itemCenterX;
+          const dy = mouseY - itemCenterY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const influence = Math.max(0, 1 - dist / MAGNETIC_RADIUS);
+          const scale = 1 + (MAGNETIC_MAX_SCALE - 1) * influence * influence;
+          el.style.transform = `scale(${scale}) translateY(${-2 * influence}px)`;
+        });
+      });
+    }
   }, []);
 
   const handleMouseLeave = useCallback(() => {

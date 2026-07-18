@@ -128,7 +128,7 @@ function Terrain() {
 
         const t = THREE.MathUtils.clamp((h + amp) / (amp * 2), 0, 1);
         if (theme === 'light') {
-          const lum = 0.55 + t * 0.25;
+          const lum = 0.3 + t * 0.4;
           colors[idx * 3] = lum;
           colors[idx * 3 + 1] = lum;
           colors[idx * 3 + 2] = lum;
@@ -197,10 +197,10 @@ function Terrain() {
   return (
     <group>
       <points ref={pointsRef} geometry={pointsGeo}>
-        <pointsMaterial ref={pointsMatRef} vertexColors size={_isMobile ? 0.14 : 0.09} transparent opacity={theme === 'light' ? 0.5 : 0.9} sizeAttenuation />
+        <pointsMaterial ref={pointsMatRef} vertexColors size={_isMobile ? 0.14 : 0.09} transparent opacity={theme === 'light' ? 0.7 : 0.9} sizeAttenuation />
       </points>
       <lineSegments ref={wireRef} geometry={wireGeo}>
-        <lineBasicMaterial ref={wireMatRef} color={colors.accent} transparent opacity={theme === 'light' ? 0.1 : 0.18} />
+        <lineBasicMaterial ref={wireMatRef} color={colors.accent} transparent opacity={theme === 'light' ? 0.2 : 0.18} />
       </lineSegments>
     </group>
   );

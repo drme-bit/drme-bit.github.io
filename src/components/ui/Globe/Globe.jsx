@@ -411,18 +411,17 @@ const Globe = forwardRef(function Globe({ className = '', onMarkerClick }, ref) 
           position={new Vector3(-200, 500, 200)}
           intensity={0.8}
         />
-        {!_isMobile && (
-          <OrbitControls
-            enablePan={false}
-            enableZoom={false}
-            minDistance={cameraZ}
-            maxDistance={cameraZ}
-            autoRotate
-            autoRotateSpeed={0.5}
-            minPolarAngle={Math.PI / 3.5}
-            maxPolarAngle={Math.PI - Math.PI / 3}
-          />
-        )}
+        <OrbitControls
+          enablePan={false}
+          enableZoom={false}
+          enableRotate={!_isMobile}
+          minDistance={cameraZ}
+          maxDistance={cameraZ}
+          autoRotate
+          autoRotateSpeed={_isMobile ? 0.3 : 0.5}
+          minPolarAngle={Math.PI / 3.5}
+          maxPolarAngle={Math.PI - Math.PI / 3}
+        />
         <GlobeInner
           markers={markers}
           arcs={arcs}
