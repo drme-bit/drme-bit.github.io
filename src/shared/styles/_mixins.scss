@@ -1,0 +1,148 @@
+// ═══════════════════════════════════════════════════════════
+// SHARED MIXINS — Reusable SCSS patterns
+// ═══════════════════════════════════════════════════════════
+
+$fs-micro: 0.55rem;
+$fs-small: 0.65rem;
+$fs-mono-base: 0.72rem;
+$fs-body: 0.82rem;
+$fs-body-lg: 1rem;
+
+@mixin fs($level) {
+  @if $level == micro {
+    font-size: $fs-micro;
+  } @else if $level == small {
+    font-size: $fs-small;
+  } @else if $level == mono-base {
+    font-size: $fs-mono-base;
+  } @else if $level == body {
+    font-size: $fs-body;
+  } @else if $level == body-lg {
+    font-size: $fs-body-lg;
+  } @else {
+    @warn "Unknown font-size level: #{$level}";
+  }
+}
+
+@mixin backdrop-blur($radius: 16px) {
+  backdrop-filter: blur($radius);
+  -webkit-backdrop-filter: blur($radius);
+}
+
+@mixin glass-card($bg: var(--glass-strong)) {
+  background: $bg;
+  @include backdrop-blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+@mixin glass-panel {
+  background: var(--glass);
+  @include backdrop-blur(28px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+@mixin terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--terminal-bar);
+  border-bottom: 1px solid var(--terminal-bar-border);
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    &--red { background: var(--dot-r); }
+    &--yellow { background: var(--dot-y); }
+    &--green { background: var(--dot-g); }
+  }
+
+  .title {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--terminal-title);
+    font-family: var(--font-mono);
+  }
+}
+
+@mixin section-base {
+  position: relative;
+  padding: 6rem 1.5rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media (max-width: 700px) {
+    padding: 4rem 1rem;
+    min-height: auto;
+  }
+}
+
+@mixin section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@mixin gradient-text($gradient: var(--gradient-primary)) {
+  background: $gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@mixin truncate-lines($lines: 3) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == mobile {
+    @media (max-width: 700px) { @content; }
+  } @else if $breakpoint == tablet {
+    @media (max-width: 1024px) { @content; }
+  } @else if $breakpoint == desktop {
+    @media (min-width: 1025px) { @content; }
+  }
+}
+
+@mixin card-hover {
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+  }
+}
+
+@mixin dot-pattern($color: rgba(0, 0, 0, 0.04), $size: 32px) {
+  background-image: radial-gradient(circle, $color 1px, transparent 1px);
+  background-size: $size $size;
+}

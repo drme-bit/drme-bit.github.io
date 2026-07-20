@@ -1,0 +1,150 @@
+@use '../shared/styles/mixins' as *;
+@use '../shared/styles/animations' as *;
+
+.not-found-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nf-terminal {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+
+  &-bar {
+    @include terminal-bar;
+  }
+
+  &-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+
+    &--red { background: #ff5f57; }
+    &--yellow { background: #febc2e; }
+    &--green { background: #28c840; }
+  }
+
+  &-title {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  &-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.nf-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.nf-prompt {
+  color: var(--accent-secondary);
+  font-weight: 600;
+}
+
+.nf-command {
+  color: var(--text);
+}
+
+.nf-output {
+  color: var(--text-secondary);
+}
+
+.nf-error {
+  color: #ff6b6b;
+}
+
+.nf-cursor {
+  color: var(--accent-secondary);
+  animation: blink 1s step-end infinite;
+}
+
+.nf-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.nf-code {
+  font-size: 8rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nf-message {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+  color: var(--text);
+}
+
+.nf-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 2rem;
+}
+
+.nf-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.nf-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+
+  &--primary {
+    background: var(--accent-secondary);
+    color: var(--bg);
+    border-color: var(--accent-secondary);
+
+    &:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+  }
+
+  &--secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+}

@@ -1,0 +1,40 @@
+@use '../../../../shared/styles/mixins' as *;
+@use '../../../../shared/styles/animations' as *;
+
+@keyframes swipeHint {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+.swipe-indicator {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.3;
+  animation: swipeHint 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 50;
+  transition: opacity 0.3s ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.swipe-indicator-icon {
+  font-size: 1.5rem;
+  color: var(--text-dim);
+}
+
+.swipe-indicator-text {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--text-ghost);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}

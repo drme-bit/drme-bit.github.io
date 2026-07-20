@@ -1,5 +1,4 @@
 node_modules
-dist
 .DS_Store
 .idea
 .vscode
@@ -7,3 +6,15 @@ dist
 .env
 .env.local
 .env.*.local
+
+# Next.js
+/.next/
+/out/
+node_modules/
+*.tsbuildinfo
+
+# Vercel
+.vercel
+
+# Build artifacts
+dist/

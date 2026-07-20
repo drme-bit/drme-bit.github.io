@@ -1,0 +1,115 @@
+@use '../../../../shared/styles/mixins' as *;
+@use '../../../../shared/styles/animations' as *;
+
+.cursorContainer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-cursor, 9998);
+  pointer-events: none;
+  overflow: hidden;
+
+  @media (pointer: coarse) {
+    display: none;
+  }
+}
+
+.cursorRing {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--accent-muted);
+  border-radius: 50%;
+  will-change: transform;
+  transition: width 0.2s var(--ease-out),
+              height 0.2s var(--ease-out),
+              border-color 0.2s var(--ease-out),
+              background 0.2s var(--ease-out);
+
+  &.isHovering {
+    width: 56px;
+    height: 56px;
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  &.isPressed {
+    width: 32px;
+    height: 32px;
+    border-color: var(--accent);
+    background: var(--accent-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+  }
+}
+
+.cursorDot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  will-change: transform;
+  transition: width 0.15s var(--ease-out),
+              height 0.15s var(--ease-out),
+              background 0.15s var(--ease-out);
+
+  &.isPressed {
+    width: 4px;
+    height: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+  }
+}
+
+.cursorTrail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background: var(--accent-muted);
+  border-radius: 50%;
+  will-change: transform;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+  }
+}
+
+.cursorTrail0 {
+  width: 4px;
+  height: 4px;
+  background: var(--accent-muted);
+}
+
+.cursorTrail1 {
+  width: 3.5px;
+  height: 3.5px;
+  background: var(--accent-glow);
+}
+
+.cursorTrail2 {
+  width: 3px;
+  height: 3px;
+  background: var(--accent-glow);
+}
+
+.cursorTrail3 {
+  width: 2.5px;
+  height: 2.5px;
+  background: var(--accent-glow);
+}
+
+.cursorTrail4 {
+  width: 2px;
+  height: 2px;
+  background: var(--accent-glow);
+}

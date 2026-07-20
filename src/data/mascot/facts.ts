@@ -1,0 +1,17 @@
+export const FACTS = [
+  "99% of website traffic is just people waiting for the other 1% to load.",
+  'There are 10 types of people: those who understand binary and those who don\u2019t.',
+  'A CSS developer walked into a bar. The bar was invisible.',
+  'Best debugging tool: console.log. Or crying. Both work.',
+  '404: sense of humor not found.',
+  'Why dark mode? Because light attracts bugs.',
+  'I\u2019d tell you a UDP joke, but you might not get it.',
+  'There\u2019s no place like 127.0.0.1',
+  'A QA engineer walks into a bar. Orders 1 beer. Orders 0 beers. Orders 999 beers. Bar bursts into flames.',
+  'Java: write once, run away.',
+  'The code compiles. Ship it.',
+  'Works on my machine.',
+  'It\u2019s not a bug, it\u2019s a feature.',
+  'I\u2019m not arguing, I\u2019m just explaining why I\u2019m right.',
+  "Psst. Click me and ask something about this site. I actually know things.",
+];

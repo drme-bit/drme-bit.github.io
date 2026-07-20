@@ -1,0 +1,708 @@
+@use '../../../shared/styles/mixins' as *;
+@use '../../../shared/styles/animations' as *;
+
+.section {
+  @include section-base;
+
+  &.section--about {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 95vw;
+    margin: 0 auto;
+    position: relative;
+    transform: none;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.reveal {
+  @include reveal-base;
+}
+
+/* ─── Layout ─────────────────────────────────────────────── */
+
+.about-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 3.5rem;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* ─── Photo ──────────────────────────────────────────────── */
+
+.about-photo-col {
+  position: sticky;
+  top: clamp(4.5rem, 10vh, 7rem);
+  align-self: start;
+  z-index: var(--z-sticky);
+
+  @media (max-width: 900px) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    position: static;
+  }
+
+  @media (max-width: 700px) {
+    position: static;
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 1rem;
+    row-gap: 0.4rem;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--glass);
+  }
+}
+
+.about-bugcatcher {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+
+  @media (max-width: 700px) {
+    display: none;
+  }
+}
+
+.about-photo-frame {
+  position: relative;
+}
+
+.about-photo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  filter: grayscale(0.1) contrast(1.05);
+  transition: filter 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+  position: relative;
+  z-index: 1;
+
+  &:hover {
+    filter: grayscale(0) contrast(1.08);
+    transform: translateY(-4px) rotate(-2deg);
+  }
+
+  @media (max-width: 700px) {
+    width: 7.5rem;
+    height: 7.5rem;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+  }
+}
+
+.about-photo-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: var(--radius-md);
+  background: radial-gradient(ellipse at 50% 30%, var(--accent-glow), transparent 70%);
+  opacity: 0.4;
+  filter: blur(20px);
+  z-index: 0;
+  transition: opacity 0.5s var(--ease-out);
+
+  .about-photo-frame:hover & {
+    opacity: 0.6;
+  }
+
+  @media (max-width: 700px) {
+    inset: -12px;
+    border-radius: var(--radius-full);
+  }
+}
+
+/* ─── Content Column ─────────────────────────────────────── */
+
+.about-content-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+
+  @media (max-width: 900px) {
+    width: 100%;
+  }
+
+  @media (max-width: 700px) {
+    gap: 1.25rem;
+  }
+}
+
+.about-role {
+  font-family: var(--font-mono);
+  @include fs(mono-base);
+  color: var(--accent-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ─── Intro Blocks ───────────────────────────────────────── */
+
+.about-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.about-intro-text {
+  font-family: var(--font-sans);
+  @include fs(body);
+  line-height: 1.7;
+  color: var(--text-secondary);
+  letter-spacing: 0.015em;
+  margin: 0;
+  padding: 0.7rem 0;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+
+  &.is-open {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 700px) {
+    padding: 0.5rem 0;
+  }
+}
+
+/* ─── Stats ──────────────────────────────────────────────── */
+
+.about-stats-row {
+  display: flex;
+  gap: 2rem;
+
+  @media (max-width: 700px) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+.about-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  animation: statFadeIn 0.5s var(--ease-out) both;
+}
+
+.about-stat-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.about-stat-label {
+  font-family: var(--font-mono);
+  @include fs(small);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@keyframes statFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── GitHub Activity ───────────────────────────────────── */
+
+.about-github {
+  border: 1px solid var(--terminal-border);
+  border-radius: var(--radius-md);
+  background: var(--terminal-bg);
+  overflow: hidden;
+}
+
+.about-map-title {
+  font-family: var(--font-mono);
+  @include fs(small);
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.6rem 0.75rem;
+}
+
+.about-github-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 0.75rem;
+  background: var(--terminal-bar);
+  border-bottom: 1px solid var(--terminal-bar-border);
+
+  &::after {
+    content: '';
+    margin-left: auto;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-success, #34d399);
+    box-shadow: 0 0 6px currentColor;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @media (max-width: 700px) {
+    padding: 0.45rem 0.6rem;
+  }
+}
+
+.about-github-hash {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  @include fs(micro);
+  color: var(--accent-secondary);
+  letter-spacing: 0.05em;
+}
+
+.about-github-body {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.about-github-loading {
+  font-family: var(--font-mono);
+  @include fs(small);
+  color: var(--text-ghost);
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+}
+
+.about-github-commit {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  transition: background 0.15s ease, transform 0.15s ease;
+
+  &::before {
+    content: '';
+    flex-shrink: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent-teal, var(--accent-secondary));
+    box-shadow: 0 0 6px var(--accent-secondary-glow);
+  }
+
+  &:hover {
+    background: var(--glass-hover);
+    transform: translateX(2px);
+    cursor: pointer;
+  }
+
+  &:active {
+    background: var(--glass-strong);
+  }
+
+  @media (max-width: 700px) {
+    flex-wrap: wrap;
+    row-gap: 0.3rem;
+
+    &::before {
+      align-self: flex-start;
+      margin-top: 0.35rem;
+    }
+  }
+}
+
+.about-github-repo {
+  font-family: var(--font-mono);
+  @include fs(small);
+  color: var(--accent-secondary);
+  flex-shrink: 0;
+  opacity: 0.8;
+  background: var(--accent-secondary-glow);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-xs);
+
+  @media (max-width: 700px) {
+    order: 1;
+  }
+}
+
+.about-github-sha {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  @include fs(small);
+  color: var(--text-dim);
+  flex-shrink: 0;
+
+  @media (max-width: 700px) {
+    order: 1;
+  }
+}
+
+.about-github-msg {
+  font-family: var(--font-sans);
+  @include fs(body);
+  line-height: 1.4;
+  color: var(--text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: 700px) {
+    flex-basis: 100%;
+    white-space: normal;
+    order: 3;
+  }
+}
+
+.about-github-date {
+  font-family: var(--font-mono);
+  @include fs(small);
+  color: var(--text-ghost);
+  flex-shrink: 0;
+
+  @media (max-width: 700px) {
+    order: 1;
+  }
+}
+
+/* ─── Whoami ─────────────────────────────────────────────── */
+
+.about-whoami-prompt {
+  font-family: var(--font-mono);
+  @include fs(mono-base);
+  color: var(--accent-secondary);
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+}
+
+.about-whoami-cmd {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-mono);
+  @include fs(mono-base);
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+
+  .about-whoami-prompt {
+    margin-right: 0.5rem;
+  }
+}
+
+.about-whoami-name {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.about-whoami-tags {
+  margin: 0;
+  font-family: var(--font-mono);
+  @include fs(body);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+
+  @media (max-width: 700px) {
+    @include fs(small);
+    line-height: 1.7;
+  }
+}
+
+.about-whoami-sep {
+  margin: 0 0.5rem;
+  color: var(--text-ghost);
+}
+
+.about-whoami-tags s {
+  text-decoration-color: var(--text-ghost);
+  text-decoration-thickness: 1px;
+  color: var(--text-ghost);
+}
+
+.about-whoami-error {
+  display: inline-block;
+  margin-left: 0.4rem;
+  color: #e06c75;
+  @include fs(small);
+  opacity: 0.85;
+}
+
+.about-whoami-cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 0.3em;
+  background: var(--accent-secondary);
+  vertical-align: text-bottom;
+  animation: whoamiBlink 1s step-end infinite;
+}
+
+@keyframes whoamiBlink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+.about-whoami {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--accent-secondary);
+    opacity: 0.6;
+  }
+  &::before { top: 0; left: 0; border-right: none; border-bottom: none; }
+  &::after { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+  @media (max-width: 700px) {
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.1rem;
+
+    &::before, &::after {
+      width: 10px;
+      height: 10px;
+    }
+  }
+}
+
+/* ─── Status & Location ─────────────────────────────────── */
+
+.about-meta-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.about-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-secondary);
+}
+
+.about-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-secondary);
+  box-shadow: 0 0 8px var(--accent-secondary);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+.about-location {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.about-location-icon {
+  font-size: 0.8rem;
+}
+
+/* ─── Map ────────────────────────────────────────────────── */
+
+.about-map-canvas {
+  width: 100%;
+  height: 180px;
+  display: block;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--terminal-border);
+  margin-top: 1rem;
+
+  &:hover {
+    border-color: var(--accent-secondary);
+  }
+
+  @media (max-width: 700px) {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    height: 7.5rem;
+    margin-top: 0;
+    border-radius: var(--radius-sm);
+  }
+}
+
+.about-map-coords {
+  padding: 0.4rem 0;
+  font-family: var(--font-mono);
+  @include fs(small);
+  color: var(--accent-secondary);
+  letter-spacing: 0.05em;
+  text-align: center;
+  display: flex;
+
+  @media (max-width: 700px) {
+    grid-column: 2;
+    grid-row: 2;
+    display: block;
+    padding: 0;
+    text-align: left;
+    @include fs(micro);
+    color: var(--text-dim);
+  }
+}
+
+/* ─── Bento Grid ────────────────────────────────────────── */
+
+.about-bento {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-flow: dense;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.about-bento-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--accent-glow), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  &:hover {
+    border-color: var(--accent-muted);
+    background: var(--glass);
+    transform: translateY(-2px);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &--wide {
+    grid-column: span 2;
+  }
+
+  &--tall {
+    grid-row: span 2;
+  }
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    grid-column: span 1 !important;
+    grid-row: span 1 !important;
+  }
+}
+
+.about-bento-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--accent-secondary);
+  opacity: 0.8;
+}
+
+.about-bento-title {
+  font-family: var(--font-mono);
+  @include fs(mono-base);
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.about-bento-desc {
+  font-family: var(--font-sans);
+  @include fs(body);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.about-bento-tag {
+  font-family: var(--font-mono);
+  @include fs(micro);
+  color: var(--text-dim);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+  align-self: flex-start;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Mobile Animations ──────────────────────────────────── */
+
+@keyframes aboutItemIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .section.section--about.is-visible {
+    .about-role { animation: aboutItemIn 0.5s var(--ease-out) 0.08s both; }
+    .about-intro { animation: aboutItemIn 0.5s var(--ease-out) 0.15s both; }
+    .about-stats-row { animation: aboutItemIn 0.5s var(--ease-out) 0.22s both; }
+    .about-tech { animation: aboutItemIn 0.5s var(--ease-out) 0.29s both; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section.section--about.is-visible {
+    .about-role,
+    .about-intro,
+    .about-stats-row,
+    .about-tech {
+      animation: none;
+    }
+  }
+}

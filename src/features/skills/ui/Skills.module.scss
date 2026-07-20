@@ -1,0 +1,667 @@
+@use '../../../shared/styles/mixins' as *;
+@use '../../../shared/styles/animations' as *;
+
+/* ═══════════════════════════════════════════════════════════
+   Skills Section — Scroll-driven animation
+   ═══════════════════════════════════════════════════════════
+   The globe is interactive as soon as it appears. Scroll only controls the
+   surrounding scene, not access to the section's controls.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Section shell ─────────────────────────────────────── */
+.section {
+  @include section-base;
+
+  &.section--skills {
+    margin-top: 15vh;
+    justify-content: flex-start;
+    padding: 0;
+    height: 155vh;
+
+    @media (max-width: 900px) {
+      margin-top: 5vh;
+      height: auto;
+    }
+  }
+}
+
+.reveal {
+  @include reveal-base;
+}
+
+/* ── Sticky viewport ───────────────────────────────────── */
+.skills-sticky {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  padding: 0 6vw;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-md);
+    gap: 0.75rem;
+    min-height: 100svh;
+  }
+
+  @media (max-width: 700px) {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 4rem var(--space-md) 3rem;
+  }
+}
+
+/* ── Skills header (left side) ─────────────────────────── */
+.skills-header {
+  position: absolute;
+  left: 6vw;
+  top: 50%;
+  translate: 0 -50%;
+  text-align: left;
+  max-width: 380px;
+  z-index: 10;
+  opacity: var(--header-opacity, 1);
+  transform: translateX(var(--header-x, 0)) translateY(var(--header-y, 0));
+  will-change: transform, opacity;
+
+  @media (max-width: 900px) {
+    position: relative;
+    left: auto;
+    top: auto;
+    translate: none;
+    text-align: center;
+    max-width: 100%;
+    padding: 0;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.skills-header-num {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--accent-secondary);
+  margin-bottom: 4px;
+
+  @media (max-width: 900px) {
+    font-size: 0.55rem;
+  }
+}
+
+.skills-header-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 10vw, 4.5rem);
+  color: var(--text);
+  margin: 0;
+  line-height: 1.1;
+
+  @media (max-width: 900px) {
+    font-size: clamp(1.4rem, 5vw, 2rem);
+  }
+}
+
+.skills-header-accent {
+  color: var(--accent-secondary);
+}
+
+.skills-header-desc {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 12px;
+  line-height: 1.6;
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+}
+
+/* ── Filters bar (top center) ──────────────────────────── */
+.skills-filters {
+  position: absolute;
+  top: 3vh;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: var(--filters-opacity, 0);
+  transform: translateY(var(--filters-y, -0.75rem));
+  pointer-events: none;
+  will-change: opacity, transform;
+
+  @media (max-width: 900px) {
+    top: auto;
+    position: relative;
+    left: auto;
+    translate: none;
+    margin: 8px 0 0;
+    width: 100%;
+    max-width: 400px;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+.filters-visible .skills-filters {
+  pointer-events: auto;
+}
+
+.skills-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  min-width: 180px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  transition: border-color var(--duration-fast) ease, background var(--duration-fast) ease;
+
+  &:focus-within {
+    border-color: color-mix(in srgb, var(--accent-secondary) 65%, transparent);
+    background: var(--accent-secondary-glow);
+  }
+
+  @media (max-width: 900px) {
+    min-width: 0;
+    flex: 1;
+  }
+}
+
+.skills-search-icon {
+  color: var(--text-dim);
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.skills-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text);
+  min-width: 0;
+
+  &::placeholder {
+    color: var(--text-ghost);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.skills-search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: color-mix(in srgb, var(--text-ghost) 30%, transparent);
+  border: none;
+  border-radius: 50%;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: var(--text-ghost);
+    color: var(--text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+  }
+}
+
+.skills-filter-dropdown {
+  position: relative;
+}
+
+.skills-filter-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: capitalize;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: var(--accent-secondary);
+    color: var(--text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+  }
+
+  &.is-active {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+  }
+}
+
+.skills-filter-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skills-filter-label {
+  line-height: 1;
+}
+
+.skills-filter-chevron {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s ease;
+
+  &.is-open {
+    transform: rotate(180deg);
+  }
+}
+
+.skills-filter-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  padding: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 30;
+  animation: filterMenuIn 0.15s ease;
+}
+
+@keyframes filterMenuIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.skills-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  text-align: left;
+  text-transform: capitalize;
+  transition: all 0.1s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent-secondary) 10%, transparent);
+    color: var(--text);
+  }
+
+  &.is-active {
+    background: color-mix(in srgb, var(--accent-secondary) 15%, transparent);
+    color: var(--accent-secondary);
+  }
+}
+
+.skills-filter-option-count {
+  margin-left: auto;
+  font-size: 0.55rem;
+  color: var(--text-ghost);
+}
+
+.skills-filter-count {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-ghost);
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+.skills-filter-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: color-mix(in srgb, var(--accent-danger) 15%, transparent);
+  border: none;
+  border-radius: 50%;
+  color: var(--accent-danger);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent-danger) 30%, transparent);
+  }
+}
+
+/* ── Globe layout ──────────────────────────────────────── */
+.skills-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+  }
+}
+
+.skills-globe-area {
+  position: relative;
+  width: var(--globe-size, 385px);
+  height: var(--globe-size, 385px);
+  flex-shrink: 0;
+  transform-origin: center center;
+  will-change: width, height, transform;
+  opacity: 1;
+  transform: translateX(var(--globe-x, 13vw));
+  pointer-events: auto;
+
+  @media (max-width: 900px) {
+    width: 85vw;
+    max-width: 360px;
+    height: 85vw;
+    max-height: 360px;
+    width: min(82vw, 340px);
+    height: min(82vw, 340px);
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+.skills-globe {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+/* ── Skill level dots (modal) ──────────────────────────── */
+.skill-level {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.skill-level-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-ghost) 30%, transparent);
+  transition: all 0.3s ease;
+
+  &.is-filled {
+    transform: scale(1.1);
+  }
+}
+
+/* ── Modal sheet ───────────────────────────────────────── */
+.skills-sheet-tag {
+  padding: 4px 10px;
+  background: color-mix(in srgb, var(--accent-secondary) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 30%, transparent);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--accent-secondary);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent-secondary) 25%, transparent);
+    transform: translateY(-1px);
+  }
+
+  &--project {
+    background: color-mix(in srgb, var(--accent-tertiary) 15%, transparent);
+    border-color: color-mix(in srgb, var(--accent-tertiary) 30%, transparent);
+    color: var(--accent-tertiary);
+    text-decoration: none;
+
+    &:hover {
+      background: color-mix(in srgb, var(--accent-tertiary) 25%, transparent);
+    }
+  }
+}
+
+.skills-sheet-content {
+  padding: 12px var(--space-lg) calc(var(--space-lg) + env(safe-area-inset-bottom));
+}
+
+.skills-mobile-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--text-ghost);
+  margin: 0 auto 14px;
+  opacity: 0.4;
+}
+
+.skills-mobile-sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.skills-mobile-sheet-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--card-color, var(--accent-secondary)) 12%, transparent);
+  flex-shrink: 0;
+}
+
+.skills-mobile-sheet-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--card-color, var(--accent-secondary));
+}
+
+.skills-mobile-sheet-titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.skills-mobile-sheet-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.skills-mobile-sheet-group {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--text-ghost);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.skills-sheet-desc {
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin: 0 0 14px;
+}
+
+.skills-sheet-fun {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--accent-secondary);
+  margin: 0 0 10px;
+  padding: 0.5rem 0.75rem;
+  background: var(--accent-secondary-glow);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--accent-secondary);
+}
+
+.skills-sheet-section {
+  margin-bottom: 14px;
+}
+
+.skills-sheet-section-title {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--text-ghost);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.skills-sheet-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ─── Fun Tips Panel ────────────────────────────────────── */
+
+.skills-guide {
+  position: absolute;
+  right: calc(100% + 2rem);
+  bottom: 4.5rem;
+  width: 260px;
+  background: var(--terminal-bg);
+  border: 1px solid var(--terminal-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  opacity: var(--tips-opacity, 0);
+  transform: translateX(var(--tips-x, 6rem)) translateY(var(--tips-y, 0.75rem));
+  will-change: opacity, transform;
+  z-index: 1;
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+
+  @media (min-width: 901px) and (max-width: 1180px) {
+    right: auto;
+    left: -3rem;
+    bottom: 1.5rem;
+  }
+}
+
+.skills-tips-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 0.75rem;
+  background: var(--terminal-bar);
+  border-bottom: 1px solid var(--terminal-bar-border);
+}
+
+.skills-tips-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.skills-tips-dot--r { background: var(--dot-r); }
+.skills-tips-dot--y { background: var(--dot-y); }
+.skills-tips-dot--g { background: var(--dot-g); }
+
+.skills-tips-title {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--terminal-title);
+  letter-spacing: 0.05em;
+}
+
+.skills-guide-list {
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.skills-guide-item {
+  display: grid;
+  grid-template-columns: 1.5rem 1.25rem 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--glass);
+  }
+}
+
+.skills-guide-step {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--accent-secondary);
+}
+
+.skills-guide-icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  color: var(--text-dim);
+}
+
+.skills-guide-copy {
+  display: flex;
+  font-family: var(--font-mono);
+  flex-direction: column;
+  gap: 0.1rem;
+
+  strong {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  span {
+    font-size: 0.5rem;
+    color: var(--text-ghost);
+  }
+}

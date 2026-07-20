@@ -1,0 +1,120 @@
+.game {
+  border: 1px solid var(--terminal-border);
+  border-radius: var(--radius-md);
+  background: var(--terminal-bg);
+  overflow: hidden;
+  user-select: none;
+}
+
+.gameBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 0.75rem;
+  background: var(--terminal-bar);
+  border-bottom: 1px solid var(--terminal-bar-border);
+}
+
+.gameDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.gameDot--r { background: var(--dot-r); }
+.gameDot--y { background: var(--dot-y); }
+.gameDot--g { background: var(--dot-g); }
+
+.gameTitle {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--terminal-title);
+  letter-spacing: 0.05em;
+}
+
+.gameBody {
+  padding: 0.75rem;
+}
+
+.gameHud {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.gameGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--terminal-bar-border);
+  border: 1px solid var(--terminal-bar-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.gameRow {
+  display: flex;
+  background: var(--terminal-bg);
+}
+
+.gameCell {
+  width: 1.5em;
+  height: 1.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.gameCell--player {
+  color: var(--accent-secondary);
+  font-weight: bold;
+}
+
+.gameCell--bug {
+  color: var(--accent-danger);
+  animation: bugPulse 0.4s ease;
+}
+
+@keyframes bugPulse {
+  0% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.gameBtn {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--accent-secondary);
+  background: var(--accent-secondary-glow);
+  border: 1px solid var(--accent-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(125, 211, 252, 0.2);
+    transform: translateY(-1px);
+  }
+}
+
+.gameOver {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--accent-danger);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}

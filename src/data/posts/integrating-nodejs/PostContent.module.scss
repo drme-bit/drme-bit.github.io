@@ -1,0 +1,324 @@
+@use '../../../shared/styles/mixins' as *;
+
+// ═══════════════════════════════════════════════════════════
+// POST: Integrating a Node.js Backend
+// Theme: Deep violet / purple
+// ═══════════════════════════════════════════════════════════
+
+.page {
+  min-height: 100vh;
+  color: var(--text-secondary);
+}
+
+// ─── Hero ─────────────────────────────────────────────────
+
+.hero {
+  position: relative;
+  padding: 10rem 2rem 6rem;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  min-height: 70vh;
+
+  &-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(167, 139, 250, 0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  &-content {
+    max-width: 700px;
+    position: relative;
+    z-index: 1;
+  }
+
+  &-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: #a78bfa;
+    background: rgba(167, 139, 250, 0.1);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    padding: 0.3em 0.8em;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+
+  &-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.25rem;
+  }
+
+  &-accent {
+    color: #a78bfa;
+  }
+
+  &-desc {
+    font-family: var(--font-sans);
+    font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin: 0 0 1.5rem;
+    max-width: 550px;
+  }
+
+  &-meta {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-ghost);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  &-sep {
+    opacity: 0.4;
+  }
+}
+
+// ─── Sections ─────────────────────────────────────────────
+
+.section {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  & + & {
+    margin-top: 3rem;
+  }
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-prompt {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: #a78bfa;
+  opacity: 0.6;
+}
+
+.body-text {
+  font-family: var(--font-sans);
+  font-size: clamp(0.88rem, 1vw, 0.95rem);
+  color: var(--text-secondary);
+  line-height: 1.85;
+  margin: 0 0 1.5rem;
+  max-width: 640px;
+  padding-left: 1.5em;
+  border-left: 2px solid rgba(167, 139, 250, 0.15);
+}
+
+// ─── Code Blocks ──────────────────────────────────────────
+
+.code-block {
+  position: relative;
+  margin: 1.5rem 0;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(167, 139, 250, 0.1);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.3), transparent);
+  }
+}
+
+.code-lang {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: rgba(167, 139, 250, 0.5);
+  background: rgba(167, 139, 250, 0.06);
+  padding: 0.2em 0.6em;
+  border-radius: 0 var(--radius-sm) 0 var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.code-pre {
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar { height: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  code {
+    font-family: inherit;
+    white-space: pre;
+  }
+}
+
+// ─── Architecture Diagram ─────────────────────────────────
+
+.arch {
+  margin: 3rem 0;
+
+  &-flow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    background: rgba(167, 139, 250, 0.03);
+    border: 1px solid rgba(167, 139, 250, 0.08);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  &-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1rem 1.25rem;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    min-width: 100px;
+    text-align: center;
+
+    &--primary {
+      border-color: rgba(167, 139, 250, 0.3);
+      background: rgba(167, 139, 250, 0.06);
+    }
+
+    &--warm {
+      border-color: rgba(251, 191, 36, 0.2);
+      background: rgba(251, 191, 36, 0.04);
+    }
+  }
+
+  &-node-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &-node-sub {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    color: var(--text-ghost);
+  }
+
+  &-arrow {
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    color: var(--text-ghost);
+    flex-shrink: 0;
+  }
+}
+
+// ─── Feature Grid ─────────────────────────────────────────
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(167, 139, 250, 0.2);
+  }
+
+  &-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &-desc {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────
+
+@media (max-width: 700px) {
+  .hero {
+    padding: 7rem 1rem 4rem;
+    min-height: 55vh;
+
+    &-title {
+      font-size: 1.8rem;
+    }
+  }
+
+  .section {
+    padding: 0 1rem;
+  }
+
+  .arch-flow {
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+
+  .arch-node {
+    padding: 0.75rem;
+    min-width: 80px;
+  }
+
+  .arch-arrow {
+    font-size: 1rem;
+  }
+}

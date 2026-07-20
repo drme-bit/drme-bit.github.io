@@ -1,0 +1,150 @@
+// ═══════════════════════════════════════════════════════════
+// SHARED ANIMATIONS — Reusable keyframes and transitions
+// ═══════════════════════════════════════════════════════════
+
+// ── Reveal / entrance ─────────────────────────────────────
+@mixin reveal-base {
+  opacity: 0;
+  translate: 0 30px;
+  transition: opacity 0.8s var(--ease-out), translate 0.8s var(--ease-out);
+
+  &.is-visible {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+// ── Stagger children ──────────────────────────────────────
+@mixin stagger-children($count: 8, $delay: 80ms) {
+  @for $i from 0 through $count {
+    > *:nth-child(#{$i + 1}) {
+      transition-delay: #{$i * $delay};
+    }
+  }
+}
+
+// ── Shimmer / loading ─────────────────────────────────────
+@mixin shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--glass) 25%,
+    var(--glass-hover) 50%,
+    var(--glass) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+// ── Pulse glow ────────────────────────────────────────────
+@mixin glow-pulse($color: var(--accent-secondary), $size: 40px) {
+  box-shadow: 0 0 $size rgba(125, 211, 252, 0.06);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+// ── Typing cursor ─────────────────────────────────────────
+@mixin typing-cursor($color: var(--accent-secondary)) {
+  &::after {
+    content: '|';
+    color: $color;
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+  }
+}
+
+// ── Float / hover ─────────────────────────────────────────
+@mixin float($distance: -4px, $duration: 3s) {
+  animation: float $duration ease-in-out infinite;
+
+  &:hover {
+    animation-play-state: paused;
+  }
+}
+
+// ── Keyframes ─────────────────────────────────────────────
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(125, 211, 252, 0.06); }
+  50% { box-shadow: 0 0 60px rgba(125, 211, 252, 0.12); }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes long-press-pulse {
+  0% { transform: scale(1); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+// ── Modal animations ──────────────────────────────────────
+@keyframes modal-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-overlay-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes modal-panel-in {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes modal-panel-out {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to { opacity: 0; transform: scale(0.95) translateY(10px); }
+}
+
+// ── Companion cube ────────────────────────────────────────
+@keyframes companionAmbient {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+@keyframes companionSparkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+// ── Mobile touch animations ───────────────────────────────
+@keyframes tap-ripple-anim {
+  0% { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+@keyframes swipe-indicator {
+  0%, 100% { transform: translateX(0); opacity: 0.5; }
+  50% { transform: translateX(10px); opacity: 1; }
+}

@@ -1,0 +1,74 @@
+@use '../../../../shared/styles/mixins' as *;
+@use '../../../../shared/styles/animations' as *;
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.3; }
+}
+
+.skeletonLine,
+.skeletonCircle {
+  background: var(--text-ghost);
+  border-radius: var(--radius-xs);
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+}
+
+.skeletonCircle {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeletonCard {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+
+  @media (max-width: 700px) {
+    padding: var(--space-md);
+  }
+}
+
+.skeletonCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+.skeletonCardFooter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.skeletonBlogCard {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+
+  @media (max-width: 700px) {
+    padding: var(--space-md);
+  }
+}
+
+.skeletonBlogCardLines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+.skeletonBlogCardTags {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
