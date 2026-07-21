@@ -97,7 +97,7 @@ function openSkillModal(openModal: OpenModalFn, skill: SkillItem, onClose: () =>
             <h4 className={styles['skills-sheet-section-title']}>Used in</h4>
             <div className={styles['skills-sheet-tags']}>
               {projects.map((p) => (
-                <span key={p} className={`${styles['skills-sheet-tag']} ${styles['skills-sheet-tag--project']}`}>{p}</span>
+                <span key={p} className={`${styles['skills-sheet-tag']} ${styles['skills-sheet-tag--projects']}`}>{p}</span>
               ))}
             </div>
           </div>

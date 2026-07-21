@@ -2,11 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
-  FiHome, FiUser, FiZap, FiBriefcase, FiGrid,
-  FiFileText, FiStar, FiMail, FiBarChart2, FiChevronDown,
-  FiChevronLeft, FiChevronRight,
+  FiHome,
+  FiUser,
+  FiZap,
+  FiBriefcase,
+  FiGrid,
+  FiFileText,
+  FiStar,
+  FiMail,
+  FiBarChart2,
+  FiChevronDown,
 } from 'react-icons/fi';
 import { useNav } from '@/providers/NavProvider';
 import styles from './GlobalNav.module.scss';
@@ -20,13 +27,6 @@ interface MenuItem {
   hash?: string;
 }
 
-interface Menu {
-  label: string;
-  href?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  items?: MenuItem[];
-}
-
 const HOME_SECTIONS: MenuItem[] = [
   { label: 'about', href: '/#about', icon: FiUser, hash: 'about' },
   { label: 'skills', href: '/#skills', icon: FiZap, hash: 'skills' },
@@ -35,22 +35,10 @@ const HOME_SECTIONS: MenuItem[] = [
   { label: 'contact', href: '/#contact', icon: FiMail, hash: 'contact' },
 ];
 
-const DEFAULT_MENUS: Menu[] = [
-  {
-    label: 'projects',
-    href: '/projects',
-    icon: FiGrid,
-  },
-  {
-    label: 'blog',
-    href: '/posts',
-    icon: FiFileText,
-  },
-  {
-    label: 'stats',
-    href: '/stats',
-    icon: FiBarChart2,
-  },
+const DEFAULT_MENUS = [
+  { label: 'projects', href: '/projects', icon: FiGrid },
+  { label: 'blog', href: '/posts', icon: FiFileText },
+  { label: 'stats', href: '/stats', icon: FiBarChart2 },
 ];
 
 /* ─── Component ──────────────────────────────────────────── */
@@ -58,23 +46,25 @@ const DEFAULT_MENUS: Menu[] = [
 export default function GlobalNav() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+
   const pathname = usePathname();
   const isHome = pathname === '/';
   const ref = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastScrollY = useRef(0);
 
-  const { config, setConfig } = useNav();
-  const hasContextSections = config.sections.length > 0;
+  const { pageConfig, setPageConfig, active, setActiveSection } = useNav();
 
-  // Reset nav config when leaving project/post pages
+  const hasContextSections = (pageConfig?.contextItems?.length ?? 0) > 0;
+
+  // Reset nav config when leaving projects/post pages
   useEffect(() => {
-    if (!pathname.includes('/project/') && !pathname.includes('/posts/')) {
-      setConfig({ sections: [] });
+    if (!pathname.includes('/projects/') && !pathname.includes('/posts/')) {
+      setPageConfig(null);
     }
-  }, [pathname, setConfig]);
+  }, [pathname, setPageConfig]);
 
-  // Collapse on scroll down, expand on scroll up
+  // Collapse on scroll
   useEffect(() => {
     const SCROLL_THRESHOLD = 60;
 
@@ -88,7 +78,6 @@ export default function GlobalNav() {
       } else if (delta < -SCROLL_THRESHOLD) {
         setCollapsed(false);
       }
-
       lastScrollY.current = y;
     };
 
@@ -96,93 +85,84 @@ export default function GlobalNav() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close dropdown on outside click
+  // Close dropdown handlers (outside click + Escape)
   useEffect(() => {
     if (!openMenu) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpenMenu(null);
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpenMenu(null);
+      }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenMenu(null);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [openMenu]);
 
-  // Close dropdown on Escape
-  useEffect(() => {
-    if (!openMenu) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenMenu(null); };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [openMenu]);
-
-  /** Handle dropdown item click — hash links scroll, page links navigate */
   const handleDropdownClick = (e: React.MouseEvent, item: MenuItem) => {
     e.preventDefault();
     setOpenMenu(null);
 
-    if (item.hash && (isHome || pathname.includes('/project/'))) {
+    if (item.hash && isHome) {
       const el = document.getElementById(item.hash);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
-        config.onSectionClick?.(item.hash);
+        setActiveSection(item.hash);
       }
     } else {
       window.location.href = item.href;
     }
   };
 
-  const isActive = useCallback(
-    (href: string) => {
-      if (href === '/') return pathname === '/';
-      return pathname.startsWith(href);
-    },
-    [pathname],
-  );
-
   return (
     <nav
       ref={ref}
-      className={`${styles.nav}${collapsed ? ` ${styles['nav--collapsed']}` : ''}${hasContextSections ? ` ${styles['nav--context']}` : ''}`}
+      className={`${styles.nav}${collapsed ? ` ${styles['nav--collapsed']}` : ''}${
+        hasContextSections ? ` ${styles['nav--context']}` : ''
+      }`}
       aria-label="Navigation"
     >
-      {/* Home — direct link + dropdown */}
+      {/* Home + Dropdown */}
       <div className={styles.menuWrap}>
         <Link
           href="/"
           className={`${styles.trigger} ${styles['trigger--home']}${isHome ? ` ${styles['trigger--active']}` : ''}`}
-          onClick={() => setOpenMenu(null)}
         >
           <FiHome className={styles.triggerIcon} />
           <span className={styles.triggerLabel}>home</span>
           {isHome && <span className={styles.indicator} />}
         </Link>
+
         <button
           className={`${styles.trigger} ${styles['trigger--chevron']}${openMenu === 'home' ? ` ${styles['trigger--open']}` : ''}`}
           onClick={() => setOpenMenu(openMenu === 'home' ? null : 'home')}
-          onMouseEnter={() => {
-            clearTimeout(closeTimer.current);
-            setOpenMenu('home');
-          }}
-          onMouseLeave={() => {
-            closeTimer.current = setTimeout(() => setOpenMenu(null), 120);
-          }}
-          aria-label="Sections"
         >
-          <FiChevronDown className={`${styles.chevron}${openMenu === 'home' ? ` ${styles['chevron--open']}` : ''}`} />
+          <FiChevronDown
+            className={`${styles.chevron}${openMenu === 'home' ? ` ${styles['chevron--open']}` : ''}`}
+          />
         </button>
 
         <div
           className={`${styles.dropdown}${openMenu === 'home' ? ` ${styles['dropdown--open']}` : ''}`}
-          onMouseEnter={() => clearTimeout(closeTimer.current)}
-          onMouseLeave={() => setOpenMenu(null)}
         >
           {HOME_SECTIONS.map((item) => {
             const ItemIcon = item.icon;
-            const itemActive = config.activeSection === item.hash;
+            const isActive = active.sectionId === item.hash;
+
             return (
               <a
                 key={item.label}
                 href={item.href}
-                className={`${styles.dropdownLink}${itemActive ? ` ${styles['dropdownLink--active']}` : ''}`}
+                className={`${styles.dropdownLink}${isActive ? ` ${styles['dropdownLink--active']}` : ''}`}
                 onClick={(e) => handleDropdownClick(e, item)}
               >
                 <ItemIcon className={styles.dropdownIcon} />
@@ -193,59 +173,42 @@ export default function GlobalNav() {
         </div>
       </div>
 
-      {/* Main page links */}
+      {/* Default Menus */}
       {DEFAULT_MENUS.map((menu) => {
-        const active = isActive(menu.href!);
+        const activeLink = pathname.startsWith(menu.href);
         const Icon = menu.icon;
+
         return (
           <Link
             key={menu.label}
-            href={menu.href!}
-            className={`${styles.trigger}${active ? ` ${styles['trigger--active']}` : ''}`}
-            onClick={() => setOpenMenu(null)}
+            href={menu.href}
+            className={`${styles.trigger}${activeLink ? ` ${styles['trigger--active']}` : ''}`}
           >
             <Icon className={styles.triggerIcon} />
             <span className={styles.triggerLabel}>{menu.label}</span>
-            {active && <span className={styles.indicator} />}
+            {activeLink && <span className={styles.indicator} />}
           </Link>
         );
       })}
 
-      {/* Context sections (right side, separated by divider) */}
-      {hasContextSections && (
+      {/* Context Items (for projects/posts) */}
+      {hasContextSections && pageConfig?.contextItems && (
         <>
           <div className={styles.divider} />
-          {config.sections.map((section) => {
-            const active = config.activeSection === section.id;
-            return (
-              <button
-                key={section.id}
-                className={`${styles.sectionItem}${active ? ` ${styles['sectionItem--active']}` : ''}`}
-                onClick={() => config.onSectionClick?.(section.id)}
-              >
-                {section.label}
-                {active && <span className={styles.indicator} />}
-              </button>
-            );
-          })}
-          {config.arrows?.prev && (
+          {pageConfig.contextItems.map((item) => (
             <button
-              className={styles.arrow}
-              onClick={config.arrows.onPrev}
-              aria-label="Previous"
+              key={item.id}
+              className={`${styles.sectionItem}${active.sectionId === item.id ? ` ${styles['sectionItem--active']}` : ''}`}
+              onClick={() =>  {
+                setActiveSection(item.id);
+                pageConfig?.onSectionClick?.(item.id);
+              }
+              }
             >
-              <FiChevronLeft className={styles.arrowIcon} />
+              {item.label}
+              {active.sectionId === item.id && <span className={styles.indicator} />}
             </button>
-          )}
-          {config.arrows?.next && (
-            <button
-              className={styles.arrow}
-              onClick={config.arrows.onNext}
-              aria-label="Next"
-            >
-              <FiChevronRight className={styles.arrowIcon} />
-            </button>
-          )}
+          ))}
         </>
       )}
     </nav>

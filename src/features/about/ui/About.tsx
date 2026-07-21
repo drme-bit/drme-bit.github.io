@@ -5,12 +5,13 @@ import Image from 'next/image';
 import useReveal from '@/shared/hooks/useReveal';
 import SectionTitle from '@/shared/ui/molecules/SectionTitle/SectionTitle';
 import LocationMap from '@/shared/ui/molecules/LocationMap/LocationMap';
-import Clicker from '@/shared/ui/molecules/Clicker/Clicker';
 import aboutData from '@/data/aboutData';
 import styles from './About.module.scss';
 
+// utility
+import { log } from '@/shared/lib/logger'
+
 /* Icons */
-import { FaMapLocationDot } from 'react-icons/fa6';
 import { BsFillKanbanFill } from 'react-icons/bs';
 import { LuTriangle } from 'react-icons/lu';
 import { RiOpenSourceFill, RiRobot2Fill } from 'react-icons/ri';
@@ -66,7 +67,11 @@ function GitHubActivity() {
     async function fetchGitHub() {
       try {
         const res = await fetch('https://api.github.com/users/drme-bit/events/public?per_page=30');
-        if (!res.ok) throw new Error('failed');
+        if (!res.ok) {
+          log(`Github response with status code ${res.status} ${res.body}`);
+        } else {
+          log(`Github response with status code ${res.status} ${res.body}`);
+        }
         const events = await res.json();
 
         const pushEvents = events
@@ -98,7 +103,7 @@ function GitHubActivity() {
       }
       setLoading(false);
     }
-    fetchGitHub();
+    fetchGitHub().finally(() => setLoading(false));
   }, []);
 
   return (
@@ -170,7 +175,7 @@ export default function About() {
               alt="Vyacheslav Tkachyk"
               fill
               className={styles['about-photo-img']}
-              sizes="(max-width: 900px) 280px, 320px" // ← важно
+              sizes="(max-width: 900px) 280px, 320px"
               priority
               quality={90}
             />
@@ -201,9 +206,19 @@ export default function About() {
             <div className={`${styles['about-bento-card']} ${styles['about-bento-card--wide']}`}>
               <BsFillKanbanFill />
               <span className={styles['about-bento-title']}>Kanban Workflow</span>
+              <div className={`${styles['about-bento-demo']} w-85 h-95 mx-auto rounded-md`}>
+                <Image
+                  src="/images/demonstration/kanban-demo.png"
+                  alt="Kanban Demonstration"
+                  fill
+                  quality={90}
+                />
+              </div>
               <p className={styles['about-bento-desc']}>
-                Tasks flow through columns &mdash; backlog, in progress, review, done. I keep a
-                clean board, move cards intentionally, and ship in small iterations(usually).
+                I follow a Kanban workflow where tasks move through clear stages — Backlog, In
+                Progress, Review, and Done. I keep my board clean and organized, move cards with
+                intention, and prefer shipping in small, frequent iterations. This approach helps me
+                stay focused, reduce context switching, and deliver value consistently.
               </p>
               <span className={styles['about-bento-tag']}>productivity</span>
             </div>
@@ -211,15 +226,20 @@ export default function About() {
             <div className={styles['about-bento-card']}>
               <RiRobot2Fill />
               <span className={styles['about-bento-title']}>AI-Augmented</span>
-              <div className={styles['about-bento-demo']}>
+              <div className={`${styles['about-bento-demo']} w-85 h-70 mx-auto rounded-md`}>
                 <Image
                   src="/images/demonstration/jetbrains-ai-use-demo.png"
                   alt="Using AI as a tool"
                   fill
+                  quality={90}
                 />
               </div>
               <p className={styles['about-bento-desc']}>
-                Using AI as a tool to make my life easier, code cleaner, efficient and fast.
+                I integrate modern tools into my workflow to boost productivity and code quality.
+                GitHub Copilot and Cursor provide powerful autocompletion and refactoring, ChatGPT
+                helps with reviews and problem-solving, while GitHub Security tools and Dependabot
+                keep dependencies secure and up-to-date. I also use Linear AI, Vercel tools, and
+                other agents to streamline development.
               </p>
               <span className={styles['about-bento-tag']}>tooling</span>
             </div>
@@ -227,6 +247,14 @@ export default function About() {
             <div className={`${styles['about-bento-card']} ${styles['about-bento-card--tall']}`}>
               <LuTriangle />
               <span className={styles['about-bento-title']}>Persistent</span>
+              <div className={`${styles['about-bento-demo']} w-85 h-90 rounded-md mx-auto`}>
+                <Image
+                  src="/images/demonstration/me-coding-demo.png"
+                  alt="this is me coding"
+                  fill
+                  quality={90}
+                />
+              </div>
               <p className={styles['about-bento-desc']}>
                 When something doesn&apos;t work, I don&apos;t stop. I dig through docs, read source
                 code, and find the answer. Every bug is a puzzle &mdash; I just need more time to
@@ -244,9 +272,6 @@ export default function About() {
               <span className={styles['about-bento-tag']}>community</span>
             </div>
           </div>
-
-          {/* ── Clicker ── */}
-          <Clicker />
 
           {/* ── Stats ── */}
           <div className={styles['about-stats-row']}>

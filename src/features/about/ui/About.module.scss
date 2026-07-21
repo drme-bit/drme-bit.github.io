@@ -73,20 +73,6 @@
   }
 }
 
-.about-bugcatcher {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1000;
-
-  @media (max-width: 700px) {
-    display: none;
-  }
-}
-
 .about-photo-frame {
   position: relative;
   width: 100%;
@@ -94,6 +80,11 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 0.5s var(--ease-out);
+
+  &:hover {
+    transform: translateY(-4px) rotate(-2deg);
+  }
 
   @media (max-width: 700px) {
     width: 7.5rem;
@@ -111,13 +102,12 @@
   object-fit: cover;
   border-radius: var(--radius-md);
   filter: grayscale(0.1) contrast(1.05);
-  transition: filter 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+  transition: filter 0.5s var(--ease-out);
   position: relative;
   z-index: 1;
 
   &:hover {
     filter: grayscale(0) contrast(1.08);
-    transform: translateY(-4px) rotate(-2deg);
   }
 
   @media (max-width: 700px) {
@@ -165,7 +155,7 @@
 }
 
 .about-role {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(mono-base);
   color: var(--accent-secondary);
   letter-spacing: 0.1em;
@@ -182,7 +172,7 @@
 }
 
 .about-intro-text {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), serif;
   @include fs(body);
   line-height: 1.7;
   color: var(--text-secondary);
@@ -224,14 +214,14 @@
 }
 
 .about-stat-value {
-  font-family: var(--font-display);
+  font-family: var(--font-display), serif;
   font-size: clamp(1.1rem, 1.8vw, 1.4rem);
   font-weight: 600;
   color: var(--text);
 }
 
 .about-stat-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(small);
   color: var(--text-dim);
   letter-spacing: 0.1em;
@@ -253,7 +243,7 @@
 }
 
 .about-map-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(small);
   color: var(--text-dim);
   letter-spacing: 0.05em;
@@ -287,7 +277,7 @@
 
 .about-github-hash {
   margin-left: auto;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(micro);
   color: var(--accent-secondary);
   letter-spacing: 0.05em;
@@ -301,7 +291,7 @@
 }
 
 .about-github-loading {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(small);
   color: var(--text-ghost);
   padding: 0.75rem 0.5rem;
@@ -349,7 +339,7 @@
 }
 
 .about-github-repo {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(small);
   color: var(--accent-secondary);
   flex-shrink: 0;
@@ -364,7 +354,7 @@
 }
 
 .about-github-sha {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   font-variant-numeric: tabular-nums;
   @include fs(small);
   color: var(--text-dim);
@@ -376,7 +366,7 @@
 }
 
 .about-github-msg {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), serif;
   @include fs(body);
   line-height: 1.4;
   color: var(--text);
@@ -393,7 +383,7 @@
 }
 
 .about-github-date {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(small);
   color: var(--text-ghost);
   flex-shrink: 0;
@@ -406,7 +396,7 @@
 /* ─── Whoami ─────────────────────────────────────────────── */
 
 .about-whoami-prompt {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(mono-base);
   color: var(--accent-secondary);
   letter-spacing: 0.08em;
@@ -415,7 +405,7 @@
 
 .about-whoami-cmd {
   margin: 0 0 0.6rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(mono-base);
   color: var(--text-dim);
   letter-spacing: 0.05em;
@@ -427,7 +417,7 @@
 
 .about-whoami-name {
   margin: 0 0 0.65rem;
-  font-family: var(--font-display);
+  font-family: var(--font-display), serif;
   font-size: clamp(1.6rem, 3vw, 2.25rem);
   font-weight: 600;
   line-height: 1.1;
@@ -437,7 +427,7 @@
 
 .about-whoami-tags {
   margin: 0;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(body);
   line-height: 1.6;
   color: var(--text-secondary);
@@ -524,7 +514,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   font-size: 0.72rem;
   color: var(--accent-secondary);
 }
@@ -547,7 +537,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   font-size: 0.72rem;
   color: var(--text-dim);
 }
@@ -582,7 +572,7 @@
 
 .about-map-coords {
   padding: 0.4rem 0;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(small);
   color: var(--accent-secondary);
   letter-spacing: 0.05em;
@@ -604,8 +594,12 @@
 
 .about-bento {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-flow: dense;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-areas:
+    "kanban kanban ai persistent"
+    "kanban kanban ai persistent"
+    "open   open   ai persistent";
+
   gap: 0.75rem;
   margin-top: 0.5rem;
 }
@@ -621,6 +615,11 @@
   transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
   position: relative;
   overflow: hidden;
+
+  &:nth-child(1) { grid-area: kanban; }
+  &:nth-child(2) { grid-area: ai; }
+  &:nth-child(3) { grid-area: persistent; }
+  &:nth-child(4) { grid-area: open; }
 
   &::before {
     content: '';
@@ -660,8 +659,6 @@
 .about-bento-demo {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;           /* или 4/3, 16/10 — как тебе нравится */
-  border-radius: var(--radius-sm);
   overflow: hidden;
   margin: 0.5rem 0;
   border: 1px solid var(--border);
@@ -676,7 +673,7 @@
 }
 
 .about-bento-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(mono-base);
   font-weight: 600;
   color: var(--text);
@@ -684,7 +681,7 @@
 }
 
 .about-bento-desc {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), serif;
   @include fs(body);
   line-height: 1.6;
   color: var(--text-secondary);
@@ -692,7 +689,7 @@
 }
 
 .about-bento-tag {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), serif;
   @include fs(micro);
   color: var(--text-dim);
   background: var(--glass);

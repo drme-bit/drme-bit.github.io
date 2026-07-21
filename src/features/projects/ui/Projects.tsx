@@ -58,51 +58,51 @@ function ProjectCard({ project, index, isActive }: ProjectCardProps) {
   const bgImage = project.image || project.images?.[0] || '';
 
   return (
-    <div className={`${styles['project-card']}${isActive ? ` ${styles['is-active']}` : ''}`}>
-      <div className={styles['project-card-bg']}>
-        {bgImage && <Image src={bgImage} alt="" className={styles['project-card-bg-img']} fill/>}
-        <div className={styles['project-card-bg-overlay']} />
+    <div className={`${styles['projects-card']}${isActive ? ` ${styles['is-active']}` : ''}`}>
+      <div className={styles['projects-card-bg']}>
+        {bgImage && <Image src={bgImage} alt="" className={styles['projects-card-bg-img']} fill/>}
+        <div className={styles['projects-card-bg-overlay']} />
       </div>
 
       <div
-        className={styles['project-card-glass']}
+        className={styles['projects-card-glass']}
         onMouseMove={handleMouseMove}
       >
-        <div className={styles['project-card-glass-inner']}>
-          <div className={styles['project-card-header']}>
-            <span className={`${styles['project-badge']} ${styles[meta.cls] || ''}`}>
-              <span className={styles['project-badge-dot']}>{meta.icon}</span>
+        <div className={styles['projects-card-glass-inner']}>
+          <div className={styles['projects-card-header']}>
+            <span className={`${styles['projects-badge']} ${styles[meta.cls] || ''}`}>
+              <span className={styles['projects-badge-dot']}>{meta.icon}</span>
               {meta.label}
             </span>
-            <span className={styles['project-card-id']}>
+            <span className={styles['projects-card-id']}>
               ./project_{String(index + 1).padStart(3, '0')}
             </span>
           </div>
 
-          <h3 className={styles['project-card-title']}>{project.title}</h3>
+          <h3 className={styles['projects-card-title']}>{project.title}</h3>
 
-          <p className={styles['project-card-desc']}>{project.desc}</p>
+          <p className={styles['projects-card-desc']}>{project.desc}</p>
 
-          <div className={styles['project-card-tech']}>
+          <div className={styles['projects-card-tech']}>
             {project.tech.slice(0, 6).map((t: string) => (
-              <span key={t} className={styles['project-tech-tag']}>{t}</span>
+              <span key={t} className={styles['projects-tech-tag']}>{t}</span>
             ))}
             {project.tech.length > 6 && (
-              <span className={styles['project-tech-more']}>+{project.tech.length - 6}</span>
+              <span className={styles['projects-tech-more']}>+{project.tech.length - 6}</span>
             )}
           </div>
 
-          <div className={styles['project-card-actions']}>
-            <button className={styles['project-cta']} onClick={handleClick}>
+          <div className={styles['projects-card-actions']}>
+            <button className={styles['projects-cta']} onClick={handleClick}>
               <span>cat details.md</span>
-              <FiArrowRight className={styles['project-cta-icon']} />
+              <FiArrowRight className={styles['projects-cta-icon']} />
             </button>
             {project.url && project.url !== '#' && (
               <a
                 href={project.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles['project-link']}
+                className={styles['projects-link']}
                 onClick={(e) => e.stopPropagation()}
               >
                 <FiExternalLink />
