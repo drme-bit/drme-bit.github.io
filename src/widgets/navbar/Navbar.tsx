@@ -1,15 +1,24 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { FiHome, FiUser, FiZap, FiBriefcase, FiGrid, FiStar, FiMail, FiChevronUp } from 'react-icons/fi';
+import { FiHome, FiUser, FiZap, FiBriefcase, FiGrid, FiFileText, FiStar, FiMail, FiChevronUp } from 'react-icons/fi';
+import type { IconType } from 'react-icons';
 import styles from './Navbar.module.scss';
 
-const ITEMS = [
+interface NavItem {
+  id: string;
+  label: string;
+  Icon: IconType;
+  href?: string;
+}
+
+const ITEMS: NavItem[] = [
   { id: 'hero', label: 'Home', Icon: FiHome },
   { id: 'about', label: 'About', Icon: FiUser },
   { id: 'skills', label: 'Skills', Icon: FiZap },
   { id: 'experience', label: 'Exp', Icon: FiBriefcase },
   { id: 'projects', label: 'Work', Icon: FiGrid },
+  { id: 'blog', label: 'Blog', Icon: FiFileText, href: '/posts' },
   { id: 'reviews', label: 'Reviews', Icon: FiStar },
   { id: 'contact', label: 'Mail', Icon: FiMail },
 ];
@@ -30,28 +39,38 @@ export default function Navbar() {
   const activeRef = useRef('hero');
   const collapsedRef = useRef(false);
   const expandBtnRef = useRef<HTMLButtonElement | null>(null);
-  const rafRef = useRef(0);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
-    return () => {
-      clearTimeout(t);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => clearTimeout(t);
   }, []);
 
   // Scroll-based hide/show + active section tracking
   useEffect(() => {
     let ticking = false;
 
+    const updateIndicator = (activeId: string) => {
+      const idx = ITEMS.findIndex((it) => it.id === activeId);
+      const el = itemRefs.current[idx];
+      const indicator = indicatorRef.current;
+      const dock = dockRef.current;
+      if (!el || !indicator || !dock) return;
+      const dockRect = dock.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const offset = elRect.left - dockRect.left - dock.clientLeft;
+      indicator.style.transform = `translateX(${offset}px)`;
+      indicator.style.width = `${elRect.width}px`;
+    };
+
     const tick = () => {
       ticking = false;
       const scrollY = window.scrollY;
 
-      // Find active section
+      // Find active section (skip route-only items like Blog)
       let best = 'hero';
       let bestScore = Infinity;
-      for (const { id } of ITEMS) {
+      for (const { id, href } of ITEMS) {
+        if (href) continue;
         const el = document.getElementById(id);
         if (!el) continue;
         const score = Math.abs(el.getBoundingClientRect().top);
@@ -61,15 +80,17 @@ export default function Navbar() {
         }
       }
 
-      // Update active class + indicator
+      // Update active class
       if (best !== activeRef.current) {
         const prevEl = itemRefs.current[ITEMS.findIndex((it) => it.id === activeRef.current)];
         const nextEl = itemRefs.current[ITEMS.findIndex((it) => it.id === best)];
         if (prevEl) prevEl.classList.remove(styles.active);
         if (nextEl) nextEl.classList.add(styles.active);
         activeRef.current = best;
-        updateIndicator(best);
       }
+
+      // Update indicator position every tick (dock may be animating)
+      updateIndicator(activeRef.current);
 
       // Collapse/expand on scroll
       const delta = scrollY - lastY.current;
@@ -87,18 +108,6 @@ export default function Navbar() {
         expandBtnRef.current?.classList.toggle(styles['expand-btn-visible'], shouldCollapse);
       }
       lastY.current = scrollY;
-    };
-
-    const updateIndicator = (activeId: string) => {
-      const idx = ITEMS.findIndex((it) => it.id === activeId);
-      const el = itemRefs.current[idx];
-      const indicator = indicatorRef.current;
-      const dock = dockRef.current;
-      if (!el || !indicator || !dock) return;
-      const dockRect = dock.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-      indicator.style.transform = `translateX(${elRect.left - dockRect.left}px)`;
-      indicator.style.width = `${elRect.width}px`;
     };
 
     const onScroll = () => {
@@ -127,8 +136,14 @@ export default function Navbar() {
     });
   }, []);
 
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  const scrollTo = (id: string, href?: string) => {
+    if (href) {
+      window.location.href = href;
+    } else if (id === 'hero') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const centerIdx = Math.floor(ITEMS.length / 2);
@@ -149,7 +164,7 @@ export default function Navbar() {
           style={{ width: 0 }}
         />
 
-        {ITEMS.map(({ id, label, Icon }, i) => {
+        {ITEMS.map(({ id, label, Icon, href }, i) => {
           const distFromCenter = Math.abs(i - centerIdx);
           const staggerDelay = `${distFromCenter * 25}ms`;
 
@@ -159,8 +174,9 @@ export default function Navbar() {
               ref={(el) => { itemRefs.current[i] = el; }}
               type="button"
               className={`${styles.item} ${id === 'hero' ? styles.active : ''}`}
-              onClick={() => scrollTo(id)}
+              onClick={() => scrollTo(id, href)}
               onMouseEnter={() => handleItemHover(i)}
+              aria-label={label}
               aria-current={id === 'hero' ? 'true' : undefined}
               style={{ transitionDelay: staggerDelay }}
             >

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState } from 'react';
 import {
   FiMail, FiLinkedin, FiPhone, FiFileText,
   FiGithub, FiSend, FiMessageSquare,
-  FiArrowUpRight, FiCheck,
+  FiArrowUpRight, FiCalendar, FiMapPin, FiCheck, FiCopy,
 } from 'react-icons/fi';
 import useReveal from '@/shared/hooks/useReveal';
 import useCursorParallax from '@/shared/hooks/useCursorParallax';
@@ -24,19 +24,12 @@ interface Contact {
   color: string;
 }
 
-interface BentoCardProps {
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-}
-
 /* ─── Data ───────────────────────────────────────────────── */
 
 const ICON: Record<string, IconType> = {
   email: FiMail,
   linkedin: FiLinkedin,
   phone: FiPhone,
-  resume: FiFileText,
   github: FiGithub,
   telegram: FiSend,
   discord: FiMessageSquare,
@@ -51,60 +44,126 @@ const CONTACTS: Contact[] = [
   { id: 'discord', label: 'discord', value: 'Dr.ME', href: 'https://discord.gg/389417490809225216', external: true, color: '#c084fc' },
 ];
 
-/* ─── Helpers ────────────────────────────────────────────── */
+/* ─── Quick Links ────────────────────────────────────────── */
 
-async function copyToClipboard(text: string) {
-  if (navigator.clipboard?.writeText) {
-    try { await navigator.clipboard.writeText(text); return true; } catch { /* fall through */ }
-  }
-  try {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    return true;
-  } catch { return false; }
-}
-
-/* ─── Sub-components ─────────────────────────────────────── */
-
-function BentoCard({ children, className = '', style }: BentoCardProps) {
+function QuickLinks() {
   return (
-    <div className={`${styles['bento-card']} ${className}`} style={style}>
-      {children}
+    <div className={`${styles['bento-card']} ${styles['bento-links']}`}>
+      <h3 className={styles['bento-links-title']}>
+        <span className={styles['bento-links-prompt']}>$</span> contact_methods
+      </h3>
+      <div className={styles['bento-links-list']}>
+        {CONTACTS.map((c) => {
+          const Icon = ICON[c.label];
+          return (
+            <a
+              key={c.id}
+              href={c.href}
+              target={c.external ? '_blank' : undefined}
+              rel={c.external ? 'noopener noreferrer' : undefined}
+              className={styles['bento-links-row']}
+              style={{ '--link-color': c.color } as React.CSSProperties}
+            >
+              <span className={styles['bento-links-icon']}>
+                <Icon size={14} />
+              </span>
+              <span className={styles['bento-links-label']}>{c.label}</span>
+              <span className={styles['bento-links-value']}>{c.value}</span>
+              <span className={styles['bento-links-arrow']}>
+                <FiArrowUpRight size={12} />
+              </span>
+            </a>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-function ContactCard({ contact }: { contact: Contact }) {
-  const Icon = ICON[contact.label];
+/* ─── Actions Card ───────────────────────────────────────── */
+
+function ActionsCard() {
+  const [copied, setCopied] = useState(false);
+
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText('vacheslavtkachik@gmail.com');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = 'vacheslavtkachik@gmail.com';
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
 
   return (
-    <a
-      href={contact.href}
-      target={contact.external ? '_blank' : undefined}
-      rel={contact.external ? 'noopener noreferrer' : undefined}
-      className={`${styles['bento-card']} ${styles['bento-contact']}`}
-      style={{ '--card-color': contact.color } as React.CSSProperties}
-    >
-      <div className={styles['bento-contact-icon']}>
-        <Icon />
+    <div className={`${styles['bento-card']} ${styles['bento-actions']}`}>
+      <h3 className={styles['bento-actions-title']}>
+        <span className={styles['bento-actions-prompt']}>$</span> quick_actions
+      </h3>
+      <div className={styles['bento-actions-grid']}>
+        <a
+          href="https://calendly.com/vacheslavtkachik/30min"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles['bento-action-tile']}
+          style={{ '--tile-color': '#7dd3fc' } as React.CSSProperties}
+        >
+          <FiCalendar size={16} />
+          <span className={styles['bento-action-label']}>Schedule Meeting</span>
+          <span className={styles['bento-action-detail']}>30 min · Calendly</span>
+        </a>
+
+        <a
+          href="/resume.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles['bento-action-tile']}
+          style={{ '--tile-color': '#a78bfa' } as React.CSSProperties}
+        >
+          <FiFileText size={16} />
+          <span className={styles['bento-action-label']}>Download Resume</span>
+          <span className={styles['bento-action-detail']}>PDF · updated 2025</span>
+        </a>
+
+        <button
+          type="button"
+          onClick={copyEmail}
+          className={styles['bento-action-tile']}
+          style={{ '--tile-color': '#34d399' } as React.CSSProperties}
+        >
+          {copied ? <FiCheck size={16} /> : <FiCopy size={16} />}
+          <span className={styles['bento-action-label']}>Open to</span>
+          <span className={styles['bento-action-detail']}>
+            {copied ? 'email copied!' : 'freelance · contract · full-time'}
+          </span>
+        </button>
+
+        <a
+          href="https://maps.google.com/?q=Kyiv,Ukraine"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles['bento-action-tile']}
+          style={{ '--tile-color': '#f472b6' } as React.CSSProperties}
+        >
+          <FiMapPin size={16} />
+          <span className={styles['bento-action-label']}>Location</span>
+          <span className={styles['bento-action-detail']}>Kyiv, Ukraine · UTC+2</span>
+        </a>
       </div>
-      <div className={styles['bento-contact-info']}>
-        <span className={styles['bento-contact-label']}>{contact.label}</span>
-        <span className={styles['bento-contact-value']}>{contact.value}</span>
-      </div>
-      <span className={styles['bento-contact-arrow']}>
-        <FiArrowUpRight />
-      </span>
-      <div className={styles['bento-contact-glow']} />
-    </a>
+    </div>
   );
 }
+
+/* ─── Contact Form ───────────────────────────────────────── */
 
 function ContactForm() {
   const [name, setName] = useState('');
@@ -178,7 +237,7 @@ export default function Contacts() {
       >
         <div className={styles['contact-bento']}>
           {/* CTA Card */}
-          <BentoCard className={styles['bento-cta']}>
+          <div className={`${styles['bento-card']} ${styles['bento-cta']}`}>
             <span className={styles['bento-cta-tag']}>available for work</span>
             <h2 className={styles['bento-cta-title']}>
               Let's build<br />
@@ -187,12 +246,13 @@ export default function Contacts() {
             <p className={styles['bento-cta-sub']}>
               based in ukraine · freelance & collaboration
             </p>
-          </BentoCard>
+          </div>
 
-          {/* Contact cards */}
-          {CONTACTS.map((c: Contact) => (
-            <ContactCard key={c.id} contact={c} />
-          ))}
+          {/* Quick Links */}
+          <QuickLinks />
+
+          {/* Actions */}
+          <ActionsCard />
 
           {/* Form */}
           <ContactForm />

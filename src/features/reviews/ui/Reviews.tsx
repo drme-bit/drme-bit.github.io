@@ -69,6 +69,7 @@ export default function Reviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasReviewed, setHasReviewed] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { openModal } = useModal();
 
   /* ─── Auth ───────────────────────────────────────────── */
@@ -112,6 +113,28 @@ export default function Reviews() {
     try { await signOut(auth); setHasReviewed(false); } catch (e) { console.error(e); }
   }
 
+  /* ─── Scroll progress ──────────────────────────────────── */
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    function onScroll() {
+      const rect = el!.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const sectionHeight = rect.height;
+      const scrollable = sectionHeight - vh;
+      if (scrollable <= 0) return;
+      const scrolled = -rect.top;
+      const progress = Math.max(0, Math.min(1, scrolled / scrollable));
+      setScrollProgress(progress);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [ref]);
+
   /* ─── Canvas state ───────────────────────────────────── */
 
   const worldRef = useRef<HTMLDivElement | null>(null);
@@ -123,9 +146,7 @@ export default function Reviews() {
   const focusedId = useRef<string | null>(null);
   const [blurred, setBlurred] = useState(false);
   const [hintHidden, setHintHidden] = useState(false);
-  const [viewportSize, setViewportSize] = useState({ w: 1200, h: 800 });
 
-  useEffect(() => { setViewportSize({ w: window.innerWidth, h: window.innerHeight }); }, []);
   useEffect(() => { const t = setTimeout(() => setHintHidden(true), 6000); return () => clearTimeout(t); }, []);
 
   const cardPositions = useMemo(() => distributeCards(reviews.length), [reviews.length]);
@@ -300,6 +321,7 @@ export default function Reviews() {
       id="reviews"
       ref={ref}
       className={`${styles.section} ${styles['section--reviews']} ${styles.reveal}${visible ? ` ${styles['is-visible']}` : ''}`}
+      style={{ '--scroll-progress': scrollProgress } as React.CSSProperties}
     >
       <div
         className={`${styles['reviews-canvas']}${blurred ? ` ${styles['reviews-canvas--blurred']}` : ''}${canvasDragging ? ` ${styles['reviews-canvas--dragging']}` : ''}${visible ? ` ${styles['is-revealed']}` : ''}`}
@@ -311,32 +333,11 @@ export default function Reviews() {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <ReviewsHero isRevealed={visible} onOpenModal={openReviewModal} />
+        <ReviewsHero isRevealed={visible} progress={scrollProgress} onOpenModal={openReviewModal} />
 
         <div className={`${styles['reviews-drag-hint']}${hintHidden ? ` ${styles['is-hidden']}` : ''}`}>
           <span>drag to explore</span>
           <PiArrowRight size={10} />
-        </div>
-
-        {/* Mini Map */}
-        <div className={styles['reviews-minimap']}>
-          {cardPositions.map((pos, i) => (
-            <div
-              key={`map-${i}`}
-              className={`${styles['minimap-dot']}${focusedId.current === reviews[i]?.id ? ` ${styles['is-active']}` : ''}`}
-              style={{ left: `${(pos.x / WORLD_W) * 100}%`, top: `${(pos.y / WORLD_H) * 100}%` }}
-            />
-          ))}
-          <div
-            className={styles['minimap-viewport']}
-            style={{
-              left: `${(posRef.current.x / WORLD_W) * 100}%`,
-              top: `${(posRef.current.y / WORLD_H) * 100}%`,
-              width: `${(viewportSize.w / WORLD_W) * 100}%`,
-              height: `${(viewportSize.h / WORLD_H) * 100}%`,
-            }}
-          />
-          <div className={styles['minimap-label']}>{reviews.length} reviews</div>
         </div>
 
         <div ref={worldRef} className={styles['reviews-world']} style={{ width: WORLD_W, height: WORLD_H }}>

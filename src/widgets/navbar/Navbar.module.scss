@@ -103,8 +103,6 @@
   background: var(--accent-muted);
   border-radius: var(--radius-md);
   pointer-events: none;
-  transition: transform 0.3s var(--ease-out),
-              width 0.3s var(--ease-out);
   z-index: 0;
 }
 

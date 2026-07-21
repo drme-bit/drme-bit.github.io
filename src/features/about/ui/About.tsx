@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import useReveal from '@/shared/hooks/useReveal';
 import SectionTitle from '@/shared/ui/molecules/SectionTitle/SectionTitle';
 import LocationMap from '@/shared/ui/molecules/LocationMap/LocationMap';
@@ -164,10 +165,14 @@ export default function About() {
         {/* ── Photo Column ── */}
         <div className={styles['about-photo-col']}>
           <div className={styles['about-photo-frame']}>
-            <img
+            <Image
               src="/images/17969af76asf9y986ad9fy.jpg"
-              alt="Vyacheslav"
+              alt="Vyacheslav Tkachyk"
+              fill
               className={styles['about-photo-img']}
+              sizes="(max-width: 900px) 280px, 320px" // ← важно
+              priority
+              quality={90}
             />
             <div className={styles['about-photo-glow']} />
           </div>
@@ -180,7 +185,6 @@ export default function About() {
             className={styles['about-map-canvas']}
           />
           <div className={styles['about-map-coords']}>46.482952&deg; N, 30.712481&deg; E</div>
-
         </div>
 
         {/* ── Content Column ── */}
@@ -207,6 +211,13 @@ export default function About() {
             <div className={styles['about-bento-card']}>
               <RiRobot2Fill />
               <span className={styles['about-bento-title']}>AI-Augmented</span>
+              <div className={styles['about-bento-demo']}>
+                <Image
+                  src="/images/demonstration/jetbrains-ai-use-demo.png"
+                  alt="Using AI as a tool"
+                  fill
+                />
+              </div>
               <p className={styles['about-bento-desc']}>
                 Using AI as a tool to make my life easier, code cleaner, efficient and fast.
               </p>

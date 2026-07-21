@@ -25,16 +25,6 @@
       z-index: 3;
     }
 
-    &::before {
-      top: 0;
-      background: linear-gradient(to bottom, var(--bg), transparent);
-    }
-
-    &::after {
-      bottom: 0;
-      background: linear-gradient(to top, var(--bg), transparent);
-    }
-
     @media (max-width: 700px) {
       &::before, &::after { height: 80px; }
     }
@@ -54,15 +44,29 @@
   height: 100vh;
   overflow: hidden;
   cursor: grab;
-  background: var(--bg);
+  background: transparent;
   z-index: 1;
-  transition: background 0.8s var(--ease-out);
 
-  &.is-revealed {
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
     background:
-      radial-gradient(circle, var(--text-ghost) 0.6px, transparent 0.6px),
+      radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
       var(--bg);
-    background-size: 28px 28px, 100% 100%;
+    background-size: 24px 24px, 100% 100%;
+    opacity: 0;
+    transition: opacity 0.8s var(--ease-out);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &.is-revealed::before {
+    opacity: calc((var(--scroll-progress, 0) - 0.1) * 2.5);
+  }
+
+  &.is-revealed::before {
+    opacity: calc((var(--scroll-progress, 0) - 0.15) * 3);
   }
 
   &:active { cursor: grabbing; }
@@ -87,6 +91,12 @@
   will-change: transform;
   width: 100%;
   height: 100%;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out);
+
+  .is-revealed & {
+    opacity: calc((var(--scroll-progress, 0) - 0.1) * 2.5);
+  }
 }
 
 /* ─── Hero ──────────────────────────────────────────────── */
@@ -95,22 +105,14 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
   width: 40vw;
   text-align: center;
   z-index: 5;
   pointer-events: none;
   padding: 2rem 2.5rem;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.95);
-  transition: opacity 0.7s var(--ease-out) 0.4s,
-              transform 0.7s var(--ease-out) 0.4s;
 
   & > * { pointer-events: auto; }
-
-  .is-revealed & {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
 
   @media (max-width: 700px) {
     width: 70vw;
@@ -223,7 +225,6 @@
   touch-action: none;
   opacity: 0.45;
   transition: opacity var(--duration-normal) var(--ease-out),
-              transform var(--duration-normal) var(--ease-out),
               border-color var(--duration-normal) ease,
               box-shadow var(--duration-normal) ease;
 
@@ -398,62 +399,6 @@
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
-}
-
-/* ─── Mini Map ──────────────────────────────────────────── */
-
-.reviews-minimap {
-  position: absolute;
-  bottom: 1.2rem;
-  left: 1.5rem;
-  z-index: 11;
-  width: 120px;
-  height: 80px;
-  background: var(--terminal-bg);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--terminal-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  opacity: 0;
-  transition: opacity 0.5s ease 1.2s;
-
-  .is-revealed & { opacity: 0.6; }
-  &:hover { opacity: 1 !important; }
-
-  @media (max-width: 700px) { display: none; }
-}
-
-.minimap-dot {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--text-dim);
-  transition: all 0.3s ease;
-
-  &.is-active {
-    background: var(--accent-secondary);
-    transform: scale(1.8);
-    box-shadow: 0 0 6px var(--accent-secondary);
-  }
-}
-
-.minimap-viewport {
-  position: absolute;
-  border: 1px solid var(--accent-secondary);
-  border-radius: 2px;
-  opacity: 0.4;
-  transition: all 0.3s ease;
-}
-
-.minimap-label {
-  position: absolute;
-  bottom: 2px;
-  right: 4px;
-  font-family: var(--font-mono);
-  font-size: 0.42rem;
-  color: var(--text-dim);
-  letter-spacing: 0.05em;
 }
 
 /* ─── Empty ─────────────────────────────────────────────── */

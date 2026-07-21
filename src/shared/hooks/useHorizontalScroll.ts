@@ -111,7 +111,7 @@ export default function useHorizontalScroll({
       const clamped = Math.max(0, Math.min(itemCount - 1, index));
       const scrollTop = window.scrollY + el.offsetTop;
       const targetScrollTop = scrollTop + clamped * window.innerHeight;
-      window.scrollTo({ top: targetScrollTop });
+      window.scrollTo({ top: targetScrollTop, behavior: 'instant' });
     },
     [itemCount],
   );

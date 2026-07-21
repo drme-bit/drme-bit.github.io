@@ -8,25 +8,32 @@ import {
   FiArrowLeft,
   FiArrowRight,
   FiClock,
-  FiTag,
   FiSearch,
   FiStar,
 } from 'react-icons/fi';
 import { BLOG_POSTS, CATEGORIES } from '@/data/blogData';
 import type { BlogPost } from '@/data/blogData';
+import { usePostTransition } from './PostTransitionContext';
 import styles from './PostsList.module.scss';
 
 const ALL_CATEGORIES = ['All', ...new Set(BLOG_POSTS.map((p) => p.category))];
 
 function FeaturedCard({ post }: { post: BlogPost }) {
   const router = useRouter();
+  const { setTransitionFrom } = usePostTransition();
   const cat = CATEGORIES[post.category] || CATEGORIES.Frontend;
+
+  function handleClick(e: React.MouseEvent<HTMLElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTransitionFrom({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
+    router.push(`/posts/${post.slug}`);
+  }
 
   return (
     <article
       className={styles['featured-card']}
       style={{ '--card-gradient': cat.gradient, '--card-color': cat.color } as React.CSSProperties}
-      onClick={() => router.push(`/posts/${post.slug}`)}
+      onClick={handleClick}
     >
       <div className={styles['featured-card-glow']} />
       <div className={styles['featured-card-content']}>
@@ -54,7 +61,7 @@ function FeaturedCard({ post }: { post: BlogPost }) {
           </span>
         </div>
         <div className={styles['featured-card-tags']}>
-          {post.tags.slice(0, 3).map((tag) => (
+          {post.tags.slice(0, 4).map((tag) => (
             <span key={tag} className={styles['featured-card-tag']}>
               {tag}
             </span>
@@ -68,24 +75,33 @@ function FeaturedCard({ post }: { post: BlogPost }) {
 
 function PostRow({ post, index }: { post: BlogPost; index: number }) {
   const router = useRouter();
+  const { setTransitionFrom } = usePostTransition();
   const cat = CATEGORIES[post.category] || CATEGORIES.Frontend;
+
+  function handleClick(e: React.MouseEvent<HTMLElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTransitionFrom({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
+    router.push(`/posts/${post.slug}`);
+  }
 
   return (
     <article
       className={styles['posts-row']}
       style={{
         '--row-accent': cat.color,
-        '--row-gradient': cat.gradient,
         animationDelay: `${index * 0.06}s`,
       } as React.CSSProperties}
-      onClick={() => router.push(`/posts/${post.slug}`)}
+      onClick={handleClick}
     >
       <div className={styles['posts-row-accent']} />
       <div className={styles['posts-row-num']}>{String(index + 1).padStart(2, '0')}</div>
 
       <div className={styles['posts-row-content']}>
         <div className={styles['posts-row-top']}>
-          <span className={styles['posts-row-category']}>{post.category}</span>
+          <span className={styles['posts-row-category']}>
+            <span className={styles['posts-row-cat-dot']} />
+            {post.category}
+          </span>
           <span className={styles['posts-row-date']}>
             {new Date(post.date).toLocaleDateString('en-US', {
               year: 'numeric',
@@ -102,13 +118,12 @@ function PostRow({ post, index }: { post: BlogPost; index: number }) {
           <div className={styles['posts-row-tags']}>
             {post.tags.slice(0, 3).map((tag) => (
               <span key={tag} className={styles['posts-row-tag']}>
-                <FiTag size={9} />
                 {tag}
               </span>
             ))}
           </div>
           <span className={styles['posts-row-readtime']}>
-            <FiClock size={11} />
+            <FiClock size={10} />
             {post.readTime}
           </span>
         </div>
@@ -166,10 +181,7 @@ export default function PostsList() {
             <span className={styles['pl-hero-bc-current']}>posts</span>
           </div>
 
-          <h1 className={styles['pl-hero-title']}>
-            <span className={styles['pl-hero-prompt']}>$</span>
-            ls ./posts
-          </h1>
+          <h1 className={styles['pl-hero-title']}>posts</h1>
           <p className={styles['pl-hero-desc']}>
             Notes on frontend, architecture, and design — short reads about building things that
             work.
@@ -190,7 +202,7 @@ export default function PostsList() {
           <FiSearch size={14} className={styles['pl-search-icon']} />
           <input
             type="text"
-            placeholder="grep -i 'search posts...'"
+            placeholder="search posts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={styles['pl-search-input']}
@@ -214,7 +226,6 @@ export default function PostsList() {
       <main className={styles['pl-posts']}>
         {filteredPosts.length === 0 ? (
           <div className={styles['pl-empty']}>
-            <span className={styles['pl-empty-prompt']}>$</span>
             <span>No posts found matching &quot;{searchQuery || activeCategory}&quot;</span>
           </div>
         ) : (

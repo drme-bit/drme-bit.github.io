@@ -89,6 +89,18 @@
 
 .about-photo-frame {
   position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+  @media (max-width: 700px) {
+    width: 7.5rem;
+    height: 7.5rem;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+  }
 }
 
 .about-photo-img {
@@ -643,6 +655,17 @@
     grid-column: span 1 !important;
     grid-row: span 1 !important;
   }
+}
+
+.about-bento-demo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;           /* или 4/3, 16/10 — как тебе нравится */
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin: 0.5rem 0;
+  border: 1px solid var(--border);
+  background: #0a0a0a;
 }
 
 .about-bento-icon {

@@ -47,11 +47,3 @@ export const BLOG_POSTS: BlogPost[] = [
   cobeMeta,
   portfolioMeta,
 ];
-
-export function getBlogPostBySlug(slug: string) {
-  return BLOG_POSTS.find((post) => post.slug === slug);
-}
-
-export function getBlogPostIndex(slug: string) {
-  return BLOG_POSTS.findIndex((post) => post.slug === slug);
-}
