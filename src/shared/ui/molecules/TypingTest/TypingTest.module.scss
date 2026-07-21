@@ -1,0 +1,129 @@
+@use '../../../styles/mixins' as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+/* ─── Stats Bar ──────────────────────────────────────────── */
+
+.statsBar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--text-ghost);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.resetBtn {
+  margin-left: auto;
+  padding: 0.3rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--accent-secondary);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity 0.2s var(--ease-out);
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+/* ─── Text Area ──────────────────────────────────────────── */
+
+.textArea {
+  position: relative;
+  padding: 1rem 1.2rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: text;
+  min-height: 4.5rem;
+  line-height: 1.8;
+  overflow: hidden;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--accent-secondary) 20%, transparent);
+  }
+}
+
+.wordList {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.char {
+  color: var(--text-ghost);
+  transition: color 0.05s;
+}
+
+.correct {
+  color: var(--accent-secondary);
+}
+
+.incorrect {
+  color: #ff4444;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 68, 68, 0.4);
+}
+
+.cursor {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent-secondary) 25%, transparent);
+  border-radius: 2px;
+  animation: pulse 1s steps(1) infinite;
+}
+
+@keyframes pulse {
+  50% { background: transparent; }
+}
+
+.hiddenInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ─── Hint ───────────────────────────────────────────────── */
+
+.hint {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--text-ghost);
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.05em;
+}

@@ -1,0 +1,58 @@
+@use '../../../../shared/styles/mixins' as *;
+@use '../../../../shared/styles/animations' as *;
+
+.ghStatus {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.5rem;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  pointer-events: auto;
+}
+
+.ghStatusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.35);
+}
+
+.ghStatusLabel {
+  font-family: var(--font-mono);
+  font-size: clamp(0.55rem, 0.75vw, 0.65rem);
+  color: var(--text-dim);
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+}
+
+.ghStatusLink {
+  font-family: var(--font-mono);
+  font-size: clamp(0.55rem, 0.75vw, 0.65rem);
+  color: var(--text-secondary);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  transition: color 0.2s var(--ease-out);
+
+  &:hover {
+    color: var(--accent);
+  }
+}
+
+.ghStats {
+  display: none;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.45rem, 0.65vw, 0.55rem);
+  color: var(--text-ghost);
+
+  @media (min-width: 600px) {
+    display: flex;
+  }
+}
+
+.ghStatSep {
+  color: var(--text-ghost);
+}

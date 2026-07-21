@@ -1,0 +1,294 @@
+@use '../../../shared/styles/mixins' as *;
+@use '../../../shared/styles/animations' as *;
+
+/* ─── Section ────────────────────────────────────────────── */
+
+.section {
+  @include section-base;
+
+  &.section--blog {
+    min-height: auto;
+    position: relative;
+    top: auto;
+    padding: 0 var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-top: 6rem;
+
+    @media (max-width: 700px) {
+      padding: 0 var(--space-md);
+      padding-top: 4rem;
+    }
+  }
+}
+
+.reveal {
+  @include reveal-base;
+}
+
+/* ─── Grid ───────────────────────────────────────────────── */
+
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+}
+
+/* ─── Card ───────────────────────────────────────────────── */
+
+.blog-card {
+  --card-color: var(--accent-secondary);
+  background: var(--glass-strong);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      var(--accent-glow),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 700px) {
+    border-radius: var(--radius-sm);
+  }
+
+  &--featured {
+    grid-column: span 2;
+    grid-row: span 2;
+
+    .blog-card-title {
+      font-size: clamp(1.3rem, 2vw, 1.6rem);
+    }
+
+    .blog-card-excerpt {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      -webkit-line-clamp: 5;
+    }
+
+    @media (max-width: 900px) {
+      grid-column: span 1;
+      grid-row: span 1;
+
+      .blog-card-title {
+        font-size: 1.15rem;
+      }
+
+      .blog-card-excerpt {
+        font-size: 0.85rem;
+        -webkit-line-clamp: 3;
+      }
+    }
+  }
+}
+
+.blog-card-inner {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  height: 100%;
+
+  .blog-card--featured & {
+    padding: 2rem;
+  }
+
+  @media (max-width: 700px) {
+    padding: 1.25rem;
+  }
+}
+
+/* ─── Card Top ───────────────────────────────────────────── */
+
+.blog-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.blog-card-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--card-color);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.blog-card-cat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--card-color);
+  flex-shrink: 0;
+}
+
+.blog-card-featured {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--accent-warm);
+  background: color-mix(in srgb, var(--accent-warm) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-warm) 20%, transparent);
+  padding: 0.2em 0.6em;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ─── Card Content ───────────────────────────────────────── */
+
+.blog-card-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.blog-card-excerpt {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── Card Meta ──────────────────────────────────────────── */
+
+.blog-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.blog-card-date {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.blog-card-sep {
+  opacity: 0.3;
+}
+
+.blog-card-readtime {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+/* ─── Card Tags ──────────────────────────────────────────── */
+
+.blog-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.blog-card-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--text-dim);
+  padding: 0.2rem 0.5rem;
+  background: color-mix(in srgb, var(--accent-secondary) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 10%, transparent);
+  border-radius: var(--radius-full);
+  letter-spacing: 0.03em;
+}
+
+/* ─── Card Action ────────────────────────────────────────── */
+
+.blog-card-action {
+  margin-top: auto;
+  padding-top: 0.6rem;
+}
+
+.blog-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  transition: color 0.2s ease;
+
+  .blog-card:hover & {
+    color: var(--card-color);
+  }
+}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+
+.blog-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-xl);
+}
+
+.blog-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent-secondary);
+  background: color-mix(in srgb, var(--accent-secondary) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 12%, transparent);
+  padding: 0.65em 1.3em;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
+    border-color: color-mix(in srgb, var(--accent-secondary) 25%, transparent);
+    transform: translateY(-1px);
+  }
+}

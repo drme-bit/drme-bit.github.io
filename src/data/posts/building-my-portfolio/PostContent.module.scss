@@ -1,0 +1,265 @@
+@use '../../../shared/styles/mixins' as *;
+
+// ═══════════════════════════════════════════════════════════
+// POST: Building My Portfolio
+// Theme: Warm amber / gold
+// ═══════════════════════════════════════════════════════════
+
+.page {
+  min-height: 100vh;
+  color: var(--text-secondary);
+}
+
+// ─── Hero ─────────────────────────────────────────────────
+
+.hero {
+  position: relative;
+  padding: 10rem 2rem 6rem;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  min-height: 70vh;
+
+  &-gradient {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 50% 40% at 70% 30%, rgba(251, 191, 36, 0.08), transparent 70%),
+      radial-gradient(ellipse 40% 30% at 30% 60%, rgba(251, 146, 36, 0.06), transparent 60%);
+    pointer-events: none;
+  }
+
+  &-content {
+    max-width: 700px;
+    position: relative;
+    z-index: 1;
+  }
+
+  &-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.15);
+    padding: 0.3em 0.8em;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+
+  &-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.25rem;
+  }
+
+  &-accent {
+    color: #fbbf24;
+  }
+
+  &-desc {
+    font-family: var(--font-sans);
+    font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin: 0 0 1.5rem;
+    max-width: 550px;
+  }
+
+  &-meta {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-ghost);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  &-sep {
+    opacity: 0.4;
+  }
+}
+
+// ─── Sections ─────────────────────────────────────────────
+
+.section {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  & + & {
+    margin-top: 3rem;
+  }
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-prompt {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: #fbbf24;
+  opacity: 0.5;
+}
+
+.body-text {
+  font-family: var(--font-sans);
+  font-size: clamp(0.88rem, 1vw, 0.95rem);
+  color: var(--text-secondary);
+  line-height: 1.85;
+  margin: 0 0 1.5rem;
+  max-width: 640px;
+  padding-left: 1.5em;
+  border-left: 2px solid rgba(251, 191, 36, 0.12);
+}
+
+// ─── Callout ──────────────────────────────────────────────
+
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: rgba(251, 191, 36, 0.04);
+  border: 1px solid rgba(251, 191, 36, 0.1);
+  border-radius: var(--radius-sm);
+  margin: 1.5rem 0;
+
+  &-icon {
+    flex-shrink: 0;
+    color: #fbbf24;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    margin-top: 0.1em;
+  }
+
+  &-text {
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-style: italic;
+    margin: 0;
+  }
+}
+
+// ─── Tech Stack Grid ──────────────────────────────────────
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tech-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(251, 191, 36, 0.2);
+  }
+}
+
+.tech-name {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tech-role {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+// ─── Lesson Box ───────────────────────────────────────────
+
+.lesson-box {
+  margin: 1.5rem 0;
+  background: rgba(251, 191, 36, 0.03);
+  border: 1px solid rgba(251, 191, 36, 0.12);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+
+  &-header {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.6rem 1rem;
+    background: rgba(251, 191, 36, 0.06);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.08);
+  }
+
+  &-text {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0;
+    padding: 1rem;
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.08);
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+    }
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────
+
+@media (max-width: 700px) {
+  .hero {
+    padding: 7rem 1rem 4rem;
+    min-height: 55vh;
+
+    &-title {
+      font-size: 1.8rem;
+    }
+  }
+
+  .section {
+    padding: 0 1rem;
+  }
+}

@@ -2,34 +2,45 @@
   "name": "portfolio",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
+  "packageManager": "npm@11.9.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "clsx": "^2.1.1",
     "firebase": "^12.16.0",
+    "leaflet": "^1.9.4",
     "lenis": "^1.3.25",
     "motion": "^12.42.2",
+    "next": "^16.2.10",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-icons": "^5.7.0",
-    "react-router-dom": "^7.18.1",
+    "react-leaflet": "^5.0.0",
     "three": "^0.185.1",
     "three-globe": "^2.45.2",
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.0.0",
-    "eslint": "^10.7.0",
+    "@tailwindcss/postcss": "^4.1.8",
+    "@types/leaflet": "^1.9.21",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.5",
+    "@types/three": "^0.185.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.3.3",
     "lucide-react": "^1.24.0",
     "prettier": "^3.9.5",
     "sass": "^1.101.0",
-    "vite": "^8.1.5"
+    "tailwindcss": "^4.1.8",
+    "typescript": "^5.8.3"
   }
 }

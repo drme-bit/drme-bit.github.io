@@ -1,7 +1,22 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Reviews — approved ones are public, anyone authenticated can create
     match /reviews/{reviewId} {
+      allow read: if resource.data.approved == true;
+      allow create: if request.auth != null;
+      allow update, delete: if true;
+    }
+
+    // Global stats — anyone can read, authenticated can update counters
+    match /siteStats/{docId} {
+      allow read: if true;
+      allow create, update: if true;
+    }
+
+    // Comments — approved ones public, authenticated users can write
+    match /comments/{commentId} {
       allow read: if resource.data.approved == true;
       allow create: if request.auth != null;
       allow update, delete: if true;

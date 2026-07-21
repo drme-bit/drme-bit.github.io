@@ -1,0 +1,21 @@
+@use '../../../../shared/styles/mixins' as *;
+
+.location-map-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.location-map-label {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-mono);
+  @include fs(small);
+  color: var(--text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}

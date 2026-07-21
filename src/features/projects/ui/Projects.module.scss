@@ -1,0 +1,456 @@
+@use '../../../shared/styles/mixins' as *;
+@use '../../../shared/styles/animations' as *;
+
+/* ─── Section ────────────────────────────────────────────── */
+
+.section {
+  @include section-base;
+
+  &.section--projects {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 0;
+  }
+}
+
+.reveal {
+  @include reveal-base;
+}
+
+/* ─── Sticky Container ───────────────────────────────────── */
+
+.projects-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.projects-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 4vw;
+}
+
+/* ─── Top Bar ────────────────────────────────────────────── */
+
+.projects-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-top: 2rem;
+  z-index: 10;
+}
+
+.projects-counter {
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  padding-top: 1.2rem;
+}
+
+.projects-counter-current {
+  color: var(--accent-secondary);
+  font-weight: 600;
+}
+
+.projects-counter-sep {
+  margin: 0 0.3em;
+  color: var(--text-ghost);
+}
+
+.projects-counter-total {
+  color: var(--text-dim);
+}
+
+/* ─── Viewport & Track ───────────────────────────────────── */
+
+.projects-viewport {
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.projects-track {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+  transition: none;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.projects-track-item {
+  flex: 0 0 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* ─── Project Card ───────────────────────────────────────── */
+
+.project-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  opacity: 0.4;
+  transform: scale(0.97);
+  border-radius: var(--radius-xl, 1.2rem);
+  overflow: hidden;
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid transparent;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 50%, var(--accent-glow)) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out);
+    z-index: 10;
+  }
+
+  &.is-active {
+    opacity: 1;
+    transform: scale(1);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: opacity 0.2s;
+  }
+}
+
+/* ─── Background Image ───────────────────────────────────── */
+
+.project-card-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.project-card-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.project-card-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.78) 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+}
+
+/* ─── Glass Content Card ─────────────────────────────────── */
+
+.project-card-glass {
+  position: absolute;
+  bottom: 10vh;
+  left: 5vw;
+  max-width: 520px;
+  width: calc(100% - 10vw);
+  padding: 2rem 2.2rem;
+  background: var(--glass-strong);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  z-index: 5;
+  transition: border-color 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+
+  .is-active & {
+    border-color: color-mix(in srgb, var(--accent-secondary) 25%, transparent);
+    box-shadow: 0 0 30px -10px var(--accent-glow),
+                0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      var(--accent-glow),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+
+  @media (max-width: 700px) {
+    bottom: 6vh;
+    left: 4vw;
+    width: calc(100% - 8vw);
+    max-width: none;
+    padding: 1.5rem;
+  }
+}
+
+.project-card-glass-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* ─── Card Header ────────────────────────────────────────── */
+
+.project-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.project-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.badge--active {
+  color: var(--accent-success);
+}
+
+.badge--archived {
+  color: var(--text-dim);
+}
+
+.project-badge-dot {
+  font-size: 0.5em;
+}
+
+.project-card-id {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-ghost);
+  letter-spacing: 0.12em;
+}
+
+/* ─── Card Content ───────────────────────────────────────── */
+
+.project-card-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+
+  @media (max-width: 700px) {
+    font-size: 1.4rem;
+  }
+}
+
+.project-card-desc {
+  font-family: var(--font-sans);
+  font-size: clamp(0.82rem, 1vw, 0.92rem);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+
+  @media (max-width: 700px) {
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+}
+
+/* ─── Tech Tags ──────────────────────────────────────────── */
+
+.project-card-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.project-tech-tag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  padding: 0.25rem 0.6rem;
+  background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 15%, transparent);
+  border-radius: var(--radius-full);
+  letter-spacing: 0.03em;
+  transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+
+  &:hover {
+    color: var(--accent-secondary);
+    border-color: color-mix(in srgb, var(--accent-secondary) 30%, transparent);
+  }
+}
+
+.project-tech-more {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--text-ghost);
+  padding: 0.25rem 0.5rem;
+}
+
+/* ─── Card Actions ───────────────────────────────────────── */
+
+.project-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-top: 0.3rem;
+}
+
+.project-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent-secondary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 20%, transparent);
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+  letter-spacing: 0.02em;
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent-secondary) 18%, transparent);
+    border-color: color-mix(in srgb, var(--accent-secondary) 35%, transparent);
+    color: var(--accent-secondary);
+  }
+}
+
+.project-cta-icon {
+  transition: transform 0.25s var(--ease-out);
+  font-size: 0.9em;
+
+  .project-cta:hover & {
+    transform: translateX(3px);
+  }
+}
+
+.project-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all 0.25s var(--ease-out);
+
+  &:hover {
+    color: var(--accent-secondary);
+    border-color: color-mix(in srgb, var(--accent-secondary) 30%, transparent);
+    background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
+  }
+}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+
+.projects-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-bottom: 2.5rem;
+  z-index: 10;
+
+  @media (max-width: 700px) {
+    padding-bottom: 1.5rem;
+  }
+}
+
+.projects-progress {
+  flex: 1;
+  max-width: 200px;
+}
+
+.projects-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.projects-progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+  transition: width 0.3s var(--ease-out);
+}
+
+/* ─── Navigation ─────────────────────────────────────────── */
+
+.projects-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.projects-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+
+  &:hover:not(:disabled) {
+    color: var(--text);
+    border-color: var(--border-hover);
+    background: var(--glass-hover);
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 700px) {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+}

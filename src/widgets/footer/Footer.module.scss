@@ -1,0 +1,87 @@
+@use '../../shared/styles/mixins' as *;
+@use '../../shared/styles/animations' as *;
+
+.site-footer {
+  position: relative;
+  z-index: 10;
+  border-top: 1px solid var(--border);
+  background: var(--glass);
+  @include backdrop-blur(12px);
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+
+  @media (max-width: 700px) {
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    text-align: center;
+  }
+}
+
+.footer-text {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.footer-heart {
+  color: var(--accent-warm);
+  flex-shrink: 0;
+}
+
+.footer-kofi {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-warm);
+  text-decoration: none;
+  padding: 0.45em 0.9em;
+  border: 1px solid rgba(255, 153, 102, 0.25);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 153, 102, 0.06);
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: rgba(255, 153, 102, 0.12);
+    border-color: rgba(255, 153, 102, 0.45);
+    transform: translateY(-1px);
+  }
+}
+
+.footer-kofi-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.footer-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-link {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.2s var(--ease-out);
+
+  &:hover {
+    color: var(--accent-secondary);
+  }
+}
