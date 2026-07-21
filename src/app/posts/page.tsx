@@ -160,18 +160,6 @@ export default function PostsList() {
 
   return (
     <div className={`${styles['posts-list-page']}${mounted ? ` ${styles['is-mounted']}` : ''}`}>
-      {/* Floating Nav */}
-      <nav className={styles['pp-nav']}>
-        <Link href="/" className={styles['pp-nav-home']}>
-          <FiHome size={10} />
-          <span>home</span>
-        </Link>
-        <div className={styles['pp-nav-divider']} />
-        <span className={styles['pp-nav-label']}>posts</span>
-        <div className={styles['pp-nav-spacer']} />
-        <span className={styles['pp-nav-count']}>{BLOG_POSTS.length} posts</span>
-      </nav>
-
       {/* Hero */}
       <header className={styles['pl-hero']}>
         <div className={styles['pl-hero-inner']}>

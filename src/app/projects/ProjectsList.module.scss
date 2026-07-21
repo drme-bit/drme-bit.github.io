@@ -1,0 +1,295 @@
+@use '../../shared/styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 5rem 1.5rem 2rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.4s var(--ease-out);
+
+  &.is-mounted {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Nav ────────────────────────────────────────────────── */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.navHome {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: color 0.15s;
+
+  &:hover { color: var(--text); }
+}
+
+.navDivider {
+  width: 1px;
+  height: 0.8rem;
+  background: var(--border);
+}
+
+.navLabel {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.navSpacer { flex: 1; }
+
+.navCount {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  color: var(--text-ghost);
+}
+
+/* ─── Hero ───────────────────────────────────────────────── */
+
+.hero {
+  padding: 6rem 0 2.5rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.heroInner {}
+
+.heroBreadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--text-ghost);
+  margin-bottom: 1rem;
+
+  a {
+    color: var(--text-dim);
+    text-decoration: none;
+    &:hover { color: var(--text); }
+  }
+}
+
+.heroBcCurrent {
+  color: var(--text);
+}
+
+.heroTitle {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+}
+
+.heroDesc {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ─── Grid ───────────────────────────────────────────────── */
+
+.grid {
+  max-width: 700px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  padding-bottom: 4rem;
+}
+
+/* ─── Card ───────────────────────────────────────────────── */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  animation: cardIn 0.4s var(--ease-out) both;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--accent-secondary) 25%, transparent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  font-weight: 500;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.badge--active {
+  color: var(--accent-success);
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.badge--archived {
+  color: var(--text-ghost);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+}
+
+.cardDesc {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.cardTech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.techTag {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  font-weight: 500;
+  padding: 0.15rem 0.4rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-dim);
+}
+
+.techMore {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  color: var(--text-ghost);
+  padding: 0.15rem 0.2rem;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.cardLink {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 500;
+  color: var(--accent-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cardRepo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  color: var(--text-ghost);
+  transition: all 0.15s;
+
+  &:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+
+.footer {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.footerHome {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: color 0.15s;
+
+  &:hover { color: var(--text); }
+}
+
+/* ─── Mobile ─────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .page { padding: 0 1rem; }
+  .nav { padding: 0.5rem 1rem; }
+  .hero { padding: 5rem 0 2rem; }
+}

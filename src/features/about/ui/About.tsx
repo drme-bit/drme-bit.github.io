@@ -5,7 +5,7 @@ import Image from 'next/image';
 import useReveal from '@/shared/hooks/useReveal';
 import SectionTitle from '@/shared/ui/molecules/SectionTitle/SectionTitle';
 import LocationMap from '@/shared/ui/molecules/LocationMap/LocationMap';
-import BugCatcher from '@/shared/ui/molecules/BugCatcher/BugCatcher';
+import Clicker from '@/shared/ui/molecules/Clicker/Clicker';
 import aboutData from '@/data/aboutData';
 import styles from './About.module.scss';
 
@@ -244,6 +244,9 @@ export default function About() {
               <span className={styles['about-bento-tag']}>community</span>
             </div>
           </div>
+
+          {/* ── Clicker ── */}
+          <Clicker />
 
           {/* ── Stats ── */}
           <div className={styles['about-stats-row']}>

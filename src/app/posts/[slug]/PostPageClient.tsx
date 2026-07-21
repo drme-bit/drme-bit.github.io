@@ -11,6 +11,7 @@ import {
   FiArrowRight,
 } from 'react-icons/fi';
 import { BLOG_POSTS } from '@/data/blogData';
+import { useNav } from '@/providers/NavProvider';
 import { usePostTransition } from '../PostTransitionContext';
 import styles from './PostPage.module.scss';
 
@@ -62,6 +63,7 @@ export default function PostPageClient() {
   const { slug } = useParams() as { slug: string };
   const router = useRouter();
   const { transitionFrom } = usePostTransition();
+  const { setConfig } = useNav();
   const post = BLOG_POSTS.find((p) => p.slug === slug);
 
   const clipFrom = useMemo(() => {
@@ -83,6 +85,20 @@ export default function PostPageClient() {
     if (!post) router.replace('/posts');
   }, [post, router]);
 
+  // Configure nav with prev/next arrows
+  useEffect(() => {
+    if (!post) return;
+    setConfig({
+      sections: [],
+      arrows: {
+        prev: prevPost ? `/posts/${prevPost.slug}` : undefined,
+        next: nextPost ? `/posts/${nextPost.slug}` : undefined,
+        onPrev: prevPost ? () => router.push(`/posts/${prevPost.slug}`) : undefined,
+        onNext: nextPost ? () => router.push(`/posts/${nextPost.slug}`) : undefined,
+      },
+    });
+  }, [slug]);
+
   if (!post) return null;
 
   const currentIndex = BLOG_POSTS.findIndex((p) => p.slug === slug);
@@ -93,37 +109,6 @@ export default function PostPageClient() {
   return (
     <div className={styles['post-page']}>
       <ProgressBar />
-
-      {/* Floating Nav */}
-      <motion.nav
-        className={styles['pp-nav']}
-        initial={clipFrom ? { opacity: 0, y: -10 } : false}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <Link href="/" className={styles['pp-nav-home']}>
-          <FiHome size={10} />
-          <span>home</span>
-        </Link>
-        <div className={styles['pp-nav-divider']} />
-        <Link href="/posts" className={styles['pp-nav-home']}>
-          <FiArrowLeft size={10} />
-          <span>posts</span>
-        </Link>
-        <div className={styles['pp-nav-spacer']} />
-        <div className={styles['pp-nav-arrows']}>
-          {prevPost && (
-            <Link href={`/posts/${prevPost.slug}`} className={styles['pp-nav-arrow']}>
-              <FiArrowLeft size={14} />
-            </Link>
-          )}
-          {nextPost && (
-            <Link href={`/posts/${nextPost.slug}`} className={styles['pp-nav-arrow']}>
-              <FiArrowRight size={14} />
-            </Link>
-          )}
-        </div>
-      </motion.nav>
 
       {/* Post Content with clip-path morph from card */}
       {PostContent && clipFrom ? (

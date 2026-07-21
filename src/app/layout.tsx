@@ -3,6 +3,9 @@ import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google';
 import { SettingsProvider } from '@/providers/ThemeProvider';
 import { TerrainProvider } from '@/providers/TerrainProvider';
 import { ModalProvider } from '@/providers/ModalProvider';
+import { ActivityProvider } from '@/providers/ActivityProvider';
+import { NavProvider } from '@/providers/NavProvider';
+import GlobalNav from '@/widgets/global-nav/GlobalNav';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import './globals.scss';
@@ -68,9 +71,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SettingsProvider>
           <TerrainProvider>
             <ModalProvider>
-              <Analytics />
-              <SpeedInsights />
-              {children}
+              <ActivityProvider>
+                <NavProvider>
+                  <GlobalNav />
+                  <Analytics />
+                  <SpeedInsights />
+                  {children}
+                </NavProvider>
+              </ActivityProvider>
             </ModalProvider>
           </TerrainProvider>
         </SettingsProvider>

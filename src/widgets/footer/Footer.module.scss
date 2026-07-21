@@ -67,3 +67,21 @@
   height: 16px;
   object-fit: contain;
 }
+
+.footer-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-link {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.2s var(--ease-out);
+
+  &:hover {
+    color: var(--accent-secondary);
+  }
+}

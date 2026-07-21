@@ -14,6 +14,7 @@ import {
   FiAlertCircle,
 } from 'react-icons/fi';
 import { getProjectById, getProjectIndex, PROJECTS } from '@/data/projectsData';
+import { useNav } from '@/providers/NavProvider';
 import styles from './ProjectPage.module.scss';
 
 interface Project {
@@ -308,7 +309,7 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
   const { id } = useParams() as { id: string };
   const router = useRouter();
   const project = getProjectById(id) as Project | undefined;
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const { setConfig, setActiveSection } = useNav();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -337,6 +338,32 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
     links.push({ label: 'Source Code', url: project.repo });
   }
 
+  // Configure GlobalNav — set once per project
+  useEffect(() => {
+    if (!project || contentSections.length === 0) return;
+
+    const sections = contentSections.map((s) => ({
+      id: s.id,
+      label: s.label,
+    }));
+
+    const onSectionClick = (sectionId: string) => {
+      const el = document.getElementById(`section-${sectionId}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    setConfig({
+      sections,
+      onSectionClick,
+      arrows: {
+        prev: prevProject ? `/project/${prevProject.id}` : undefined,
+        next: nextProject ? `/project/${nextProject.id}` : undefined,
+        onPrev: prevProject ? () => router.push(`/project/${prevProject.id}`) : undefined,
+        onNext: nextProject ? () => router.push(`/project/${nextProject.id}`) : undefined,
+      },
+    });
+  }, [id]);
+
   useEffect(() => {
     if (!project) return;
     const observers = contentSections.map((section) => {
@@ -353,46 +380,12 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
     });
 
     return () => observers.forEach((observer) => observer?.disconnect());
-  }, [contentSections, project]);
+  }, [contentSections, project, setActiveSection]);
 
   if (!project) return null;
 
   return (
     <div className={styles['project-page']}>
-      {/* Top Nav */}
-      <nav className={styles['pp-nav']}>
-        <Link href="/" className={styles['pp-nav-home']}>
-          <FiHome size={12} />
-        </Link>
-        <div className={styles['pp-nav-divider']} />
-        <div className={styles['pp-nav-sections']}>
-          {contentSections.map((s) => (
-            <button
-              key={s.id}
-              className={`${styles['pp-nav-link']}${activeSection === s.id ? ` ${styles['is-active']}` : ''}`}
-              onClick={() =>
-                document.getElementById(`section-${s.id}`)?.scrollIntoView()
-              }
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-        <div className={styles['pp-nav-divider']} />
-        <div className={styles['pp-nav-arrows']}>
-          {prevProject && (
-            <Link href={`/project/${prevProject.id}`} className={styles['pp-nav-arrow']}>
-              <FiChevronLeft size={14} />
-            </Link>
-          )}
-          {nextProject && (
-            <Link href={`/project/${nextProject.id}`} className={styles['pp-nav-arrow']}>
-              <FiChevronRight size={14} />
-            </Link>
-          )}
-        </div>
-      </nav>
-
       {/* Hero */}
       <header className={styles['pp-hero']}>
         {(project.video || project.image) && (
@@ -525,52 +518,9 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
                 ))}
               </div>
             </div>
-
-            {/* Navigation */}
-            <div className={styles['pp-right-section']}>
-              <span className={styles['pp-right-label']}>Sections</span>
-              <nav className={styles['pp-right-nav']}>
-                {contentSections.map((s) => (
-                  <button
-                    key={s.id}
-                    className={`${styles['pp-right-nav-link']}${activeSection === s.id ? ` ${styles['is-active']}` : ''}`}
-                    onClick={() =>
-                      document.getElementById(`section-${s.id}`)?.scrollIntoView()
-                    }
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
           </div>
         </aside>
       </div>
-
-      {/* Bottom Nav */}
-      <nav className={styles['pp-bottom-nav']}>
-        {prevProject && (
-          <Link
-            href={`/project/${prevProject.id}`}
-            className={styles['pp-bottom-nav-btn']}
-          >
-            <FiChevronLeft size={14} />
-            <span>{prevProject.title}</span>
-          </Link>
-        )}
-        <Link href="/" className={styles['pp-bottom-nav-home']}>
-          <FiHome size={14} />
-        </Link>
-        {nextProject && (
-          <Link
-            href={`/project/${nextProject.id}`}
-            className={`${styles['pp-bottom-nav-btn']} ${styles['pp-bottom-nav-btn--next']}`}
-          >
-            <span>{nextProject.title}</span>
-            <FiChevronRight size={14} />
-          </Link>
-        )}
-      </nav>
     </div>
   );
 }

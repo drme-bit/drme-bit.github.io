@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { SceneProvider, useScene } from '@/providers/SceneProvider';
+import { useNav } from '@/providers/NavProvider';
 import useLockOrientation from '@/shared/hooks/useLockOrientation';
 import Hero from '@/features/hero/ui/Hero';
 import About from '@/features/about/ui/About';
@@ -11,8 +12,6 @@ import Blog from '@/features/blog/ui/Blog';
 import Reviews from '@/features/reviews/ui/Reviews';
 import Contacts from '@/features/contacts/ui/Contacts';
 import Footer from '@/widgets/footer/Footer';
-import Navbar from '@/widgets/navbar/Navbar';
-import GitHubStatus from '@/shared/ui/molecules/GitHubStatus/GitHubStatus';
 import ScrollProgressBar from '@/shared/ui/molecules/ScrollProgressBar/ScrollProgressBar';
 import SearchBar from '@/shared/ui/molecules/SearchBar/SearchBar';
 import ChangeTheme from '@/shared/ui/molecules/ChangeTheme/ChangeTheme';
@@ -46,6 +45,7 @@ function MainInner() {
   const [searchCount, setSearchCount] = useState(0);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const { setSceneNode } = useScene();
+  const { setConfig, setActiveSection } = useNav();
 
   const sceneRef = useCallback(
     (node: HTMLElement | null) => {
@@ -68,11 +68,45 @@ function MainInner() {
     setMascotMessage(null);
   }, []);
 
+  // Configure nav with home page sections
+  useEffect(() => {
+    const sections = [
+      { id: 'about', label: 'about' },
+      { id: 'skills', label: 'skills' },
+      { id: 'experience', label: 'experience' },
+      { id: 'projects', label: 'projects' },
+      { id: 'reviews', label: 'reviews' },
+      { id: 'contact', label: 'contact' },
+    ];
+
+    const onSectionClick = (sectionId: string) => {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    setConfig({ sections, onSectionClick });
+
+    // Observe sections for active state
+    const observers = sections.map((s) => {
+      const el = document.getElementById(s.id);
+      if (!el) return null;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveSection(s.id);
+        },
+        { threshold: 0.3 },
+      );
+      observer.observe(el);
+      return observer;
+    });
+
+    return () => observers.forEach((o) => o?.disconnect());
+  }, [setConfig, setActiveSection]);
+
   return (
     <>
       <Cursor />
       <ScrollProgressBar />
-      <GitHubStatus />
       <div
         ref={sceneRef}
         style={{
@@ -97,7 +131,6 @@ function MainInner() {
       <Blog />
       <Reviews />
       <Contacts />
-      <Navbar />
       <button className="archive-fab" onClick={() => setArchiveOpen(true)} title="archive">
         <svg
           width="14"
