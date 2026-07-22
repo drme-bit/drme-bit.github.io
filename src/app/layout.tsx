@@ -5,7 +5,7 @@ import { TerrainProvider } from '@/providers/TerrainProvider';
 import { ModalProvider } from '@/providers/ModalProvider';
 import { ActivityProvider } from '@/providers/ActivityProvider';
 import { NavProvider } from '@/providers/NavProvider';
-import GlobalNav from '@/widgets/global-nav/GlobalNav';
+import Navbar from '@/widgets/navbar/Navbar';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import './globals.scss';
@@ -73,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ModalProvider>
               <ActivityProvider>
                 <NavProvider>
-                  <GlobalNav />
+                  <Navbar />
                   <Analytics />
                   <SpeedInsights />
                   {children}

@@ -6,6 +6,7 @@ export type NavLinkBase = {
   id: string;
   label: string;
   icon?: IconType;
+  description?: string;
 };
 
 /** Navigates to another page */
@@ -29,11 +30,11 @@ export type NavActionLink = NavLinkBase & {
 
 export type NavLeaf = NavRouteLink | NavSectionLink | NavActionLink;
 
-/** Item with a dropdown of section links */
+/** Item with a dropdown of links */
 export type NavGroup = NavLinkBase & {
   type: 'group';
   href?: string;
-  children: NavSectionLink[];
+  children: NavLeaf[];
 };
 
 export type NavItem = NavRouteLink | NavGroup;

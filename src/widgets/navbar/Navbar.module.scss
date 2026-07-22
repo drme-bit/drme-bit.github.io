@@ -1,285 +1,680 @@
 @use '../../shared/styles/mixins' as *;
-@use '../../shared/styles/animations' as *;
 
-.dock {
+/* ─── Nav bar ────────────────────────────────────────────── */
+
+.nav {
   position: fixed;
-  bottom: 1.2rem;
+  top: 1rem;
   left: 50%;
-  transform: translateX(-50%) translateY(0);
-  z-index: 150;
+  transform: translateX(-50%);
+  z-index: 999;
   display: flex;
-  align-items: flex-end;
-  gap: 0.1rem;
-  padding: 0.4rem 0.6rem;
-  background: var(--glass);
-  backdrop-filter: blur(28px) saturate(1.4);
-  -webkit-backdrop-filter: blur(28px) saturate(1.4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  font-family: var(--font-mono);
-  font-weight: 500;
-  pointer-events: auto;
-  opacity: 0;
-  transform: translateX(-50%) translateY(24px) scale(0.92);
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.3s var(--ease-out),
-              border-color 0.3s var(--ease-out),
-              box-shadow 0.4s var(--ease-out);
-
-  &.mounted {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-
-  &:hover {
-    background: var(--glass-hover);
-    border-color: var(--border-hover);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.25),
-      0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-  }
-
-  &.collapsed {
-    transform: translateX(-50%) translateY(calc(100% + 2rem)) scale(0.85);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.3s ease-out,
-                pointer-events 0s linear 0.4s;
-
-    .label,
-    .indicator,
-    .inner-glow {
-      opacity: 0;
-    }
-
-    .item {
-      opacity: 0;
-      transform: translateY(4px) scale(0.9);
-      transition: opacity 0.15s ease-out, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-  }
-
-  @media (max-width: 700px) {
-    bottom: 0.6rem;
-    padding-bottom: calc(0.25rem + env(safe-area-inset-bottom));
-    padding: 0.25rem 0.4rem;
-    gap: 0;
-    border-radius: var(--radius-md);
-
-    &.collapsed {
-      transform: translateX(-50%) translateY(calc(100% + 1.5rem)) scale(0.8);
-
-      .item {
-        padding: 0.15rem 0.2rem;
-        min-width: 32px;
-        min-height: 32px;
-      }
-
-      .icon {
-        font-size: 0.7rem;
-      }
-    }
-  }
-}
-
-.inner-glow {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(ellipse at 50% -20%, var(--accent-glow), transparent 70%);
-  opacity: 0.3;
-  pointer-events: none;
-  transition: opacity 0.4s var(--ease-out);
-}
-
-.indicator {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: calc(100% - 0.35rem);
-  transform: translateY(0) translateX(0);
-  background: var(--accent-muted);
-  border-radius: var(--radius-md);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.item {
-  position: relative;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 0.15rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.3rem 0.45rem;
+  padding: 0.3rem 0.4rem;
+  background: var(--glass-strong);
+  backdrop-filter: blur(37px);
+  -webkit-backdrop-filter: blur(37px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  opacity: 0.95;
+  transition:
+          transform 0.4s var(--ease-out),
+          width 0.8s var(--ease-out),
+          height 0.8s var(--ease-out),
+          padding 0.4s var(--ease-out),
+          border-radius 0.4s var(--ease-out),
+          background-color 0.3s var(--ease-out),
+          opacity 0.3s var(--ease-out);
+  max-width: calc(100vw - 2rem);
+
+  & > * {
+    transition: opacity 0.2s var(--ease-out);
+    opacity: 1;
+  }
+
+  &--collapsed {
+    width: 134px;
+    height: 5px;
+    padding: 0;
+    border-radius: var(--radius-md);
+    transform: translateX(-50%);
+    opacity: 0.8;
+    background: var(--glass-strong);
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition:
+            transform 0.4s var(--ease-out),
+            width 0.8s var(--ease-out),
+            height 0.8s var(--ease-out),
+            padding 0.4s var(--ease-out),
+            border-radius 0.4s var(--ease-out),
+            background-color 0.3s var(--ease-out),
+            opacity 0.3s var(--ease-out);
+
+    & > * {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    &:hover {
+      opacity: 1;
+      transform: translateX(-50%) scaleX(1.05);
+    }
+  }
+
+  &--context {
+    max-width: calc(100vw - 2rem);
+  }
+
+  @include respond-to(mobile) {
+    bottom: 0.5rem;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    max-width: calc(100vw - 1rem);
+
+    /* Сохраняем логику полоски на мобилках */
+    &--collapsed {
+      width: 120px;
+      height: 5px;
+      transform: translateX(-50%);
+    }
+  }
+}
+
+/* ─── Logo ───────────────────────────────────────────────── */
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.65rem;
+  text-decoration: none;
   border-radius: var(--radius-md);
-  z-index: 1;
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  transition: opacity 0.25s ease-out,
-              background 0.2s var(--ease-out),
-              transform 0.2s var(--ease-out);
+  transition: all 0.2s var(--ease-out);
+  flex-shrink: 0;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  &:active {
-    transform: scale(0.9) !important;
-    transition-duration: 0.08s;
-  }
-
-  @media (max-width: 700px) {
-    padding: 0.25rem 0.35rem;
-    min-width: 40px;
-    min-height: 40px;
-    align-items: center;
-    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
   }
 }
 
-.icon {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  transition: color 0.2s var(--ease-out),
-              filter 0.3s var(--ease-out),
-              transform 0.3s var(--ease-out);
-
-  @media (max-width: 700px) {
-    font-size: 0.8rem;
-  }
-}
-
-.active .icon {
+.logoText {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
   color: var(--accent);
-  filter: drop-shadow(0 0 6px var(--accent));
-  transform: scale(1.05);
+  letter-spacing: 0.06em;
 }
 
-.label {
-  font-size: 0.45rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  opacity: 0.6;
-  transition: color 0.2s var(--ease-out),
-              opacity 0.2s var(--ease-out);
+/* ─── Desktop nav wrapper ────────────────────────────────── */
 
-  @media (max-width: 700px) {
+.desktopNav {
+  display: flex;
+  align-items: center;
+
+  @include respond-to(mobile) {
     display: none;
   }
 }
 
-.active .label {
-  color: var(--accent);
-  opacity: 1;
-}
-
-.tooltip {
-  position: fixed;
-  z-index: 160;
-  transform: translateX(-50%) translateY(-100%);
-  padding: 0.25rem 0.5rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  pointer-events: none;
-  animation: tooltip-in 0.15s var(--ease-out) forwards;
-  box-shadow: var(--shadow-md);
-}
-
-@keyframes tooltip-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(-100%) scale(0.92); }
-  to { opacity: 1; transform: translateX(-50%) translateY(-100%) scale(1); }
-}
-
-.expand-btn {
-  position: fixed;
-  bottom: 0.5rem;
-  left: 50%;
-  z-index: 151;
+.navList {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  color: var(--text-dim);
+  gap: 0.1rem;
+  list-style: none;
+}
+
+/* ─── Shared trigger base ────────────────────────────────── */
+
+.triggerBase {
+  position: relative;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 500;
+  color: var(--text-ghost);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  transition: color 0.2s var(--ease-out), background 0.2s var(--ease-out), box-shadow 0.25s var(--ease-out);
+  white-space: nowrap;
+  overflow: hidden;
   cursor: pointer;
-  opacity: 0;
-  transform: translateX(-50%) translateY(16px) scale(0.5);
-  pointer-events: none;
-  visibility: hidden;
-  transition: opacity 0.3s var(--ease-out),
-              transform 0.3s var(--ease-out),
-              visibility 0s linear 0.3s,
-              background 0.2s,
-              color 0.2s,
-              box-shadow 0.3s var(--ease-out);
+
+  &:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+}
+
+/* ─── NavigationMenu trigger (groups) ────────────────────── */
+
+.navTrigger {
+  composes: triggerBase;
+  gap: 0.4rem;
+  padding: 0.55rem 0.75rem;
+
+  &--active {
+    color: var(--accent-secondary);
+    background: rgba(125, 211, 252, 0.1);
+  }
+}
+
+.navTriggerIcon {
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.navTriggerLabel {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* ─── Expandable tab ─────────────────────────────────────── */
+
+.expandTab {
+  composes: triggerBase;
+  display: flex;
+  align-items: center;
+  padding: 0.55rem 0.7rem;
+  transition: background 0.15s var(--ease-out), color 0.15s var(--ease-out);
 
   &:hover {
     background: var(--glass-hover);
-    color: var(--text);
-    box-shadow: 0 0 20px var(--accent-glow);
   }
 
-  @media (max-width: 700px) {
-    bottom: calc(0.5rem + env(safe-area-inset-bottom));
-    width: 32px;
-    height: 32px;
+  &--active {
+    color: var(--accent-secondary);
+    background: rgba(125, 211, 252, 0.1);
   }
 }
 
-.expand-btn-visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0) scale(1);
-  pointer-events: auto;
-  visibility: visible;
-  transition: opacity 0.25s ease-out 0.25s,
-              transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s,
-              visibility 0s linear 0s,
-              background 0.2s,
-              color 0.2s,
-              box-shadow 0.3s var(--ease-out);
-  animation: expand-pulse 2.5s ease-in-out infinite 0.8s;
+.expandTabIcon {
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  transition: all 0.2s var(--ease-out);
+}
+
+.expandTabLabel {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* ─── Custom dropdown ───────────────────────────────────── */
+
+.dropdown {
+  position: relative;
+}
+
+/* Backdrop — invisible, catches mouse between trigger and panel */
+.dropdownBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+/* Trigger gets darker bg when its panel is open */
+.navTrigger--open {
+  color: var(--text) !important;
+  background: var(--bg-elevated) !important;
+  box-shadow: none !important;
+}
+
+/* ─── Dropdown panel ────────────────────────────────────── */
+
+.dropdownPanel {
+  position: fixed;
+  left: 50%;
+  top: calc(3.5rem + 8px);
+  transform: translateX(-50%);
+  width: 56rem;
+  max-width: calc(100vw - 2rem);
+  padding: 6px;
+  background: var(--bg-elevated);
+  @include backdrop-blur(36px);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-lg) + 4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  color: var(--text);
+  z-index: 100;
+}
+
+.dropdownPanel--fade {
+  animation: dropdownFadeIn 0.3s var(--ease-out);
+}
+
+.dropdownPanel--fromLeft {
+  animation: dropdownSlideFromLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdownPanel--fromRight {
+  animation: dropdownSlideFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdownPanel--exit {
+  animation: dropdownFadeOut 0.25s var(--ease-out) forwards;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dropdownFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes dropdownSlideFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-50% - 20px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes dropdownSlideFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-50% + 20px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
+
+.dropdownInner {
+  display: grid;
+  grid-template-columns: 1fr 0.22fr;
+  width: 100%;
+  align-items: stretch;
+  background: var(--glass-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  @include respond-to(mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Content slide when switching between dropdowns */
+.dropdownInner--slideLeft {
+  animation: innerSlideFromLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdownInner--slideRight {
+  animation: innerSlideFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes innerSlideFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes innerSlideFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.dropdownCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  align-self: start;
+  list-style: none;
+  margin: 0;
+
+  li {
+    list-style: none;
+  }
+
+  @include respond-to(mobile) {
+    grid-template-columns: 1fr 1fr;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+.dropdownSecondary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.6rem;
+  list-style: none;
+  margin: 0;
+
+  li {
+    list-style: none;
+  }
+}
+
+/* ─── Dropdown card ─────────────────────────────────────── */
+
+.dropdownCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  padding: 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--glass);
+  text-decoration: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
 
   &:hover {
-    transform: translateX(-50%) translateY(-2px) scale(1.1);
-    animation: none;
-
-    .expand-icon {
-      transform: translateY(-1px);
-    }
+    color: var(--text);
+    border-color: var(--border-hover);
+    background: var(--glass-hover);
+    transform: translateY(-2px);
   }
 }
 
-@keyframes expand-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 var(--accent-glow),
-                0 0 0 0 transparent;
-  }
-  50% {
-    box-shadow: 0 0 12px 3px var(--accent-glow),
-                0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
+.dropdownCardIcon {
+  font-size: 1rem;
+  color: var(--accent-secondary);
+}
+
+.dropdownCardTitle {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.dropdownCardDesc {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  opacity: 0.6;
+}
+
+/* ─── Dropdown small item ───────────────────────────────── */
+
+.dropdownSmallItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s var(--ease-out);
+
+  &:hover {
+    color: var(--text);
+    background: var(--glass-hover);
+    padding-left: 0.65rem;
   }
 }
 
-.expand-icon {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.25s var(--ease-out);
+.dropdownSmallItemLabel {
+  font-size: 0.65rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.dropdownSmallItemArrow {
+  margin-left: auto;
+  font-size: 0.55rem;
+  opacity: 0.35;
+  transition: opacity 0.12s var(--ease-out);
+
+  .dropdownSmallItem:hover & {
+    opacity: 0.8;
+  }
+}
+
+/* ─── Divider ────────────────────────────────────────────── */
+
+.divider {
+  width: 1px;
+  height: 1rem;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 0.15rem;
+
+  @include respond-to(mobile) {
+    display: none;
+  }
+}
+
+/* ─── Context items (sections / page TOC) ────────────────── */
+
+.contextItems {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+
+  @include respond-to(mobile) {
+    display: none;
+  }
+}
+
+.contextItem {
+  position: relative;
+  padding: 0.5rem 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 500;
+  color: var(--text-ghost);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color 0.2s var(--ease-out), background 0.2s var(--ease-out);
+  white-space: nowrap;
+  overflow: hidden;
+
+  &:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &--active {
+    color: var(--accent-secondary);
+    background: rgba(125, 211, 252, 0.1);
+  }
+}
+
+.contextIndicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: var(--accent-secondary);
+  border-radius: 1px;
+  box-shadow: 0 0 8px var(--accent-secondary-glow);
+  animation: indicatorIn 0.25s var(--ease-out);
+}
+
+@keyframes indicatorIn {
+  from { width: 0; opacity: 0; }
+  to { width: 60%; opacity: 1; }
+}
+
+/* ─── Mobile menu button ─────────────────────────────────── */
+
+.menuBtn {
+  display: none;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+
+  @include respond-to(mobile) {
+    display: flex;
+  }
+}
+
+.menuBtnIcon {
+  font-size: 0.85rem;
+}
+
+/* ─── Sheet (mobile) ─────────────────────────────────────── */
+
+.sheetContent {
+  background: var(--bg-elevated) !important;
+  border-left: 1px solid var(--border) !important;
+  width: 75% !important;
+  max-width: 280px !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.sheetCloseBtn {
+  padding: 0.4rem !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.sheetCloseX {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.sheetBody {
+  padding: 0.75rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sheetAccordionTrigger {
+  font-family: var(--font-mono) !important;
+  font-size: 0.55rem !important;
+  font-weight: 500 !important;
+  color: var(--text-dim) !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  padding: 0.5rem 0.4rem !important;
+
+  &:hover {
+    color: var(--text) !important;
+    text-decoration: none !important;
+  }
+}
+
+.sheetAccordionContent {
+  padding-left: 0.5rem !important;
+}
+
+.sheetLinkList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sheetLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all 0.12s var(--ease-out);
+
+  &:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+.sheetRouteLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all 0.12s var(--ease-out);
+
+  &:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+.sheetLinkIcon {
+  font-size: 0.65rem;
+  flex-shrink: 0;
+}
+
+.sheetDivider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  margin: 0.35rem 0;
 }
