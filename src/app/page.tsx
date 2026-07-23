@@ -13,8 +13,6 @@ import Reviews from '@/features/reviews/ui/Reviews';
 import Contacts from '@/features/contacts/ui/Contacts';
 import Footer from '@/widgets/footer/Footer';
 import ScrollProgressBar from '@/shared/ui/molecules/ScrollProgressBar/ScrollProgressBar';
-import SearchBar from '@/shared/ui/molecules/SearchBar/SearchBar';
-import ChangeTheme from '@/shared/ui/molecules/ChangeTheme/ChangeTheme';
 import Mascot, { getMockMessage } from '@/widgets/mascot/Mascot';
 
 const Scene = dynamic(() => import('@/widgets/scene/Scene'), { ssr: false });
@@ -28,7 +26,6 @@ const SoundEffects = dynamic(() => import('@/shared/ui/organisms/SoundEffects/So
 
 function MainInner() {
   const [mascotMessage, setMascotMessage] = useState<string | null>(null);
-  const [searchCount, setSearchCount] = useState(0);
   const [archiveOpen, setArchiveOpen] = useState(false);
 
   const { setSceneNode } = useScene();
@@ -42,14 +39,6 @@ function MainInner() {
   );
 
   useLockOrientation();
-
-  const handleSearch = useCallback(() => {
-    setSearchCount((c) => c + 1);
-  }, []);
-
-  useEffect(() => {
-    if (searchCount > 0) setMascotMessage(getMockMessage(searchCount));
-  }, [searchCount]);
 
   const handleMascotDone = useCallback(() => {
     setMascotMessage(null);
@@ -130,8 +119,6 @@ function MainInner() {
         </svg>
       </button>
 
-      <SearchBar onSearch={handleSearch} />
-      <ChangeTheme />
       <Mascot userMessage={mascotMessage ?? undefined} onDone={handleMascotDone} />
       <SoundEffects />
       <Footer />

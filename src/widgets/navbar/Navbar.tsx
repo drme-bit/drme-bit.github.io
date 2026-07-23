@@ -3,23 +3,11 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
-  FiHome,
-  FiUser,
-  FiZap,
-  FiBriefcase,
-  FiGrid,
-  FiFileText,
-  FiStar,
-  FiMail,
-  FiBarChart2,
   FiMenu,
   FiChevronRight,
-  FiGithub,
 } from 'react-icons/fi';
-import type { IconType } from 'react-icons';
 import { useNav } from '@/providers/NavProvider';
 import { GLOBAL_NAV } from '@/config/navConfig';
 import type { NavGroup, NavRouteLink, NavSectionLink, NavLeaf } from '@/config/navTypes';
@@ -29,32 +17,12 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/shared/ui/organisms/Sheet/Sheet';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/shared/ui/organisms/Accordion/Accordion';
+
 import { Button } from '@/shared/ui/organisms/Button/Button';
+import { NavDropdown } from './NavDropdown';
+import SearchBar from '@/shared/ui/molecules/SearchBar/SearchBar';
+import ChangeTheme from '@/shared/ui/molecules/ChangeTheme/ChangeTheme';
 import styles from './Navbar.module.scss';
-
-/* ─── Icon map ──────────────────────────────────────────── */
-
-const ICON_MAP: Record<string, IconType> = {
-  home: FiHome,
-  about: FiUser,
-  skills: FiZap,
-  experience: FiBriefcase,
-  projects: FiGrid,
-  reviews: FiStar,
-  contact: FiMail,
-  blog: FiFileText,
-  stats: FiBarChart2,
-};
-
-function getIcon(id: string): IconType {
-  return ICON_MAP[id] || FiGrid;
-}
 
 /* ─── Expandable tab (like ExpandableTabs component) ────── */
 
@@ -86,7 +54,7 @@ function ExpandableTab({
   isRouteActive: boolean;
   onSelect: () => void;
 }) {
-  const Icon = getIcon(item.id);
+  const Icon = item.icon;
 
   return (
     <motion.button
@@ -100,7 +68,7 @@ function ExpandableTab({
       custom={isSelected}
       transition={springTransition}
     >
-      <Icon className={styles.expandTabIcon} />
+      {Icon && <Icon className={styles.expandTabIcon} />}
       <AnimatePresence initial={false}>
         {isSelected && (
           <motion.span
@@ -119,90 +87,11 @@ function ExpandableTab({
   );
 }
 
-/* ─── Dropdown content (shared, renders inside one panel) ── */
-
-function DropdownContent({
-  group,
-  onCloseImmediate,
-  onLinkClick,
-  slideKey,
-  slideDirection,
-}: {
-  group: NavGroup;
-  onCloseImmediate: () => void;
-  onLinkClick: (item: NavSectionLink) => void;
-  slideKey: string;
-  slideDirection: 'left' | 'right' | null;
-}) {
-  const router = useRouter();
-  const featured = group.children.slice(0, 3);
-  const secondary = group.children.slice(3);
-
-  const handleClick = (e: React.MouseEvent, child: NavLeaf) => {
-    if (child.type === 'section') onLinkClick(child);
-    else router.push(leafHref(child));
-    e.preventDefault();
-    onCloseImmediate();
-  };
-
-  return (
-    <div
-      key={slideKey}
-      className={`${styles.dropdownInner} ${
-        slideDirection === 'left' ? styles['dropdownInner--slideLeft']
-        : slideDirection === 'right' ? styles['dropdownInner--slideRight']
-        : ''
-      }`}
-    >
-      <ul className={styles.dropdownCards}>
-        {featured.map((child) => {
-          const ChildIcon = child.icon || FiGrid;
-          return (
-            <li key={child.id}>
-              <a
-                href={leafHref(child)}
-                className={styles['dropdownCard']}
-                onClick={(e) => handleClick(e, child)}
-              >
-                <ChildIcon className={styles['dropdownCardIcon']} />
-                <span className={styles['dropdownCardTitle']}>{child.label}</span>
-                {child.description && (
-                  <span className={styles['dropdownCardDesc']}>{child.description}</span>
-                )}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-      {secondary.length > 0 && (
-        <ul className={styles['dropdownSecondary']}>
-          {secondary.map((child) => {
-            const ChildIcon = child.icon || FiGithub;
-            return(
-            <li key={child.id}>
-              <a
-                href={leafHref(child)}
-                className={styles['dropdownSmallItem']}
-                onClick={(e) => handleClick(e, child)}
-              >
-                <ChildIcon/>
-                <span className={styles['dropdownSmallItemLabel']}>{child.label}</span>
-                <FiChevronRight className={styles['dropdownSmallItemArrow']} />
-              </a>
-            </li>
-            )
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
-
 /* ─── Group trigger ──────── */
 
 function leafHref(leaf: NavLeaf): string {
   if (leaf.type === 'route') return leaf.href;
-  if (leaf.type === 'section') return `#${leaf.targetId}`;
+  if (leaf.type === 'section') return `/#${leaf.targetId}`;
   return '#';
 }
 
@@ -223,14 +112,10 @@ function GroupDropdown({
   onCancelClose: () => void;
   router: ReturnType<typeof useRouter>;
 }) {
-  const Icon = getIcon(group.id);
+  const Icon = group.icon;
 
   return (
-    <li
-      className={`${styles['dropdown']}${isOpen ? ` ${styles['dropdown--open']}` : ''}`}
-      onMouseEnter={() => { onCancelClose(); onOpen(); }}
-      onMouseLeave={() => onScheduleClose()}
-    >
+    <li className={`${styles.dropdown}${isOpen ? ` ${styles['dropdown--open']}` : ''}`}>
       <button
         className={`${styles.navTrigger}${isOpen ? ` ${styles['navTrigger--open']}` : ''}${isActive ? ` ${styles['navTrigger--active']}` : ''}`}
         onClick={() => {
@@ -238,9 +123,14 @@ function GroupDropdown({
           else onOpen();
           router.push(group.href || '/');
         }}
+        onMouseEnter={() => { onCancelClose(); onOpen(); }}
+        onMouseLeave={() => onScheduleClose()}
         aria-expanded={isOpen}
+        aria-haspopup="true"
+        aria-controls={`dropdown-${group.id}`}
+        id={`trigger-${group.id}`}
       >
-        <Icon className={styles.navTriggerIcon} />
+        {Icon && <Icon className={styles.navTriggerIcon} />}
         <span className={styles.navTriggerLabel}>{group.label}</span>
       </button>
     </li>
@@ -256,69 +146,57 @@ function MobileNav() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size="icon" variant="ghost" className={styles.menuBtn}>
+        <button className={styles.menuBtn} aria-label="Open menu">
           <FiMenu className={styles.menuBtnIcon} />
-        </Button>
+        </button>
       </SheetTrigger>
-      <SheetContent className={styles.sheetContent} showClose={false}>
+      <SheetContent className={styles.sheetContent} showClose={false} side="right">
         <div className={styles.sheetHeader}>
+          <span className={styles.sheetTitle}>menu</span>
           <SheetClose asChild>
-            <Button size="icon" variant="ghost" className={styles.sheetCloseBtn}>
+            <button className={styles.sheetCloseBtn} aria-label="Close menu">
               <span className={styles.sheetCloseX}>✕</span>
-              <span className="sr-only">Close</span>
-            </Button>
+            </button>
           </SheetClose>
         </div>
         <div className={styles.sheetBody}>
-          <Accordion type="single" collapsible>
-            {groups.map((group) => (
-              <AccordionItem key={group.id} value={group.id}>
-                <AccordionTrigger className={styles.sheetAccordionTrigger}>
-                  {group.label}
-                </AccordionTrigger>
-                <AccordionContent className={styles.sheetAccordionContent}>
-                  <ul className={styles.sheetLinkList}>
-                    {group.children.map((child) => {
-                      const LinkIcon = getIcon(child.id);
-                      const href = leafHref(child);
-                      return (
-                        <li key={child.id}>
-                          <SheetClose asChild>
-                            <a
-                              href={href}
-                              className={styles.sheetLink}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (child.type === 'section') {
-                                  const el = document.getElementById(child.targetId);
-                                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                                } else {
-                                  window.location.href = href;
-                                }
-                              }}
-                            >
-                              <LinkIcon className={styles.sheetLinkIcon} />
-                              <span>{child.label}</span>
-                            </a>
-                          </SheetClose>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          {groups.map((group) => (
+            <div key={group.id} className={styles.sheetGroup}>
+              <span className={styles.sheetGroupLabel}>{group.label}</span>
+              <ul className={styles.sheetLinkList}>
+                {group.children.map((child) => {
+                  const href = leafHref(child);
+                  const ChildIcon = child.icon;
+                  return (
+                    <li key={child.id}>
+                      <SheetClose asChild>
+                        <a
+                          href={href}
+                          className={styles.sheetLink}
+                          onClick={(e) => {
+                            window.location.href = href;
+                          }}
+                        >
+                          {ChildIcon && <ChildIcon className={styles.sheetLinkIcon} />}
+                          <span className={styles.sheetLinkLabel}>{child.label}</span>
+                        </a>
+                      </SheetClose>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
 
           <div className={styles.sheetDivider} />
 
           {routes.map((route) => {
-            const RouteIcon = getIcon(route.id);
+            const RouteIcon = route.icon;
             return (
               <SheetClose key={route.id} asChild>
                 <Link href={route.href} className={styles.sheetRouteLink}>
-                  <RouteIcon className={styles.sheetLinkIcon} />
-                  <span>{route.label}</span>
+                  {RouteIcon && <RouteIcon className={styles.sheetLinkIcon} />}
+                  <span className={styles.sheetLinkLabel}>{route.label}</span>
                 </Link>
               </SheetClose>
             );
@@ -379,41 +257,6 @@ export default function Navbar() {
     prevGroupIndex.current = -1;
   }, []);
 
-  // Shared backdrop + panel container — visible when any dropdown is open
-  const activeGroup = groups.find((g) => g.id === openGroupId);
-  const [panelMounted, setPanelMounted] = useState(false);
-  const [panelAnimState, setPanelAnimState] = useState<string | null>(null);
-  const prevOpenRef = useRef(false);
-
-  useEffect(() => {
-    if (openGroupId && !prevOpenRef.current) {
-      // Opening first time — mount first, animate second
-      clearTimeout(exitTimerRef.current!);
-      setPanelMounted(true);
-      setPanelAnimState(null);
-      // Apply animation after paint
-      const id = requestAnimationFrame(() => {
-        setPanelAnimState(direction ? (direction === 'left' ? 'enter-left' : 'enter-right') : 'enter');
-      });
-      prevOpenRef.current = true;
-      return () => cancelAnimationFrame(id);
-    } else if (!openGroupId && prevOpenRef.current) {
-      // Closing — animate out, then unmount
-      setPanelAnimState('exit');
-      exitTimerRef.current = setTimeout(() => {
-        setPanelMounted(false);
-        setPanelAnimState(null);
-      }, 300);
-      prevOpenRef.current = false;
-    } else if (openGroupId && prevOpenRef.current) {
-      // Switching — just change content direction
-      setPanelAnimState(direction ? (direction === 'left' ? 'slide-left' : 'slide-right') : null);
-    }
-  }, [openGroupId, direction]);
-
-  const exitTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
-  useEffect(() => () => clearTimeout(exitTimerRef.current!), []);
-
   // Reset nav config when leaving projects/post pages
   useEffect(() => {
     if (!pathname.includes('/projects/') && !pathname.includes('/posts/')) {
@@ -421,19 +264,26 @@ export default function Navbar() {
     }
   }, [pathname, setPageConfig]);
 
-  // Collapse on scroll — position-based thresholds
+  // Collapse on scroll — position-based thresholds with smooth hysteresis
   useEffect(() => {
     const HIDE_Y = 80;
     const SHOW_Y = 20;
+    let ticking = false;
 
     const handleScroll = () => {
-      const y = window.scrollY;
+      if (ticking) return;
+      ticking = true;
+      
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
 
-      if (y > HIDE_Y) {
-        setCollapsed(true);
-      } else if (y < SHOW_Y) {
-        setCollapsed(false);
-      }
+        if (y > HIDE_Y) {
+          setCollapsed(true);
+        } else if (y < SHOW_Y) {
+          setCollapsed(false);
+        }
+        ticking = false;
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -478,46 +328,67 @@ export default function Navbar() {
     [pageConfig, setActiveSection],
   );
 
-  const sharedPanel = panelMounted && activeGroup
-    ? createPortal(
-        <>
-          <div className={styles.dropdownBackdrop} />
-          <div className={`${styles.dropdownPanel} ${
-            panelAnimState === 'enter' ? styles['dropdownPanel--fade']
-            : panelAnimState === 'enter-left' ? styles['dropdownPanel--fromLeft']
-            : panelAnimState === 'enter-right' ? styles['dropdownPanel--fromRight']
-            : panelAnimState === 'exit' ? styles['dropdownPanel--exit']
-            : ''
-          }`}
-          onMouseEnter={cancelGroupClose}
-          onMouseLeave={scheduleGroupClose}
-          >
-            <DropdownContent
-              group={activeGroup}
-              onCloseImmediate={closeGroupImmediate}
-              onLinkClick={handleGroupLinkClick}
-              slideKey={openGroupId!}
-              slideDirection={panelAnimState?.startsWith('slide-') ? panelAnimState.replace('slide-', '') as 'left' | 'right' : null}
-            />
-          </div>
-        </>,
-        document.body,
-      )
-    : null;
+  const activeGroup = groups.find((g) => g.id === openGroupId);
+
+  // Render dropdown panel — always mounted, handles its own show/hide
+  const dropdownPanel = (
+    <NavDropdown
+      key="nav-dropdown"
+      groups={groups}
+      activeGroupId={openGroupId}
+      onClose={scheduleGroupClose}
+      onCloseImmediate={closeGroupImmediate}
+      onCancelClose={cancelGroupClose}
+      onLinkClick={handleGroupLinkClick}
+      router={router}
+    />
+  );
 
   return (
-    <nav
-      ref={ref}
-      className={`${styles.nav}${collapsed ? ` ${styles['nav--collapsed']}` : ''}${
-        hasContextSections ? ` ${styles['nav--context']}` : ''
-      }`}
-      aria-label="Navigation"
-      onMouseEnter={setCollapsed.bind(null, false)}
-    >
-      {/* Logo */}
-      <Link href="/" className={styles.logo}>
-        <span className={styles.logoText}>DrME</span>
+    <>
+      {/* Logo — fixed left on desktop, in navbar on mobile */}
+      <Link href="/" className={styles.logo} aria-label="Home">
+        <svg
+          className={styles.logoIcon}
+          viewBox="0 0 150 136.9"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m125.6 94.2v14.8c0 2.4-1.8 4.3-4.3 4.3h-48.3c-4-0.1-7.4-3-7.4-7.3v-39.4c0-3.1-1.8-6.8-3.7-8.7l-29.4-30.8c-1.4-1.5-2.8-2.4-5.4-2.4h-14.6c-2.2 0-3.2 1.1-3.2 3.1v96.3c0 2.3 1.7 3.7 4 3.7h7.5c2.5 0.1 4.2-1.5 4.2-4.2v-82.8c0-1.4 1.5-2.6 3-1l21.1 22.5c0.2 2 1.3 2.1 1.3 4.1l0.1 57.9c0 2.1 1.2 3.5 3.4 3.5h81c3.5 0 5.8-2.4 5.8-6.1v-27.4c0-2.4-1.8-4.7-4.7-4.7h-5.8c-2.3-0.2-4.6 1.5-4.6 4.6zm-92.3-69.5v-12.6c0-1.5 0.9-2.8 2.8-2.8h96.1c4.2 0 6.9 2.9 6.9 6.8v31.2c0 1.7-0.5 3.2-2 4.3s-2.4 1-8.2 1c-1.9 0-4.9-1-4.9-5.1 0-3.2 0-16.3-0.1-18 0-2.9-2.2-5.1-5.5-5.1h-82.8-2.3v0.3zm58.6 69.2 8.8-2.9c3.5-1.1 3.7-3.6 3.7-5.2 0-7.4-0.2-39.4-0.2-40.5 0-2.5-1.8-4.7-4.5-4.7h-5.8c-1.7 0-3.4 0.7-4.9 2.3-2.5 2.7-8.2 9.8-13.2 16.1-2 2.4-2.2 4.9-2.2 8.1v5c0.1 3.9 4 6.1 6.4 3l7.9-9.7c1.1-1.2 2.6-2 2.6 0v27.4c0 1.1 0.6 1.5 1.4 1.1z"
+            fill="currentColor"
+          />
+        </svg>
       </Link>
+
+      {/* Search & Settings — fixed right on desktop */}
+      <div className={styles.navActions}>
+        <SearchBar />
+        <ChangeTheme />
+      </div>
+
+      <nav
+        ref={ref}
+        className={`${styles.nav}${collapsed ? ` ${styles['nav--collapsed']}` : ''}${
+          hasContextSections ? ` ${styles['nav--context']}` : ''
+        }`}
+        aria-label="Navigation"
+        onMouseEnter={setCollapsed.bind(null, false)}
+      >
+        {/* Mobile logo */}
+        <Link href="/" className={styles.mobileLogo} aria-label="Home">
+          <svg
+            className={styles.logoIcon}
+            viewBox="0 0 150 136.9"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m125.6 94.2v14.8c0 2.4-1.8 4.3-4.3 4.3h-48.3c-4-0.1-7.4-3-7.4-7.3v-39.4c0-3.1-1.8-6.8-3.7-8.7l-29.4-30.8c-1.4-1.5-2.8-2.4-5.4-2.4h-14.6c-2.2 0-3.2 1.1-3.2 3.1v96.3c0 2.3 1.7 3.7 4 3.7h7.5c2.5 0.1 4.2-1.5 4.2-4.2v-82.8c0-1.4 1.5-2.6 3-1l21.1 22.5c0.2 2 1.3 2.1 1.3 4.1l0.1 57.9c0 2.1 1.2 3.5 3.4 3.5h81c3.5 0 5.8-2.4 5.8-6.1v-27.4c0-2.4-1.8-4.7-4.7-4.7h-5.8c-2.3-0.2-4.6 1.5-4.6 4.6zm-92.3-69.5v-12.6c0-1.5 0.9-2.8 2.8-2.8h96.1c4.2 0 6.9 2.9 6.9 6.8v31.2c0 1.7-0.5 3.2-2 4.3s-2.4 1-8.2 1c-1.9 0-4.9-1-4.9-5.1 0-3.2 0-16.3-0.1-18 0-2.9-2.2-5.1-5.5-5.1h-82.8-2.3v0.3zm58.6 69.2 8.8-2.9c3.5-1.1 3.7-3.6 3.7-5.2 0-7.4-0.2-39.4-0.2-40.5 0-2.5-1.8-4.7-4.5-4.7h-5.8c-1.7 0-3.4 0.7-4.9 2.3-2.5 2.7-8.2 9.8-13.2 16.1-2 2.4-2.2 4.9-2.2 8.1v5c0.1 3.9 4 6.1 6.4 3l7.9-9.7c1.1-1.2 2.6-2 2.6 0v27.4c0 1.1 0.6 1.5 1.4 1.1z"
+              fill="currentColor"
+            />
+          </svg>
+        </Link>
 
       {/* Desktop navigation */}
       <div className={styles.desktopNav}>
@@ -575,8 +446,9 @@ export default function Navbar() {
       {/* Mobile menu */}
       <MobileNav />
 
-      {/* Shared dropdown panel */}
-      {sharedPanel}
+      {/* Dropdown panel */}
+      {dropdownPanel}
     </nav>
+    </>
   );
 }
