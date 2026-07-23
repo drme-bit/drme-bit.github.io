@@ -1,9 +1,7 @@
 @use '../../../../shared/styles/mixins' as *;
 
 .toggleContainer {
-  position: fixed;
-  top: 12px;
-  right: 44px;
+  position: relative;
   z-index: 180;
 }
 
@@ -37,7 +35,7 @@
 
 .panel {
   position: absolute;
-  top: 36px;
+  top: calc(100% + 8px);
   right: 0;
   width: 240px;
   background: var(--terminal-bg);
@@ -47,6 +45,7 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   animation: panelIn 0.2s var(--ease-out);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes panelIn {

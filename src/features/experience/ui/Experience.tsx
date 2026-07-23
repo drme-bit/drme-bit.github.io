@@ -28,7 +28,7 @@ const ENTRIES: ExperienceEntry[] = [
     period: '2024',
     role: 'Diploma Project — Nexagon',
     org: 'Software Engineering Bachelor',
-    desc: 'Created Nexagon, a platform for monitoring and managing game servers. Features real-time tracking, server management tools, and planned hosting integration. Served as the thesis project for my Professional Junior Bachelor degree.',
+    desc: 'Created Nexagon, a platform for monitoring and managing game servers. Features real-time tracking, server management tools, and planned hosting integration. Served as the thesis projects for my Professional Junior Bachelor degree.',
   },
   {
     period: '2023 — present',

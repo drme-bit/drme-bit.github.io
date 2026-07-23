@@ -5,15 +5,14 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useTheme } from '@/providers/ThemeProvider';
 import { useTerrain } from '@/providers/TerrainProvider';
-import useReducedMotion from '@/shared/hooks/useReducedMotion';
 
-const _isMobile =
-  typeof window !== 'undefined' && window.innerWidth <= 768;
-const GRID_X = _isMobile ? 65 : 90;
-const GRID_Z = _isMobile ? 65 : 90;
+const _isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+const GRID_X = _isMobile ? 65 : 85;
+const GRID_Z = _isMobile ? 65 : 85;
 const SPACING = 0.5;
 const HALF_X = (GRID_X - 1) * SPACING * 0.5;
 const HALF_Z = (GRID_Z - 1) * SPACING * 0.5;
+const TOTAL_POINTS = GRID_X * GRID_Z;
 
 function hash(x: number, y: number): number {
   const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
@@ -35,21 +34,33 @@ function valueNoise(x: number, y: number): number {
 }
 
 function terrainHeight(x: number, z: number, amplitude: number): number {
-  let h = 0;
-  h += (valueNoise(x * 0.08, z * 0.08) - 0.5) * 2.0;
+  let h = (valueNoise(x * 0.08, z * 0.08) - 0.5) * 2.0;
   h += (valueNoise(x * 0.2 + 19, z * 0.2 + 19) - 0.5) * 0.9;
   h += (valueNoise(x * 0.45 + 71, z * 0.45 + 71) - 0.5) * 0.35;
   return h * amplitude;
+}
+
+function useScrollProgress() {
+  const scrollT = useRef(0);
+  useEffect(() => {
+    const handleScroll = () => {
+      const max = Math.max(document.body.scrollHeight - window.innerHeight, 1);
+      scrollT.current = window.scrollY / max;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  return scrollT;
 }
 
 function Starfield() {
   const ref = useRef<THREE.Points>(null);
   const matRef = useRef<THREE.PointsMaterial>(null);
   const { colors } = useTheme();
-  const { invalidate } = useThree();
 
   const geometry = useMemo(() => {
-    const count = 900;
+    const count = 700;
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const r = 40 + Math.random() * 18;
@@ -70,7 +81,6 @@ function Starfield() {
     ref.current.position.x = mouse.x * 0.4;
     ref.current.position.y = mouse.y * 0.2;
     if (matRef.current) matRef.current.color.set(colors.accent);
-    invalidate();
   });
 
   return (
@@ -87,134 +97,137 @@ function Starfield() {
   );
 }
 
-function Terrain() {
+function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
   const pointsRef = useRef<THREE.Points>(null);
   const wireRef = useRef<THREE.LineSegments>(null);
   const wireMatRef = useRef<THREE.LineBasicMaterial>(null);
   const pointsMatRef = useRef<THREE.PointsMaterial>(null);
-  const scrollT = useRef(0);
+
+  // THREE.Timer вместо THREE.Clock
+  const timerRef = useRef(new THREE.Timer());
+
   const scrollSmoothed = useRef(0);
   const noiseOffset = useRef(0);
   const amplitude = useRef(0.9);
   const frameCount = useRef(0);
+
   const { theme, colors } = useTheme();
   const terrain = useTerrain();
-  const { invalidate } = useThree();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const max = Math.max(document.body.scrollHeight - window.innerHeight, 1);
-      scrollT.current = window.scrollY / max;
+  const { pointsGeo, wireGeo, heightField, maxWireSegments } = useMemo(() => {
+    const pGeo = new THREE.BufferGeometry();
+    const pos = new Float32Array(TOTAL_POINTS * 3);
+    const col = new Float32Array(TOTAL_POINTS * 3);
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    pGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+
+    const maxSegs = GRID_X * GRID_Z * 4;
+    const wGeo = new THREE.BufferGeometry();
+    const wPos = new Float32Array(maxSegs * 6);
+    const wAttr = new THREE.BufferAttribute(wPos, 3);
+    wAttr.setUsage(THREE.DynamicDrawUsage);
+    wGeo.setAttribute('position', wAttr);
+
+    return {
+      pointsGeo: pGeo,
+      wireGeo: wGeo,
+      heightField: new Float32Array(TOTAL_POINTS),
+      maxWireSegments: maxSegs,
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const pointsGeo = useMemo(() => {
-    const count = GRID_X * GRID_Z;
-    const pos = new Float32Array(count * 3);
-    const col = new Float32Array(count * 3);
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    return geo;
-  }, []);
-
-  const wireGeo = useMemo(() => new THREE.BufferGeometry(), []);
-  const wirePositionsScratch = useMemo(
-    () => new Float32Array(GRID_X * GRID_Z * 2 * 3),
-    [],
-  );
-  const heightField = useMemo(() => new Float32Array(GRID_X * GRID_Z), []);
 
   function recompute(offset: number, amp: number) {
-    const positions = pointsGeo.attributes.position.array as Float32Array;
-    const pointColors = pointsGeo.attributes.color.array as Float32Array;
+    const posAttr = pointsGeo.attributes.position as THREE.BufferAttribute;
+    const colAttr = pointsGeo.attributes.color as THREE.BufferAttribute;
+    const positions = posAttr.array as Float32Array;
+    const pointColors = colAttr.array as Float32Array;
+
     let idx = 0;
+    const isLight = theme === 'light';
+
     for (let zi = 0; zi < GRID_Z; zi++) {
+      const z = zi * SPACING - HALF_Z;
       for (let xi = 0; xi < GRID_X; xi++) {
         const x = xi * SPACING - HALF_X;
-        const z = zi * SPACING - HALF_Z;
         const h = terrainHeight(x + offset * 0.3, z + offset, amp);
+
         heightField[idx] = h;
-        positions[idx * 3] = x;
-        positions[idx * 3 + 1] = h;
-        positions[idx * 3 + 2] = z;
+        const idx3 = idx * 3;
+        positions[idx3] = x;
+        positions[idx3 + 1] = h;
+        positions[idx3 + 2] = z;
 
         const t = THREE.MathUtils.clamp((h + amp) / (amp * 2), 0, 1);
-        if (theme === 'light') {
-          const lum = 0.3 + t * 0.4;
-          pointColors[idx * 3] = lum;
-          pointColors[idx * 3 + 1] = lum;
-          pointColors[idx * 3 + 2] = lum;
-        } else {
-          const lum = 0.12 + t * 0.78;
-          pointColors[idx * 3] = lum;
-          pointColors[idx * 3 + 1] = lum;
-          pointColors[idx * 3 + 2] = lum;
-        }
+        const lum = isLight ? 0.3 + t * 0.4 : 0.12 + t * 0.78;
+        pointColors[idx3] = lum;
+        pointColors[idx3 + 1] = lum;
+        pointColors[idx3 + 2] = lum;
         idx++;
       }
     }
-    pointsGeo.attributes.position.needsUpdate = true;
-    pointsGeo.attributes.color.needsUpdate = true;
+    posAttr.needsUpdate = true;
+    colAttr.needsUpdate = true;
 
+    // Отрисовка изобар
     const bands = [-0.5, 0, 0.5, 1.0];
     let segCount = 0;
-    const out = wirePositionsScratch;
+    const wirePosAttr = wireGeo.attributes.position as THREE.BufferAttribute;
+    const out = wirePosAttr.array as Float32Array;
+
     for (let zi = 0; zi < GRID_Z; zi++) {
+      const z0 = zi * SPACING - HALF_Z;
       for (let xi = 0; xi < GRID_X - 1; xi++) {
         const i0 = zi * GRID_X + xi;
-        const i1 = zi * GRID_X + xi + 1;
+        const i1 = i0 + 1;
         const h0 = heightField[i0];
         const h1 = heightField[i1];
-        for (const band of bands) {
+
+        for (let b = 0; b < bands.length; b++) {
+          const band = bands[b];
           if ((h0 - band) * (h1 - band) < 0) {
+            if (segCount >= maxWireSegments) break;
             const tt = (band - h0) / (h1 - h0);
             const x0 = xi * SPACING - HALF_X;
-            const z0 = zi * SPACING - HALF_Z;
             const x = x0 + tt * SPACING;
-            if (segCount * 6 >= out.length - 6) break;
-            out[segCount * 6] = x;
-            out[segCount * 6 + 1] = band;
-            out[segCount * 6 + 2] = z0;
-            out[segCount * 6 + 3] = x;
-            out[segCount * 6 + 4] = band + 0.001;
-            out[segCount * 6 + 5] = z0;
+
+            const s6 = segCount * 6;
+            out[s6] = x;
+            out[s6 + 1] = band;
+            out[s6 + 2] = z0;
+            out[s6 + 3] = x;
+            out[s6 + 4] = band + 0.001;
+            out[s6 + 5] = z0;
             segCount++;
           }
         }
       }
     }
-    wireGeo.setAttribute(
-      'position',
-      new THREE.BufferAttribute(out.subarray(0, segCount * 6), 3),
-    );
-    wireGeo.computeBoundingSphere();
+
+    wireGeo.setDrawRange(0, segCount * 2);
+    wirePosAttr.needsUpdate = true;
   }
 
   useEffect(() => {
     recompute(0, amplitude.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [theme]);
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
     if (terrain.paused) return;
 
-    scrollSmoothed.current +=
-      (scrollT.current - scrollSmoothed.current) * 0.05;
-    const breathing = Math.sin(clock.elapsedTime * 0.15) * 0.08;
-    amplitude.current =
-      (0.7 + scrollSmoothed.current * 1.1 + breathing) * terrain.amplitude;
-    noiseOffset.current +=
-      (0.0015 + scrollSmoothed.current * 0.01) * terrain.speed;
+    // Обновляем таймер и берем оттуда прошедшее время
+    timerRef.current.update();
+    const elapsedTime = timerRef.current.getElapsed();
+
+    scrollSmoothed.current += (scrollT.current - scrollSmoothed.current) * 0.05;
+    const breathing = Math.sin(elapsedTime * 0.15) * 0.08;
+    amplitude.current = (0.7 + scrollSmoothed.current * 1.1 + breathing) * terrain.amplitude;
+    noiseOffset.current += (0.0015 + scrollSmoothed.current * 0.01) * terrain.speed;
+
     frameCount.current++;
     if (frameCount.current % 2 === 0) {
       recompute(noiseOffset.current, amplitude.current);
     }
     if (wireMatRef.current) wireMatRef.current.color.set(colors.accent);
-    invalidate();
   });
 
   return (
@@ -242,11 +255,12 @@ function Terrain() {
 }
 
 function Beacons() {
-  const groupRef = useRef<THREE.Group>(null);
   const refs = useRef<(THREE.Mesh | null)[]>([]);
   const matRefs = useRef<(THREE.MeshBasicMaterial | null)[]>([]);
   const { colors } = useTheme();
-  const { invalidate } = useThree();
+
+  // THREE.Timer вместо THREE.Clock
+  const timerRef = useRef(new THREE.Timer());
 
   const seeds = useMemo(
     () =>
@@ -259,8 +273,11 @@ function Beacons() {
     [],
   );
 
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime;
+  useFrame(() => {
+    // Обновляем таймер и берем оттуда прошедшее время
+    timerRef.current.update();
+    const t = timerRef.current.getElapsed();
+
     const c = colors.accent;
     seeds.forEach((s, i) => {
       const m = refs.current[i];
@@ -273,11 +290,10 @@ function Beacons() {
       m.rotation.y = t * 0.3 + i;
       if (matRefs.current[i]) matRefs.current[i]!.color.set(c);
     });
-    invalidate();
   });
 
   return (
-    <group ref={groupRef}>
+    <group>
       {seeds.map((_, i) => (
         <mesh
           key={i}
@@ -300,23 +316,12 @@ function Beacons() {
   );
 }
 
-function IsoCamera() {
+function IsoCamera({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
   const { camera, gl } = useThree();
-  const scrollT = useRef(0);
   const angle = useRef(0.78);
   const dragAngle = useRef(0);
   const isDragging = useRef(false);
   const prevX = useRef(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const max = Math.max(document.body.scrollHeight - window.innerHeight, 1);
-      scrollT.current = window.scrollY / max;
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const el = gl.domElement;
@@ -332,6 +337,7 @@ function IsoCamera() {
       dragAngle.current += (e.clientX - prevX.current) * 0.005;
       prevX.current = e.clientX;
     };
+
     el.addEventListener('pointerdown', onDown);
     window.addEventListener('pointerup', onUp);
     window.addEventListener('pointermove', onMove);
@@ -342,22 +348,25 @@ function IsoCamera() {
     };
   }, [gl]);
 
-  useFrame(({ mouse }) => {
+  useFrame(() => {
     const s = scrollT.current;
-    const targetAngle = 0.6 + s * 1.4 + dragAngle.current;
-    angle.current += (targetAngle - angle.current) * 0.02;
+
+    const targetAngle = 0.78 + s * 1.2 + dragAngle.current;
+    angle.current += (targetAngle - angle.current) * 0.04;
+
     const dist = 13;
-    const a = isDragging.current
-      ? angle.current
-      : angle.current + mouse.x * 0.12;
+    const a = angle.current;
+
     const isoX = Math.cos(a) * dist * 0.82;
-    const isoY = 9.2 + mouse.y * 0.4;
+    const isoY = 9.2 * 0.4;
     const isoZ = Math.sin(a) * dist * 0.82 - 4;
+
     const t = Math.min(s * 2.5, 1);
     const camX = isoX * t;
     const camY = 16 - (16 - isoY) * t;
     const camZ = -4 + (isoZ + 4) * t;
-    camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.04);
+
+    camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.05);
     camera.lookAt(0, 0.3 * t, -4);
   });
 
@@ -365,80 +374,73 @@ function IsoCamera() {
 }
 
 function useLowPowerMode() {
-  const isMobile = _isMobile;
-  const isLowMem =
-    typeof navigator !== 'undefined' &&
-    (navigator as Navigator & { deviceMemory?: number }).deviceMemory !==
-      undefined &&
-    (navigator as Navigator & { deviceMemory?: number }).deviceMemory! < 4;
-  const prefersReduced = useReducedMotion();
-  const [low, setLow] = useState(isMobile || isLowMem || prefersReduced);
+  const [low, setLow] = useState(true);
+
   useEffect(() => {
+    const isMobile = window.innerWidth <= 768;
+    const isLowMem =
+      typeof navigator !== 'undefined' &&
+      (navigator as Navigator & { deviceMemory?: number }).deviceMemory !== undefined &&
+      (navigator as Navigator & { deviceMemory?: number }).deviceMemory! < 4;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     setLow(isMobile || isLowMem || prefersReduced);
-  }, [isMobile, isLowMem, prefersReduced]);
+  }, []);
+
   return low;
 }
 
-function SceneInner({ lowPower }: { lowPower: boolean }) {
-  if (lowPower)
-    return (
-      <>
-        <IsoCamera />
-        <Terrain />
-      </>
-    );
-  return (
-    <>
-      <IsoCamera />
-      <Starfield />
-      <Terrain />
-      <Beacons />
-    </>
-  );
-}
-
 function FogUpdater() {
-  const { scene, invalidate } = useThree();
+  const { scene } = useThree();
   const { theme, colors } = useTheme();
+
   useFrame(() => {
     const fogColor = theme === 'light' ? colors.bg : '#080808';
-    if (!scene.fog || scene.fog.color.getStyle() !== fogColor) {
-      scene.fog = new THREE.Fog(
-        fogColor,
-        _isMobile ? 10 : 14,
-        _isMobile ? 28 : 34,
-      );
+    if (!scene.fog) {
+      scene.fog = new THREE.Fog(fogColor, _isMobile ? 10 : 14, _isMobile ? 28 : 34);
+    } else if (scene.fog.color.getStyle() !== fogColor) {
+      scene.fog.color.set(fogColor);
     }
-    invalidate();
   });
+
   return null;
 }
 
 export default function Scene() {
   const lowPower = useLowPowerMode();
   const { colors } = useTheme();
+  const scrollT = useScrollProgress();
 
   return (
     <Canvas
       id="bg"
       camera={{ position: [9, 9.2, 5], fov: 32, near: 0.1, far: 80 }}
-      gl={{ alpha: true, antialias: !lowPower }}
+      gl={{
+        alpha: true,
+        antialias: !lowPower,
+        powerPreference: 'high-performance',
+      }}
       frameloop="always"
       onCreated={({ gl }) => {
-        gl.setPixelRatio(
-          Math.min(window.devicePixelRatio, lowPower ? 1 : 2),
-        );
+        gl.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 1.5));
       }}
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 0,
         background: colors.bg,
-        transformStyle: 'preserve-3d',
+        pointerEvents: 'auto',
       }}
     >
       <FogUpdater />
-      <SceneInner lowPower={lowPower} />
+      <IsoCamera scrollT={scrollT} />
+      <Terrain scrollT={scrollT} />
+      {!lowPower && (
+        <>
+          <Starfield />
+          <Beacons />
+        </>
+      )}
     </Canvas>
   );
 }

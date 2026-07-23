@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { SceneProvider, useScene } from '@/providers/SceneProvider';
-import { useNav } from '@/providers/NavProvider';
+import { NavLeaf, useNav } from '@/providers/NavProvider';
 import useLockOrientation from '@/shared/hooks/useLockOrientation';
 import Hero from '@/features/hero/ui/Hero';
 import About from '@/features/about/ui/About';
@@ -13,39 +13,23 @@ import Reviews from '@/features/reviews/ui/Reviews';
 import Contacts from '@/features/contacts/ui/Contacts';
 import Footer from '@/widgets/footer/Footer';
 import ScrollProgressBar from '@/shared/ui/molecules/ScrollProgressBar/ScrollProgressBar';
-import SearchBar from '@/shared/ui/molecules/SearchBar/SearchBar';
-import ChangeTheme from '@/shared/ui/molecules/ChangeTheme/ChangeTheme';
 import Mascot, { getMockMessage } from '@/widgets/mascot/Mascot';
 
-const Scene = dynamic(() => import('@/widgets/scene/Scene'), {
-  ssr: false,
-  loading: () => null,
-});
-const Skills = dynamic(() => import('@/features/skills/ui/Skills'), {
-  ssr: false,
-  loading: () => null,
-});
-const Projects = dynamic(() => import('@/features/projects/ui/Projects'), {
-  ssr: false,
-  loading: () => null,
-});
-const Archive = dynamic(() => import('@/widgets/archive/Archive'), {
+const Scene = dynamic(() => import('@/widgets/scene/Scene'), { ssr: false });
+const Skills = dynamic(() => import('@/features/skills/ui/Skills'), { ssr: false });
+const Projects = dynamic(() => import('@/features/projects/ui/Projects'), { ssr: false });
+const Archive = dynamic(() => import('@/widgets/archive/Archive'), { ssr: false });
+const Cursor = dynamic(() => import('@/shared/ui/organisms/Cursor/Cursor'), { ssr: false });
+const SoundEffects = dynamic(() => import('@/shared/ui/organisms/SoundEffects/SoundEffects'), {
   ssr: false,
 });
-const Cursor = dynamic(() => import('@/shared/ui/organisms/Cursor/Cursor'), {
-  ssr: false,
-});
-const SoundEffects = dynamic(
-  () => import('@/shared/ui/organisms/SoundEffects/SoundEffects'),
-  { ssr: false },
-);
 
 function MainInner() {
   const [mascotMessage, setMascotMessage] = useState<string | null>(null);
-  const [searchCount, setSearchCount] = useState(0);
   const [archiveOpen, setArchiveOpen] = useState(false);
+
   const { setSceneNode } = useScene();
-  const { setConfig, setActiveSection } = useNav();
+  const { setPageConfig, setActiveSection } = useNav();
 
   const sceneRef = useCallback(
     (node: HTMLElement | null) => {
@@ -56,27 +40,20 @@ function MainInner() {
 
   useLockOrientation();
 
-  const handleSearch = useCallback(() => {
-    setSearchCount((c) => c + 1);
-  }, []);
-
-  useEffect(() => {
-    if (searchCount > 0) setMascotMessage(getMockMessage(searchCount));
-  }, [searchCount]);
-
   const handleMascotDone = useCallback(() => {
     setMascotMessage(null);
   }, []);
 
-  // Configure nav with home page sections
+  // Configure nav for home page
   useEffect(() => {
-    const sections = [
-      { id: 'about', label: 'about' },
-      { id: 'skills', label: 'skills' },
-      { id: 'experience', label: 'experience' },
-      { id: 'projects', label: 'projects' },
-      { id: 'reviews', label: 'reviews' },
-      { id: 'contact', label: 'contact' },
+    const contextItems: NavLeaf[] = [
+      { id: 'about', label: 'about', type: 'section', targetId: 'about' },
+      { id: 'skills', label: 'skills', type: 'section', targetId: 'skills' },
+      { id: 'experience', label: 'experience', type: 'section', targetId: 'experience' },
+      { id: 'projects', label: 'projects', type: 'section', targetId: 'projects' },
+      { id: 'blog', label: 'blog', type: 'section', targetId: 'blog' },
+      { id: 'reviews', label: 'reviews', type: 'section', targetId: 'reviews' },
+      { id: 'contact', label: 'contact', type: 'section', targetId: 'contact' },
     ];
 
     const onSectionClick = (sectionId: string) => {
@@ -84,53 +61,49 @@ function MainInner() {
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     };
 
-    setConfig({ sections, onSectionClick });
+    setPageConfig({
+      contextItems,
+      onSectionClick,
+    });
 
-    // Observe sections for active state
-    const observers = sections.map((s) => {
-      const el = document.getElementById(s.id);
+    // Active section observer
+    const observers = contextItems.map((item) => {
+      const el = document.getElementById(item.id);
       if (!el) return null;
+
       const observer = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(s.id);
+          if (entry.isIntersecting) setActiveSection(item.id);
         },
-        { threshold: 0.3 },
+        { threshold: 0.4 },
       );
       observer.observe(el);
       return observer;
     });
 
-    return () => observers.forEach((o) => o?.disconnect());
-  }, [setConfig, setActiveSection]);
+    return () => {
+      observers.forEach((obs) => obs?.disconnect());
+    };
+  }, [setPageConfig, setActiveSection]);
 
   return (
     <>
       <Cursor />
       <ScrollProgressBar />
-      <div
-        ref={sceneRef}
-        style={{
-          opacity: 1,
-          transition: 'opacity 0.05s linear',
-          willChange: 'opacity',
-        }}
-      >
-        <Suspense fallback={null}>
-          <Scene />
-        </Suspense>
+
+      <div ref={sceneRef}>
+        <Scene />
       </div>
+
       <Hero />
       <About />
-      <Suspense fallback={null}>
-        <Skills />
-      </Suspense>
+      <Skills />
       <Experience />
-      <Suspense fallback={null}>
-        <Projects />
-      </Suspense>
+      <Projects />
       <Blog />
       <Reviews />
       <Contacts />
+
       <button className="archive-fab" onClick={() => setArchiveOpen(true)} title="archive">
         <svg
           width="14"
@@ -145,20 +118,12 @@ function MainInner() {
           <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
         </svg>
       </button>
-      <SearchBar onSearch={handleSearch} />
-      <ChangeTheme />
-      <Mascot
-        userMessage={mascotMessage ?? undefined}
-        searchCount={searchCount}
-        onDone={handleMascotDone}
-      />
+
+      <Mascot userMessage={mascotMessage ?? undefined} onDone={handleMascotDone} />
       <SoundEffects />
       <Footer />
-      {archiveOpen && (
-        <Suspense fallback={null}>
-          <Archive onClose={() => setArchiveOpen(false)} />
-        </Suspense>
-      )}
+
+      {archiveOpen && <Archive onClose={() => setArchiveOpen(false)} />}
     </>
   );
 }
