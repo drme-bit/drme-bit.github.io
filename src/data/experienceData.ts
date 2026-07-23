@@ -38,4 +38,4 @@ const experienceData: ExperienceEntry[] = [
   },
 ];
 
-export { experienceData, ExperienceEntry };
+export { experienceData, type ExperienceEntry };
