@@ -6,7 +6,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   FiMenu,
-  FiChevronRight,
 } from 'react-icons/fi';
 import { useNav } from '@/providers/NavProvider';
 import { GLOBAL_NAV } from '@/config/navConfig';
@@ -18,7 +17,6 @@ import {
   SheetTrigger,
 } from '@/shared/ui/organisms/Sheet/Sheet';
 
-import { Button } from '@/shared/ui/organisms/Button/Button';
 import { NavDropdown } from './NavDropdown';
 import SearchBar from '@/shared/ui/molecules/SearchBar/SearchBar';
 import ChangeTheme from '@/shared/ui/molecules/ChangeTheme/ChangeTheme';
@@ -173,7 +171,7 @@ function MobileNav() {
                         <a
                           href={href}
                           className={styles.sheetLink}
-                          onClick={(e) => {
+                          onClick={() => {
                             window.location.href = href;
                           }}
                         >
@@ -213,13 +211,11 @@ export default function Navbar() {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedTab, setSelectedTab] = useState<number | null>(null);
   const [openGroupId, setOpenGroupId] = useState<string | null>(null);
-  const [direction, setDirection] = useState<'left' | 'right' | null>(null);
   const prevGroupIndex = useRef<number>(-1);
   const closeGroupIdTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const pathname = usePathname();
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
-  const lastScrollY = useRef(0);
 
   const { pageConfig, setPageConfig, active, setActiveSection } = useNav();
 
@@ -230,13 +226,7 @@ export default function Navbar() {
 
   const handleGroupOpen = useCallback((groupId: string) => {
     clearTimeout(closeGroupIdTimer.current!);
-    const newIndex = groups.findIndex((g) => g.id === groupId);
-    if (prevGroupIndex.current >= 0 && prevGroupIndex.current !== newIndex) {
-      setDirection(newIndex > prevGroupIndex.current ? 'right' : 'left');
-    } else {
-      setDirection(null);
-    }
-    prevGroupIndex.current = newIndex;
+    prevGroupIndex.current = groups.findIndex((g) => g.id === groupId);
     setOpenGroupId(groupId);
   }, [groups]);
 
@@ -327,8 +317,6 @@ export default function Navbar() {
     },
     [pageConfig, setActiveSection],
   );
-
-  const activeGroup = groups.find((g) => g.id === openGroupId);
 
   // Render dropdown panel — always mounted, handles its own show/hide
   const dropdownPanel = (

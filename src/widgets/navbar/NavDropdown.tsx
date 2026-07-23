@@ -3,11 +3,9 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
-import { FiChevronRight, FiGrid, FiGithub } from 'react-icons/fi';
-import type { IconType } from 'react-icons';
+import { FiChevronRight, FiGrid } from 'react-icons/fi';
 import styles from './Navbar.module.scss';
 import type { NavGroup, NavLeaf, NavSectionLink } from '@/config/navTypes';
-import { useNav } from '@/providers/NavProvider';
 
 interface NavDropdownProps {
   groups: NavGroup[];
@@ -17,24 +15,6 @@ interface NavDropdownProps {
   onCancelClose: () => void;
   onLinkClick: (item: NavSectionLink) => void;
   router: ReturnType<typeof import('next/navigation').useRouter>;
-}
-
-const ICON_MAP: Record<string, IconType> = {
-  home: FiGrid,
-  about: FiGrid,
-  skills: FiGrid,
-  experience: FiGrid,
-  projects: FiGrid,
-  reviews: FiGrid,
-  contact: FiGrid,
-  blog: FiGrid,
-  stats: FiGrid,
-};
-
-const GAP_REM = 0.5; // gap between carousel items in rem
-
-function getIcon(id: string): IconType {
-  return ICON_MAP[id] || FiGrid;
 }
 
 function leafHref(leaf: NavLeaf): string {
@@ -69,7 +49,7 @@ function GroupContent({ group, onLinkClick, onCloseImmediate, router, isActive, 
     <div className={`${styles.dropdownInner} ${isActive ? styles['dropdownInner--active'] : ''}`} role="menu" aria-label={`${group.label} navigation`}>
       <ul className={styles.dropdownCards} role="none">
         {featured.map((child, index) => {
-          const ChildIcon = child.icon || FiGrid;
+            const ChildIcon = child.icon ?? FiGrid;
           const focused = isFocused && isActive && index === 0;
           return (
             <li key={child.id} role="none">
@@ -95,7 +75,7 @@ function GroupContent({ group, onLinkClick, onCloseImmediate, router, isActive, 
       {secondary.length > 0 && (
         <ul className={styles.dropdownSecondary} role="none">
           {secondary.map((child, index) => {
-            const ChildIcon = child.icon || FiGithub;
+          const ChildIcon = child.icon ?? FiGrid;
             return (
               <li key={child.id} role="none">
                 <motion.a
@@ -146,13 +126,13 @@ export function NavDropdown({
     if (activeGroupId) {
       setCarouselX(-activeGroupIndex * 100);
     }
-  }, [activeGroupIndex]);
+  }, [activeGroupId, activeGroupIndex]);
 
   useEffect(() => {
     if (activeGroupId) {
       setIsMounted(true);
       clearTimeout(exitTimerRef.current!);
-      const handler = (e: KeyboardEvent) => handleKeyDown(e);
+      const handler = (e: KeyboardEvent) => handleKeyDownRef.current?.(e);
       document.addEventListener('keydown', handler);
       document.body.style.overflow = 'hidden';
       return () => {
@@ -237,7 +217,10 @@ export function NavDropdown({
         }
         break;
     }
-  }, [activeGroupId, activeGroupIndex, groups, focusedItemType, focusedItemIndex, onLinkClick, router, onCloseImmediate]);
+  }, [activeGroupId, activeGroupIndex, groups, focusedItemType, focusedItemIndex, focusedGroupIndex, onLinkClick, router, onCloseImmediate]);
+
+  const handleKeyDownRef = useRef<((e: KeyboardEvent) => void) | null>(null);
+  handleKeyDownRef.current = handleKeyDown;
 
   const handleMouseEnter = useCallback(() => {
     onCancelClose();
@@ -262,13 +245,11 @@ export function NavDropdown({
 
   if (!isMounted) return null;
 
-  const isOpen = !!activeGroupId;
-
   return createPortal(
     <>
       <div
         ref={panelRef}
-        className={`${styles.dropdownPanel} ${isOpen ? styles['dropdownPanel--fade'] : styles['dropdownPanel--exit']}`}
+        className={`${styles.dropdownPanel} ${activeGroupId ? styles['dropdownPanel--fade'] : styles['dropdownPanel--exit']}`}
         role="menu"
         aria-label="Navigation"
         onMouseEnter={handleMouseEnter}
@@ -294,7 +275,7 @@ export function NavDropdown({
       </div>
       <div className={styles.dropdownBackdrop} 
            onMouseEnter={handleMouseEnter} 
-           onMouseLeave={(e) => {
+           onMouseLeave={(e: React.MouseEvent) => {
              if (!panelRef.current?.contains(e.relatedTarget as Node)) {
                handleMouseLeave(e);
              }
