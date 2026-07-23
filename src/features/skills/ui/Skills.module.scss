@@ -1,13 +1,6 @@
 @use '../../../shared/styles/mixins' as *;
 @use '../../../shared/styles/animations' as *;
 
-/* ═══════════════════════════════════════════════════════════
-   Skills Section — Scroll-driven animation
-   ═══════════════════════════════════════════════════════════
-   The globe is interactive as soon as it appears. Scroll only controls the
-   surrounding scene, not access to the section's controls.
-   ═══════════════════════════════════════════════════════════ */
-
 /* ── Section shell ─────────────────────────────────────── */
 .section {
   @include section-base;
@@ -52,9 +45,9 @@
   @media (max-width: 700px) {
     position: relative;
     height: auto;
-    min-height: 0;
+    min-height: 100svh;
     overflow: visible;
-    padding: 4rem var(--space-md) 3rem;
+    padding: 3rem var(--space-md) 2rem;
   }
 }
 
@@ -393,21 +386,42 @@
   flex-shrink: 0;
   transform-origin: center center;
   will-change: width, height, transform;
-  opacity: 1;
+  opacity: var(--globe-opacity, 1);
   transform: translateX(var(--globe-x, 13vw));
   pointer-events: auto;
 
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background: radial-gradient(
+      circle at center,
+      color-mix(in srgb, var(--accent-secondary) 12%, transparent) 0%,
+      color-mix(in srgb, var(--accent-secondary) 6%, transparent) 40%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    animation: globeGlow 8s ease-in-out infinite alternate;
+  }
+
   @media (max-width: 900px) {
-    width: 85vw;
-    max-width: 360px;
-    height: 85vw;
-    max-height: 360px;
     width: min(82vw, 340px);
     height: min(82vw, 340px);
     opacity: 1;
     transform: none;
     pointer-events: auto;
+
+    &::before {
+      inset: -15%;
+    }
   }
+}
+
+@keyframes globeGlow {
+  0% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.05); }
 }
 
 .skills-globe {
@@ -420,6 +434,7 @@
 /* ── Skill level dots (modal) ──────────────────────────── */
 .skill-level {
   display: flex;
+  align-items: center;
   gap: 4px;
   margin-bottom: 12px;
 }
@@ -436,6 +451,13 @@
   }
 }
 
+.skill-level-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-ghost);
+  margin-left: 6px;
+}
+
 /* ── Modal sheet ───────────────────────────────────────── */
 .skills-sheet-tag {
   padding: 4px 10px;
@@ -446,6 +468,7 @@
   font-size: 0.6rem;
   color: var(--accent-secondary);
   transition: all 0.2s ease;
+  cursor: default;
 
   &:hover {
     background: color-mix(in srgb, var(--accent-secondary) 25%, transparent);
@@ -457,9 +480,25 @@
     border-color: color-mix(in srgb, var(--accent-tertiary) 30%, transparent);
     color: var(--accent-tertiary);
     text-decoration: none;
+    cursor: pointer;
+    position: relative;
+
+    &::after {
+      content: '→';
+      margin-left: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: translateX(-4px);
+    }
 
     &:hover {
       background: color-mix(in srgb, var(--accent-tertiary) 25%, transparent);
+      transform: translateY(-1px);
+
+      &::after {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
   }
 }

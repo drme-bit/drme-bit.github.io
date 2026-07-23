@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { SceneProvider, useScene } from '@/providers/SceneProvider';
 import { NavLeaf, useNav } from '@/providers/NavProvider';
 import useLockOrientation from '@/shared/hooks/useLockOrientation';
 import Hero from '@/features/hero/ui/Hero';
@@ -28,15 +27,7 @@ function MainInner() {
   const [mascotMessage, setMascotMessage] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
 
-  const { setSceneNode } = useScene();
   const { setPageConfig, setActiveSection } = useNav();
-
-  const sceneRef = useCallback(
-    (node: HTMLElement | null) => {
-      setSceneNode(node);
-    },
-    [setSceneNode],
-  );
 
   useLockOrientation();
 
@@ -91,9 +82,7 @@ function MainInner() {
       <Cursor />
       <ScrollProgressBar />
 
-      <div ref={sceneRef}>
-        <Scene />
-      </div>
+      <Scene />
 
       <Hero />
       <About />
@@ -130,8 +119,6 @@ function MainInner() {
 
 export default function MainPage() {
   return (
-    <SceneProvider>
-      <MainInner />
-    </SceneProvider>
+    <MainInner />
   );
 }

@@ -4,7 +4,6 @@ import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react'
 import useReveal from '@/shared/hooks/useReveal';
 import useScrollPhase from '@/shared/hooks/useScrollPhase';
 import useMergedRef from '@/shared/hooks/useMergedRef';
-import { useScene } from '@/providers/SceneProvider';
 import { useModal } from '@/providers/ModalProvider';
 import { SKILLS_DATA, GROUP_COLORS, ICON_MAP } from './skillsData';
 import type { SkillItem } from './skillsData';
@@ -73,6 +72,7 @@ function openSkillModal(openModal: OpenModalFn, skill: SkillItem, onClose: () =>
               style={n <= skill.level ? { background: GROUP_COLORS[skill.group] } : {}}
             />
           ))}
+          <span className={styles['skill-level-label']}>{skill.level}/5</span>
         </div>
 
         {skill.funLevel && (
@@ -83,7 +83,7 @@ function openSkillModal(openModal: OpenModalFn, skill: SkillItem, onClose: () =>
 
         {related.length > 0 && (
           <div className={styles['skills-sheet-section']}>
-            <h4 className={styles['skills-sheet-section-title']}>Related</h4>
+            <h4 className={styles['skills-sheet-section-title']}>Related Skills</h4>
             <div className={styles['skills-sheet-tags']}>
               {related.map((r) => (
                 <span key={r} className={styles['skills-sheet-tag']}>{r}</span>
@@ -94,10 +94,21 @@ function openSkillModal(openModal: OpenModalFn, skill: SkillItem, onClose: () =>
 
         {projects.length > 0 && (
           <div className={styles['skills-sheet-section']}>
-            <h4 className={styles['skills-sheet-section-title']}>Used in</h4>
+            <h4 className={styles['skills-sheet-section-title']}>Used In Projects</h4>
             <div className={styles['skills-sheet-tags']}>
               {projects.map((p) => (
-                <span key={p} className={`${styles['skills-sheet-tag']} ${styles['skills-sheet-tag--projects']}`}>{p}</span>
+                <a
+                  key={p}
+                  href={`/projects#${p.toLowerCase().replace(/\s+/g, '-')}`}
+                  className={`${styles['skills-sheet-tag']} ${styles['skills-sheet-tag--project']}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const el = document.getElementById(p.toLowerCase().replace(/\s+/g, '-'));
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  {p}
+                </a>
               ))}
             </div>
           </div>
@@ -119,7 +130,6 @@ export default function Skills() {
   const globeRef = useRef<{ setDisabled: (v: boolean) => void; search: (v: string | null) => void; setFilter: (v: string | null) => void; reset: () => void; select: (v: string | null) => void } | null>(null);
   const sectionElRef = useRef<HTMLElement | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { showScene, hideScene } = useScene();
   const { openModal } = useModal();
 
   const { getProgress, sectionRef } = useScrollPhase({
@@ -133,7 +143,6 @@ export default function Skills() {
   const mergedRef = useMergedRef<HTMLElement>(ref, sectionRef, sectionElRef);
 
   // ── DOM-direct scroll animation (zero React re-renders) ──
-  const wasSceneVisible = useRef(true);
   const wereFiltersVisible = useRef(false);
 
   useEffect(() => {
@@ -143,12 +152,6 @@ export default function Skills() {
 
     const tick = () => {
       const p = getProgress();
-
-      const sceneVisible = p <= 0.02 || p >= 0.96;
-      if (sceneVisible !== wasSceneVisible.current) {
-        wasSceneVisible.current = sceneVisible;
-        if (sceneVisible) showScene(); else hideScene();
-      }
 
       const headerProgress = Math.min(p / 0.32, 1);
       const globeProgress = Math.min(Math.max((p - 0.08) / 0.45, 0), 1);
@@ -177,7 +180,7 @@ export default function Skills() {
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [getProgress, showScene, hideScene]);
+  }, [getProgress]);
 
   const handleSearchInput = useCallback((value: string) => {
     setInputValue(value);

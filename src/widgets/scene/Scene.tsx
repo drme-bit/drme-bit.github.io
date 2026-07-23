@@ -103,7 +103,6 @@ function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
   const wireMatRef = useRef<THREE.LineBasicMaterial>(null);
   const pointsMatRef = useRef<THREE.PointsMaterial>(null);
 
-  // THREE.Timer вместо THREE.Clock
   const timerRef = useRef(new THREE.Timer());
 
   const scrollSmoothed = useRef(0);
@@ -168,8 +167,7 @@ function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
     posAttr.needsUpdate = true;
     colAttr.needsUpdate = true;
 
-    // Отрисовка изобар
-    const bands = [-0.5, 0, 0.5, 1.0];
+    const bands = [-2.5, -2.0, -1.5, -1.0, -0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5];
     let segCount = 0;
     const wirePosAttr = wireGeo.attributes.position as THREE.BufferAttribute;
     const out = wirePosAttr.array as Float32Array;
@@ -214,7 +212,6 @@ function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
   useFrame(() => {
     if (terrain.paused) return;
 
-    // Обновляем таймер и берем оттуда прошедшее время
     timerRef.current.update();
     const elapsedTime = timerRef.current.getElapsed();
 
@@ -232,7 +229,7 @@ function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
 
   return (
     <group>
-      <points ref={pointsRef} geometry={pointsGeo}>
+      <points ref={pointsRef} geometry={pointsGeo} frustumCulled={false}>
         <pointsMaterial
           ref={pointsMatRef}
           vertexColors
@@ -242,7 +239,7 @@ function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
           sizeAttenuation
         />
       </points>
-      <lineSegments ref={wireRef} geometry={wireGeo}>
+      <lineSegments ref={wireRef} geometry={wireGeo} frustumCulled={false}>
         <lineBasicMaterial
           ref={wireMatRef}
           color={colors.accent}
@@ -259,7 +256,6 @@ function Beacons() {
   const matRefs = useRef<(THREE.MeshBasicMaterial | null)[]>([]);
   const { colors } = useTheme();
 
-  // THREE.Timer вместо THREE.Clock
   const timerRef = useRef(new THREE.Timer());
 
   const seeds = useMemo(
@@ -274,7 +270,6 @@ function Beacons() {
   );
 
   useFrame(() => {
-    // Обновляем таймер и берем оттуда прошедшее время
     timerRef.current.update();
     const t = timerRef.current.getElapsed();
 
@@ -419,6 +414,9 @@ export default function Scene() {
         alpha: true,
         antialias: !lowPower,
         powerPreference: 'high-performance',
+        stencil: false,
+        depth: true,
+        preserveDrawingBuffer: true,
       }}
       frameloop="always"
       onCreated={({ gl }) => {
