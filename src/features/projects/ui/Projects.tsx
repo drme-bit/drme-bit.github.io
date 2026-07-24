@@ -1,119 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
-import Image from 'next/image'
 import useReveal from '@/shared/hooks/useReveal';
 import useHorizontalScroll from '@/shared/hooks/useHorizontalScroll';
 import useMergedRef from '@/shared/hooks/useMergedRef';
 import SectionTitle from '@/shared/ui/molecules/SectionTitle/SectionTitle';
 import { PROJECTS } from '@/data/projectsData';
-import { FiArrowRight, FiExternalLink, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import styles from './Projects.module.scss';
-
-/* ─── Types ──────────────────────────────────────────────── */
-
-interface Project {
-  id: string;
-  title: string;
-  desc: string;
-  tech: string[];
-  status?: string;
-  image?: string | null;
-  images?: string[];
-  url?: string;
-}
-
-interface ProjectCardProps {
-  project: Project;
-  index: number;
-  isActive: boolean;
-}
-
-/* ─── Data ───────────────────────────────────────────────── */
-
-const STATUS_META: Record<string, { icon: string; cls: string; label: string }> = {
-  ACTIVE: { icon: '●', cls: 'badge--active', label: 'active' },
-  ARCHIVED: { icon: '◌', cls: 'badge--archived', label: 'archived' },
-};
-
-/* ─── Sub-components ─────────────────────────────────────── */
-
-function ProjectCard({ project, index, isActive }: ProjectCardProps) {
-  const router = useRouter();
-  const meta = STATUS_META[project.status || 'ARCHIVED'] || STATUS_META.ARCHIVED;
-
-  const handleClick = () => {
-    router.push(`/project/${project.id}`);
-  };
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    e.currentTarget.style.setProperty('--mouse-x', `${x}%`);
-    e.currentTarget.style.setProperty('--mouse-y', `${y}%`);
-  }, []);
-
-  const bgImage = project.image || project.images?.[0] || '';
-
-  return (
-    <div className={`${styles['projects-card']}${isActive ? ` ${styles['is-active']}` : ''}`}>
-      <div className={styles['projects-card-bg']}>
-        {bgImage && <Image src={bgImage} alt="" className={styles['projects-card-bg-img']} fill/>}
-        <div className={styles['projects-card-bg-overlay']} />
-      </div>
-
-      <div
-        className={styles['projects-card-glass']}
-        onMouseMove={handleMouseMove}
-      >
-        <div className={styles['projects-card-glass-inner']}>
-          <div className={styles['projects-card-header']}>
-            <span className={`${styles['projects-badge']} ${styles[meta.cls] || ''}`}>
-              <span className={styles['projects-badge-dot']}>{meta.icon}</span>
-              {meta.label}
-            </span>
-            <span className={styles['projects-card-id']}>
-              ./project_{String(index + 1).padStart(3, '0')}
-            </span>
-          </div>
-
-          <h3 className={styles['projects-card-title']}>{project.title}</h3>
-
-          <p className={styles['projects-card-desc']}>{project.desc}</p>
-
-          <div className={styles['projects-card-tech']}>
-            {project.tech.slice(0, 6).map((t: string) => (
-              <span key={t} className={styles['projects-tech-tag']}>{t}</span>
-            ))}
-            {project.tech.length > 6 && (
-              <span className={styles['projects-tech-more']}>+{project.tech.length - 6}</span>
-            )}
-          </div>
-
-          <div className={styles['projects-card-actions']}>
-            <button className={styles['projects-cta']} onClick={handleClick}>
-              <span>cat details.md</span>
-              <FiArrowRight className={styles['projects-cta-icon']} />
-            </button>
-            {project.url && project.url !== '#' && (
-              <a
-                href={project.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles['projects-link']}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <FiExternalLink />
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { ProjectCard } from '../components/ProjectCard';
+import styles from '../ui/Projects.module.scss';
 
 /* ─── Projects ───────────────────────────────────────────── */
 
@@ -123,12 +16,10 @@ export default function Projects() {
     progress,
     currentIndex,
     containerRef,
-    scrollNext,
-    scrollPrev,
   } = useHorizontalScroll({
     itemCount: PROJECTS.length,
     snapThreshold: 0.15,
-    firstItemDelay: 0.12,
+    firstItemDelay: 0.1,
   });
   const mergedRef = useMergedRef<HTMLElement>(containerRef, sectionRef);
 
@@ -139,7 +30,7 @@ export default function Projects() {
       id="projects"
       ref={mergedRef}
       className={`${styles.section} ${styles['section--projects']} ${styles.reveal}${sectionVisible ? ` ${styles['is-visible']}` : ''}`}
-      style={{ height: `${count * 100}vh` }}
+      style={{ height: `${(count - 1) * 100 + 15}vh` }}
     >
       <div className={styles['projects-sticky']}>
         <div className={styles['projects-inner']}>
@@ -162,7 +53,7 @@ export default function Projects() {
 
           <div className={styles['projects-viewport']}>
             <div className={styles['projects-track']} data-track>
-              {PROJECTS.map((project: Project, i: number) => (
+              {PROJECTS.map((project, i: number) => (
                 <div key={project.id} className={styles['projects-track-item']}>
                   <ProjectCard
                     project={project}
@@ -182,25 +73,6 @@ export default function Projects() {
                   style={{ width: `${(progress * 100).toFixed(1)}%` }}
                 />
               </div>
-            </div>
-
-            <div className={styles['projects-nav']}>
-              <button
-                className={styles['projects-nav-btn']}
-                onClick={scrollPrev}
-                disabled={currentIndex === 0}
-                aria-label="Previous project"
-              >
-                <FiChevronLeft />
-              </button>
-              <button
-                className={styles['projects-nav-btn']}
-                onClick={scrollNext}
-                disabled={currentIndex === count - 1}
-                aria-label="Next project"
-              >
-                <FiChevronRight />
-              </button>
             </div>
           </div>
         </div>

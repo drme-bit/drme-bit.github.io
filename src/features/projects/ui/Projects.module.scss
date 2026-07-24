@@ -23,7 +23,7 @@
 .projects-sticky {
   position: sticky;
   top: 0;
-  height: 100vh;
+  height: 95vh;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -76,6 +76,34 @@
   width: 100%;
   overflow: hidden;
   position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  &::before {
+    left: 0;
+    background: linear-gradient(to right, var(--bg) 0%, transparent 100%);
+  }
+
+  &::after {
+    right: 0;
+    background: linear-gradient(to left, var(--bg) 0%, transparent 100%);
+  }
+
+  @media (max-width: 700px) {
+    &::before,
+    &::after {
+      width: 40px;
+    }
+  }
 }
 
 .projects-track {
@@ -160,6 +188,15 @@
     rgba(0, 0, 0, 0.5) 40%,
     rgba(0, 0, 0, 0.3) 100%
   );
+
+  @media (max-width: 700px) {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.6) 0%,
+      rgba(0, 0, 0, 0.35) 40%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+  }
 }
 
 /* ─── Glass Content Card ─────────────────────────────────── */
@@ -169,7 +206,8 @@
   bottom: 10vh;
   left: 5vw;
   max-width: 520px;
-  width: calc(100% - 10vw);
+  width: calc(100vw - 10vw);
+  max-height: calc(100vh - 20vh);
   padding: 2rem 2.2rem;
   background: var(--glass-strong);
   backdrop-filter: blur(24px);
@@ -210,6 +248,7 @@
     left: 4vw;
     width: calc(100% - 8vw);
     max-width: none;
+    max-height: calc(100vh - 35vh);
     padding: 1.5rem;
   }
 }
@@ -219,7 +258,24 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 0.8rem;
+  max-height: calc(100vh - 24vh);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
 }
 
 /* ─── Card Header ────────────────────────────────────────── */
@@ -247,11 +303,12 @@
 }
 
 .badge--archived {
-  color: var(--text-dim);
+  color: var(--text-ghost);
 }
 
 .projects-badge-dot {
-  font-size: 0.5em;
+  font-size: 0.8em;
+  opacity: 0.8;
 }
 
 .projects-card-id {
@@ -299,6 +356,9 @@
 }
 
 .projects-tech-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   font-family: var(--font-mono);
   font-size: 0.6rem;
   color: var(--text-dim);
@@ -315,6 +375,11 @@
   }
 }
 
+.projects-tech-icon {
+  font-size: 0.7em;
+  opacity: 0.8;
+}
+
 .projects-tech-more {
   font-family: var(--font-mono);
   font-size: 0.55rem;
@@ -322,13 +387,130 @@
   padding: 0.25rem 0.5rem;
 }
 
+/* ─── Features Preview ───────────────────────────────────── */
+
+.projects-card-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.projects-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.projects-feature-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-secondary);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.projects-feature-more {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-ghost);
+  padding-left: 0.9rem;
+}
+
+/* ─── Meta Info ──────────────────────────────────────────── */
+
+.projects-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.projects-card-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.projects-meta-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.projects-meta-value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-secondary);
+}
+
+.projects-meta-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-ghost);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Architecture & Challenges ──────────────────────────── */
+
+.projects-card-arch,
+.projects-card-challenges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.6rem;
+  background: color-mix(in srgb, var(--glass) 50%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  border-radius: var(--radius-sm);
+}
+
+.projects-card-arch-label,
+.projects-card-challenges-label {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--accent-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+.projects-card-challenges-label {
+  color: var(--accent-warning);
+}
+
+.projects-card-arch-text,
+.projects-card-challenges-text {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
 /* ─── Card Actions ───────────────────────────────────────── */
 
 .projects-card-actions {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  justify-content: space-between;
+  gap: 1rem;
   margin-top: 0.3rem;
+}
+
+.projects-card-links {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .projects-cta {
@@ -398,13 +580,13 @@
 
 .projects-progress {
   flex: 1;
-  max-width: 200px;
+  max-width: 300px;
 }
 
 .projects-progress-bar {
   width: 100%;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.1);
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -414,43 +596,5 @@
   background: var(--gradient-primary);
   border-radius: 2px;
   transition: width 0.3s var(--ease-out);
-}
-
-/* ─── Navigation ─────────────────────────────────────────── */
-
-.projects-nav {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.projects-nav-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-dim);
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.25s var(--ease-out);
-
-  &:hover:not(:disabled) {
-    color: var(--text);
-    border-color: var(--border-hover);
-    background: var(--glass-hover);
-  }
-
-  &:disabled {
-    opacity: 0.2;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: 700px) {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
-  }
+  box-shadow: 0 0 12px var(--accent-secondary);
 }
