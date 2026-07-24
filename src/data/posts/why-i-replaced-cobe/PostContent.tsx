@@ -187,7 +187,7 @@ const y = (-pos.y + 1) / 2 * window.innerHeight;`}
                 'Arcs connecting skill groups',
                 'Custom SVG polygons for borders',
                 'Per-point sizing and coloring',
-                'HTML labels via Vector3.project()',
+                'HTML labels via Vector3.projects()',
               ]}
             />
           </div>
@@ -210,7 +210,7 @@ const y = (-pos.y + 1) / 2 * window.innerHeight;`}
           </p>
           <div className={styles['timeline']}>
             {[
-              { day: 'Day 1', task: 'Rebuild marker overlay system with Vector3.project()' },
+              { day: 'Day 1', task: 'Rebuild marker overlay system with Vector3.projects()' },
               { day: 'Day 1', task: 'Implement GlobeManager class for state management' },
               { day: 'Day 2', task: 'Add arcs, polygon highlights, and custom marker shapes' },
               { day: 'Day 2', task: 'Mobile optimization and performance tuning' },

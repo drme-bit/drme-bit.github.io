@@ -25,7 +25,7 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'skills-1', title: 'Curious', description: 'Checked 1 skill', category: 'skills', check: (p) => p.skillsChecked >= 1 },
   { id: 'skills-5', title: 'Explorer', description: 'Checked 5 skills', category: 'skills', check: (p) => p.skillsChecked >= 5 },
   { id: 'skills-10', title: 'Scholar', description: 'Checked 10 skills', category: 'skills', check: (p) => p.skillsChecked >= 10 },
-  { id: 'projects-1', title: 'Observer', description: 'Viewed 1 project', category: 'projects', check: (p) => p.projectsViewed >= 1 },
+  { id: 'projects-1', title: 'Observer', description: 'Viewed 1 projects', category: 'projects', check: (p) => p.projectsViewed >= 1 },
   { id: 'projects-3', title: 'Inspector', description: 'Viewed 3 projects', category: 'projects', check: (p) => p.projectsViewed >= 3 },
   { id: 'sections-3', title: 'Browser', description: 'Revealed 3 sections', category: 'sections', check: (p) => p.sectionsRevealed >= 3 },
   { id: 'sections-5', title: 'Scroller', description: 'Revealed 5 sections', category: 'sections', check: (p) => p.sectionsRevealed >= 5 },

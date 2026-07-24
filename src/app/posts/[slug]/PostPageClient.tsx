@@ -63,7 +63,7 @@ export default function PostPageClient() {
   const { slug } = useParams() as { slug: string };
   const router = useRouter();
   const { transitionFrom } = usePostTransition();
-  const { setConfig } = useNav();
+  const { setPageConfig } = useNav();
   const post = BLOG_POSTS.find((p) => p.slug === slug);
 
   const clipFrom = useMemo(() => {
@@ -88,13 +88,14 @@ export default function PostPageClient() {
   // Configure nav with prev/next arrows
   useEffect(() => {
     if (!post) return;
-    setConfig({
-      sections: [],
-      arrows: {
-        prev: prevPost ? `/posts/${prevPost.slug}` : undefined,
-        next: nextPost ? `/posts/${nextPost.slug}` : undefined,
-        onPrev: prevPost ? () => router.push(`/posts/${prevPost.slug}`) : undefined,
-        onNext: nextPost ? () => router.push(`/posts/${nextPost.slug}`) : undefined,
+    setPageConfig({
+      pagination: {
+        prev: prevPost
+          ? { label: prevPost.title, href: `/posts/${prevPost.slug}`, onClick: () => router.push(`/posts/${prevPost.slug}`) }
+          : undefined,
+        next: nextPost
+          ? { label: nextPost.title, href: `/posts/${nextPost.slug}`, onClick: () => router.push(`/posts/${nextPost.slug}`) }
+          : undefined,
       },
     });
   }, [slug]);
@@ -122,33 +123,6 @@ export default function PostPageClient() {
       ) : (
         PostContent && <PostContent />
       )}
-
-      {/* Bottom Nav */}
-      <motion.nav
-        className={styles['post-bottom-nav']}
-        initial={clipFrom ? { opacity: 0, y: 20 } : false}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {prevPost && (
-          <Link href={`/posts/${prevPost.slug}`} className={styles['post-bottom-nav-btn']}>
-            <FiArrowLeft size={14} />
-            <span>{prevPost.title}</span>
-          </Link>
-        )}
-        <Link href="/" className={styles['post-bottom-nav-home']}>
-          <FiHome size={14} />
-        </Link>
-        {nextPost && (
-          <Link
-            href={`/posts/${nextPost.slug}`}
-            className={`${styles['post-bottom-nav-btn']} ${styles['post-bottom-nav-btn--next']}`}
-          >
-            <span>{nextPost.title}</span>
-            <FiArrowRight size={14} />
-          </Link>
-        )}
-      </motion.nav>
     </div>
   );
 }

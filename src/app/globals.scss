@@ -3,6 +3,114 @@
 @use '../shared/styles/animations' as *;
 
 // ═══════════════════════════════════════════════════════════
+// ACCORDION ANIMATIONS (Radix UI)
+// ═══════════════════════════════════════════════════════════
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-muted-foreground: var(--text-dim);
+  --color-border: var(--border);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--accent-secondary);
+  --color-primary-foreground: var(--bg);
+  --color-secondary: var(--bg-elevated);
+  --color-secondary-foreground: var(--text);
+  --color-destructive: var(--accent-danger);
+  --color-destructive-foreground: var(--bg);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-in: enter 0.15s ease var(--tw-animation-delay, 0s) var(--tw-animation-fill-mode, none);
+  --animate-out: exit 0.15s ease var(--tw-animation-delay, 0s) var(--tw-animation-fill-mode, none);
+  @keyframes enter {
+    from {
+      opacity: var(--tw-enter-opacity, 1);
+      transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0)
+        scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), var(--tw-enter-scale, 1))
+        rotate(var(--tw-enter-rotate, 0));
+      filter: blur(var(--tw-enter-blur, 0));
+    }
+  }
+  @keyframes exit {
+    to {
+      opacity: var(--tw-exit-opacity, 1);
+      transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0)
+        scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1))
+        rotate(var(--tw-exit-rotate, 0));
+      filter: blur(var(--tw-exit-blur, 0));
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// ANIMATION UTILITIES (replaces tw-animate-css)
+// ═══════════════════════════════════════════════════════════
+
+@utility fade-in {
+  --tw-enter-opacity: 0;
+}
+@utility fade-in-0 {
+  --tw-enter-opacity: 0;
+}
+@utility fade-out {
+  --tw-exit-opacity: 0;
+}
+@utility fade-out-0 {
+  --tw-exit-opacity: 0;
+}
+@utility slide-in-from-left-52 {
+  --tw-enter-translate-x: -13rem;
+}
+@utility slide-in-from-right-52 {
+  --tw-enter-translate-x: 13rem;
+}
+@utility slide-out-to-left-52 {
+  --tw-exit-translate-x: -13rem;
+}
+@utility slide-out-to-right-52 {
+  --tw-exit-translate-x: 13rem;
+}
+@utility zoom-in-90 {
+  --tw-enter-scale: 0.9;
+}
+@utility zoom-in-95 {
+  --tw-enter-scale: 0.95;
+}
+@utility zoom-out-90 {
+  --tw-exit-scale: 0.9;
+}
+@utility zoom-out-95 {
+  --tw-exit-scale: 0.95;
+}
+@utility slide-in-from-top {
+  --tw-enter-translate-y: -100%;
+}
+@utility slide-out-to-top {
+  --tw-exit-translate-y: -100%;
+}
+@utility slide-in-from-bottom {
+  --tw-enter-translate-y: 100%;
+}
+@utility slide-out-to-bottom {
+  --tw-exit-translate-y: 100%;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ACCORDION ANIMATIONS (Radix UI)
+// ═══════════════════════════════════════════════════════════
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+// ═══════════════════════════════════════════════════════════
 // DESIGN TOKENS — CSS Custom Properties
 // ═══════════════════════════════════════════════════════════
 
@@ -696,3 +804,20 @@ html.no-blur {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+// ═══════════════════════════════════════════════════════════
+// SHADCN UTILITY OVERRIDES — spacing, sizing, rings
+// ═══════════════════════════════════════════════════════════
+
+@utility bg-muted\/20 { background: color-mix(in srgb, var(--text-dim) 4%, transparent); }
+@utility bg-muted\/30 { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+@utility fill-border\/50 { fill: color-mix(in srgb, var(--border) 50%, transparent); }
+@utility stroke-border { stroke: var(--border); }
+@utility stroke-border\/50 { stroke: color-mix(in srgb, var(--border) 50%, transparent); }
+@utility fill-gray-400\/30 { fill: color-mix(in srgb, #9ca3af 30%, transparent); }
+@utility stroke-gray-400\/30 { stroke: color-mix(in srgb, #9ca3af 30%, transparent); }
+@utility bg-border { background-color: var(--border); }
+@utility text-border { color: var(--border); }
+@utility border-input { border-color: var(--border); }
+@utility ring-ring { --tw-ring-color: rgba(255, 255, 255, 0.15); }
+@utility ring-offset-background { --tw-ring-offset-color: var(--bg); }

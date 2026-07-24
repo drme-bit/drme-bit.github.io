@@ -30,7 +30,7 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['experience', 'job', 'work history', 'career', 'background', 'professional', 'employment'],
     answer:
-      "Three entries on the timeline: 1) Freelance Roblox Developer (2023–present) — custom game systems for Roblox. 2) Nexagon diploma project (2026) — bachelor's in Software Engineering. 3) Bot Developer (2023–present) — freelance automation and bots.",
+      "Three entries on the timeline: 1) Freelance Roblox Developer (2023–present) — custom game systems for Roblox. 2) Nexagon diploma projects (2026) — bachelor's in Software Engineering. 3) Bot Developer (2023–present) — freelance automation and bots.",
   },
   {
     keywords: ['contact', 'email', 'reach', 'get in touch', 'social', 'hire', 'message'],
@@ -40,7 +40,7 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['education', 'study', 'studying', 'university', 'college', 'degree', 'bachelor', 'learn'],
     answer:
-      "Vyacheslav earned his Bachelor's in Software Engineering in 2026. His diploma project was Nexagon — a game server monitoring tool built with Rust, React, and much more.",
+      "Vyacheslav earned his Bachelor's in Software Engineering in 2026. His diploma projects was Nexagon — a game server monitoring tool built with Rust, React, and much more.",
   },
   {
     keywords: ['location', 'where are you', 'based', 'live', 'country', 'timezone'],
@@ -101,7 +101,7 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['github', 'source code', 'repository', 'repo', 'open source'],
     answer:
-      "The source code for this portfolio is on GitHub at github.com/drme-bit/drme-bit.github.io. Other projects like Nexagon also have repos linked in the project cards.",
+      "The source code for this portfolio is on GitHub at github.com/drme-bit/drme-bit.github.io. Other projects like Nexagon also have repos linked in the projects cards.",
   },
 ];
 
