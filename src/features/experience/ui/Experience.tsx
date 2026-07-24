@@ -6,37 +6,7 @@ import useCursorParallax from '@/shared/hooks/useCursorParallax';
 import SectionTitle from '@/shared/ui/molecules/SectionTitle/SectionTitle';
 import styles from './Experience.module.scss';
 
-/* ─── Types ──────────────────────────────────────────────── */
-
-interface ExperienceEntry {
-  period: string;
-  role: string;
-  org: string;
-  desc: string;
-}
-
-/* ─── Data ───────────────────────────────────────────────── */
-
-const ENTRIES: ExperienceEntry[] = [
-  {
-    period: '2024 — present',
-    role: 'Freelance Roblox Developer',
-    org: 'Self-employed',
-    desc: 'Developed commission-based games across multiple genres: anime-themed experiences (JoJo, One Piece), an item trading economy game, and the creepypasta horror game "Vault 8166". Built interactive gameplay systems and server-side logic using Luau.',
-  },
-  {
-    period: '2024',
-    role: 'Diploma Project — Nexagon',
-    org: 'Software Engineering Bachelor',
-    desc: 'Created Nexagon, a platform for monitoring and managing game servers. Features real-time tracking, server management tools, and planned hosting integration. Served as the thesis projects for my Professional Junior Bachelor degree.',
-  },
-  {
-    period: '2023 — present',
-    role: 'Bot Developer',
-    org: 'Freelance',
-    desc: 'Built custom Telegram and Discord bots for moderation, community management, automation, and game server integration. Focused on reliable, self-hosted solutions using Python and Node.js.',
-  },
-];
+import { experienceData, ExperienceEntry } from '@/data/experienceData';
 
 /* ─── Experience ─────────────────────────────────────────── */
 
@@ -110,7 +80,7 @@ export default function Experience() {
             <span ref={headRef} className={styles['tl-head']} />
           </div>
 
-          {ENTRIES.map((e: ExperienceEntry, i: number) => (
+          {experienceData.map((e: ExperienceEntry, i: number) => (
             <div
               key={i}
               ref={(el) => { entryRefs.current[i] = el; }}

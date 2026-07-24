@@ -4,108 +4,24 @@ import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react'
 import useReveal from '@/shared/hooks/useReveal';
 import useScrollPhase from '@/shared/hooks/useScrollPhase';
 import useMergedRef from '@/shared/hooks/useMergedRef';
-import { useScene } from '@/providers/SceneProvider';
-import { useModal } from '@/providers/ModalProvider';
-import { SKILLS_DATA, GROUP_COLORS, ICON_MAP } from './skillsData';
-import type { SkillItem } from './skillsData';
-import { FiSearch, FiX, FiChevronDown, FiMove, FiMousePointer, FiSliders } from 'react-icons/fi';
+import { SKILLS_DATA, GROUP_COLORS } from '@/data/skillsData';
+import { EXPLORER_GUIDE, MAX_HISTORY } from '../lib/constants';
+import { useSkillHistory } from '../hooks/useSkillHistory';
+import { useCompareMode } from '../hooks/useCompareMode';
+import { GROUP_OPTIONS } from '../hooks/useSkillFilter';
+import { SkillPanel } from '../components/SkillPanel';
+import { FiSearch, FiX, FiChevronDown } from 'react-icons/fi';
 import styles from './Skills.module.scss';
+import type { SkillItem } from '../types/skills';
 
 const Globe = lazy(() => import('@/shared/ui/organisms/Globe/Globe'));
 
-/* ─── Types ──────────────────────────────────────────────── */
-
-interface GroupOption {
-  key: string;
-  color: string;
-}
-
 /* ─── Derived data ───────────────────────────────────────── */
-
-const GROUP_OPTIONS: GroupOption[] = Object.entries(GROUP_COLORS).map(([key, color]) => ({ key, color }));
 
 const GROUP_COUNTS: Record<string, number> = {};
 GROUP_OPTIONS.forEach(({ key }) => {
   GROUP_COUNTS[key] = SKILLS_DATA.filter((s) => s.group === key).length;
 });
-
-/* ─── Helpers ────────────────────────────────────────────── */
-
-const EXPLORER_GUIDE = [
-  { step: '01', icon: FiMove, title: 'Rotate', detail: 'drag the globe' },
-  { step: '02', icon: FiMousePointer, title: 'Inspect', detail: 'select a marker' },
-  { step: '03', icon: FiSliders, title: 'Refine', detail: 'search or filter' },
-];
-
-interface OpenModalFn {
-  (config: { className: string; onClose?: () => void; content: React.JSX.Element }): void;
-}
-
-function openSkillModal(openModal: OpenModalFn, skill: SkillItem, onClose: () => void) {
-  const Icon = ICON_MAP[skill.name];
-  const related = SKILLS_DATA.find((s) => s.name === skill.name)?.related || [];
-  const projects = SKILLS_DATA.find((s) => s.name === skill.name)?.projects || [];
-
-  openModal({
-    className: 'modal-panel--skills-sheet',
-    onClose,
-    content: (
-      <div className={styles['skills-sheet-content']}>
-        <div className={styles['skills-mobile-sheet-handle']} />
-
-        <div className={styles['skills-mobile-sheet-header']}>
-          <div className={styles['skills-mobile-sheet-icon-wrap']} style={{ '--card-color': GROUP_COLORS[skill.group] } as React.CSSProperties}>
-            {Icon && <Icon className={styles['skills-mobile-sheet-icon']} />}
-          </div>
-          <div className={styles['skills-mobile-sheet-titles']}>
-            <span className={styles['skills-mobile-sheet-name']} style={{ color: GROUP_COLORS[skill.group] }}>
-              {skill.name}
-            </span>
-            <span className={styles['skills-mobile-sheet-group']}>{skill.group}</span>
-          </div>
-        </div>
-
-        <div className={styles['skill-level']}>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <span
-              key={n}
-              className={`${styles['skill-level-dot']}${n <= skill.level ? ` ${styles['is-filled']}` : ''}`}
-              style={n <= skill.level ? { background: GROUP_COLORS[skill.group] } : {}}
-            />
-          ))}
-        </div>
-
-        {skill.funLevel && (
-          <p className={styles['skills-sheet-fun']}>&quot;{skill.funLevel}&quot;</p>
-        )}
-
-        {skill.desc && <p className={styles['skills-sheet-desc']}>{skill.desc}</p>}
-
-        {related.length > 0 && (
-          <div className={styles['skills-sheet-section']}>
-            <h4 className={styles['skills-sheet-section-title']}>Related</h4>
-            <div className={styles['skills-sheet-tags']}>
-              {related.map((r) => (
-                <span key={r} className={styles['skills-sheet-tag']}>{r}</span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {projects.length > 0 && (
-          <div className={styles['skills-sheet-section']}>
-            <h4 className={styles['skills-sheet-section-title']}>Used in</h4>
-            <div className={styles['skills-sheet-tags']}>
-              {projects.map((p) => (
-                <span key={p} className={`${styles['skills-sheet-tag']} ${styles['skills-sheet-tag--projects']}`}>{p}</span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    ),
-  });
-}
 
 /* ─── Skills ─────────────────────────────────────────────── */
 
@@ -114,13 +30,15 @@ export default function Skills() {
   const [filterGroup, setFilterGroup] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [selectedSkill, setSelectedSkill] = useState<SkillItem | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const globeRef = useRef<{ setDisabled: (v: boolean) => void; search: (v: string | null) => void; setFilter: (v: string | null) => void; reset: () => void; select: (v: string | null) => void } | null>(null);
   const sectionElRef = useRef<HTMLElement | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { showScene, hideScene } = useScene();
-  const { openModal } = useModal();
+
+  const { history, addSkill } = useSkillHistory();
+  const { isCompareMode, compareSkill, toggleCompareMode, selectCompareSkill, exitCompareMode } = useCompareMode();
 
   const { getProgress, sectionRef } = useScrollPhase({
     phases: [
@@ -133,7 +51,6 @@ export default function Skills() {
   const mergedRef = useMergedRef<HTMLElement>(ref, sectionRef, sectionElRef);
 
   // ── DOM-direct scroll animation (zero React re-renders) ──
-  const wasSceneVisible = useRef(true);
   const wereFiltersVisible = useRef(false);
 
   useEffect(() => {
@@ -144,16 +61,11 @@ export default function Skills() {
     const tick = () => {
       const p = getProgress();
 
-      const sceneVisible = p <= 0.02 || p >= 0.96;
-      if (sceneVisible !== wasSceneVisible.current) {
-        wasSceneVisible.current = sceneVisible;
-        if (sceneVisible) showScene(); else hideScene();
-      }
-
       const headerProgress = Math.min(p / 0.32, 1);
       const globeProgress = Math.min(Math.max((p - 0.08) / 0.45, 0), 1);
       const tipsProgress = Math.min(Math.max((p - 0.46) / 0.2, 0), 1);
       const filtersProgress = Math.min(Math.max((p - 0.62) / 0.16, 0), 1);
+      const cardsProgress = Math.min(Math.max((p - 0.15) / 0.3, 0), 1);
 
       el.style.setProperty('--header-opacity', String(1 - headerProgress));
       el.style.setProperty('--header-x', `${headerProgress * -4}vw`);
@@ -165,6 +77,9 @@ export default function Skills() {
       el.style.setProperty('--tips-y', `${(1 - tipsProgress) * 0.75}rem`);
       el.style.setProperty('--filters-opacity', String(filtersProgress));
       el.style.setProperty('--filters-y', `${(1 - filtersProgress) * -0.75}rem`);
+      el.style.setProperty('--cards-opacity', String(cardsProgress));
+      el.style.setProperty('--card-1-y', `${(1 - cardsProgress) * 40}px`);
+      el.style.setProperty('--card-2-y', `${(1 - cardsProgress) * 60}px`);
 
       const filtersVisible = p > 0.62;
       if (filtersVisible !== wereFiltersVisible.current) {
@@ -177,7 +92,7 @@ export default function Skills() {
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [getProgress, showScene, hideScene]);
+  }, [getProgress]);
 
   const handleSearchInput = useCallback((value: string) => {
     setInputValue(value);
@@ -208,20 +123,64 @@ export default function Skills() {
   }, []);
 
   const handleMarkerClick = useCallback((skillName: string) => {
+    const p = getProgress();
+    if (p < 0.6) return;
     const skill = SKILLS_DATA.find((s) => s.name === skillName);
     if (!skill) return;
     globeRef.current?.select(skillName);
-    openSkillModal(openModal, skill, () => globeRef.current?.select(null));
-  }, [openModal]);
+    addSkill(skill);
+    if (isCompareMode) {
+      if (!selectedSkill) {
+        setSelectedSkill(skill);
+      } else if (!compareSkill) {
+        selectCompareSkill(skill);
+      }
+    } else {
+      setSelectedSkill(skill);
+    }
+  }, [getProgress, isCompareMode, selectedSkill, compareSkill, addSkill, selectCompareSkill]);
+
+  const closePanel = useCallback(() => {
+    setSelectedSkill(null);
+    exitCompareMode();
+    globeRef.current?.select(null);
+  }, [exitCompareMode]);
+
+  const navigateHistory = useCallback((direction: 'prev' | 'next') => {
+    if (!selectedSkill || history.length === 0) return;
+    const currentIndex = history.findIndex((s) => s.name === selectedSkill.name);
+    let newIndex = direction === 'prev' ? currentIndex + 1 : currentIndex - 1;
+    if (newIndex < 0) newIndex = history.length - 1;
+    if (newIndex >= history.length) newIndex = 0;
+    setSelectedSkill(history[newIndex]);
+    globeRef.current?.select(history[newIndex].name);
+  }, [selectedSkill, history]);
+
+  const selectHistorySkill = useCallback((skill: SkillItem) => {
+    setSelectedSkill(skill);
+    globeRef.current?.select(skill.name);
+  }, []);
+
+  const selectRelatedSkill = useCallback((skill: SkillItem) => {
+    setSelectedSkill(skill);
+    addSkill(skill);
+    globeRef.current?.select(skill.name);
+  }, [addSkill]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        setInputValue('');
-        globeRef.current?.search(null);
-        searchRef.current?.blur();
-        setDropdownOpen(false);
+        if (isCompareMode) {
+          toggleCompareMode();
+        } else if (selectedSkill) {
+          closePanel();
+        } else {
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          setInputValue('');
+          globeRef.current?.search(null);
+          searchRef.current?.blur();
+          setDropdownOpen(false);
+        }
       }
     };
     document.addEventListener('keydown', onKey);
@@ -229,7 +188,7 @@ export default function Skills() {
       document.removeEventListener('keydown', onKey);
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, []);
+  }, [selectedSkill, closePanel, isCompareMode, toggleCompareMode]);
 
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -304,7 +263,7 @@ export default function Skills() {
                   all
                   <span className={styles['skills-filter-option-count']}>{SKILLS_DATA.length}</span>
                 </button>
-                {GROUP_OPTIONS.map(({ key, color }: GroupOption) => (
+                {GROUP_OPTIONS.map(({ key, color }) => (
                   <button
                     key={key}
                     className={`${styles['skills-filter-option']} ${filterGroup === key ? styles['is-active'] : ''}`}
@@ -327,6 +286,30 @@ export default function Skills() {
         </div>
 
         <div className={styles['skills-layout']}>
+          {/* Background decorative cards */}
+          <div className={styles['skills-bg-cards']}>
+            <div className={`${styles['skills-bg-card']} ${styles['skills-bg-card--1']}`}>
+              <div className={styles['skills-bg-card-header']}>
+                <span className={styles['skills-bg-card-dot']} style={{ background: 'var(--accent)' }} />
+                <span className={styles['skills-bg-card-title']}>frontend</span>
+              </div>
+              <div className={styles['skills-bg-card-content']}>
+                <span className={styles['skills-bg-card-value']}>9</span>
+                <span className={styles['skills-bg-card-label']}>skills</span>
+              </div>
+            </div>
+            <div className={`${styles['skills-bg-card']} ${styles['skills-bg-card--2']}`}>
+              <div className={styles['skills-bg-card-header']}>
+                <span className={styles['skills-bg-card-dot']} style={{ background: 'var(--accent-secondary)' }} />
+                <span className={styles['skills-bg-card-title']}>backend</span>
+              </div>
+              <div className={styles['skills-bg-card-content']}>
+                <span className={styles['skills-bg-card-value']}>8</span>
+                <span className={styles['skills-bg-card-label']}>skills</span>
+              </div>
+            </div>
+          </div>
+
           {/* Globe — centered, big */}
           <div className={styles['skills-globe-area']}>
             <Suspense fallback={<div className={styles['skills-globe']} />}>
@@ -358,6 +341,19 @@ export default function Skills() {
               </div>
             </aside>
           </div>
+
+          {/* Skill detail panel */}
+          <SkillPanel
+            skill={selectedSkill}
+            history={history}
+            compareMode={isCompareMode}
+            compareSkill={compareSkill}
+            onClose={closePanel}
+            onToggleCompare={toggleCompareMode}
+            onNavigateHistory={navigateHistory}
+            onSelectHistory={selectHistorySkill}
+            onSelectRelated={selectRelatedSkill}
+          />
         </div>
       </div>
     </section>

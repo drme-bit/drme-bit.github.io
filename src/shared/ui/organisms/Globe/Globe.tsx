@@ -12,7 +12,7 @@ import {
   SKILLS_DATA,
   GROUP_COLORS,
   ICON_MAP,
-} from '@/features/skills/ui/skillsData';
+} from '@/data/skillsData';
 
 import GlobeManager from './GlobeManager';
 
@@ -455,11 +455,11 @@ const Globe = forwardRef(function Globe({ className = '', onMarkerClick }: Globe
         <OrbitControls
           enablePan={false}
           enableZoom={false}
-          enableRotate={!_isMobile}
+          enableRotate
           minDistance={cameraZ}
           maxDistance={cameraZ}
           autoRotate
-          autoRotateSpeed={_isMobile ? 0.3 : 0.5}
+          autoRotateSpeed={0.4}
           minPolarAngle={Math.PI / 3.5}
           maxPolarAngle={Math.PI - Math.PI / 3}
         />
