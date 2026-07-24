@@ -19,7 +19,7 @@ export default function Projects() {
   } = useHorizontalScroll({
     itemCount: PROJECTS.length,
     snapThreshold: 0.15,
-    firstItemDelay: 0.25,
+    firstItemDelay: 0.1,
   });
   const mergedRef = useMergedRef<HTMLElement>(containerRef, sectionRef);
 
@@ -30,7 +30,7 @@ export default function Projects() {
       id="projects"
       ref={mergedRef}
       className={`${styles.section} ${styles['section--projects']} ${styles.reveal}${sectionVisible ? ` ${styles['is-visible']}` : ''}`}
-      style={{ height: `${(count - 1) * 100 + 80}vh` }}
+      style={{ height: `${(count - 1) * 100 + 15}vh` }}
     >
       <div className={styles['projects-sticky']}>
         <div className={styles['projects-inner']}>

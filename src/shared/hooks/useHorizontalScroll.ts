@@ -122,10 +122,16 @@ export default function useHorizontalScroll({
     const clamped = Math.max(0, Math.min(itemCount - 1, nearest));
     const exactProgress = clamped / (itemCount - 1);
 
-    if (Math.abs(targetProgress.current - exactProgress) < 0.02) return;
+    if (Math.abs(targetProgress.current - exactProgress) < 0.15) return;
 
     isSnapping.current = true;
     const targetScroll = getScrollForIndex(clamped);
+
+    const currentScroll = window.scrollY;
+    if (Math.abs(currentScroll - targetScroll) < 50) {
+      isSnapping.current = false;
+      return;
+    }
 
     window.scrollTo({ top: targetScroll, behavior: 'smooth' });
 
