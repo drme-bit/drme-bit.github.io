@@ -12,7 +12,7 @@ import {
   SKILLS_DATA,
   GROUP_COLORS,
   ICON_MAP,
-} from '@/features/skills/ui/skillsData';
+} from '@/data/skillsData';
 
 import GlobeManager from './GlobeManager';
 

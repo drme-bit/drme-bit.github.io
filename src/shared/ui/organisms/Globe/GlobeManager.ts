@@ -1,4 +1,4 @@
-import { SKILLS_DATA } from '@/features/skills/ui/skillsData';
+import { SKILLS_DATA } from '@/data/skillsData';
 
 interface GlobeManagerState {
   selected: string | null;
