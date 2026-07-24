@@ -4,8 +4,8 @@ import useIsMobile from './useIsMobile';
 
 interface UseHorizontalScrollOptions {
   itemCount?: number;
-  snapThreshold?: number;
   firstItemDelay?: number;
+  snapThreshold?: number;
 }
 
 interface DragHandlers {
@@ -27,7 +27,8 @@ interface UseHorizontalScrollResult {
 
 export default function useHorizontalScroll({
   itemCount = 1,
-  firstItemDelay = 0,
+  firstItemDelay = 0.2,
+  snapThreshold = 0.2,
 }: UseHorizontalScrollOptions = {}): UseHorizontalScrollResult {
   const [progress, setProgress] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -36,14 +37,16 @@ export default function useHorizontalScroll({
   const containerRef = useRef<HTMLElement | null>(null);
   const animProgress = useRef(0);
   const targetProgress = useRef(0);
+  const velocity = useRef(0);
   const isDragging = useRef(false);
   const currentIndexRef = useRef(0);
   const rafId = useRef<number | null>(null);
-  const lastClientX = useRef(0);
-  const lastReportTime = useRef(0);
+  const lastTime = useRef(0);
+  const lastScrollY = useRef(0);
 
   const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSnapping = useRef(false);
+  const snapTarget = useRef(0);
 
   const tick = useCallback(() => {
     const el = containerRef.current;
@@ -51,6 +54,10 @@ export default function useHorizontalScroll({
       rafId.current = requestAnimationFrame(tick);
       return;
     }
+
+    const now = performance.now();
+    const dt = lastTime.current ? Math.min((now - lastTime.current) / 16.67, 3) : 1;
+    lastTime.current = now;
 
     if (!isDragging.current && !isSnapping.current) {
       const windowHeight = window.innerHeight;
@@ -65,11 +72,21 @@ export default function useHorizontalScroll({
       }
     }
 
-    const diff = targetProgress.current - animProgress.current;
-    if (Math.abs(diff) > 0.001) {
-      animProgress.current += diff * 0.08;
+    if (isSnapping.current) {
+      const diff = snapTarget.current - animProgress.current;
+      const springForce = diff * 0.1;
+      const dampingForce = -velocity.current * 0.7;
+      velocity.current += (springForce + dampingForce) * dt;
+      animProgress.current += velocity.current * dt;
     } else {
-      animProgress.current = targetProgress.current;
+      const diff = targetProgress.current - animProgress.current;
+      if (Math.abs(diff) > 0.0005) {
+        velocity.current = diff * 0.12 * dt;
+        animProgress.current += velocity.current;
+      } else {
+        animProgress.current = targetProgress.current;
+        velocity.current = 0;
+      }
     }
 
     const track = el.querySelector('[data-track]') as HTMLElement | null;
@@ -78,20 +95,16 @@ export default function useHorizontalScroll({
       track.style.transform = `translateX(${offset}%)`;
     }
 
-    const now = performance.now();
-    if (now - lastReportTime.current > 50) {
-      lastReportTime.current = now;
-      const newIndex = Math.round(animProgress.current * (itemCount - 1));
-      const clamped = Math.max(0, Math.min(itemCount - 1, newIndex));
-      setCurrentIndex((prev) => {
-        if (prev !== clamped) {
-          currentIndexRef.current = clamped;
-          return clamped;
-        }
-        return prev;
-      });
-      setProgress(animProgress.current);
-    }
+    const newIndex = Math.round(animProgress.current * (itemCount - 1));
+    const clamped = Math.max(0, Math.min(itemCount - 1, newIndex));
+    setCurrentIndex((prev) => {
+      if (prev !== clamped) {
+        currentIndexRef.current = clamped;
+        return clamped;
+      }
+      return prev;
+    });
+    setProgress(animProgress.current);
 
     rafId.current = requestAnimationFrame(tick);
   }, [itemCount, firstItemDelay]);
@@ -118,27 +131,30 @@ export default function useHorizontalScroll({
   }, [itemCount, firstItemDelay]);
 
   const snapToNearest = useCallback(() => {
+    if (isSnapping.current) return;
+
     const nearest = Math.round(targetProgress.current * (itemCount - 1));
     const clamped = Math.max(0, Math.min(itemCount - 1, nearest));
     const exactProgress = clamped / (itemCount - 1);
 
-    if (Math.abs(targetProgress.current - exactProgress) < 0.15) return;
+    if (Math.abs(targetProgress.current - exactProgress) < snapThreshold) return;
+
+    const targetScroll = getScrollForIndex(clamped);
+    const currentScroll = window.scrollY;
+    if (Math.abs(currentScroll - targetScroll) < 30) return;
 
     isSnapping.current = true;
-    const targetScroll = getScrollForIndex(clamped);
-
-    const currentScroll = window.scrollY;
-    if (Math.abs(currentScroll - targetScroll) < 50) {
-      isSnapping.current = false;
-      return;
-    }
+    snapTarget.current = exactProgress;
+    velocity.current = 0;
 
     window.scrollTo({ top: targetScroll, behavior: 'smooth' });
 
     setTimeout(() => {
       isSnapping.current = false;
-    }, 600);
-  }, [itemCount, getScrollForIndex]);
+      animProgress.current = exactProgress;
+      targetProgress.current = exactProgress;
+    }, 500);
+  }, [itemCount, getScrollForIndex, snapThreshold]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -147,7 +163,7 @@ export default function useHorizontalScroll({
       if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
       scrollEndTimer.current = setTimeout(() => {
         snapToNearest();
-      }, 150);
+      }, 100);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -175,21 +191,11 @@ export default function useHorizontalScroll({
 
   const handleDragStart = useCallback((clientX: number) => {
     isDragging.current = true;
-    lastClientX.current = clientX;
+    lastScrollY.current = window.scrollY;
   }, []);
 
   const handleDragMove = useCallback((clientX: number) => {
     if (!isDragging.current) return;
-    const delta = clientX - lastClientX.current;
-    lastClientX.current = clientX;
-
-    const containerWidth = containerRef.current?.offsetWidth || 1;
-    const progressDelta = -delta / containerWidth;
-    targetProgress.current = Math.max(
-      0,
-      Math.min(1, targetProgress.current + progressDelta),
-    );
-    animProgress.current = targetProgress.current;
   }, []);
 
   const handleDragEnd = useCallback(() => {
