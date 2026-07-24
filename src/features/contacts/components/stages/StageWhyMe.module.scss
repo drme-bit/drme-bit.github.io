@@ -1,0 +1,204 @@
+.stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* ─── Background Layer ───────────────────────────────────── */
+
+.bgText {
+  position: absolute;
+  left: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(8rem, 18vw, 16rem);
+  font-weight: 800;
+  color: var(--accent-secondary);
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+  z-index: 0;
+  will-change: transform, opacity;
+
+  @media (max-width: 700px) {
+    font-size: 5rem;
+    left: 2%;
+  }
+}
+
+/* ─── Mid Layer: floating stats ──────────────────────────── */
+
+.midStats {
+  position: absolute;
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 3;
+  will-change: transform, opacity;
+
+  @media (max-width: 900px) {
+    right: 2%;
+  }
+
+  @media (max-width: 700px) {
+    display: none;
+  }
+}
+
+.floatStat {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+
+  svg {
+    color: var(--accent-secondary);
+    opacity: 0.7;
+  }
+}
+
+/* ─── Foreground Layer: avatar ───────────────────────────── */
+
+.avatarWrap {
+  position: absolute;
+  left: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  will-change: transform, opacity;
+
+  @media (max-width: 900px) {
+    left: 3%;
+  }
+
+  @media (max-width: 700px) {
+    display: none;
+  }
+}
+
+.avatar {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px color-mix(in srgb, var(--accent-secondary) 35%, transparent);
+}
+
+.avatarText {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--bg);
+}
+
+.pulse {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-success);
+  border: 2px solid var(--glass);
+  box-shadow: 0 0 8px var(--accent-success);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--accent-success); }
+  50% { box-shadow: 0 0 16px var(--accent-success); }
+}
+
+/* ─── Inner Content (inside strip) ───────────────────────── */
+
+.inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  z-index: 10;
+  padding: 1rem;
+  margin-left: 15vw;
+  will-change: transform, opacity;
+
+  @media (max-width: 700px) {
+    margin-left: 0;
+    gap: 0.3rem;
+  }
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+  background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 25%, transparent);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  font-weight: 700;
+  color: inherit;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.8vw, 0.72rem);
+  color: inherit;
+  opacity: 0.55;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Strengths ──────────────────────────────────────────── */
+
+.strengths {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+
+  @media (max-width: 700px) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+.strength {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  color: inherit;
+  opacity: 0.8;
+  will-change: transform, opacity;
+}
