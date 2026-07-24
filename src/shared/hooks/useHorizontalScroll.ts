@@ -5,7 +5,6 @@ import useIsMobile from './useIsMobile';
 interface UseHorizontalScrollOptions {
   itemCount?: number;
   snapThreshold?: number;
-  /** Fraction of viewport height to wait before carousel starts moving (0–1) */
   firstItemDelay?: number;
 }
 
@@ -43,6 +42,9 @@ export default function useHorizontalScroll({
   const lastClientX = useRef(0);
   const lastReportTime = useRef(0);
 
+  const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSnapping = useRef(false);
+
   const tick = useCallback(() => {
     const el = containerRef.current;
     if (!el) {
@@ -50,7 +52,7 @@ export default function useHorizontalScroll({
       return;
     }
 
-    if (!isDragging.current) {
+    if (!isDragging.current && !isSnapping.current) {
       const windowHeight = window.innerHeight;
       const deadZone = windowHeight * firstItemDelay;
       const scrollRange = el.offsetHeight - windowHeight;
@@ -64,8 +66,8 @@ export default function useHorizontalScroll({
     }
 
     const diff = targetProgress.current - animProgress.current;
-    if (Math.abs(diff) > 0.0001) {
-      animProgress.current += diff * 0.12;
+    if (Math.abs(diff) > 0.001) {
+      animProgress.current += diff * 0.08;
     } else {
       animProgress.current = targetProgress.current;
     }
@@ -104,16 +106,57 @@ export default function useHorizontalScroll({
     };
   }, [tick]);
 
+  const getScrollForIndex = useCallback((index: number) => {
+    const el = containerRef.current;
+    if (!el) return 0;
+    const windowHeight = window.innerHeight;
+    const deadZone = windowHeight * firstItemDelay;
+    const scrollRange = el.offsetHeight - windowHeight;
+    const effectiveRange = Math.max(1, scrollRange - deadZone);
+    const progressForIndex = index / (itemCount - 1);
+    return el.offsetTop + deadZone + progressForIndex * effectiveRange;
+  }, [itemCount, firstItemDelay]);
+
+  const snapToNearest = useCallback(() => {
+    const nearest = Math.round(targetProgress.current * (itemCount - 1));
+    const clamped = Math.max(0, Math.min(itemCount - 1, nearest));
+    const exactProgress = clamped / (itemCount - 1);
+
+    if (Math.abs(targetProgress.current - exactProgress) < 0.02) return;
+
+    isSnapping.current = true;
+    const targetScroll = getScrollForIndex(clamped);
+
+    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+
+    setTimeout(() => {
+      isSnapping.current = false;
+    }, 600);
+  }, [itemCount, getScrollForIndex]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (isDragging.current || isSnapping.current) return;
+
+      if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
+      scrollEndTimer.current = setTimeout(() => {
+        snapToNearest();
+      }, 150);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
+    };
+  }, [snapToNearest]);
+
   const scrollTo = useCallback(
     (index: number) => {
-      const el = containerRef.current;
-      if (!el) return;
-      const clamped = Math.max(0, Math.min(itemCount - 1, index));
-      const scrollTop = window.scrollY + el.offsetTop;
-      const targetScrollTop = scrollTop + clamped * window.innerHeight;
-      window.scrollTo({ top: targetScrollTop, behavior: 'instant' });
+      const targetScroll = getScrollForIndex(index);
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
     },
-    [itemCount],
+    [getScrollForIndex],
   );
 
   const scrollNext = useCallback(() => {
@@ -145,10 +188,8 @@ export default function useHorizontalScroll({
 
   const handleDragEnd = useCallback(() => {
     isDragging.current = false;
-    const nearest = Math.round(targetProgress.current * (itemCount - 1));
-    const clamped = Math.max(0, Math.min(itemCount - 1, nearest));
-    targetProgress.current = clamped / (itemCount - 1);
-  }, [itemCount]);
+    snapToNearest();
+  }, [snapToNearest]);
 
   return {
     progress,
