@@ -1,5 +1,7 @@
 'use client';
+
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useLenis } from 'lenis/react'; // или '@studio-freight/react-lenis'
 import useIsMobile from './useIsMobile';
 
 interface UseHorizontalScrollOptions {
@@ -8,46 +10,88 @@ interface UseHorizontalScrollOptions {
   snapThreshold?: number;
 }
 
-interface DragHandlers {
-  onPointerDown: (e: React.PointerEvent) => void;
-  onPointerMove: (e: React.PointerEvent) => void;
-  onPointerUp: () => void;
-  onPointerLeave: () => void;
-}
-
-interface UseHorizontalScrollResult {
-  progress: number;
-  currentIndex: number;
-  containerRef: React.RefObject<HTMLElement | null>;
-  scrollTo: (index: number) => void;
-  scrollNext: () => void;
-  scrollPrev: () => void;
-  handlers: DragHandlers;
-}
-
 export default function useHorizontalScroll({
   itemCount = 1,
   firstItemDelay = 0.2,
-  snapThreshold = 0.2,
-}: UseHorizontalScrollOptions = {}): UseHorizontalScrollResult {
+  snapThreshold = 0.15,
+}: UseHorizontalScrollOptions = {}) {
   const [progress, setProgress] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const isMobile = useIsMobile();
 
   const containerRef = useRef<HTMLElement | null>(null);
-  const animProgress = useRef(0);
-  const targetProgress = useRef(0);
-  const velocity = useRef(0);
-  const isDragging = useRef(false);
+  const trackRef = useRef<HTMLElement | null>(null);
+
+  const currentProgressRef = useRef(0);
   const currentIndexRef = useRef(0);
   const rafId = useRef<number | null>(null);
-  const lastTime = useRef(0);
-  const lastScrollY = useRef(0);
 
-  const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isDragging = useRef(false);
   const isSnapping = useRef(false);
-  const snapTarget = useRef(0);
+  const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Получаем инстанс для ручного скролла
+  const lenis = useLenis();
+
+  // Ищем трек один раз
+  useEffect(() => {
+    if (containerRef.current) {
+      trackRef.current = containerRef.current.querySelector('[data-track]');
+    }
+  }, []);
+
+  // Железобетонный расчет абсолютной позиции для скролла
+  const getTargetScrollForIndex = useCallback(
+    (index: number) => {
+      const el = containerRef.current;
+      if (!el) return 0;
+
+      // getBoundingClientRect().top + window.scrollY всегда дает точное расстояние от верха документа
+      const rect = el.getBoundingClientRect();
+      const absoluteTop = window.scrollY + rect.top;
+
+      const windowHeight = window.innerHeight;
+      const deadZone = windowHeight * firstItemDelay;
+      const scrollRange = el.offsetHeight - windowHeight;
+      const effectiveRange = Math.max(1, scrollRange - deadZone);
+
+      return absoluteTop + deadZone + (index / (itemCount - 1)) * effectiveRange;
+    },
+    [itemCount, firstItemDelay],
+  );
+
+  // Снаппинг (доводка)
+  const snapToNearest = useCallback(() => {
+    if (isSnapping.current || isDragging.current) return;
+
+    const currentProgress = currentProgressRef.current;
+    const nearestIndex = Math.round(currentProgress * (itemCount - 1));
+    const exactProgress = nearestIndex / (itemCount - 1);
+
+    if (Math.abs(currentProgress - exactProgress) < snapThreshold) return;
+
+    const targetScroll = getTargetScrollForIndex(nearestIndex);
+    if (Math.abs(window.scrollY - targetScroll) < 10) return;
+
+    isSnapping.current = true;
+
+    if (lenis) {
+      lenis.scrollTo(targetScroll, {
+        duration: 0.8,
+        lock: true,
+        onComplete: () => {
+          isSnapping.current = false;
+        },
+      });
+    } else {
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+      setTimeout(() => {
+        isSnapping.current = false;
+      }, 800);
+    }
+  }, [itemCount, snapThreshold, getTargetScrollForIndex, lenis]);
+
+  // Основной цикл: работает всегда, считывает реальную позицию DOM
   const tick = useCallback(() => {
     const el = containerRef.current;
     if (!el) {
@@ -55,107 +99,52 @@ export default function useHorizontalScroll({
       return;
     }
 
-    const now = performance.now();
-    const dt = lastTime.current ? Math.min((now - lastTime.current) / 16.67, 3) : 1;
-    lastTime.current = now;
-
-    if (!isDragging.current && !isSnapping.current) {
-      const windowHeight = window.innerHeight;
-      const deadZone = windowHeight * firstItemDelay;
-      const scrollRange = el.offsetHeight - windowHeight;
-
-      if (scrollRange > 0) {
-        const scrolled = window.scrollY - el.offsetTop;
-        const effectiveScrolled = Math.max(0, scrolled - deadZone);
-        const effectiveRange = Math.max(1, scrollRange - deadZone);
-        targetProgress.current = Math.max(0, Math.min(1, effectiveScrolled / effectiveRange));
-      }
-    }
-
-    if (isSnapping.current) {
-      const diff = snapTarget.current - animProgress.current;
-      const springForce = diff * 0.1;
-      const dampingForce = -velocity.current * 0.7;
-      velocity.current += (springForce + dampingForce) * dt;
-      animProgress.current += velocity.current * dt;
-    } else {
-      const diff = targetProgress.current - animProgress.current;
-      if (Math.abs(diff) > 0.0005) {
-        velocity.current = diff * 0.12 * dt;
-        animProgress.current += velocity.current;
-      } else {
-        animProgress.current = targetProgress.current;
-        velocity.current = 0;
-      }
-    }
-
-    const track = el.querySelector('[data-track]') as HTMLElement | null;
-    if (track) {
-      const offset = -animProgress.current * (itemCount - 1) * 100;
-      track.style.transform = `translateX(${offset}%)`;
-    }
-
-    const newIndex = Math.round(animProgress.current * (itemCount - 1));
-    const clamped = Math.max(0, Math.min(itemCount - 1, newIndex));
-    setCurrentIndex((prev) => {
-      if (prev !== clamped) {
-        currentIndexRef.current = clamped;
-        return clamped;
-      }
-      return prev;
-    });
-    setProgress(animProgress.current);
-
-    rafId.current = requestAnimationFrame(tick);
-  }, [itemCount, firstItemDelay]);
-
-  useEffect(() => {
-    rafId.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafId.current !== null) {
-        cancelAnimationFrame(rafId.current);
-        rafId.current = null;
-      }
-    };
-  }, [tick]);
-
-  const getScrollForIndex = useCallback((index: number) => {
-    const el = containerRef.current;
-    if (!el) return 0;
+    const rect = el.getBoundingClientRect();
     const windowHeight = window.innerHeight;
     const deadZone = windowHeight * firstItemDelay;
     const scrollRange = el.offsetHeight - windowHeight;
-    const effectiveRange = Math.max(1, scrollRange - deadZone);
-    const progressForIndex = index / (itemCount - 1);
-    return el.offsetTop + deadZone + progressForIndex * effectiveRange;
+
+    let currentProgress = 0;
+
+    if (scrollRange > 0) {
+      // -rect.top показывает, на сколько пикселей мы проскроллили ВНИЗ относительно верха секции
+      const scrolledPastTop = -rect.top;
+      const effectiveScrolled = Math.max(0, scrolledPastTop - deadZone);
+      const effectiveRange = Math.max(1, scrollRange - deadZone);
+      currentProgress = Math.max(0, Math.min(1, effectiveScrolled / effectiveRange));
+    }
+
+    currentProgressRef.current = currentProgress;
+
+    // Двигаем сам трек напрямую в DOM для 60 FPS
+    const track = trackRef.current || (el.querySelector('[data-track]') as HTMLElement);
+    if (track) {
+      const offset = -currentProgress * (itemCount - 1) * 100;
+      track.style.transform = `translateX(${offset}%)`;
+    }
+
+    const newIndex = Math.round(currentProgress * (itemCount - 1));
+    const clampedIndex = Math.max(0, Math.min(itemCount - 1, newIndex));
+
+    // Обновляем состояния только при реальном изменении индекса
+    if (currentIndexRef.current !== clampedIndex) {
+      currentIndexRef.current = clampedIndex;
+      setCurrentIndex(clampedIndex);
+    }
+
+    setProgress(currentProgress);
+    rafId.current = requestAnimationFrame(tick);
   }, [itemCount, firstItemDelay]);
 
-  const snapToNearest = useCallback(() => {
-    if (isSnapping.current) return;
+  // Запуск цикла анимации
+  useEffect(() => {
+    rafId.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
+    };
+  }, [tick]);
 
-    const nearest = Math.round(targetProgress.current * (itemCount - 1));
-    const clamped = Math.max(0, Math.min(itemCount - 1, nearest));
-    const exactProgress = clamped / (itemCount - 1);
-
-    if (Math.abs(targetProgress.current - exactProgress) < snapThreshold) return;
-
-    const targetScroll = getScrollForIndex(clamped);
-    const currentScroll = window.scrollY;
-    if (Math.abs(currentScroll - targetScroll) < 30) return;
-
-    isSnapping.current = true;
-    snapTarget.current = exactProgress;
-    velocity.current = 0;
-
-    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-
-    setTimeout(() => {
-      isSnapping.current = false;
-      animProgress.current = exactProgress;
-      targetProgress.current = exactProgress;
-    }, 500);
-  }, [itemCount, getScrollForIndex, snapThreshold]);
-
+  // Отслеживание окончания скроллинга для доводки
   useEffect(() => {
     const onScroll = () => {
       if (isDragging.current || isSnapping.current) return;
@@ -163,7 +152,7 @@ export default function useHorizontalScroll({
       if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
       scrollEndTimer.current = setTimeout(() => {
         snapToNearest();
-      }, 100);
+      }, 150);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -175,57 +164,39 @@ export default function useHorizontalScroll({
 
   const scrollTo = useCallback(
     (index: number) => {
-      const targetScroll = getScrollForIndex(index);
-      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+      const targetScroll = getTargetScrollForIndex(index);
+      if (lenis) {
+        lenis.scrollTo(targetScroll, { duration: 1.2 });
+      } else {
+        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+      }
     },
-    [getScrollForIndex],
+    [getTargetScrollForIndex, lenis],
   );
-
-  const scrollNext = useCallback(() => {
-    scrollTo(currentIndexRef.current + 1);
-  }, [scrollTo]);
-
-  const scrollPrev = useCallback(() => {
-    scrollTo(currentIndexRef.current - 1);
-  }, [scrollTo]);
-
-  const handleDragStart = useCallback((clientX: number) => {
-    isDragging.current = true;
-    lastScrollY.current = window.scrollY;
-  }, []);
-
-  const handleDragMove = useCallback((clientX: number) => {
-    if (!isDragging.current) return;
-  }, []);
-
-  const handleDragEnd = useCallback(() => {
-    isDragging.current = false;
-    snapToNearest();
-  }, [snapToNearest]);
 
   return {
     progress,
     currentIndex,
     containerRef,
     scrollTo,
-    scrollNext,
-    scrollPrev,
+    scrollNext: useCallback(() => scrollTo(currentIndexRef.current + 1), [scrollTo]),
+    scrollPrev: useCallback(() => scrollTo(currentIndexRef.current - 1), [scrollTo]),
     handlers: {
-      onPointerDown: (e: React.PointerEvent) => {
-        if (isMobile) return;
-        handleDragStart(e.clientX);
+      onPointerDown: () => {
+        if (!isMobile) isDragging.current = true;
       },
-      onPointerMove: (e: React.PointerEvent) => {
-        if (isMobile) return;
-        handleDragMove(e.clientX);
-      },
+      onPointerMove: () => {},
       onPointerUp: () => {
-        if (isMobile) return;
-        handleDragEnd();
+        if (!isMobile) {
+          isDragging.current = false;
+          snapToNearest();
+        }
       },
       onPointerLeave: () => {
-        if (isMobile) return;
-        handleDragEnd();
+        if (!isMobile) {
+          isDragging.current = false;
+          snapToNearest();
+        }
       },
     },
   };

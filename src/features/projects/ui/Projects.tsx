@@ -30,7 +30,7 @@ export default function Projects() {
       id="projects"
       ref={mergedRef}
       className={`${styles.section} ${styles['section--projects']} ${styles.reveal}${sectionVisible ? ` ${styles['is-visible']}` : ''}`}
-      style={{ height: `${(count - 1) * 100 + 15}vh` }}
+      style={{ height: `${(count) * 100 + 15}vh` }}
     >
       <div className={styles['projects-sticky']}>
         <div className={styles['projects-inner']}>
