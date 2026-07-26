@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
-import { FiChevronRight, FiGrid } from 'react-icons/fi';
+import { FiChevronRight, FiGrid } from '@/shared/ui/atoms/Icon';
 import styles from './Navbar.module.scss';
 import type { NavGroup, NavLeaf, NavSectionLink } from '@/config/navTypes';
 

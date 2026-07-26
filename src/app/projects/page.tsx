@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiArrowLeft, FiArrowRight, FiGithub } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiGithub } from '@/shared/ui/atoms/Icon';
 import { PROJECTS, STATUS } from '@/data/projectsData';
 import styles from './ProjectsList.module.scss';
 

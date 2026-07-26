@@ -6,10 +6,9 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { motion } from 'motion/react';
 import {
-  FiHome,
   FiArrowLeft,
   FiArrowRight,
-} from 'react-icons/fi';
+} from '@/shared/ui/atoms/Icon';
 import { BLOG_POSTS } from '@/data/blogData';
 import { useNav } from '@/providers/NavProvider';
 import { usePostTransition } from '../PostTransitionContext';

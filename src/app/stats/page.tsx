@@ -3,7 +3,7 @@
 import { useActivity } from '@/providers/ActivityProvider';
 import Clicker from '@/shared/ui/molecules/Clicker/Clicker';
 import TypingTest from '@/shared/ui/molecules/TypingTest/TypingTest';
-import { FiGlobe, FiActivity, FiTrendingUp, FiAward, FiZap, FiTerminal } from 'react-icons/fi';
+import { FiGlobe, FiActivity, FiTrendingUp, FiAward, FiZap, FiTerminal } from '@/shared/ui/atoms/Icon';
 import styles from './Stats.module.scss';
 
 /* ─── Achievement definitions ────────────────────────────── */

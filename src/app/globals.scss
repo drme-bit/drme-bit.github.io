@@ -153,6 +153,12 @@
   --glass-hover: rgba(255, 255, 255, 0.07);
   --glass-strong: rgba(255, 255, 255, 0.06);
 
+  // ── Nav section glass tints ────────────────────────────
+  --nav-glass-about: rgba(125, 211, 252, 0.14);
+  --nav-glass-skills: rgba(196, 181, 253, 0.14);
+  --nav-glass-experience: rgba(251, 191, 36, 0.14);
+  --nav-glass-projects: rgba(125, 211, 252, 0.18);
+
   --overlay-bg: rgba(0, 0, 0, 0.5);
   --panel-bg: rgba(10, 10, 10, 0.95);
 
@@ -261,6 +267,12 @@
   --glass-hover: rgba(0, 0, 0, 0.04);
   --glass-strong: rgba(0, 0, 0, 0.03);
 
+  // ── Nav section glass tints ────────────────────────────
+  --nav-glass-about: rgba(2, 132, 199, 0.10);
+  --nav-glass-skills: rgba(124, 58, 237, 0.10);
+  --nav-glass-experience: rgba(217, 119, 6, 0.10);
+  --nav-glass-projects: rgba(2, 132, 199, 0.14);
+
   --overlay-bg: rgba(0, 0, 0, 0.3);
   --panel-bg: rgba(245, 243, 240, 0.98);
 
@@ -330,6 +342,12 @@
   --glass: rgba(255, 180, 150, 0.04);
   --glass-hover: rgba(255, 180, 150, 0.07);
   --glass-strong: rgba(255, 180, 150, 0.06);
+
+  // ── Nav section glass tints ────────────────────────────
+  --nav-glass-about: rgba(255, 154, 118, 0.14);
+  --nav-glass-skills: rgba(255, 200, 162, 0.14);
+  --nav-glass-experience: rgba(255, 207, 135, 0.14);
+  --nav-glass-projects: rgba(255, 154, 118, 0.18);
 
   --overlay-bg: rgba(20, 15, 12, 0.6);
   --panel-bg: rgba(30, 28, 28, 0.98);
@@ -403,6 +421,12 @@
   --glass-hover: rgba(136, 192, 208, 0.07);
   --glass-strong: rgba(136, 192, 208, 0.06);
 
+  // ── Nav section glass tints ────────────────────────────
+  --nav-glass-about: rgba(136, 192, 208, 0.14);
+  --nav-glass-skills: rgba(180, 142, 173, 0.14);
+  --nav-glass-experience: rgba(208, 135, 112, 0.14);
+  --nav-glass-projects: rgba(136, 192, 208, 0.18);
+
   --overlay-bg: rgba(46, 52, 64, 0.6);
   --panel-bg: rgba(46, 52, 64, 0.98);
 
@@ -475,6 +499,12 @@
   --glass-hover: rgba(189, 147, 249, 0.07);
   --glass-strong: rgba(189, 147, 249, 0.06);
 
+  // ── Nav section glass tints ────────────────────────────
+  --nav-glass-about: rgba(189, 147, 249, 0.14);
+  --nav-glass-skills: rgba(255, 121, 198, 0.14);
+  --nav-glass-experience: rgba(255, 184, 108, 0.14);
+  --nav-glass-projects: rgba(189, 147, 249, 0.18);
+
   --overlay-bg: rgba(0, 0, 0, 0.6);
   --panel-bg: rgba(40, 42, 54, 0.98);
 
@@ -546,6 +576,12 @@
   --glass: rgba(42, 161, 152, 0.04);
   --glass-hover: rgba(42, 161, 152, 0.07);
   --glass-strong: rgba(42, 161, 152, 0.06);
+
+  // ── Nav section glass tints ────────────────────────────
+  --nav-glass-about: rgba(42, 161, 152, 0.14);
+  --nav-glass-skills: rgba(108, 113, 196, 0.14);
+  --nav-glass-experience: rgba(181, 137, 0, 0.14);
+  --nav-glass-projects: rgba(42, 161, 152, 0.18);
 
   --overlay-bg: rgba(0, 30, 40, 0.6);
   --panel-bg: rgba(0, 43, 54, 0.98);
@@ -821,3 +857,44 @@ html.no-blur {
 @utility border-input { border-color: var(--border); }
 @utility ring-ring { --tw-ring-color: rgba(255, 255, 255, 0.15); }
 @utility ring-offset-background { --tw-ring-offset-color: var(--bg); }
+
+
+.projects-wrapper {
+  position: relative;
+}
+
+.projects-wrapper .tl-head-wrapper {
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+}
+
+.reviews-contacts-wrapper {
+  position: relative;
+  background: var(--bg);
+}
+
+/* Reviews is sticky at top, gets pinned */
+.reviews-contacts-wrapper #reviews {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+}
+
+/* Contacts wrapper slides over pinned Reviews */
+.reviews-contacts-wrapper #contact {
+  position: relative;
+  z-index: 10;
+}
+
+/* Footer wrapper positioned after contact in flow, animated via GSAP */
+.reviews-contacts-wrapper #footer-wrapper {
+  height: 30vh;
+  width: 100%;
+}
+
+.reviews-contacts-wrapper #footer-wrapper .footer {
+  pointer-events: auto;
+}
+

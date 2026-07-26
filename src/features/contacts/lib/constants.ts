@@ -1,5 +1,7 @@
 export const CALENDLY_URL = 'https://calendly.com/vacheslavtkachik/30min';
 
+export const APP_PHONE = '+380 96 004 5028';
+
 export const SUBJECT_OPTIONS = [
   { value: 'freelance', label: 'Freelance Project' },
   { value: 'contract', label: 'Contract Work' },
@@ -9,16 +11,10 @@ export const SUBJECT_OPTIONS = [
 ] as const;
 
 export const SOCIAL_LINKS: Array<{ id: string; label: string; href: string; external?: boolean }> = [
-  { id: 'github', label: 'drme-bit', href: 'https://github.com/drme-bit', external: true },
-  { id: 'telegram', label: '@drme_bit', href: 'https://t.me/drmebit', external: true },
-  { id: 'discord', label: 'Dr.ME', href: 'https://discord.gg/vhAvnrmNX', external: true },
-  {
-    id: 'linkedin',
-    label: 'vacheslavtkachik',
-    href: 'https://www.linkedin.com/in/vyacheslav-tkachik-2a3b8a277',
-    external: true,
-  },
-  { id: 'email', label: 'vacheslavtkachik@gmail.com', href: 'mailto:vacheslavtkachik@gmail.com' },
+  { id: 'github', label: 'GitHub', href: 'https://github.com/drme-bit', external: true },
+  { id: 'twitter', label: 'Twitter', href: 'https://twitter.com/drme_bit', external: true },
+  { id: 'linkedin', label: 'LinkedIn', href: 'https://linkedin.com/in/vyacheslav-tkachik', external: true },
+  { id: 'instagram', label: 'Instagram', href: 'https://instagram.com/drme_bit', external: true },
 ];
 
 export const FORM_SUCCESS_DELAY = 3000;

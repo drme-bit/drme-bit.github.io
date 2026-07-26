@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import Image from 'next/image';
 import { ICON_MAP } from '@/data/skillsData';
-import { FiArrowRight, FiExternalLink, FiGithub } from 'react-icons/fi';
+import { FiArrowRight, FiExternalLink, FiGithub } from '@/shared/ui/atoms/Icon';
 import { STATUS_META } from '../lib/constants';
 import type { Project } from '../types/projects';
 import styles from '../ui/Projects.module.scss';

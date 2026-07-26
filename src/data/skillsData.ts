@@ -3,9 +3,9 @@ import {
   SiThreedotjs, SiNodedotjs, SiPython, SiGo, SiRust,
   SiPostgresql, SiRedis, SiGit, SiDocker,
   SiOpengl, SiLinux,
-} from 'react-icons/si';
-import { DiJava } from 'react-icons/di';
-import { FiCode, FiCpu } from 'react-icons/fi';
+  FiCode, FiCpu,
+} from '@/shared/ui/atoms/Icon';
+import { DiJava } from '@/shared/ui/atoms/Icon';
 import type { IconType } from 'react-icons';
 
 /* ─── Types ──────────────────────────────────────────────── */
@@ -13,7 +13,9 @@ import type { IconType } from 'react-icons';
 export interface SkillItem {
   name: string;
   group: 'frontend' | 'backend' | 'tools';
+  category: 'language' | 'framework' | 'runtime' | 'database' | 'DevOps' | 'graphics' | 'other';
   level: number;
+  difficulty: 1 | 2 | 3 | 4 | 5;
   desc: string;
   funLevel: string;
   related: string[];
@@ -44,7 +46,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'React',
     group: 'frontend',
+    category: 'framework',
     level: 4,
+    difficulty: 3,
     desc: 'Component-driven UIs with hooks, context, and state machines.',
     funLevel: 'can build a SPA before coffee gets cold',
     related: ['TypeScript', 'JavaScript', 'R3F'],
@@ -53,16 +57,20 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'TypeScript',
     group: 'frontend',
+    category: 'language',
     level: 4,
+    difficulty: 3,
     desc: 'Type-safe JavaScript for maintainable large-scale apps.',
     funLevel: 'types everything, even the types',
     related: ['React', 'JavaScript', 'Node.js'],
-    projects: ['roblox-systems'],
+    projects: ['fivem-roblox'],
   },
   {
     name: 'JavaScript',
     group: 'frontend',
+    category: 'language',
     level: 5,
+    difficulty: 2,
     desc: 'Core language of the web — ES6+ features and async patterns.',
     funLevel: 'speaks fluent callback',
     related: ['TypeScript', 'React', 'Node.js'],
@@ -71,7 +79,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'HTML/CSS',
     group: 'frontend',
+    category: 'language',
     level: 5,
+    difficulty: 1,
     desc: 'Semantic markup, responsive layouts, and modern CSS.',
     funLevel: 'can center a div (finally)',
     related: ['SCSS'],
@@ -80,7 +90,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'SCSS',
     group: 'frontend',
+    category: 'framework',
     level: 4,
+    difficulty: 2,
     desc: 'SASS-powered stylesheets with variables, mixins, and nesting.',
     funLevel: 'nests CSS like inception',
     related: ['HTML/CSS'],
@@ -89,7 +101,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'Three.js',
     group: 'frontend',
+    category: 'graphics',
     level: 3,
+    difficulty: 4,
     desc: 'WebGL 3D rendering, shaders, and interactive scenes.',
     funLevel: 'makes triangles dance on screen',
     related: ['R3F', 'WebGPU', 'JavaScript'],
@@ -98,7 +112,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'R3F',
     group: 'frontend',
+    category: 'framework',
     level: 3,
+    difficulty: 4,
     desc: 'React-three-fiber — declarative Three.js in React.',
     funLevel: 'declarative 3D without the headaches',
     related: ['Three.js', 'React'],
@@ -107,7 +123,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'C/C++',
     group: 'frontend',
+    category: 'language',
     level: 4,
+    difficulty: 5,
     desc: 'Systems programming and performance-critical applications.',
     funLevel: 'segfaults with confidence',
     related: ['C#'],
@@ -116,7 +134,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'C#',
     group: 'frontend',
+    category: 'language',
     level: 3,
+    difficulty: 3,
     desc: 'Modern, type-safe language for Windows and cross-platform development.',
     funLevel: 'writes code that compiles on the third try',
     related: ['C/C++'],
@@ -125,7 +145,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'Node.js',
     group: 'backend',
+    category: 'runtime',
     level: 4,
+    difficulty: 3,
     desc: 'Server-side JS runtime for APIs and tooling.',
     funLevel: 'npm install solves 90% of problems',
     related: ['TypeScript', 'JavaScript', 'PostgreSQL', 'Redis'],
@@ -134,7 +156,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'Python',
     group: 'backend',
+    category: 'language',
     level: 3,
+    difficulty: 2,
     desc: 'Scripting, automation, and backend services.',
     funLevel: 'imports their way to victory',
     related: ['Docker', 'Linux'],
@@ -143,7 +167,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'Go',
     group: 'backend',
+    category: 'language',
     level: 2,
+    difficulty: 3,
     desc: 'Performant, concurrent systems and CLI tools.',
     funLevel: 'goroutines go brrr',
     related: ['Docker', 'Linux'],
@@ -152,7 +178,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'Rust',
     group: 'backend',
+    category: 'language',
     level: 4,
+    difficulty: 5,
     desc: 'Memory-safe systems programming with zero-cost abstractions.',
     funLevel: 'fights the borrow checker daily',
     related: ['WebGPU', 'Linux'],
@@ -161,7 +189,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'Java',
     group: 'backend',
+    category: 'language',
     level: 2,
+    difficulty: 3,
     desc: 'Enterprise-grade applications and Android development.',
     funLevel: 'writes once, debugs everywhere',
     related: ['PostgreSQL'],
@@ -170,7 +200,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'PostgreSQL',
     group: 'backend',
+    category: 'database',
     level: 3,
+    difficulty: 3,
     desc: 'Relational databases with advanced querying.',
     funLevel: 'SELECT wisdom FROM brain WHERE skill = 3',
     related: ['Node.js', 'Redis'],
@@ -179,7 +211,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'Redis',
     group: 'backend',
+    category: 'database',
     level: 3,
+    difficulty: 2,
     desc: 'In-memory caching and pub/sub messaging.',
     funLevel: 'things go fast when you forget them',
     related: ['Node.js', 'PostgreSQL'],
@@ -188,25 +222,31 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'Luau',
     group: 'backend',
+    category: 'language',
     level: 4,
+    difficulty: 3,
     desc: 'Scripting language for Roblox game development.',
     funLevel: 'makes Roblox do things it shouldnt',
     related: ['TypeScript'],
-    projects: ['roblox-systems'],
+    projects: ['fivem-roblox'],
   },
   {
     name: 'Git',
     group: 'tools',
+    category: 'DevOps',
     level: 4,
+    difficulty: 2,
     desc: 'Version control and collaborative development workflows.',
     funLevel: 'git push --force is a lifestyle',
     related: ['Linux'],
-    projects: ['nexagon', 'roblox-systems', 'bank-rest-api-app'],
+    projects: ['nexagon', 'fivem-roblox', 'bank-rest-api-app'],
   },
   {
     name: 'Docker',
     group: 'tools',
+    category: 'DevOps',
     level: 3,
+    difficulty: 3,
     desc: 'Containerized deployment and reproducible environments.',
     funLevel: 'works on my container',
     related: ['Linux', 'Node.js'],
@@ -215,7 +255,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'WebGPU',
     group: 'tools',
+    category: 'graphics',
     level: 2,
+    difficulty: 5,
     desc: 'Next-gen GPU compute and rendering API.',
     funLevel: 'future-proofing one API call at a time',
     related: ['Rust', 'Three.js'],
@@ -224,7 +266,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'CUDA',
     group: 'tools',
+    category: 'graphics',
     level: 1,
+    difficulty: 5,
     desc: 'Parallel GPU computing for ML and simulation.',
     funLevel: 'melts GPUs for fun',
     related: ['C/C++'],
@@ -233,7 +277,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'OpenGL',
     group: 'tools',
+    category: 'graphics',
     level: 2,
+    difficulty: 4,
     desc: 'Cross-platform 2D/3D graphics API.',
     funLevel: 'deprecated but still standing',
     related: ['C/C++', 'Three.js'],
@@ -242,7 +288,9 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     name: 'Linux',
     group: 'tools',
+    category: 'DevOps',
     level: 4,
+    difficulty: 3,
     desc: 'Daily driver OS — shell, containers, and servers.',
     funLevel: 'arch btw',
     related: ['Docker', 'Git', 'Node.js'],

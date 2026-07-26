@@ -6,6 +6,8 @@ import { ModalProvider } from '@/providers/ModalProvider';
 import { ActivityProvider } from '@/providers/ActivityProvider';
 import { NavProvider } from '@/providers/NavProvider';
 import Navbar from '@/widgets/navbar/Navbar';
+import { SmoothScrolling } from '@/widgets/smooth-scrolling/SmoothScrolling';
+import Mascot from '@/widgets/mascot/Mascot'
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import './globals.scss';
@@ -76,7 +78,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <Navbar />
                   <Analytics />
                   <SpeedInsights />
-                  {children}
+                  <SmoothScrolling>
+                    {children}
+                  </SmoothScrolling>
+                  <Mascot />
                 </NavProvider>
               </ActivityProvider>
             </ModalProvider>

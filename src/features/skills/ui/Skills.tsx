@@ -1,18 +1,20 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
-import useReveal from '@/shared/hooks/useReveal';
-import useScrollPhase from '@/shared/hooks/useScrollPhase';
-import useMergedRef from '@/shared/hooks/useMergedRef';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useLenis } from 'lenis/react';
 import { SKILLS_DATA, GROUP_COLORS } from '@/data/skillsData';
 import { EXPLORER_GUIDE, MAX_HISTORY } from '../lib/constants';
 import { useSkillHistory } from '../hooks/useSkillHistory';
 import { useCompareMode } from '../hooks/useCompareMode';
 import { GROUP_OPTIONS } from '../hooks/useSkillFilter';
 import { SkillPanel } from '../components/SkillPanel';
-import { FiSearch, FiX, FiChevronDown } from 'react-icons/fi';
+import { FiSearch, FiX, FiChevronDown } from '@/shared/ui/atoms/Icon';
 import styles from './Skills.module.scss';
 import type { SkillItem } from '../types/skills';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Globe = lazy(() => import('@/shared/ui/organisms/Globe/Globe'));
 
@@ -26,73 +28,69 @@ GROUP_OPTIONS.forEach(({ key }) => {
 /* ─── Skills ─────────────────────────────────────────────── */
 
 export default function Skills() {
-  const [ref, visible] = useReveal();
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const globeRef = useRef<{ setDisabled: (v: boolean) => void; search: (v: string | null) => void; setFilter: (v: string | null) => void; reset: () => void; select: (v: string | null) => void } | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const lenis = useLenis();
+
   const [filterGroup, setFilterGroup] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState<SkillItem | null>(null);
-  const searchRef = useRef<HTMLInputElement | null>(null);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const globeRef = useRef<{ setDisabled: (v: boolean) => void; search: (v: string | null) => void; setFilter: (v: string | null) => void; reset: () => void; select: (v: string | null) => void } | null>(null);
-  const sectionElRef = useRef<HTMLElement | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isCompareMode, setIsCompareMode] = useState(false);
+  const [compareSkill, setCompareSkill] = useState<SkillItem | null>(null);
 
   const { history, addSkill } = useSkillHistory();
-  const { isCompareMode, compareSkill, toggleCompareMode, selectCompareSkill, exitCompareMode } = useCompareMode();
 
-  const { getProgress, sectionRef } = useScrollPhase({
-    phases: [
-      { id: 'intro', start: 0, end: 0.25 },
-      { id: 'transition', start: 0.25, end: 0.6 },
-      { id: 'interactive', start: 0.6, end: 1 },
-    ],
-    sectionId: 'skills',
-  });
-  const mergedRef = useMergedRef<HTMLElement>(ref, sectionRef, sectionElRef);
-
-  // ── DOM-direct scroll animation (zero React re-renders) ──
-  const wereFiltersVisible = useRef(false);
-
+  // ── GSAP ScrollTrigger for section scroll animations ──
   useEffect(() => {
-    const el = sectionElRef.current;
-    if (!el) return;
-    let rafId: number;
+    const section = sectionRef.current;
+    if (!section) return;
 
-    const tick = () => {
-      const p = getProgress();
+    ScrollTrigger.refresh();
 
-      const headerProgress = Math.min(p / 0.32, 1);
-      const globeProgress = Math.min(Math.max((p - 0.08) / 0.45, 0), 1);
-      const tipsProgress = Math.min(Math.max((p - 0.46) / 0.2, 0), 1);
-      const filtersProgress = Math.min(Math.max((p - 0.62) / 0.16, 0), 1);
-      const cardsProgress = Math.min(Math.max((p - 0.15) / 0.3, 0), 1);
+    const ctx = gsap.context(() => {
+      const st = ScrollTrigger.create({
+        trigger: section,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+          const p = self.progress;
+          const el = section;
+          
+          const headerProgress = Math.min(p / 0.32, 1);
+          const globeProgress = Math.min(Math.max((p - 0.08) / 0.45, 0), 1);
+          const tipsProgress = Math.min(Math.max((p - 0.46) / 0.2, 0), 1);
+          const filtersProgress = Math.min(Math.max((p - 0.62) / 0.16, 0), 1);
+          const cardsProgress = Math.min(Math.max((p - 0.15) / 0.3, 0), 1);
 
-      el.style.setProperty('--header-opacity', String(1 - headerProgress));
-      el.style.setProperty('--header-x', `${headerProgress * -4}vw`);
-      el.style.setProperty('--header-y', `${headerProgress * -1.5}rem`);
-      el.style.setProperty('--globe-size', `${385 + globeProgress * 135}px`);
-      el.style.setProperty('--globe-x', `${(1 - globeProgress) * 13}vw`);
-      el.style.setProperty('--tips-opacity', String(tipsProgress));
-      el.style.setProperty('--tips-x', `${(1 - tipsProgress) * 6}rem`);
-      el.style.setProperty('--tips-y', `${(1 - tipsProgress) * 0.75}rem`);
-      el.style.setProperty('--filters-opacity', String(filtersProgress));
-      el.style.setProperty('--filters-y', `${(1 - filtersProgress) * -0.75}rem`);
-      el.style.setProperty('--cards-opacity', String(cardsProgress));
-      el.style.setProperty('--card-1-y', `${(1 - cardsProgress) * 40}px`);
-      el.style.setProperty('--card-2-y', `${(1 - cardsProgress) * 60}px`);
+          el.style.setProperty('--header-opacity', String(1 - headerProgress));
+          el.style.setProperty('--header-x', `${headerProgress * -4}vw`);
+          el.style.setProperty('--header-y', `${headerProgress * -1.5}rem`);
+          el.style.setProperty('--globe-size', `${385 + globeProgress * 135}px`);
+          el.style.setProperty('--globe-x', `${(1 - globeProgress) * 13}vw`);
+          el.style.setProperty('--tips-opacity', String(tipsProgress));
+          el.style.setProperty('--tips-x', `${(1 - tipsProgress) * 6}rem`);
+          el.style.setProperty('--tips-y', `${(1 - tipsProgress) * 0.75}rem`);
+          el.style.setProperty('--filters-opacity', String(filtersProgress));
+          el.style.setProperty('--filters-y', `${(1 - filtersProgress) * -0.75}rem`);
+          el.style.setProperty('--cards-opacity', String(cardsProgress));
+          el.style.setProperty('--card-1-y', `${(1 - cardsProgress) * 40}px`);
+          el.style.setProperty('--card-2-y', `${(1 - cardsProgress) * 60}px`);
 
-      const filtersVisible = p > 0.62;
-      if (filtersVisible !== wereFiltersVisible.current) {
-        wereFiltersVisible.current = filtersVisible;
-        el.classList.toggle(styles['filters-visible'], filtersVisible);
-      }
+          const filtersVisible = p > 0.62;
+          el.classList.toggle(styles['filters-visible'], filtersVisible);
+        },
+      });
 
-      rafId = requestAnimationFrame(tick);
-    };
+      return () => st.kill();
+    }, sectionRef);
 
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, [getProgress]);
+    return () => ctx.revert();
+  }, [lenis]);
 
   const handleSearchInput = useCallback((value: string) => {
     setInputValue(value);
@@ -123,8 +121,6 @@ export default function Skills() {
   }, []);
 
   const handleMarkerClick = useCallback((skillName: string) => {
-    const p = getProgress();
-    if (p < 0.6) return;
     const skill = SKILLS_DATA.find((s) => s.name === skillName);
     if (!skill) return;
     globeRef.current?.select(skillName);
@@ -133,18 +129,19 @@ export default function Skills() {
       if (!selectedSkill) {
         setSelectedSkill(skill);
       } else if (!compareSkill) {
-        selectCompareSkill(skill);
+        setCompareSkill(skill);
       }
     } else {
       setSelectedSkill(skill);
     }
-  }, [getProgress, isCompareMode, selectedSkill, compareSkill, addSkill, selectCompareSkill]);
+  }, [isCompareMode, selectedSkill, compareSkill, addSkill]);
 
   const closePanel = useCallback(() => {
     setSelectedSkill(null);
-    exitCompareMode();
+    setIsCompareMode(false);
+    setCompareSkill(null);
     globeRef.current?.select(null);
-  }, [exitCompareMode]);
+  }, []);
 
   const navigateHistory = useCallback((direction: 'prev' | 'next') => {
     if (!selectedSkill || history.length === 0) return;
@@ -171,7 +168,7 @@ export default function Skills() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (isCompareMode) {
-          toggleCompareMode();
+          setIsCompareMode(false);
         } else if (selectedSkill) {
           closePanel();
         } else {
@@ -188,7 +185,7 @@ export default function Skills() {
       document.removeEventListener('keydown', onKey);
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [selectedSkill, closePanel, isCompareMode, toggleCompareMode]);
+  }, [selectedSkill, closePanel, isCompareMode]);
 
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -204,11 +201,10 @@ export default function Skills() {
   return (
     <section
       id="skills"
-      ref={mergedRef}
-      className={`${styles.section} ${styles['section--skills']} ${styles.reveal}${visible ? ` ${styles['is-visible']}` : ''}`}
+      ref={sectionRef}
+      className={`${styles.section} ${styles['section--skills']}`}
       aria-label="Skills explorer"
     >
-
       <div className={styles['skills-sticky']}>
         <div className={styles['skills-header']}>
           <span className={styles['skills-header-num']}>02</span>
@@ -349,7 +345,7 @@ export default function Skills() {
             compareMode={isCompareMode}
             compareSkill={compareSkill}
             onClose={closePanel}
-            onToggleCompare={toggleCompareMode}
+            onToggleCompare={() => setIsCompareMode(!isCompareMode)}
             onNavigateHistory={navigateHistory}
             onSelectHistory={selectHistorySkill}
             onSelectRelated={selectRelatedSkill}

@@ -1,6 +1,6 @@
 'use client';
 
-import { FiClock } from 'react-icons/fi';
+import { FiClock } from '@/shared/ui/atoms/Icon';
 import type { SkillItem } from '../types/skills';
 import styles from '../ui/Skills.module.scss';
 

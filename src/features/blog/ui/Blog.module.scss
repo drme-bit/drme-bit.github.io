@@ -1,29 +1,76 @@
 @use '../../../shared/styles/mixins' as *;
 @use '../../../shared/styles/animations' as *;
 
+/* ─── Wrapper (slides over Projects) ─────────────────────── */
+
+.wrapper {
+  position: relative;
+  z-index: 10;
+  background: var(--bg);
+  min-height: 100vh;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.25);
+}
+
 /* ─── Section ────────────────────────────────────────────── */
 
 .section {
-  @include section-base;
+  position: relative;
+  padding: 0 4vw;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 
-  &.section--blog {
-    min-height: auto;
-    position: relative;
-    top: auto;
-    padding: 0 var(--space-xl);
-    max-width: 1400px;
-    margin: 0 auto;
-    padding-top: 6rem;
-
-    @media (max-width: 700px) {
-      padding: 0 var(--space-md);
-      padding-top: 4rem;
-    }
+  @media (max-width: 700px) {
+    padding: 0 1.25rem;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
   }
 }
 
-.reveal {
-  @include reveal-base;
+/* ─── Section Header ─────────────────────────────────────── */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 3rem;
+
+  @media (max-width: 700px) {
+    margin-bottom: 2rem;
+  }
+}
+
+.headerTag {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-ghost);
+}
+
+.headerTitle {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.headerSub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin: 0;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
 }
 
 /* ─── Grid ───────────────────────────────────────────────── */
@@ -31,12 +78,12 @@
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-lg);
-  margin-top: var(--space-lg);
+  gap: 1.25rem;
+  margin-top: 0;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
-    gap: var(--space-md);
+    gap: 1rem;
   }
 }
 
@@ -50,7 +97,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.3s ease, transform 0.3s ease;
   position: relative;
   overflow: hidden;
 
@@ -73,7 +120,6 @@
   &:hover {
     border-color: var(--border-hover);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
 
     &::before {
       opacity: 1;
@@ -138,7 +184,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-sm);
+  gap: 0.5rem;
 }
 
 .blog-card-category {
@@ -202,7 +248,7 @@
 .blog-card-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 0.5rem;
   font-family: var(--font-mono);
   font-size: 0.65rem;
   color: var(--text-dim);
@@ -269,7 +315,7 @@
 .blog-footer {
   display: flex;
   justify-content: center;
-  margin-top: var(--space-xl);
+  margin-top: 3rem;
 }
 
 .blog-view-all {

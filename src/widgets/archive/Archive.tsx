@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { PROJECTS } from '@/data/projectsData';
-import { FiX, FiGrid, FiFolder } from 'react-icons/fi';
+import { FiX, FiGrid, FiFolder } from '@/shared/ui/atoms/Icon';
 import styles from './Archive.module.scss';
 
 /* ─── Types ──────────────────────────────────────────────── */

@@ -5,7 +5,17 @@
   @include section-base;
 
   &.section--hero {
+    position: fixed;
     height: 100vh;
+    width: 100vw;
+    left: 0;
+    top: 0;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
     pointer-events: none;
   }
 }
@@ -162,11 +172,6 @@
                 transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  &.is-show > * {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
   &.is-show > :nth-child(1) { transition-delay: 0s; }
   &.is-show > :nth-child(2) { transition-delay: 0.12s; }
   &.is-show > :nth-child(3) { transition-delay: 0.28s; }
@@ -242,6 +247,7 @@
   flex-direction: column;
   gap: 0;
   line-height: 1;
+  opacity: 0;
 }
 
 .h-name-first,

@@ -1,6 +1,7 @@
 'use client';
 
-import { FiX, FiChevronLeft, FiChevronRight, FiCopy } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
+import { FiX, FiChevronLeft, FiChevronRight, FiCopy } from '@/shared/ui/atoms/Icon';
 import { ICON_MAP, GROUP_COLORS } from '@/data/skillsData';
 import { getProjectById } from '@/data/projectsData';
 import { SkillLevel } from './SkillLevel';
@@ -33,13 +34,21 @@ export function SkillPanel({
   onSelectHistory,
   onSelectRelated,
 }: SkillPanelProps) {
+  const router = useRouter();
+
   const renderSkillPanel = (s: SkillItem, isCompare = false) => (
     <div className={styles['skills-panel-content']}>
       <div className={styles['skills-panel-header']}>
-        <div className={styles['skills-panel-icon-wrap']} style={{ '--card-color': GROUP_COLORS[s.group] } as React.CSSProperties}>
+        <div
+          className={styles['skills-panel-icon-wrap']}
+          style={{ '--card-color': GROUP_COLORS[s.group] } as React.CSSProperties}
+        >
           {ICON_MAP[s.name] && (
             <span className={styles['skills-panel-icon']}>
-              {(() => { const Icon = ICON_MAP[s.name]; return <Icon />; })()}
+              {(() => {
+                const Icon = ICON_MAP[s.name];
+                return <Icon />;
+              })()}
             </span>
           )}
         </div>
@@ -47,19 +56,17 @@ export function SkillPanel({
           <span className={styles['skills-panel-name']} style={{ color: GROUP_COLORS[s.group] }}>
             {s.name}
           </span>
-          <span className={styles['skills-panel-group']}>{s.group}</span>
+          <span className={styles['skills-panel-group']}>
+            {s.category}/{s.group}
+          </span>
         </div>
       </div>
 
       <SkillLevel level={s.level} group={s.group} />
 
-      {s.funLevel && (
-        <p className={styles['skills-panel-fun']}>&quot;{s.funLevel}&quot;</p>
-      )}
+      {s.funLevel && <p className={styles['skills-panel-fun']}>&quot;{s.funLevel}&quot;</p>}
 
-      {s.desc && (
-        <p className={styles['skills-panel-desc']}>{s.desc}</p>
-      )}
+      {s.desc && <p className={styles['skills-panel-desc']}>{s.desc}</p>}
 
       {s.related.length > 0 && (
         <div className={styles['skills-panel-section']}>
@@ -81,13 +88,16 @@ export function SkillPanel({
                   className={styles['skills-panel-project-card']}
                   onClick={() => {
                     onClose();
-                    const el = document.getElementById(p.toLowerCase().replace(/\s+/g, '-'));
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    router.push(`/projects/${p}`);
                   }}
                 >
                   <div className={styles['skills-panel-project-image']}>
                     {project.image && (
-                      <img src={project.image} alt="" className={styles['skills-panel-project-img']} />
+                      <img
+                        src={project.image}
+                        alt=""
+                        className={styles['skills-panel-project-img']}
+                      />
                     )}
                     <div className={styles['skills-panel-project-overlay']} />
                   </div>
@@ -95,7 +105,9 @@ export function SkillPanel({
                     <span className={styles['skills-panel-project-title']}>{project.title}</span>
                     <div className={styles['skills-panel-project-tech']}>
                       {project.tech.slice(0, 3).map((t: string) => (
-                        <span key={t} className={styles['skills-panel-project-tech-tag']}>{t}</span>
+                        <span key={t} className={styles['skills-panel-project-tech-tag']}>
+                          {t}
+                        </span>
                       ))}
                     </div>
                   </div>

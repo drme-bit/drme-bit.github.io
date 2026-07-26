@@ -4,13 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  FiHome,
   FiArrowLeft,
   FiArrowRight,
   FiClock,
   FiSearch,
   FiStar,
-} from 'react-icons/fi';
+} from '@/shared/ui/atoms/Icon';
 import { BLOG_POSTS, CATEGORIES } from '@/data/blogData';
 import type { BlogPost } from '@/data/blogData';
 import { usePostTransition } from './PostTransitionContext';
@@ -61,7 +60,7 @@ function FeaturedCard({ post }: { post: BlogPost }) {
           </span>
         </div>
         <div className={styles['featured-card-tags']}>
-          {post.tags.slice(0, 4).map((tag) => (
+          {post.tags.slice(0, 4).map((tag: string) => (
             <span key={tag} className={styles['featured-card-tag']}>
               {tag}
             </span>
@@ -116,7 +115,7 @@ function PostRow({ post, index }: { post: BlogPost; index: number }) {
 
         <div className={styles['posts-row-bottom']}>
           <div className={styles['posts-row-tags']}>
-            {post.tags.slice(0, 3).map((tag) => (
+            {post.tags.slice(0, 3).map((tag: string) => (
               <span key={tag} className={styles['posts-row-tag']}>
                 {tag}
               </span>
@@ -154,7 +153,7 @@ export default function PostsList() {
     const matchesSearch =
       !searchQuery ||
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+      post.tags.some((t: string) => t.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 

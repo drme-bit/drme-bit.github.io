@@ -9,7 +9,7 @@ import {
   FiCheck,
   FiCode,
   FiAlertCircle,
-} from 'react-icons/fi';
+} from '@/shared/ui/atoms/Icon';
 import { getProjectById, getProjectIndex, PROJECTS } from '@/data/projectsData';
 import { NavLeaf, useNav } from '@/providers/NavProvider';
 import styles from './ProjectPage.module.scss';

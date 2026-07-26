@@ -3,4 +3,22 @@
 
 .section {
   @include section-base;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  z-index: 10;
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+/* ─── Wrapper (slides over Reviews) ────────────────────────── */
+
+.wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  min-height: 100vh;
+  width: 100vw;
+  will-change: transform;
 }

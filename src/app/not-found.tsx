@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiHome, FiArrowLeft, FiTerminal } from 'react-icons/fi';
+import { FiHome, FiArrowLeft, FiTerminal } from '@/shared/ui/atoms/Icon';
 import styles from './NotFound.module.scss';
 
 export default function NotFound() {

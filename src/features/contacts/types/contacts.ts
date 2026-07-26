@@ -8,7 +8,7 @@ export interface SocialLink {
 export interface ContactFormData {
   name: string;
   email: string;
-  subject: 'freelance' | 'contract' | 'full-time' | 'collaboration' | 'other';
+  subject: 'general' | 'project' | 'collaboration' | 'freelance' | 'speaking' | 'mentorship' | 'other';
   message: string;
 }
 

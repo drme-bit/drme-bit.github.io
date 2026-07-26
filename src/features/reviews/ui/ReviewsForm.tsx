@@ -3,9 +3,9 @@ import {
   PiStarFill,
   PiStar,
   PiCheckCircle,
-  PiWarningCircle,
   PiSignOut,
-} from 'react-icons/pi'
+  PiWarningCircle,
+} from '@/shared/ui/atoms/Icon'
 import type { User } from 'firebase/auth'
 import styles from './Reviews.module.scss'
 
