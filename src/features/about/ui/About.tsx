@@ -18,7 +18,7 @@ import { RiOpenSourceFill, RiRobot2Fill } from 'react-icons/ri';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─── Intro Block ──────────────────────────────────────── */
+/*  Intro Block ─ */
 
 function IntroBlock({ text, delay }: { text: string; delay: number }) {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -34,7 +34,7 @@ function IntroBlock({ text, delay }: { text: string; delay: number }) {
   );
 }
 
-/* ─── GitHub Activity ──────────────────────────────────── */
+/*  GitHub Activity  */
 
 interface CommitInfo {
   hash: string;
@@ -111,7 +111,7 @@ function GitHubActivity() {
   );
 }
 
-/* ─── About ──────────────────────────────────────────────── */
+/*  About  */
 
 const INTRO_LINES = [
   "Hello there! I'm Vyacheslav, a software engineer from Ukraine. I spend my days turning coffee into code and my nights wondering why it worked yesterday.",

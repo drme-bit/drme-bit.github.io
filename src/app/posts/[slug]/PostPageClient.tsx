@@ -14,7 +14,7 @@ import { useNav } from '@/providers/NavProvider';
 import { usePostTransition } from '../PostTransitionContext';
 import styles from './PostPage.module.scss';
 
-/* ─── Progress Bar ───────────────────────────────────────── */
+/*  Progress Bar ── */
 
 function ProgressBar() {
   const [progress, setProgress] = useState(0);
@@ -39,7 +39,7 @@ function ProgressBar() {
   );
 }
 
-/* ─── Dynamic PostContent loader ─────────────────────────── */
+/*  Dynamic PostContent loader  */
 
 const POST_COMPONENTS: Record<string, React.ComponentType> = {
   'integrating-nodejs': dynamic(
@@ -56,7 +56,7 @@ const POST_COMPONENTS: Record<string, React.ComponentType> = {
   ),
 };
 
-/* ─── Main Component ─────────────────────────────────────── */
+/*  Main Component  */
 
 export default function PostPageClient() {
   const { slug } = useParams() as { slug: string };

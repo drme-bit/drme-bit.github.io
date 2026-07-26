@@ -16,7 +16,7 @@ import styles from '../ui/Projects.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─── JS Marquee (smooth slowdown on hover) ──────────────── */
+/*  JS Marquee (smooth slowdown on hover) ─ */
 
 function useMarquee(
   trackRef: React.RefObject<HTMLDivElement | null>,
@@ -74,7 +74,7 @@ function useMarquee(
   return { onEnter, onLeave, pausedRef };
 }
 
-/* ─── Projects List Component ────────────────────────────── */
+/*  Projects List Component  */
 
 export function ProjectsList() {
   const listRef = useRef<HTMLDivElement>(null);
@@ -134,7 +134,7 @@ export function ProjectsList() {
   );
 }
 
-/* ─── Project Card ───────────────────────────────────────── */
+/*  Project Card ── */
 
 function ProjectCardItem({
   project,
@@ -283,7 +283,7 @@ function ProjectCardItem({
   );
 }
 
-/* ─── Main Projects Component with ScrollTrigger ───────────── */
+/*  Main Projects Component with ScrollTrigger ─ */
 
 export function Projects() {
   const containerRef = useRef<HTMLDivElement>(null);

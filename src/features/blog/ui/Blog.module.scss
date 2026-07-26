@@ -1,7 +1,7 @@
 @use '../../../shared/styles/mixins' as *;
 @use '../../../shared/styles/animations' as *;
 
-/* ─── Wrapper (slides over Projects) ─────────────────────── */
+/*  Wrapper (slides over Projects) ── */
 
 .wrapper {
   position: relative;
@@ -13,7 +13,7 @@
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.25);
 }
 
-/* ─── Section ────────────────────────────────────────────── */
+/*  Section ─ */
 
 .section {
   position: relative;
@@ -33,7 +33,7 @@
   }
 }
 
-/* ─── Section Header ─────────────────────────────────────── */
+/*  Section Header  */
 
 .header {
   display: flex;
@@ -73,7 +73,7 @@
   text-transform: lowercase;
 }
 
-/* ─── Grid ───────────────────────────────────────────────── */
+/*  Grid ─ */
 
 .blog-grid {
   display: grid;
@@ -87,7 +87,7 @@
   }
 }
 
-/* ─── Card ───────────────────────────────────────────────── */
+/*  Card ─ */
 
 .blog-card {
   --card-color: var(--accent-secondary);
@@ -178,7 +178,7 @@
   }
 }
 
-/* ─── Card Top ───────────────────────────────────────────── */
+/*  Card Top  */
 
 .blog-card-top {
   display: flex;
@@ -218,7 +218,7 @@
   text-transform: uppercase;
 }
 
-/* ─── Card Content ───────────────────────────────────────── */
+/*  Card Content ── */
 
 .blog-card-title {
   font-family: var(--font-display);
@@ -243,7 +243,7 @@
   overflow: hidden;
 }
 
-/* ─── Card Meta ──────────────────────────────────────────── */
+/*  Card Meta ── */
 
 .blog-card-meta {
   display: flex;
@@ -270,7 +270,7 @@
   gap: 0.3em;
 }
 
-/* ─── Card Tags ──────────────────────────────────────────── */
+/*  Card Tags ── */
 
 .blog-card-tags {
   display: flex;
@@ -289,7 +289,7 @@
   letter-spacing: 0.03em;
 }
 
-/* ─── Card Action ────────────────────────────────────────── */
+/*  Card Action  */
 
 .blog-card-action {
   margin-top: auto;
@@ -310,7 +310,7 @@
   }
 }
 
-/* ─── Footer ─────────────────────────────────────────────── */
+/*  Footer ── */
 
 .blog-footer {
   display: flex;

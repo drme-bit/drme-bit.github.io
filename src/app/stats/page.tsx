@@ -6,7 +6,7 @@ import TypingTest from '@/shared/ui/molecules/TypingTest/TypingTest';
 import { FiGlobe, FiActivity, FiTrendingUp, FiAward, FiZap, FiTerminal } from '@/shared/ui/atoms/Icon';
 import styles from './Stats.module.scss';
 
-/* ─── Achievement definitions ────────────────────────────── */
+/*  Achievement definitions  */
 
 interface Achievement {
   id: string;
@@ -34,7 +34,7 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'time-900', title: 'Addicted', description: '15 minutes on site', category: 'time', check: (p) => p.timeOnSite >= 900 },
 ];
 
-/* ─── Helpers ────────────────────────────────────────────── */
+/*  Helpers ─ */
 
 function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -60,7 +60,7 @@ function getRank(pct: number): { rank: string; color: string } {
   return { rank: 'NEWCOMER', color: 'var(--text-dim)' };
 }
 
-/* ─── Contribution Bar ───────────────────────────────────── */
+/*  Contribution Bar ─ */
 
 function ContributionBar({
   label,
@@ -94,7 +94,7 @@ function ContributionBar({
   );
 }
 
-/* ─── Stats Page ─────────────────────────────────────────── */
+/*  Stats Page ─ */
 
 export default function StatsPage() {
   const { personal, global, mounted } = useActivity();

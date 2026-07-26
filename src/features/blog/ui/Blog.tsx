@@ -12,7 +12,7 @@ import styles from './Blog.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─── Post Card ──────────────────────────────────────────── */
+/*  Post Card ── */
 
 function PostCard({ post, index }: { post: BlogPost; index: number }) {
   const router = useRouter();
@@ -101,7 +101,7 @@ function PostCard({ post, index }: { post: BlogPost; index: number }) {
   );
 }
 
-/* ─── Blog ───────────────────────────────────────────────── */
+/*  Blog ─ */
 
 export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useRouter> }>(
   function Blog({ router: routerProp }, ref) {

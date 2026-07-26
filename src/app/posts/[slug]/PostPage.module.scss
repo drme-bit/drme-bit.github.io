@@ -11,7 +11,7 @@
   padding-bottom: 4rem;
 }
 
-// ─── Reading Progress Bar ─────────────────────────────────
+//  Reading Progress Bar
 
 .progress-bar {
   position: fixed;
@@ -30,7 +30,7 @@
   }
 }
 
-// ─── Hero ─────────────────────────────────────────────────
+//  Hero ─
 
 .post-hero {
   --hero-gradient: linear-gradient(135deg, rgba(125,211,252,0.1), transparent);
@@ -177,7 +177,7 @@
   }
 }
 
-// ─── Content ──────────────────────────────────────────────
+//  Content ─
 
 .post-content {
   max-width: 80vw;
@@ -217,7 +217,7 @@
   }
 }
 
-// ─── Sections ─────────────────────────────────────────────
+//  Sections
 
 .post-section {
   padding: 2rem 0;
@@ -269,7 +269,7 @@
   }
 }
 
-// ─── Code Blocks ──────────────────────────────────────────
+//  Code Blocks
 
 .code-block {
   position: relative;
@@ -322,7 +322,7 @@
   }
 }
 
-// ─── Lists ────────────────────────────────────────────────
+//  Lists
 
 .list-block {
   &-intro {
@@ -363,7 +363,7 @@
   }
 }
 
-// ─── Quotes ───────────────────────────────────────────────
+//  Quotes ──
 
 .quote-block {
   margin: 0;
@@ -382,7 +382,7 @@
   }
 }
 
-// ─── Bottom Nav ───────────────────────────────────────────
+//  Bottom Nav ─
 
 .post-bottom-nav {
   position: fixed;
@@ -448,7 +448,7 @@
   }
 }
 
-// ─── Loading ──────────────────────────────────────────────
+//  Loading ─
 
 .post-loading {
   display: flex;
@@ -462,7 +462,7 @@
   letter-spacing: 0.1em;
 }
 
-// ─── Responsive ───────────────────────────────────────────
+//  Responsive ─
 
 @media (max-width: 900px) {
   .post-hero {

@@ -1,4 +1,4 @@
-/* ─── Data ───────────────────────────────────────────────── */
+/*  Data ─ */
 interface ExperienceEntry {
   period: string;
   role: string;

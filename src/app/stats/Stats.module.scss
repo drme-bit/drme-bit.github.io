@@ -11,7 +11,7 @@
   margin: 0 auto;
 }
 
-/* ─── Header ─────────────────────────────────────────────── */
+/*  Header ── */
 
 .header {
   text-align: center;
@@ -35,7 +35,7 @@
   margin: 0;
 }
 
-/* ─── Profile Card ───────────────────────────────────────── */
+/*  Profile Card ── */
 
 .profileCard {
   display: flex;
@@ -126,7 +126,7 @@
   letter-spacing: 0.08em;
 }
 
-/* ─── Sections ───────────────────────────────────────────── */
+/*  Sections  */
 
 .section {
   margin-bottom: 2.5rem;
@@ -152,7 +152,7 @@
   flex-shrink: 0;
 }
 
-/* ─── Global Overview ────────────────────────────────────── */
+/*  Global Overview ── */
 
 .overviewGrid {
   display: grid;
@@ -192,7 +192,7 @@
   text-align: center;
 }
 
-/* ─── Your Stats Grid ────────────────────────────────────── */
+/*  Your Stats Grid ── */
 
 .yourStatsGrid {
   display: grid;
@@ -241,7 +241,7 @@
   letter-spacing: 0.05em;
 }
 
-/* ─── Contribution Bars ──────────────────────────────────── */
+/*  Contribution Bars  */
 
 .contribList {
   display: flex;
@@ -301,7 +301,7 @@
   color: var(--text-ghost);
 }
 
-/* ─── Achievements Grid ──────────────────────────────────── */
+/*  Achievements Grid  */
 
 .achievementsGrid {
   display: grid;
@@ -350,7 +350,7 @@
   text-align: center;
 }
 
-/* ─── Responsive ─────────────────────────────────────────── */
+/*  Responsive ─ */
 
 @media (max-width: 700px) {
   .page {

@@ -10,7 +10,7 @@ import styles from './Mascot.module.scss';
 
 export { getMockMessage };
 
-/* ─── Types ──────────────────────────────────────────────── */
+/*  Types  */
 
 interface MascotProps {
   userMessage?: string;
@@ -18,7 +18,7 @@ interface MascotProps {
   searchCount?: number;
 }
 
-/* ─── Mascot ─────────────────────────────────────────────── */
+/*  Mascot ── */
 
 export default function Mascot({ userMessage, onDone, searchCount = 0 }: MascotProps) {
   const [typed, setTyped] = useState('');

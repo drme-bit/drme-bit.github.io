@@ -1,7 +1,7 @@
 @use '../../shared/styles/mixins' as *;
 @use '../../shared/styles/animations' as *;
 
-/* ─── Page ───────────────────────────────────────────────── */
+/*  Page ─ */
 
 .posts-list-page {
   min-height: 100vh;
@@ -15,7 +15,7 @@
   }
 }
 
-/* ─── Floating Nav ───────────────────────────────────────── */
+/*  Floating Nav ── */
 
 .pp-nav {
   position: fixed;
@@ -68,7 +68,7 @@
   font-size: 0.65rem;
 }
 
-/* ─── Hero ───────────────────────────────────────────────── */
+/*  Hero ─ */
 
 .pl-hero {
   padding: 8rem 2rem 3rem;
@@ -128,7 +128,7 @@
   max-width: 500px;
 }
 
-/* ─── Featured ───────────────────────────────────────────── */
+/*  Featured  */
 
 .pl-featured {
   max-width: 900px;
@@ -295,7 +295,7 @@
   }
 }
 
-/* ─── Filters ────────────────────────────────────────────── */
+/*  Filters ─ */
 
 .pl-filters {
   max-width: 900px;
@@ -375,7 +375,7 @@
   }
 }
 
-/* ─── Post Rows ──────────────────────────────────────────── */
+/*  Post Rows ── */
 
 .pl-posts {
   max-width: 900px;
@@ -590,7 +590,7 @@
   flex-shrink: 0;
 }
 
-/* ─── Empty State ────────────────────────────────────────── */
+/*  Empty State  */
 
 .pl-empty {
   text-align: center;
@@ -600,7 +600,7 @@
   color: var(--text-ghost);
 }
 
-/* ─── Footer ─────────────────────────────────────────────── */
+/*  Footer ── */
 
 .pl-footer {
   max-width: 900px;

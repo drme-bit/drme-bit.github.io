@@ -8,7 +8,7 @@ import {
 import { DiJava } from '@/shared/ui/atoms/Icon';
 import type { IconType } from 'react-icons';
 
-/* ─── Types ──────────────────────────────────────────────── */
+/*  Types  */
 
 export interface SkillItem {
   name: string;
@@ -22,7 +22,7 @@ export interface SkillItem {
   projects: string[];
 }
 
-/* ─── Data ───────────────────────────────────────────────── */
+/*  Data ─ */
 
 export const GROUP_COLORS: Record<string, string> = {
   frontend: 'var(--accent)',

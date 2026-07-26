@@ -21,7 +21,7 @@
   }
 }
 
-/* ─── Decorative Grid Background ─────────────────────────── */
+/*  Decorative Grid Background  */
 
 .reviews-bg-grid {
   position: absolute;
@@ -31,7 +31,7 @@
   opacity: 0.6;
 }
 
-/* ─── Hero ───────────────────────────────────────────────── */
+/*  Hero ─ */
 
 .reviews-hero-wrap {
   text-align: center;
@@ -89,7 +89,7 @@
   }
 }
 
-/* ─── Grid ───────────────────────────────────────────────── */
+/*  Grid ─ */
 
 .reviews-grid {
   display: grid;
@@ -103,7 +103,7 @@
   }
 }
 
-/* ─── Cards ──────────────────────────────────────────────── */
+/*  Cards  */
 
 .review-card {
   padding: 1.2rem 1.3rem;
@@ -222,7 +222,7 @@
   opacity: 0.3;
 }
 
-/* ─── Skeleton ───────────────────────────────────────────── */
+/*  Skeleton  */
 
 .review-card-skeleton {
   display: flex;
@@ -248,7 +248,7 @@
   100% { background-position: -200% 0; }
 }
 
-/* ─── Empty ──────────────────────────────────────────────── */
+/*  Empty  */
 
 .reviews-empty {
   grid-column: 1 / -1;
@@ -259,7 +259,7 @@
   font-size: 0.75rem;
 }
 
-/* ─── Modal / Form ───────────────────────────────────────── */
+/*  Modal / Form ── */
 
 .review-modal-bar {
   display: flex;

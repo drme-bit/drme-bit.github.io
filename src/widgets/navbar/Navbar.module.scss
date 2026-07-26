@@ -1,6 +1,6 @@
 @use '../../shared/styles/mixins' as *;
 
-/* ─── Keyframes ────────────────────────────────────────── */
+/*  Keyframes  */
 
 @keyframes navBreathe {
   0%, 100% {
@@ -24,7 +24,7 @@
   }
 }
 
-/* ─── Nav bar ────────────────────────────────────────────── */
+/*  Nav bar ─ */
 
 .nav {
   position: fixed;
@@ -107,7 +107,7 @@
   }
 }
 
-/* ─── Logo ──────────────────────────────────────────────── */
+/*  Logo  */
 
 .logo {
   position: fixed;
@@ -184,7 +184,7 @@
   }
 }
 
-/* ─── Action buttons (search, settings) ─────────────────── */
+/*  Action buttons (search, settings) ─ */
 
 .navActions {
   position: fixed;
@@ -210,7 +210,7 @@
   }
 }
 
-/* ─── Desktop nav wrapper ────────────────────────────────── */
+/*  Desktop nav wrapper ─ */
 
 .desktopNav {
   display: flex;
@@ -230,7 +230,7 @@
   list-style: none;
 }
 
-/* ─── Shared trigger base ────────────────────────────────── */
+/*  Shared trigger base ─ */
 
 .triggerBase {
   position: relative;
@@ -288,7 +288,7 @@
   }
 }
 
-/* ─── NavigationMenu trigger (groups) ────────────────────── */
+/*  NavigationMenu trigger (groups) ─ */
 
 .navTrigger {
   composes: triggerBase;
@@ -328,7 +328,7 @@
   line-height: 1;
 }
 
-/* ─── Expandable tab ─────────────────────────────────────── */
+/*  Expandable tab  */
 
 .expandTab {
   composes: triggerBase;
@@ -377,7 +377,7 @@
   overflow: hidden;
 }
 
-/* ─── Custom dropdown ───────────────────────────────────── */
+/*  Custom dropdown ─ */
 
 .dropdown {
   position: relative;
@@ -397,7 +397,7 @@
   box-shadow: none !important;
 }
 
-/* ─── Dropdown panel ────────────────────────────────────── */
+/*  Dropdown panel ── */
 
 .dropdownPanel {
   position: fixed;
@@ -554,7 +554,7 @@
   }
 }
 
-/* ─── Dropdown card ─────────────────────────────────────── */
+/*  Dropdown card  */
 
 .dropdownCard {
   position: relative;
@@ -701,7 +701,7 @@
   }
 }
 
-/* ─── Dropdown small item ───────────────────────────────── */
+/*  Dropdown small item  */
 
 .dropdownSmallItem {
   display: flex;
@@ -761,7 +761,7 @@
   }
 }
 
-/* ─── Divider ────────────────────────────────────────────── */
+/*  Divider ─ */
 
 .divider {
   width: 1px;
@@ -783,7 +783,7 @@
   height: 1.2rem;
 }
 
-/* ─── Context items (sections / page TOC) ────────────────── */
+/*  Context items (sections / page TOC)  */
 
 .contextItems {
   display: flex;
@@ -878,7 +878,7 @@
   to { width: 60%; opacity: 1; }
 }
 
-/* ─── Backdrop enhancement ───────────────────────────────── */
+/*  Backdrop enhancement  */
 
 .dropdownBackdrop {
   position: fixed;
@@ -902,7 +902,7 @@
   to { background: transparent; }
 }
 
-/* ─── Reduced motion support ─────────────────────────────── */
+/*  Reduced motion support ─ */
 
 @media (prefers-reduced-motion: reduce) {
   .nav,
@@ -922,7 +922,7 @@
   }
 }
 
-/* ─── Mobile menu button ─────────────────────────────────── */
+/*  Mobile menu button ── */
 
 .menuBtn {
   display: none;
@@ -966,7 +966,7 @@
   transform: rotate(90deg);
 }
 
-/* ─── Sheet (mobile) ─────────────────────────────────────── */
+/*  Sheet (mobile)  */
 
 .sheetContent {
   z-index: 1000;

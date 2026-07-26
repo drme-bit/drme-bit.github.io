@@ -2,7 +2,7 @@ import type { BlogPost, BlogSection, SectionType } from './posts/types';
 
 export type { BlogPost, BlogSection, SectionType };
 
-/* ─── CATEGORIES ─────────────────────────────────────────── */
+/*  CATEGORIES ─ */
 
 export const CATEGORIES: Record<
   string,
@@ -35,7 +35,7 @@ export const CATEGORIES: Record<
   },
 };
 
-/* ─── BLOG_POSTS (sync for list page) ────────────────────── */
+/*  BLOG_POSTS (sync for list page) ─ */
 
 // Import all metas statically for the list page
 import integratingMeta from './posts/integrating-nodejs/meta';

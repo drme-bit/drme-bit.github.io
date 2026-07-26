@@ -10,7 +10,7 @@
   color: var(--text-secondary);
 }
 
-// ─── Hero ─────────────────────────────────────────────────
+//  Hero ─
 
 .hero {
   position: relative;
@@ -84,7 +84,7 @@
   }
 }
 
-// ─── Sections ─────────────────────────────────────────────
+//  Sections
 
 .section {
   margin: 0 auto;
@@ -132,7 +132,7 @@
   border-left: 2px solid rgba(167, 139, 250, 0.15);
 }
 
-// ─── Code Blocks ──────────────────────────────────────────
+//  Code Blocks
 
 .code-block {
   position: relative;
@@ -187,7 +187,7 @@
   }
 }
 
-// ─── Architecture Diagram ─────────────────────────────────
+//  Architecture Diagram
 
 .arch {
   margin: 3rem 0;
@@ -249,7 +249,7 @@
   }
 }
 
-// ─── Feature Grid ─────────────────────────────────────────
+//  Feature Grid ──
 
 .feature-grid {
   display: grid;
@@ -291,7 +291,7 @@
   }
 }
 
-// ─── Responsive ───────────────────────────────────────────
+//  Responsive ─
 
 @media (max-width: 700px) {
   .hero {

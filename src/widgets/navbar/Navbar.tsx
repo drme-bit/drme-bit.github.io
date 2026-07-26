@@ -29,7 +29,7 @@ import styles from './Navbar.module.scss';
 //Init gsap plugin
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─── Expandable tab (like ExpandableTabs component) ────── */
+/*  Expandable tab (like ExpandableTabs component)  */
 
 const tabVariants = {
   initial: { gap: 0, paddingLeft: '.7rem', paddingRight: '.7rem' },
@@ -92,7 +92,7 @@ function ExpandableTab({
   );
 }
 
-/* ─── Group trigger ──────── */
+/*  Group trigger ── */
 
 function leafHref(leaf: NavLeaf): string {
   if (leaf.type === 'route') return leaf.href;
@@ -142,7 +142,7 @@ function GroupDropdown({
   );
 }
 
-/* ─── Mobile: Sheet nav ─────────────────────────────────── */
+/*  Mobile: Sheet nav ── */
 
 function MobileNav() {
   const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
@@ -212,7 +212,7 @@ function MobileNav() {
   );
 }
 
-/* ─── Main Navbar ───────────────────────────────────────── */
+/*  Main Navbar ── */
 
 export default function Navbar() {
   const [collapsed, setCollapsed] = useState(false);

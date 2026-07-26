@@ -31,7 +31,7 @@
   fill: currentColor;
 }
 
-/* ─── Panel ─────────────────────────────────────────────── */
+/*  Panel ── */
 
 .panel {
   position: absolute;
@@ -88,7 +88,7 @@
   gap: 0.75rem;
 }
 
-/* ─── Section ───────────────────────────────────────────── */
+/*  Section  */
 
 .section {
   display: flex;
@@ -104,7 +104,7 @@
   letter-spacing: 0.1em;
 }
 
-/* ─── Theme grid ────────────────────────────────────────── */
+/*  Theme grid  */
 
 .themeGrid {
   display: grid;
@@ -150,7 +150,7 @@
   color: var(--text-dim);
 }
 
-/* ─── Option row ────────────────────────────────────────── */
+/*  Option row  */
 
 .optionRow {
   display: flex;
@@ -182,7 +182,7 @@
   }
 }
 
-/* ─── Toggle ────────────────────────────────────────────── */
+/*  Toggle ─ */
 
 .toggleRow {
   display: flex;

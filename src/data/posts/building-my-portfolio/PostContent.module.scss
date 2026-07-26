@@ -10,7 +10,7 @@
   color: var(--text-secondary);
 }
 
-// ─── Hero ─────────────────────────────────────────────────
+//  Hero ─
 
 .hero {
   position: relative;
@@ -85,7 +85,7 @@
   }
 }
 
-// ─── Sections ─────────────────────────────────────────────
+//  Sections
 
 .section {
   margin: 0 auto;
@@ -133,7 +133,7 @@
   border-left: 2px solid rgba(251, 191, 36, 0.12);
 }
 
-// ─── Callout ──────────────────────────────────────────────
+//  Callout ─
 
 .callout {
   display: flex;
@@ -163,7 +163,7 @@
   }
 }
 
-// ─── Tech Stack Grid ──────────────────────────────────────
+//  Tech Stack Grid ──
 
 .tech-grid {
   display: grid;
@@ -205,7 +205,7 @@
   line-height: 1.5;
 }
 
-// ─── Lesson Box ───────────────────────────────────────────
+//  Lesson Box ─
 
 .lesson-box {
   margin: 1.5rem 0;
@@ -245,7 +245,7 @@
   }
 }
 
-// ─── Responsive ───────────────────────────────────────────
+//  Responsive ─
 
 @media (max-width: 700px) {
   .hero {

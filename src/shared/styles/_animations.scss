@@ -2,7 +2,7 @@
 // SHARED ANIMATIONS — Reusable keyframes and transitions
 // ═══════════════════════════════════════════════════════════
 
-// ── Reveal / entrance ─────────────────────────────────────
+// ── Reveal / entrance ─
 @mixin reveal-base {
   opacity: 0;
   translate: 0 30px;
@@ -14,7 +14,7 @@
   }
 }
 
-// ── Stagger children ──────────────────────────────────────
+// ── Stagger children ──
 @mixin stagger-children($count: 8, $delay: 80ms) {
   @for $i from 0 through $count {
     > *:nth-child(#{$i + 1}) {
@@ -23,7 +23,7 @@
   }
 }
 
-// ── Shimmer / loading ─────────────────────────────────────
+// ── Shimmer / loading ─
 @mixin shimmer {
   background: linear-gradient(
     90deg,
@@ -35,13 +35,13 @@
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
-// ── Pulse glow ────────────────────────────────────────────
+// ── Pulse glow ──
 @mixin glow-pulse($color: var(--accent-secondary), $size: 40px) {
   box-shadow: 0 0 $size rgba(125, 211, 252, 0.06);
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
-// ── Typing cursor ─────────────────────────────────────────
+// ── Typing cursor ──
 @mixin typing-cursor($color: var(--accent-secondary)) {
   &::after {
     content: '|';
@@ -51,7 +51,7 @@
   }
 }
 
-// ── Float / hover ─────────────────────────────────────────
+// ── Float / hover ──
 @mixin float($distance: -4px, $duration: 3s) {
   animation: float $duration ease-in-out infinite;
 
@@ -60,7 +60,7 @@
   }
 }
 
-// ── Keyframes ─────────────────────────────────────────────
+// ── Keyframes
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -106,7 +106,7 @@
   100% { transform: scale(1); opacity: 0; }
 }
 
-// ── Modal animations ──────────────────────────────────────
+// ── Modal animations ──
 @keyframes modal-overlay-in {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -127,7 +127,7 @@
   to { opacity: 0; transform: scale(0.95) translateY(10px); }
 }
 
-// ── Companion cube ────────────────────────────────────────
+// ── Companion cube ─
 @keyframes companionAmbient {
   0%, 100% { transform: scale(1); opacity: 0.5; }
   50% { transform: scale(1.1); opacity: 0.8; }
@@ -138,7 +138,7 @@
   50% { opacity: 1; transform: scale(1); }
 }
 
-// ── Mobile touch animations ───────────────────────────────
+// ── Mobile touch animations ─
 @keyframes tap-ripple-anim {
   0% { transform: scale(0); opacity: 0.5; }
   100% { transform: scale(4); opacity: 0; }

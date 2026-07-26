@@ -12,7 +12,7 @@ import { usePathname } from 'next/navigation';
 import { GLOBAL_NAV } from '@/config/navConfig';
 import type { NavItem, NavPageConfig, NavActiveState } from '@/config/navTypes';
 
-/* ─── Route matching ─────────────────────────────────────── */
+/*  Route matching  */
 
 function matchRoute(
   pathname: string,
@@ -47,7 +47,7 @@ function resolveActiveRouteId(
   return null;
 }
 
-/* ─── Context ────────────────────────────────────────────── */
+/*  Context ─ */
 
 interface NavContextValue {
   globalItems: NavItem[];
@@ -73,7 +73,7 @@ export function useNav() {
   return useContext(NavContext);
 }
 
-/* ─── Provider ───────────────────────────────────────────── */
+/*  Provider  */
 
 export function NavProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -117,6 +117,6 @@ export function NavProvider({ children }: { children: ReactNode }) {
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;
 }
 
-/* ─── Re-exports for convenience ─────────────────────────── */
+/*  Re-exports for convenience  */
 
 export type { NavPageConfig, NavActiveState, NavLeaf, NavSectionLink } from '@/config/navTypes';

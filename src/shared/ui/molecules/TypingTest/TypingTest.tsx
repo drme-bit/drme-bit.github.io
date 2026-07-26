@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import styles from './TypingTest.module.scss';
 
-/* ─── Word pool ──────────────────────────────────────────── */
+/*  Word pool ── */
 
 const WORDS = [
   'code', 'build', 'ship', 'debug', 'deploy', 'commit', 'merge', 'push',
@@ -37,7 +37,7 @@ function pickWords(count: number, seed?: number): string[] {
   return result;
 }
 
-/* ─── Component ──────────────────────────────────────────── */
+/*  Component ── */
 
 export default function TypingTest() {
   const [mounted, setMounted] = useState(false);

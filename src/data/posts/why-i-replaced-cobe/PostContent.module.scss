@@ -10,7 +10,7 @@
   color: var(--text-secondary);
 }
 
-// ─── Hero ─────────────────────────────────────────────────
+//  Hero ─
 
 .hero {
   position: relative;
@@ -129,7 +129,7 @@
   to { transform: rotate(360deg) rotateX(60deg); }
 }
 
-// ─── Sections ─────────────────────────────────────────────
+//  Sections
 
 .section {
   margin: 0 auto;
@@ -177,7 +177,7 @@
   border-left: 2px solid rgba(125, 211, 252, 0.12);
 }
 
-// ─── Code Block ───────────────────────────────────────────
+//  Code Block ─
 
 .code-block {
   position: relative;
@@ -232,7 +232,7 @@
   }
 }
 
-// ─── Comparison Grid ──────────────────────────────────────
+//  Comparison Grid ──
 
 .compare-grid {
   display: grid;
@@ -315,7 +315,7 @@
   }
 }
 
-// ─── Timeline ─────────────────────────────────────────────
+//  Timeline
 
 .timeline {
   display: flex;
@@ -362,7 +362,7 @@
   line-height: 1.5;
 }
 
-// ─── Responsive ───────────────────────────────────────────
+//  Responsive ─
 
 @media (max-width: 700px) {
   .hero {

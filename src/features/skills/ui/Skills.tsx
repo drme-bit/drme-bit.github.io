@@ -18,14 +18,14 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Globe = lazy(() => import('@/shared/ui/organisms/Globe/Globe'));
 
-/* ─── Derived data ───────────────────────────────────────── */
+/*  Derived data ── */
 
 const GROUP_COUNTS: Record<string, number> = {};
 GROUP_OPTIONS.forEach(({ key }) => {
   GROUP_COUNTS[key] = SKILLS_DATA.filter((s) => s.group === key).length;
 });
 
-/* ─── Skills ─────────────────────────────────────────────── */
+/*  Skills ── */
 
 export default function Skills() {
   const sectionRef = useRef<HTMLDivElement>(null);

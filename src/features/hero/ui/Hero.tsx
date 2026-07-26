@@ -20,7 +20,7 @@ import styles from './Hero.module.scss';
 gsap.registerPlugin(CustomEase);
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─── Types ──────────────────────────────────────────────── */
+/*  Types  */
 
 interface TerminalLine {
   prompt?: boolean;
@@ -53,7 +53,7 @@ interface ContactRowProps {
   stats: GithubStats | null;
 }
 
-/* ─── Sub-components ─────────────────────────────────────── */
+/*  Sub-components  */
 
 function Terminals({ heroRef }: TerminalsProps) {
   const termRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -211,7 +211,7 @@ function ContactRow({ stats }: ContactRowProps) {
   );
 }
 
-/* ─── Hero ───────────────────────────────────────────────── */
+/*  Hero ─ */
 
 export default function Hero() {
   const [show, setShow] = useState(false);

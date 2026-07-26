@@ -21,7 +21,7 @@
   @include reveal-base;
 }
 
-/* ─── Layout ─────────────────────────────────────────────── */
+/*  Layout ── */
 
 .about-layout {
   display: grid;
@@ -41,7 +41,7 @@
   }
 }
 
-/* ─── Photo ──────────────────────────────────────────────── */
+/*  Photo  */
 
 .about-photo-col {
   position: sticky;
@@ -137,7 +137,7 @@
   }
 }
 
-/* ─── Content Column ─────────────────────────────────────── */
+/*  Content Column  */
 
 .about-content-col {
   display: flex;
@@ -162,7 +162,7 @@
   margin: 0;
 }
 
-/* ─── Intro Blocks ───────────────────────────────────────── */
+/*  Intro Blocks ── */
 
 .about-intro {
   display: flex;
@@ -192,7 +192,7 @@
   }
 }
 
-/* ─── Stats ──────────────────────────────────────────────── */
+/*  Stats  */
 
 .about-stats-row {
   display: flex;
@@ -232,7 +232,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── GitHub Activity ───────────────────────────────────── */
+/*  GitHub Activity ─ */
 
 .about-github {
   border: 1px solid var(--terminal-border);
@@ -392,7 +392,7 @@
   }
 }
 
-/* ─── Whoami ─────────────────────────────────────────────── */
+/*  Whoami ── */
 
 .about-whoami-prompt {
   font-family: var(--font-mono), serif;
@@ -501,7 +501,7 @@
   }
 }
 
-/* ─── Status & Location ─────────────────────────────────── */
+/*  Status & Location ── */
 
 .about-meta-row {
   display: flex;
@@ -545,7 +545,7 @@
   font-size: 0.8rem;
 }
 
-/* ─── Map ────────────────────────────────────────────────── */
+/*  Map ── */
 
 .about-map-canvas {
   width: 100%;
@@ -582,7 +582,7 @@
   }
 }
 
-/* ─── Bento Grid ────────────────────────────────────────── */
+/*  Bento Grid  */
 
 .about-bento {
   display: grid;
@@ -704,7 +704,7 @@
   letter-spacing: 0.04em;
 }
 
-/* ─── Mobile Animations ──────────────────────────────────── */
+/*  Mobile Animations  */
 
 @keyframes aboutItemIn {
   from { opacity: 0; transform: translateY(12px); }

@@ -5,7 +5,7 @@ import { PROJECTS } from '@/data/projectsData';
 import { FiX, FiGrid, FiFolder } from '@/shared/ui/atoms/Icon';
 import styles from './Archive.module.scss';
 
-/* ─── Types ──────────────────────────────────────────────── */
+/*  Types  */
 
 interface MediaItem {
   id: string;
@@ -26,7 +26,7 @@ interface ArchiveProps {
   onClose: () => void;
 }
 
-/* ─── Helpers ────────────────────────────────────────────── */
+/*  Helpers ─ */
 
 function collectMedia(): MediaItem[] {
   const items: MediaItem[] = [];
@@ -71,7 +71,7 @@ function collectMedia(): MediaItem[] {
   return items;
 }
 
-/* ─── Archive ────────────────────────────────────────────── */
+/*  Archive ─ */
 
 export default function Archive({ onClose }: ArchiveProps) {
   const [media] = useState(collectMedia);

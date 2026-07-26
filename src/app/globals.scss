@@ -115,7 +115,7 @@
 // ═══════════════════════════════════════════════════════════
 
 :root {
-  // ── Colors ──────────────────────────────────────────────
+  // ── Colors ─
   --bg: #0a0a0a;
   --bg-elevated: #111111;
   --bg-surface: #1a1a1a;
@@ -140,20 +140,20 @@
   --accent-teal: #5ec8d8;
   --accent-mint: #a7f3cd;
 
-  // ── Gradients ───────────────────────────────────────────
+  // ── Gradients ─
   --gradient-primary: linear-gradient(135deg, #7dd3fc, #c4b5fd);
   --gradient-warm: linear-gradient(135deg, #fbbf24, #f97316);
   --gradient-cool: linear-gradient(135deg, #67e8f9, #7dd3fc);
   --gradient-text: linear-gradient(135deg, #e8e4df, #7dd3fc);
 
-  // ── Borders & Glass ─────────────────────────────────────
+  // ── Borders & Glass ─
   --border: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.15);
   --glass: rgba(255, 255, 255, 0.04);
   --glass-hover: rgba(255, 255, 255, 0.07);
   --glass-strong: rgba(255, 255, 255, 0.06);
 
-  // ── Nav section glass tints ────────────────────────────
+  // ── Nav section glass tints ─
   --nav-glass-about: rgba(125, 211, 252, 0.14);
   --nav-glass-skills: rgba(196, 181, 253, 0.14);
   --nav-glass-experience: rgba(251, 191, 36, 0.14);
@@ -162,13 +162,13 @@
   --overlay-bg: rgba(0, 0, 0, 0.5);
   --panel-bg: rgba(10, 10, 10, 0.95);
 
-  // ── Shadows ─────────────────────────────────────────────
+  // ── Shadows
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
   --shadow-glow: 0 0 40px rgba(125, 211, 252, 0.06);
 
-  // ── Terminal ────────────────────────────────────────────
+  // ── Terminal ──
   --terminal-bg: rgba(18, 18, 18, 0.88);
   --terminal-border: rgba(232, 228, 223, 0.05);
   --terminal-bar: rgba(232, 228, 223, 0.025);
@@ -193,12 +193,12 @@
   --card-bg: rgba(26, 26, 26, 0.85);
   --card-border: rgba(255, 255, 255, 0.06);
 
-  // ── Typography ──────────────────────────────────────────
+  // ── Typography
   --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
-  // ── Spacing ─────────────────────────────────────────────
+  // ── Spacing
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -207,7 +207,7 @@
   --space-2xl: 3rem;
   --space-3xl: 4rem;
 
-  // ── Radii ───────────────────────────────────────────────
+  // ── Radii ──
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -215,14 +215,14 @@
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  // ── Timing ──────────────────────────────────────────────
+  // ── Timing ─
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --duration-fast: 0.15s;
   --duration-normal: 0.3s;
   --duration-slow: 0.5s;
 
-  // ── Z-index ─────────────────────────────────────────────
+  // ── Z-index
   --z-base: 1;
   --z-dropdown: 100;
   --z-sticky: 200;
@@ -232,7 +232,7 @@
   --z-max: 9999;
 }
 
-// ── Light theme ───────────────────────────────────────────
+// ── Light theme ─
 :is(html.light, body.light) {
   --bg: #f5f3f0;
   --bg-elevated: #eae7e3;
@@ -267,7 +267,7 @@
   --glass-hover: rgba(0, 0, 0, 0.04);
   --glass-strong: rgba(0, 0, 0, 0.03);
 
-  // ── Nav section glass tints ────────────────────────────
+  // ── Nav section glass tints ─
   --nav-glass-about: rgba(2, 132, 199, 0.10);
   --nav-glass-skills: rgba(124, 58, 237, 0.10);
   --nav-glass-experience: rgba(217, 119, 6, 0.10);
@@ -306,7 +306,7 @@
   color-scheme: light;
 }
 
-// ── Cattpuchin theme ───────────────────────────────────────
+// ── Cattpuchin theme
 :is(html.cattpuchin, body.cattpuchin) {
   --bg: #1e1c1c;
   --bg-elevated: #272424;
@@ -343,7 +343,7 @@
   --glass-hover: rgba(255, 180, 150, 0.07);
   --glass-strong: rgba(255, 180, 150, 0.06);
 
-  // ── Nav section glass tints ────────────────────────────
+  // ── Nav section glass tints ─
   --nav-glass-about: rgba(255, 154, 118, 0.14);
   --nav-glass-skills: rgba(255, 200, 162, 0.14);
   --nav-glass-experience: rgba(255, 207, 135, 0.14);
@@ -384,7 +384,7 @@
   color-scheme: dark;
 }
 
-// ── Nord theme ─────────────────────────────────────────────
+// ── Nord theme
 :is(html.nord, body.nord) {
   --bg: #2e3440;
   --bg-elevated: #3b4252;
@@ -421,7 +421,7 @@
   --glass-hover: rgba(136, 192, 208, 0.07);
   --glass-strong: rgba(136, 192, 208, 0.06);
 
-  // ── Nav section glass tints ────────────────────────────
+  // ── Nav section glass tints ─
   --nav-glass-about: rgba(136, 192, 208, 0.14);
   --nav-glass-skills: rgba(180, 142, 173, 0.14);
   --nav-glass-experience: rgba(208, 135, 112, 0.14);
@@ -462,7 +462,7 @@
   color-scheme: dark;
 }
 
-// ── Dracula theme ──────────────────────────────────────────
+// ── Dracula theme
 :is(html.dracula, body.dracula) {
   --bg: #282a36;
   --bg-elevated: #343746;
@@ -499,7 +499,7 @@
   --glass-hover: rgba(189, 147, 249, 0.07);
   --glass-strong: rgba(189, 147, 249, 0.06);
 
-  // ── Nav section glass tints ────────────────────────────
+  // ── Nav section glass tints ─
   --nav-glass-about: rgba(189, 147, 249, 0.14);
   --nav-glass-skills: rgba(255, 121, 198, 0.14);
   --nav-glass-experience: rgba(255, 184, 108, 0.14);
@@ -540,7 +540,7 @@
   color-scheme: dark;
 }
 
-// ── Solarized theme ────────────────────────────────────────
+// ── Solarized theme ─
 :is(html.solarized, body.solarized) {
   --bg: #002b36;
   --bg-elevated: #073642;
@@ -577,7 +577,7 @@
   --glass-hover: rgba(42, 161, 152, 0.07);
   --glass-strong: rgba(42, 161, 152, 0.06);
 
-  // ── Nav section glass tints ────────────────────────────
+  // ── Nav section glass tints ─
   --nav-glass-about: rgba(42, 161, 152, 0.14);
   --nav-glass-skills: rgba(108, 113, 196, 0.14);
   --nav-glass-experience: rgba(181, 137, 0, 0.14);
@@ -649,7 +649,7 @@ body {
   overflow-x: hidden;
   padding-bottom: env(safe-area-inset-bottom);
 
-  // ── Dot grid overlay ────────────────────────────────────
+  // ── Dot grid overlay
   &::after {
     content: '';
     position: fixed;
@@ -758,12 +758,12 @@ body {
   @include glass-card;
 }
 
-// ── Reveal animation (global) ─────────────────────────────
+// ── Reveal animation (global) ──
 .reveal {
   @include reveal-base;
 }
 
-// ── Touch animations ──────────────────────────────────────
+// ── Touch animations ──
 .tap-ripple {
   position: relative;
   overflow: hidden;
