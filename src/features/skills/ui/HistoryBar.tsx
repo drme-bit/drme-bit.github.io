@@ -1,13 +1,13 @@
 'use client';
 
 import { FiClock } from '@/shared/ui/atoms/Icon';
-import type { SkillItem } from '../types/skills';
-import styles from '../ui/Skills.module.scss';
+import styles from './Skills.module.scss';
+import type { Skill } from '../lib';
 
 interface HistoryBarProps {
-  history: SkillItem[];
-  selectedSkill: SkillItem | null;
-  onSelect: (skill: SkillItem) => void;
+  history: Skill[];
+  selectedSkill: Skill | null;
+  onSelect: (skill: Skill) => void;
 }
 
 export function HistoryBar({ history, selectedSkill, onSelect }: HistoryBarProps) {

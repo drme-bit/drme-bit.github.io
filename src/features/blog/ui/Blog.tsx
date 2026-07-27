@@ -1,12 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useRef, forwardRef, useImperativeHandle } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { BLOG_POSTS, CATEGORIES } from '@/data/blogData';
-import type { BlogPost } from '@/data/blogData';
+import { blog } from '@/features/blog/lib';
+import type { BlogPost } from '@/features/blog/lib';
 import { FiArrowRight, FiClock } from '@/shared/ui/atoms/Icon';
 import styles from './Blog.module.scss';
 
@@ -17,15 +17,6 @@ gsap.registerPlugin(ScrollTrigger);
 function PostCard({ post, index }: { post: BlogPost; index: number }) {
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
-  const cat = CATEGORIES[post.category] || CATEGORIES.Frontend;
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    e.currentTarget.style.setProperty('--mouse-x', `${x}%`);
-    e.currentTarget.style.setProperty('--mouse-y', `${y}%`);
-  }, []);
 
   useGSAP(() => {
     const el = ref.current;
@@ -51,16 +42,11 @@ function PostCard({ post, index }: { post: BlogPost; index: number }) {
     <article
       ref={ref}
       className={`${styles['blog-card']}${post.featured ? ` ${styles['blog-card--featured']}` : ''}`}
-      style={{ '--card-color': cat.color } as React.CSSProperties}
       onClick={() => router.push(`/posts/${post.slug}`)}
-      onMouseMove={handleMouseMove}
     >
       <div className={styles['blog-card-inner']}>
         <div className={styles['blog-card-top']}>
-          <span className={styles['blog-card-category']}>
-            <span className={styles['blog-card-cat-dot']} />
-            {post.category}
-          </span>
+          <span className={styles['blog-card-category']}>{post.category}</span>
           {post.featured && (
             <span className={styles['blog-card-featured']}>featured</span>
           )}
@@ -108,8 +94,8 @@ export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useR
     const router = routerProp || useRouter();
     const wrapperRef = useRef<HTMLDivElement>(null);
     const sectionRef = useRef<HTMLDivElement>(null);
-    const featured = BLOG_POSTS.filter((p: BlogPost) => p.featured);
-    const recent = BLOG_POSTS.filter((p: BlogPost) => !p.featured).slice(0, 2);
+    const featured = blog.featured;
+    const recent = blog.recent.slice(0, 2);
 
     useImperativeHandle(ref, () => wrapperRef.current!);
 
@@ -124,10 +110,10 @@ export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useR
 
           <div className={styles['blog-grid']}>
             {featured.map((post: BlogPost) => (
-              <PostCard key={post.slug} post={post} index={BLOG_POSTS.indexOf(post)} />
+              <PostCard key={post.slug} post={post} index={blog.all.indexOf(post)} />
             ))}
             {recent.map((post: BlogPost) => (
-              <PostCard key={post.slug} post={post} index={BLOG_POSTS.indexOf(post)} />
+              <PostCard key={post.slug} post={post} index={blog.all.indexOf(post)} />
             ))}
           </div>
 

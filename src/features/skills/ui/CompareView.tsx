@@ -1,13 +1,13 @@
 'use client';
 
 import { FiMousePointer } from '@/shared/ui/atoms/Icon';
-import type { SkillItem } from '../types/skills';
-import styles from '../ui/Skills.module.scss';
+import styles from './Skills.module.scss';
+import type { Skill } from '../lib';
 
 interface CompareViewProps {
-  skillA: SkillItem;
-  skillB: SkillItem | null;
-  renderSkillPanel: (skill: SkillItem, isCompare?: boolean) => React.ReactNode;
+  skillA: Skill;
+  skillB: Skill | null;
+  renderSkillPanel: (skill: Skill, isCompare?: boolean) => React.ReactNode;
 }
 
 export function CompareView({ skillA, skillB, renderSkillPanel }: CompareViewProps) {

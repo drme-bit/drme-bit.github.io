@@ -7,28 +7,7 @@ import {
 } from '@/shared/ui/atoms/Icon';
 import { DiJava } from '@/shared/ui/atoms/Icon';
 import type { IconType } from 'react-icons';
-
-/*  Types  */
-
-export interface SkillItem {
-  name: string;
-  group: 'frontend' | 'backend' | 'tools';
-  category: 'language' | 'framework' | 'runtime' | 'database' | 'DevOps' | 'graphics' | 'other';
-  level: number;
-  difficulty: 1 | 2 | 3 | 4 | 5;
-  desc: string;
-  funLevel: string;
-  related: string[];
-  projects: string[];
-}
-
-/*  Data ─ */
-
-export const GROUP_COLORS: Record<string, string> = {
-  frontend: 'var(--accent)',
-  backend: 'var(--accent-secondary)',
-  tools: 'var(--accent-tertiary)',
-};
+import type { SkillData } from './skill-graph';
 
 export const ICON_MAP: Record<string, IconType> = {
   React: SiReact, TypeScript: SiTypescript, JavaScript: SiJavascript,
@@ -42,7 +21,7 @@ export const ICON_MAP: Record<string, IconType> = {
   C: FiCode, 'C++': FiCode, 'C#': FiCode, Luau: FiCode,
 };
 
-export const SKILLS_DATA: SkillItem[] = [
+export const SKILLS_DATA: SkillData[] = [
   {
     name: 'React',
     group: 'frontend',

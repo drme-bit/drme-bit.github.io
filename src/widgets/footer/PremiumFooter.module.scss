@@ -6,19 +6,18 @@
   z-index: 5;
   width: 100%;
   will-change: transform;
-  pointer-events: none;
   isolation: isolate;
+  height: 25vh;
 
-  @include respond-to(desktop) {
-    height: 35vh;
+  @include respond-to(mobile) {
+    height: 30vh;
   }
 }
 
 .footer {
   position: relative;
   z-index: 1;
-  height: auto;
-  min-height: 35vh;
+  height: 100%;
   width: 100%;
   background: var(--bg-surface);
   pointer-events: auto;
@@ -41,10 +40,11 @@
   z-index: 1;
   margin: 0 auto;
   width: 100%;
-  padding: var(--space-xl) var(--space-md) var(--space-md); // ИСПРАВЛЕНО: уменьшены боковые отступы для узких экранов
+  max-width: 1200px;
+  padding: var(--space-xl) var(--space-md) var(--space-md);
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl); // Увеличен отступ между секциями для воздуха
+  gap: var(--space-xl);
   height: 100%;
   justify-content: space-between;
 
@@ -57,7 +57,17 @@
   }
 
   @include respond-to(tablet) {
-    padding: var(--space-2xl) var(--space-xl) var(--space-md);
+    padding: var(--space-xl) var(--space-xl) var(--space-md);
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-xl);
+  }
+
+  @include respond-to(mobile) {
+    padding: var(--space-xl) var(--space-md) var(--space-xl);
+    justify-content: flex-start;
+    gap: var(--space-lg);
   }
 }
 
@@ -72,9 +82,15 @@
   padding-top: var(--space-sm);
 
   @include respond-to(desktop) {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: var(--space-md);
+    text-align: left;
+  }
+
+  @include respond-to(tablet) {
+    flex-direction: column;
+    gap: var(--space-md);
+    text-align: left;
   }
 }
 
@@ -99,7 +115,7 @@
   font-family: var(--font-sans);
   font-size: 0.75rem;
   color: var(--text-secondary);
-  max-width: 280px; // Немного расширено для читаемости на мобилках
+  max-width: 280px;
   line-height: 1.5;
   margin: 0;
 }
@@ -154,14 +170,23 @@
 .footerBottom {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg); // Увеличен отступ для разделения на мобилках
+  gap: var(--space-lg);
   padding-bottom: var(--space-sm);
+  width: 100%;
+
+  @include respond-to(tablet) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+  }
 
   @include respond-to(desktop) {
     flex-direction: row;
     justify-content: space-between;
-    align-items: flex-end;
-    gap: var(--space-md);
+    align-items: flex-start;
+    gap: var(--space-lg);
   }
 }
 
@@ -171,10 +196,16 @@
   gap: var(--space-lg);
   width: 100%;
 
+  @include respond-to(tablet) {
+    flex-direction: row;
+    gap: var(--space-2xl);
+    flex: 1;
+  }
+
   @include respond-to(desktop) {
     flex-direction: row;
-    flex: 1;
     gap: var(--space-2xl);
+    flex: 1;
   }
 }
 
@@ -197,10 +228,22 @@
 .socialList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm); // Чуть больше отступ между ссылками на мобилках для удобства тапа
+  gap: var(--space-sm);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+@include respond-to(tablet) {
+  .navList {
+    flex-direction: row;
+    gap: var(--space-lg);
+  }
+  
+  .socialList {
+    flex-direction: row;
+    gap: var(--space-sm);
+  }
 }
 
 @include respond-to(desktop) {
@@ -208,16 +251,21 @@
     flex-direction: row;
     gap: var(--space-lg);
   }
+  
+  .socialList {
+    flex-direction: row;
+    gap: var(--space-sm);
+  }
 }
 
 .navLink {
   font-family: var(--font-sans);
-  font-size: 0.85rem; // Чуть крупнее для мобилок (удобнее кликать)
+  font-size: 0.85rem;
   color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.2s var(--ease-out);
   position: relative;
-  padding: 4px 0; // Увеличен интерактивный хитбокс ссылки
+  padding: 4px 0;
 
   &::after {
     content: '';
@@ -249,13 +297,17 @@
   flex-direction: row;
   gap: var(--space-sm);
   flex-wrap: wrap;
+
+  @include respond-to(desktop) {
+    justify-content: center;
+  }
 }
 
 .socialLink {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px; // Чуть больше размер под пальцы на мобилках
+  width: 36px;
   height: 36px;
   border-radius: 0;
   background: transparent;
@@ -303,6 +355,11 @@
   text-align: left;
   width: 100%;
 
+  @include respond-to(tablet) {
+    align-items: flex-end;
+    width: auto;
+  }
+
   @include respond-to(desktop) {
     align-items: flex-end;
     width: auto;
@@ -314,7 +371,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-md); // Удобнее нажимать на смартфонах
+  padding: var(--space-sm) var(--space-md);
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 0;
@@ -326,6 +383,10 @@
   width: 100%;
   transition: border-color 0.2s var(--ease-out),
   color 0.2s var(--ease-out);
+
+  @include respond-to(tablet) {
+    width: auto;
+  }
 
   @include respond-to(desktop) {
     width: auto;
@@ -361,8 +422,13 @@
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
+
+  @include respond-to(tablet) {
+    justify-content: flex-end;
+    width: auto;
+  }
 
   @include respond-to(desktop) {
     justify-content: flex-end;
@@ -384,12 +450,14 @@
    ANIMATION TARGETS
    ═══════════════════════════════════════════════════════════════ */
 
-.footer-row {
+.footer-row,
+.footerRow {
   opacity: 0;
   transform: translateY(20px);
 }
 
-.social-icon {
+.social-icon,
+.socialIcon {
   opacity: 0;
   transform: scale(0.8) rotate(-10deg);
 }
@@ -411,7 +479,9 @@
   }
 
   .footer-row,
-  .social-icon {
+  .footerRow,
+  .social-icon,
+  .socialIcon {
     opacity: 1 !important;
     transform: none !important;
   }
@@ -423,7 +493,7 @@
 
 @media (max-width: 768px) {
   .footerInner {
-    padding: var(--space-xl) var(--space-md) var(--space-lg);
+    padding: var(--space-xl) var(--space-md) var(--space-xl);
   }
 
   .footerTop {
@@ -431,7 +501,7 @@
   }
 
   .footerBottom {
-    gap: var(--space-xl);
+    gap: var(--space-lg);
   }
 
   .navList {

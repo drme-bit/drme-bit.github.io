@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { PROJECTS } from '@/data/projectsData';
+import { projects } from '@/features/projects/lib/registry';
 import { FiX, FiGrid, FiFolder } from '@/shared/ui/atoms/Icon';
 import styles from './Archive.module.scss';
 
@@ -31,7 +31,7 @@ interface ArchiveProps {
 function collectMedia(): MediaItem[] {
   const items: MediaItem[] = [];
 
-  for (const project of PROJECTS) {
+  for (const project of projects.all) {
     if (project.logo) {
       items.push({
         id: `${project.id}-logo`,
@@ -115,7 +115,7 @@ export default function Archive({ onClose }: ArchiveProps) {
   }, [onClose, previewIdx, closePreview, prevPreview, nextPreview]);
 
   const projectFilters: ProjectFilter[] = uniqueSources.map((src) => {
-    const p = PROJECTS.find((pr) => pr.id === src);
+    const p = projects.get(src);
     return { id: src, label: p?.title || src, logo: p?.logo };
   });
 

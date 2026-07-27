@@ -1,8 +1,7 @@
 'use client';
 
-import { LEVEL_LABELS } from '../lib/constants';
-import { GROUP_COLORS } from '@/data/skillsData';
-import styles from '../ui/Skills.module.scss';
+import { LEVEL_LABELS, GROUP_COLORS } from '../lib';
+import styles from './Skills.module.scss';
 
 interface SkillLevelProps {
   level: number;

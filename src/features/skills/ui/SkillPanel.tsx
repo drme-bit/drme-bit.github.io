@@ -2,25 +2,25 @@
 
 import { useRouter } from 'next/navigation';
 import { FiX, FiChevronLeft, FiChevronRight, FiCopy } from '@/shared/ui/atoms/Icon';
-import { ICON_MAP, GROUP_COLORS } from '@/data/skillsData';
-import { getProjectById } from '@/data/projectsData';
+import { graph, GROUP_COLORS } from '../lib';
+import { projects } from '@/features/projects/lib/registry';
 import { SkillLevel } from './SkillLevel';
 import { RelatedSkills } from './RelatedSkills';
 import { HistoryBar } from './HistoryBar';
 import { CompareView } from './CompareView';
-import type { SkillItem } from '../types/skills';
-import styles from '../ui/Skills.module.scss';
+import type { Skill } from '../lib';
+import styles from './Skills.module.scss';
 
 interface SkillPanelProps {
-  skill: SkillItem | null;
-  history: SkillItem[];
+  skill: Skill | null;
+  history: Skill[];
   compareMode: boolean;
-  compareSkill: SkillItem | null;
+  compareSkill: Skill | null;
   onClose: () => void;
   onToggleCompare: () => void;
   onNavigateHistory: (direction: 'prev' | 'next') => void;
-  onSelectHistory: (skill: SkillItem) => void;
-  onSelectRelated: (skill: SkillItem) => void;
+  onSelectHistory: (skill: Skill) => void;
+  onSelectRelated: (skill: Skill) => void;
 }
 
 export function SkillPanel({
@@ -36,19 +36,16 @@ export function SkillPanel({
 }: SkillPanelProps) {
   const router = useRouter();
 
-  const renderSkillPanel = (s: SkillItem, isCompare = false) => (
+  const renderSkillPanel = (s: Skill, isCompare = false) => (
     <div className={styles['skills-panel-content']}>
       <div className={styles['skills-panel-header']}>
         <div
           className={styles['skills-panel-icon-wrap']}
           style={{ '--card-color': GROUP_COLORS[s.group] } as React.CSSProperties}
         >
-          {ICON_MAP[s.name] && (
+          {s.icon && (
             <span className={styles['skills-panel-icon']}>
-              {(() => {
-                const Icon = ICON_MAP[s.name];
-                return <Icon />;
-              })()}
+              <s.icon />
             </span>
           )}
         </div>
@@ -68,52 +65,48 @@ export function SkillPanel({
 
       {s.desc && <p className={styles['skills-panel-desc']}>{s.desc}</p>}
 
-      {s.related.length > 0 && (
+      {s.relatedSkills.length > 0 && (
         <div className={styles['skills-panel-section']}>
           <h4 className={styles['skills-panel-section-title']}>Works well with</h4>
           <RelatedSkills skill={s} onSelect={onSelectRelated} />
         </div>
       )}
 
-      {s.projects.length > 0 && (
+      {s.usedInProjects.length > 0 && (
         <div className={styles['skills-panel-section']}>
           <h4 className={styles['skills-panel-section-title']}>Used In Projects</h4>
           <div className={styles['skills-panel-projects']}>
-            {s.projects.map((p) => {
-              const project = getProjectById(p.toLowerCase().replace(/\s+/g, '-'));
-              if (!project) return null;
-              return (
-                <button
-                  key={p}
-                  className={styles['skills-panel-project-card']}
-                  onClick={() => {
-                    onClose();
-                    router.push(`/projects/${p}`);
-                  }}
-                >
-                  <div className={styles['skills-panel-project-image']}>
-                    {project.image && (
-                      <img
-                        src={project.image}
-                        alt=""
-                        className={styles['skills-panel-project-img']}
-                      />
-                    )}
-                    <div className={styles['skills-panel-project-overlay']} />
+            {s.usedInProjects.map((project) => (
+              <button
+                key={project.id}
+                className={styles['skills-panel-project-card']}
+                onClick={() => {
+                  onClose();
+                  router.push(`/projects/${project.id}`);
+                }}
+              >
+                <div className={styles['skills-panel-project-image']}>
+                  {project.image && (
+                    <img
+                      src={project.image}
+                      alt=""
+                      className={styles['skills-panel-project-img']}
+                    />
+                  )}
+                  <div className={styles['skills-panel-project-overlay']} />
+                </div>
+                <div className={styles['skills-panel-project-info']}>
+                  <span className={styles['skills-panel-project-title']}>{project.title}</span>
+                  <div className={styles['skills-panel-project-tech']}>
+                    {project.techSkills.slice(0, 3).map((t) => (
+                      <span key={t.name} className={styles['skills-panel-project-tech-tag']}>
+                        {t.name}
+                      </span>
+                    ))}
                   </div>
-                  <div className={styles['skills-panel-project-info']}>
-                    <span className={styles['skills-panel-project-title']}>{project.title}</span>
-                    <div className={styles['skills-panel-project-tech']}>
-                      {project.tech.slice(0, 3).map((t: string) => (
-                        <span key={t} className={styles['skills-panel-project-tech-tag']}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       )}

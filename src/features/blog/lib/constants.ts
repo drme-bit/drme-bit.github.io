@@ -1,9 +1,3 @@
-import type { BlogPost, BlogSection, SectionType } from './posts/types';
-
-export type { BlogPost, BlogSection, SectionType };
-
-/*  CATEGORIES ─ */
-
 export const CATEGORIES: Record<
   string,
   { color: string; gradient: string; icon: string }
@@ -34,16 +28,3 @@ export const CATEGORIES: Record<
     icon: 'Palette',
   },
 };
-
-/*  BLOG_POSTS (sync for list page) ─ */
-
-// Import all metas statically for the list page
-import integratingMeta from './posts/integrating-nodejs/meta';
-import cobeMeta from './posts/why-i-replaced-cobe/meta';
-import portfolioMeta from './posts/building-my-portfolio/meta';
-
-export const BLOG_POSTS: BlogPost[] = [
-  integratingMeta,
-  cobeMeta,
-  portfolioMeta,
-];

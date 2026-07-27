@@ -1,6 +1,5 @@
 export const STATUS = {
   ACTIVE: { icon: '●', cls: 'badge--active', label: 'active' },
-  ARCHIVED: { icon: '◌', cls: 'badge--archived', label: 'archived' },
 };
 
 export const PRESENTATION = {

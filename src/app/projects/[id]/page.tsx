@@ -1,8 +1,8 @@
-import { PROJECTS } from '@/data/projectsData';
+import { projects } from '@/features/projects/lib/registry';
 import ProjectPageClient from './ProjectPageClient';
 
 export function generateStaticParams() {
-  return PROJECTS.map((project) => ({ id: project.id }));
+  return projects.all.map((project) => ({ id: project.id }));
 }
 
 export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {

@@ -4,21 +4,25 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FiArrowLeft, FiArrowRight, FiGithub } from '@/shared/ui/atoms/Icon';
-import { PROJECTS, STATUS } from '@/data/projectsData';
+import { projects } from '@/features/projects/lib/registry';
+import { STATUS_META } from '@/features/projects/lib/constants';
 import styles from './ProjectsList.module.scss';
 
-interface Project {
-  id: string;
-  title: string;
-  url: string;
-  repo?: string;
-  desc: string;
-  tech: string[];
-  status: string;
+interface ProjectCardProps {
+  project: {
+    id: string;
+    title: string;
+    url: string;
+    repo?: string;
+    desc: string;
+    techNames: string[];
+    status: string;
+  };
+  index: number;
 }
 
-function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const status = STATUS[project.status as keyof typeof STATUS] || STATUS.ACTIVE;
+function ProjectCard({ project, index }: ProjectCardProps) {
+  const meta = STATUS_META[project.status] || STATUS_META.ACTIVE;
   const router = useRouter();
 
   return (
@@ -29,19 +33,19 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
     >
       <div className={styles.cardHeader}>
         <div className={styles.cardTitle}>{project.title}</div>
-        <span className={`${styles.badge} ${styles[status.cls]}`}>
-          {status.icon} {status.label}
+        <span className={`${styles.badge} ${styles[meta.cls]}`}>
+          <meta.icon size={11} /> {meta.label}
         </span>
       </div>
 
       <p className={styles.cardDesc}>{project.desc}</p>
 
       <div className={styles.cardTech}>
-        {project.tech.slice(0, 5).map((t) => (
+        {project.techNames.slice(0, 5).map((t) => (
           <span key={t} className={styles.techTag}>{t}</span>
         ))}
-        {project.tech.length > 5 && (
-          <span className={styles.techMore}>+{project.tech.length - 5}</span>
+        {project.techNames.length > 5 && (
+          <span className={styles.techMore}>+{project.techNames.length - 5}</span>
         )}
       </div>
 
@@ -73,16 +77,16 @@ export default function ProjectsList() {
     requestAnimationFrame(() => setMounted(true));
   }, []);
 
+  const allProjects = projects.all;
+
   return (
     <div className={`${styles.page}${mounted ? ` ${styles['is-mounted']}` : ''}`}>
-      {/* Grid */}
       <main className={styles.grid}>
-        {PROJECTS.map((project, i) => (
-          <ProjectCard key={project.id} project={project as Project} index={i} />
+        {allProjects.map((project, i) => (
+          <ProjectCard key={project.id} project={project as any} index={i} />
         ))}
       </main>
 
-      {/* Footer */}
       <footer className={styles.footer}>
         <Link href="/" className={styles.footerHome}>
           <FiArrowLeft size={14} />

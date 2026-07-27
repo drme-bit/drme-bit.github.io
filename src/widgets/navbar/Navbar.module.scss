@@ -5,11 +5,11 @@
 @keyframes navBreathe {
   0%, 100% {
     opacity: 0.7;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
   50% {
     opacity: 1;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -36,14 +36,10 @@
   align-items: center;
   gap: 0.15rem;
   padding: 0.3rem 0.4rem;
-  background: var(--bg);
-  backdrop-filter: blur(37px);
-  -webkit-backdrop-filter: blur(37px);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: 
-    0 4px 24px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   opacity: 0.95;
   transition:
     transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
@@ -68,7 +64,7 @@
     padding: 0;
     border-radius: var(--radius-md);
     transform: translateX(-50%);
-    background: var(--bg);
+    background: var(--bg-elevated);
     border: 1px solid var(--border);
     cursor: pointer;
     animation: navBreathe 3s ease-in-out infinite;
@@ -100,9 +96,7 @@
   }
 
   &:hover:not(.nav--collapsed) {
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     background: var(--bg-elevated);
   }
 }
@@ -122,14 +116,10 @@
   padding: 0.3rem 0.4rem;
   color: var(--text);
   text-decoration: none;
-  background: var(--bg);
-  backdrop-filter: blur(37px);
-  -webkit-backdrop-filter: blur(37px);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   transition:
     background 0.2s var(--ease-out),
     color 0.2s var(--ease-out),
@@ -140,9 +130,7 @@
     background: var(--bg-elevated);
     color: var(--accent-secondary);
     transform: scale(1.05);
-    box-shadow:
-      0 6px 24px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
   }
 
   &:active {
@@ -196,14 +184,10 @@
   gap: 0.15rem;
   height: 2rem;
   padding: 0.35rem 0.45rem;
-  background: var(--bg);
-  backdrop-filter: blur(37px);
-  -webkit-backdrop-filter: blur(37px);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 
   @include respond-to(mobile) {
     display: none;
@@ -256,31 +240,10 @@
   cursor: pointer;
   @include focus-ring;
 
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-md);
-    background: var(--accent-secondary);
-    opacity: 0;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: 
-      opacity 0.25s var(--ease-out),
-      transform 0.3s var(--ease-out);
-    pointer-events: none;
-  }
-
   &:hover {
     color: var(--text);
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 16px var(--accent-glow);
+    background: rgba(255, 255, 255, 0.06);
     transform: translateY(-1px);
-  }
-
-  &:hover::before {
-    opacity: 0.06;
-    transform: scaleX(1);
   }
 
   &:active {
@@ -341,7 +304,7 @@
     transform 0.15s var(--ease-out);
 
   &:hover {
-    background: var(--glass-hover);
+    background: rgba(255, 255, 255, 0.06);
     transform: translateY(-1px);
   }
 
@@ -408,10 +371,9 @@
   max-width: calc(100vw - 2rem);
   padding: 0.5rem;
   background: var(--bg-elevated);
-  @include backdrop-blur(36px);
   border: 1px solid var(--border);
   border-radius: calc(var(--radius-lg) + 4px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
   color: var(--text);
   z-index: 100;
   will-change: transform, opacity;
@@ -483,7 +445,7 @@
   grid-template-columns: 1fr auto;
   width: 100%;
   align-items: stretch;
-  background: var(--glass-strong);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   flex: 0 0 100%;
@@ -546,7 +508,7 @@
   transition: border-color 0.2s var(--ease-out);
 
   &:hover {
-    border-color: color-mix(in srgb, var(--accent-secondary) 30%, var(--border));
+    border-color: var(--border-hover);
   }
 
   li {
@@ -564,72 +526,24 @@
   padding: 1rem 0.85rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: var(--glass);
+  background: var(--bg-elevated);
   text-decoration: none;
   color: var(--text-dim);
   cursor: pointer;
   transition: 
-    background 0.25s var(--ease-out),
-    border-color 0.25s var(--ease-out),
-    color 0.25s var(--ease-out),
-    box-shadow 0.25s var(--ease-out),
+    background 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out),
     transform 0.2s var(--ease-out);
   overflow: hidden;
 
-  /* Gradient glow overlay */
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--accent-secondary) 8%, transparent) 0%,
-      transparent 50%,
-      color-mix(in srgb, var(--accent-secondary) 4%, transparent) 100%
-    );
-    opacity: 0;
-    transition: opacity 0.3s var(--ease-out);
-    pointer-events: none;
-  }
-
-  /* Accent top bar */
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      var(--accent-secondary) 50%,
-      transparent 100%
-    );
-    opacity: 0;
-    transform: scaleX(0);
-    transition: 
-      opacity 0.25s var(--ease-out),
-      transform 0.25s var(--ease-out);
-  }
-
   &:hover {
     color: var(--text);
-    border-color: color-mix(in srgb, var(--accent-secondary) 25%, var(--border));
-    background: var(--glass-hover);
-    box-shadow: 
-      0 4px 16px rgba(0, 0, 0, 0.12),
-      0 0 0 1px color-mix(in srgb, var(--accent-secondary) 10%, transparent);
+    border-color: var(--border-hover);
+    background: var(--bg);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     transform: translateY(-2px);
-
-    &::before {
-      opacity: 1;
-    }
-
-    &::after {
-      opacity: 0.6;
-      transform: scaleX(1);
-    }
   }
 
   &:active {
@@ -645,18 +559,21 @@
   width: 2rem;
   height: 2rem;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
-  color: var(--accent-secondary);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
   font-size: 0.9rem;
   transition: 
-    background 0.25s var(--ease-out),
-    color 0.25s var(--ease-out),
-    transform 0.25s var(--ease-out);
+    background 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
 }
 
 .dropdownCard:hover .dropdownCardIcon {
-  background: color-mix(in srgb, var(--accent-secondary) 20%, transparent);
-  color: var(--accent);
+  background: var(--bg-elevated);
+  color: var(--accent-secondary);
+  border-color: var(--border-hover);
   transform: scale(1.05);
 }
 
@@ -687,18 +604,9 @@
 .dropdownCard--focused {
   outline: 2px solid var(--accent-secondary);
   outline-offset: -2px;
-  background: var(--glass-hover);
+  background: var(--bg);
   color: var(--text);
-  border-color: color-mix(in srgb, var(--accent-secondary) 25%, var(--border));
-
-  &::before {
-    opacity: 1;
-  }
-
-  &::after {
-    opacity: 0.6;
-    transform: scaleX(1);
-  }
+  border-color: var(--border-hover);
 }
 
 /*  Dropdown small item  */
@@ -719,12 +627,12 @@
 
   &:hover {
     color: var(--text);
-    background: var(--glass-hover);
+    background: rgba(255, 255, 255, 0.06);
     padding-left: 0.7rem;
   }
 
   &:active {
-    background: var(--glass-hover);
+    background: rgba(255, 255, 255, 0.06);
   }
 }
 
@@ -752,7 +660,7 @@
 .dropdownSmallItem--focused {
   outline: 2px solid var(--accent-secondary);
   outline-offset: -2px;
-  background: var(--glass-hover);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--text);
 
   .dropdownSmallItemArrow {
@@ -779,7 +687,7 @@
 }
 
 .nav:hover .divider {
-  background: var(--accent-secondary);
+  background: var(--border-hover);
   height: 1.2rem;
 }
 
@@ -835,7 +743,7 @@
 
   &:hover {
     color: var(--text);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
     transform: translateY(-1px);
   }
 
@@ -942,7 +850,7 @@
     transform 0.15s var(--ease-out);
 
   &:hover {
-    background: var(--glass-hover);
+    background: rgba(255, 255, 255, 0.06);
     color: var(--text);
   }
 
@@ -1012,7 +920,7 @@
     transform 0.15s var(--ease-out);
 
   &:hover {
-    background: var(--glass-hover);
+    background: rgba(255, 255, 255, 0.06);
     border-color: var(--border-hover);
     transform: scale(1.05);
   }
@@ -1141,7 +1049,7 @@
 
   &:hover {
     color: var(--text);
-    background: var(--glass-hover);
+    background: rgba(255, 255, 255, 0.06);
   }
 
   &:hover::before {
@@ -1149,7 +1057,7 @@
   }
 
   &:active {
-    background: var(--glass-hover);
+    background: rgba(255, 255, 255, 0.06);
   }
 
   @include focus-ring;

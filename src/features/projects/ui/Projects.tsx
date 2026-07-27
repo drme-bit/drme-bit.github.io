@@ -1,18 +1,17 @@
 'use client';
 
 import { useRef, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { FiArrowRight, FiExternalLink, FiGithub } from '@/shared/ui/atoms/Icon';
-import { ICON_MAP } from '@/data/skillsData';
-import { PROJECTS } from '@/data/projectsData';
+import { ICON_MAP } from '@/features/skills/lib/registry';
+import { projects } from '../lib/registry';
 import { STATUS_META } from '../lib/constants';
-import ProjectsHero from '../components/ProjectsHero';
+import ProjectsHero from './ProjectsHero';
 import { Blog } from '@/features/blog/ui/Blog';
-import styles from '../ui/Projects.module.scss';
+import styles from './Projects.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,6 +20,7 @@ gsap.registerPlugin(ScrollTrigger);
 function useMarquee(
   trackRef: React.RefObject<HTMLDivElement | null>,
   isReversed: boolean,
+  setCount: number,
 ) {
   const speedRef = useRef(1);
   const targetSpeedRef = useRef(1);
@@ -28,6 +28,7 @@ function useMarquee(
   const rafRef = useRef<number>(0);
   const lastTimeRef = useRef(0);
   const pausedRef = useRef(false);
+  const initializedRef = useRef(false);
   const baseSpeed = 80;
 
   const tick = useCallback(() => {
@@ -42,20 +43,41 @@ function useMarquee(
 
     speedRef.current += (targetSpeedRef.current - speedRef.current) * Math.min(dt * 3, 1);
 
+    const track = trackRef.current;
+    if (!track || setCount <= 0) {
+      rafRef.current = requestAnimationFrame(tick);
+      return;
+    }
+
+    const half = track.scrollWidth / 2;
+    if (half <= 0) {
+      rafRef.current = requestAnimationFrame(tick);
+      return;
+    }
+
+    if (!initializedRef.current) {
+      if (isReversed) {
+        offsetRef.current = -half;
+      }
+      initializedRef.current = true;
+    }
+
     const dir = isReversed ? 1 : -1;
     offsetRef.current += dir * baseSpeed * speedRef.current * dt;
 
-    const track = trackRef.current;
-    if (track) {
-      const half = track.scrollWidth / 2;
-      if (Math.abs(offsetRef.current) >= half) {
-        offsetRef.current -= dir * half;
+    if (isReversed) {
+      if (offsetRef.current >= 0) {
+        offsetRef.current -= half;
       }
-      track.style.transform = `translateX(${offsetRef.current}px)`;
+    } else {
+      if (Math.abs(offsetRef.current) >= half) {
+        offsetRef.current += half;
+      }
     }
 
+    track.style.transform = `translateX(${offsetRef.current}px)`;
     rafRef.current = requestAnimationFrame(tick);
-  }, [isReversed, trackRef]);
+  }, [isReversed, trackRef, setCount]);
 
   useEffect(() => {
     lastTimeRef.current = 0;
@@ -111,12 +133,14 @@ export function ProjectsList() {
     return () => ctx.revert();
   }, []);
 
+  const allProjects = projects.all;
+
   return (
     <div ref={listRef} className={styles.projectList}>
-      {PROJECTS.map((project, i) => {
-        const meta = STATUS_META[project.status || 'ARCHIVED'] || STATUS_META.ARCHIVED;
-        const images = project.images || (project.image ? [project.image] : []);
-        const isLast = i === PROJECTS.length - 1;
+      {allProjects.map((project, i) => {
+        const meta = STATUS_META[project.status] || STATUS_META.ACTIVE;
+        const images = project.images?.length > 0 ? project.images : project.image ? [project.image] : [];
+        const isLast = i === allProjects.length - 1;
 
         return (
           <div key={project.id}>
@@ -151,7 +175,7 @@ function ProjectCardItem({
   const isReversed = index % 2 !== 0;
   const trackRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const { onEnter, onLeave, pausedRef } = useMarquee(trackRef, isReversed);
+  const { onEnter, onLeave, pausedRef } = useMarquee(trackRef, isReversed, images.length);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -190,13 +214,12 @@ function ProjectCardItem({
         <div ref={trackRef} className={styles.galleryTrack}>
           {marqueeImages.map((src, i) => (
             <div key={`slide-${index}-${i}`} className={styles.gallerySlide}>
-              <Image
+              <img
                 src={src}
                 alt=""
-                fill
                 className={styles.galleryImg}
-                sizes="100vw"
-                priority={i < 3}
+                loading={i < 4 ? 'eager' : 'lazy'}
+                draggable={false}
               />
             </div>
           ))}
@@ -207,7 +230,7 @@ function ProjectCardItem({
       <div className={styles.cardContent}>
         <div className={styles.cardHeader}>
           <span className={`${styles.cardBadge} ${styles[meta.cls] || ''}`}>
-            <span className={styles.badgeDot}>{meta.icon}</span>
+            <meta.icon size={11} className={styles.badgeIcon} />
             {meta.label}
           </span>
           <span className={styles.cardId}>./project_{String(index + 1).padStart(3, '0')}</span>
@@ -217,17 +240,17 @@ function ProjectCardItem({
         <p className={styles.cardDesc}>{project.desc}</p>
 
         <div className={styles.cardTech}>
-          {project.tech.slice(0, 6).map((t: string) => {
-            const Icon = ICON_MAP[t];
+          {project.techSkills.slice(0, 6).map((t: any) => {
+            const Icon = t.icon;
             return (
-              <span key={t} className={styles.techTag}>
+              <span key={t.name} className={styles.techTag}>
                 {Icon && <Icon className={styles.techIcon} />}
-                {t}
+                {t.name}
               </span>
             );
           })}
-          {project.tech.length > 6 && (
-            <span className={styles.techMore}>+{project.tech.length - 6}</span>
+          {project.techSkills.length > 6 && (
+            <span className={styles.techMore}>+{project.techSkills.length - 6}</span>
           )}
         </div>
 
@@ -245,7 +268,7 @@ function ProjectCardItem({
         <div className={styles.cardActions}>
           <button
             className={styles.cardCta}
-            onClick={() => router.push(`/project/${project.id}`)}
+            onClick={() => router.push(`/projects/${project.id}`)}
           >
             <span>cat details.md</span>
             <FiArrowRight className={styles.ctaIcon} />

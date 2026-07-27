@@ -3,11 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import Image from 'next/image';
-import { ICON_MAP } from '@/data/skillsData';
+import { ICON_MAP } from '@/features/skills/lib/registry';
 import { FiArrowRight, FiExternalLink, FiGithub } from '@/shared/ui/atoms/Icon';
 import { STATUS_META } from '../lib/constants';
-import type { Project } from '../types/projects';
-import styles from '../ui/Projects.module.scss';
+import type { Project } from '../lib/project-repository';
+import styles from './Projects.module.scss';
 
 interface ProjectCardProps {
   project: Project;
@@ -17,7 +17,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, index, isActive }: ProjectCardProps) {
   const router = useRouter();
-  const meta = STATUS_META[project.status || 'ARCHIVED'] || STATUS_META.ARCHIVED;
+  const meta = STATUS_META[project.status] || STATUS_META.ACTIVE;
 
   const handleClick = () => {
     router.push(`/project/${project.id}`);
@@ -47,7 +47,7 @@ export function ProjectCard({ project, index, isActive }: ProjectCardProps) {
         <div className={styles['projects-card-glass-inner']}>
           <div className={styles['projects-card-header']}>
             <span className={`${styles['projects-badge']} ${styles[meta.cls] || ''}`}>
-              <span className={styles['projects-badge-dot']}>{meta.icon}</span>
+              <meta.icon size={10} className={styles['projects-badge-icon']} />
               {meta.label}
             </span>
             <span className={styles['projects-card-id']}>
@@ -71,26 +71,23 @@ export function ProjectCard({ project, index, isActive }: ProjectCardProps) {
                 <span className={styles['projects-meta-label']}>stages</span>
               </span>
             )}
-            {project.tech && (
+            {project.techSkills && (
               <span className={styles['projects-meta-item']}>
-                <span className={styles['projects-meta-value']}>{project.tech.length}</span>
+                <span className={styles['projects-meta-value']}>{project.techSkills.length}</span>
                 <span className={styles['projects-meta-label']}>tech</span>
               </span>
             )}
           </div>
 
           <div className={styles['projects-card-tech']}>
-            {project.tech.slice(0, 6).map((t: string) => {
-              const Icon = ICON_MAP[t];
-              return (
-                <span key={t} className={styles['projects-tech-tag']}>
-                  {Icon && <Icon className={styles['projects-tech-icon']} />}
-                  {t}
-                </span>
-              );
-            })}
-            {project.tech.length > 6 && (
-              <span className={styles['projects-tech-more']}>+{project.tech.length - 6}</span>
+            {project.techSkills.slice(0, 6).map((t) => (
+              <span key={t.name} className={styles['projects-tech-tag']}>
+                {t.icon && <t.icon className={styles['projects-tech-icon']} />}
+                {t.name}
+              </span>
+            ))}
+            {project.techSkills.length > 6 && (
+              <span className={styles['projects-tech-more']}>+{project.techSkills.length - 6}</span>
             )}
           </div>
 

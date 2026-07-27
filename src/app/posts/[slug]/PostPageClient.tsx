@@ -9,9 +9,9 @@ import {
   FiArrowLeft,
   FiArrowRight,
 } from '@/shared/ui/atoms/Icon';
-import { BLOG_POSTS } from '@/data/blogData';
+import { blog } from '@/features/blog/lib';
 import { useNav } from '@/providers/NavProvider';
-import { usePostTransition } from '../PostTransitionContext';
+import { usePostTransition } from '@/features/blog/lib/PostTransitionContext';
 import styles from './PostPage.module.scss';
 
 /*  Progress Bar ── */
@@ -63,7 +63,7 @@ export default function PostPageClient() {
   const router = useRouter();
   const { transitionFrom } = usePostTransition();
   const { setPageConfig } = useNav();
-  const post = BLOG_POSTS.find((p) => p.slug === slug);
+  const post = blog.get(slug);
 
   const clipFrom = useMemo(() => {
     if (typeof window === 'undefined' || !transitionFrom) return null;
@@ -101,9 +101,7 @@ export default function PostPageClient() {
 
   if (!post) return null;
 
-  const currentIndex = BLOG_POSTS.findIndex((p) => p.slug === slug);
-  const prevPost = currentIndex > 0 ? BLOG_POSTS[currentIndex - 1] : null;
-  const nextPost = currentIndex < BLOG_POSTS.length - 1 ? BLOG_POSTS[currentIndex + 1] : null;
+  const { prev: prevPost, next: nextPost } = blog.prevNext(slug);
   const PostContent = POST_COMPONENTS[slug];
 
   return (

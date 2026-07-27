@@ -4,47 +4,49 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FiSend, FiMail, FiUser, FiLoader, FiCheck, FiX, FiExternalLink, FiCopy, FiCalendar, FiPhone, FiMapPin, FiGithub, FiTwitter, FiLinkedin, FiInstagram, FiAlertCircle } from '@/shared/ui/atoms/Icon';
+import {
+  FiSend,
+  FiMail,
+  FiLoader,
+  FiCheck,
+  FiX,
+  FiExternalLink,
+  FiCopy,
+  FiCalendar,
+  FiPhone,
+  FiMapPin,
+  FiGithub,
+  FiTwitter,
+  FiLinkedin,
+  SiDiscord,
+  FiAlertCircle,
+} from '@/shared/ui/atoms/Icon';
 import { useContactForm } from '../hooks/useContactForm';
 import type { ContactFormData } from '../types/contacts';
+import { fieldConfigs, contactItems, socialLinks, navLinks } from '../lib/data';
 import styles from '../ui/PremiumContacts.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/*  Form Field Config  */
+/*  Icon Map  */
 
-interface FormFieldConfig {
-  name: keyof ContactFormData;
-  label: string;
-  type: 'text' | 'email' | 'textarea' | 'select';
-  placeholder: string;
-  required?: boolean;
-  maxLength?: number;
-  options?: { value: string; label: string }[];
-}
-
-const fieldConfigs: FormFieldConfig[] = [
-  { name: 'name', label: 'Full Name', type: 'text', placeholder: 'Your name', required: true, maxLength: 50 },
-  { name: 'email', label: 'Email Address', type: 'email', placeholder: 'your@email.com', required: true },
-  {
-    name: 'subject', label: 'Subject', type: 'select', placeholder: 'What\'s this about?', required: true,
-    options: [
-      { value: 'project', label: 'Project Inquiry' },
-      { value: 'collaboration', label: 'Collaboration' },
-      { value: 'freelance', label: 'Freelance Work' },
-      { value: 'speaking', label: 'Speaking Engagement' },
-      { value: 'other', label: 'Other' },
-    ],
-  },
-  { name: 'message', label: 'Message', type: 'textarea', placeholder: 'Tell me about your project, ideas, or just say hi...', required: true, maxLength: 2000 },
-];
+const iconMap = {
+  calendar: FiCalendar,
+  mail: FiMail,
+  phone: FiPhone,
+  mapPin: FiMapPin,
+  github: FiGithub,
+  twitter: FiTwitter,
+  linkedin: FiLinkedin,
+  discord: SiDiscord,
+} as const;
 
 /*  Form Field ─ */
 
 function FormField({
   config, value, error, touched, onChange, onBlur,
 }: {
-  config: FormFieldConfig;
+  config: typeof fieldConfigs[0];
   value: string;
   error?: string;
   touched?: boolean;
@@ -98,7 +100,7 @@ function FormField({
               value={value}
               onChange={handleChange}
               onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              onBlur={() => { setIsFocused(false); onBlur(config.name); }}
               aria-invalid={isError ? 'true' : 'false'}
               aria-describedby={isError ? `${config.name}-error` : undefined}
               aria-required={config.required}
@@ -260,25 +262,7 @@ function ContactForm() {
 
 /*  Contact Info ── */
 
-interface ContactInfoItem {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  copyText?: string;
-  href?: string;
-  external?: boolean;
-  actionLabel?: string;
-}
-
-const contactItems: ContactInfoItem[] = [
-  { id: 'calendar', icon: <FiCalendar size={18} />, title: 'Schedule a Call', subtitle: '30 min · Calendly', href: 'https://calendly.com/vacheslavtkachik/30min', external: true, actionLabel: 'Book' },
-  { id: 'email', icon: <FiMail size={18} />, title: 'Email Me', subtitle: 'hello@drme.dev', copyText: 'hello@drme.dev' },
-  { id: 'phone', icon: <FiPhone size={18} />, title: 'Call Me', subtitle: '+380 96 004 5028', copyText: '+380 96 004 5028' },
-  { id: 'location', icon: <FiMapPin size={18} />, title: 'Location', subtitle: 'Kyiv, Ukraine (GMT+3)' },
-];
-
-function ContactInfoCard({ item, index }: { item: ContactInfoItem; index: number }) {
+function ContactInfoCard({ item, index }: { item: typeof contactItems[0]; index: number }) {
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -297,6 +281,7 @@ function ContactInfoCard({ item, index }: { item: ContactInfoItem; index: number
   }, [item.copyText]);
 
   const isActionable = !!item.href || !!item.copyText;
+  const IconComponent = iconMap[item.icon];
 
   return (
     <article
@@ -304,7 +289,7 @@ function ContactInfoCard({ item, index }: { item: ContactInfoItem; index: number
       className={`${styles.infoCard} ${isActionable ? styles.actionable : ''} ${copied ? styles.copied : ''}`}
     >
       <div className={styles.cardIconWrapper}>
-        <span className={styles.cardIcon} aria-hidden="true">{item.icon}</span>
+        <span className={styles.cardIcon} aria-hidden="true"><IconComponent size={18} /></span>
       </div>
 
       <div className={styles.cardContent}>
@@ -356,23 +341,9 @@ function ContactInfo() {
 
 /*  Social Links ── */
 
-interface SocialLink {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  href: string;
-  description: string;
-}
-
-const socialLinks: SocialLink[] = [
-  { id: 'github', label: 'GitHub', icon: <FiGithub size={18} />, href: 'https://github.com/drme-bit', description: 'Repositories & contributions' },
-  { id: 'twitter', label: 'Twitter/X', icon: <FiTwitter size={18} />, href: 'https://twitter.com/drme_bit', description: 'Updates & thoughts' },
-  { id: 'linkedin', label: 'LinkedIn', icon: <FiLinkedin size={18} />, href: 'https://linkedin.com/in/vyacheslav-tkachik', description: 'Professional network' },
-  { id: 'instagram', label: 'Instagram', icon: <FiInstagram size={18} />, href: 'https://instagram.com/drme_bit', description: 'Behind the scenes' },
-];
-
-function SocialCard({ link, index }: { link: SocialLink; index: number }) {
+function SocialCard({ link, index }: { link: typeof socialLinks[0]; index: number }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
+  const IconComponent = iconMap[link.icon];
 
   useGSAP(() => {
     if (!cardRef.current) return;
@@ -385,17 +356,19 @@ function SocialCard({ link, index }: { link: SocialLink; index: number }) {
 
   return (
     <a ref={cardRef} href={link.href} target="_blank" rel="noopener noreferrer" className={styles.socialCard} aria-label={link.label}>
-      <span className={styles.socialIcon} aria-hidden="true">{link.icon}</span>
+      <span className={styles.socialIcon} aria-hidden="true"><IconComponent size={18} /></span>
       <span className={styles.socialLabel}>{link.label}</span>
     </a>
   );
 }
 
-function SocialLinks() {
+function PremiumSocialLinks() {
   return (
     <section className={styles.socialLinks} aria-label="Social Links">
       <header className={styles.socialHeader}>
-        <span className={styles.prompt} aria-hidden="true">$</span>
+        <span className={styles.prompt} aria-hidden="true">
+          $
+        </span>
         <h2 className={styles.socialTitle}>Connect</h2>
       </header>
 
@@ -407,7 +380,10 @@ function SocialLinks() {
 
       <div className={styles.socialFooter}>
         <p className={styles.footerText}>
-          Prefer email? <a href="mailto:hello@drme.dev" className={styles.footerLink}>hello@drme.dev</a>
+          Prefer email?{' '}
+          <a href="mailto:vacheslavtkachik@gmail.com" className={styles.footerLink}>
+            vacheslavtkachik@gmail.com
+          </a>
         </p>
       </div>
     </section>
@@ -420,30 +396,12 @@ export function PremiumContacts() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Curtain: contact slides up over pinned Reviews (no pin — CSS sticky handles holding)
   useGSAP(() => {
     const wrapper = wrapperRef.current;
     const section = sectionRef.current;
     if (!wrapper || !section) return;
 
     const ctx = gsap.context(() => {
-      // Contact slides from below viewport to top (yPercent: 100 → 0)
-      gsap.fromTo(wrapper,
-        { yPercent: 100 },
-        {
-          yPercent: 0,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: wrapper,
-            start: 'top bottom',
-            end: 'top top',
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-
-      // Stagger reveal for left (form) and right (info+social) columns
       const formWrapper = section.querySelector(`.${styles.formWrapper}`);
       const sideWrapper = section.querySelector(`.${styles.sideWrapper}`);
 
@@ -474,15 +432,13 @@ export function PremiumContacts() {
           </header>
 
           <div className={styles.grid}>
-            {/* Form Column */}
             <div className={styles.formWrapper}>
               <ContactForm />
             </div>
 
-            {/* Right Column — Info & Social */}
             <div className={styles.sideWrapper}>
               <ContactInfo />
-              <SocialLinks />
+              <PremiumSocialLinks />
             </div>
           </div>
         </div>

@@ -879,22 +879,19 @@ html.no-blur {
   position: sticky;
   top: 0;
   z-index: 1;
-
+  height: 100vh;
 }
 
-/* Contacts wrapper slides over pinned Reviews */
+/* Contacts wrapper slides over pinned Reviews, revealing footer */
 .reviews-contacts-wrapper #contact {
   position: relative;
   z-index: 10;
 }
 
 /* Footer wrapper positioned after contact in flow, animated via GSAP */
-.reviews-contacts-wrapper #footer-wrapper {
-  height: 30vh;
+.reviews-contacts-wrapper .footer-wrapper {
+  position: relative;
+  z-index: 5;
   width: 100%;
-}
-
-.reviews-contacts-wrapper #footer-wrapper .footer {
-  pointer-events: auto;
 }
 

@@ -2,127 +2,138 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
-import { FiHeart, FiMail, FiGithub, FiTwitter, FiLinkedin, FiInstagram, FiExternalLink } from '@/shared/ui/atoms/Icon';
+import {
+  FiHeart,
+  FiMail,
+  FiGithub,
+  FiTwitter,
+  FiLinkedin,
+  SiDiscord,
+  FiExternalLink,
+} from '@/shared/ui/atoms/Icon';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import {
+  footerNavLinks,
+  footerSocialLinks,
+  supportLink,
+  brandName,
+  brandTagline,
+  email,
+  kofiUrl,
+  kofiImage,
+  currentYear,
+} from './lib/data';
 import styles from './PremiumFooter.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
-
-interface FooterLink {
-  label: string;
-  href: string;
-  external?: boolean;
-}
-
-const socialLinks: FooterLink[] = [
-  { label: 'GitHub', href: 'https://github.com/drme-bit', external: true },
-  { label: 'Twitter/X', href: 'https://twitter.com/drme_bit', external: true },
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/vyacheslav-tkachik', external: true },
-  { label: 'Instagram', href: 'https://instagram.com/drme_bit', external: true },
-];
-
-const navLinks: FooterLink[] = [
-  { label: 'Stats', href: '/stats' },
-  { label: 'Blog', href: '/posts' },
-  { label: 'Projects', href: '/projects' },
-];
 
 export function PremiumFooter() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLElement>(null);
 
-  // Footer slides up from below (yPercent: 100 → 0) as it scrolls into view
-  useGSAP(() => {
-    const wrapper = wrapperRef.current;
-    const footer = footerRef.current;
-    if (!wrapper || !footer) return;
+  useGSAP(
+    () => {
+      const wrapper = wrapperRef.current;
+      const footer = footerRef.current;
+      if (!wrapper || !footer) return;
 
-    const ctx = gsap.context(() => {
-      // Footer slides up from below viewport
-      gsap.fromTo(wrapper,
-        { yPercent: 100 },
-        {
+      const contact = document.getElementById('contact') || wrapper.previousElementSibling;
+
+      const ctx = gsap.context(() => {
+        gsap.set(wrapper, { yPercent: -100 });
+
+        gsap.to(wrapper, {
           yPercent: 0,
           ease: 'none',
+          force3D: true,
           scrollTrigger: {
             trigger: wrapper,
             start: 'top bottom',
-            end: 'top top',
-            scrub: 0.3,
+            end: 'bottom bottom-=25%',
+            scrub: true,
+            invalidateOnRefresh: true,
           },
-        }
-      );
+        });
 
-      // Fade in footer content as it reveals
-      gsap.fromTo(footer.querySelectorAll('.footer-row'),
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.08,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: footer,
-            start: 'top 95%',
-            toggleActions: 'play none none reverse',
-          },
+        const rows = footer.querySelectorAll(`.${styles.footerRow}`);
+        if (rows.length) {
+          gsap.fromTo(
+            rows,
+            { opacity: 0, y: 20 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              stagger: 0.08,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: footer,
+                start: 'top 85%',
+                toggleActions: 'play none none reverse',
+              },
+            },
+          );
         }
-      );
 
-      gsap.fromTo(footer.querySelectorAll('.social-icon'),
-        { opacity: 0, scale: 0.8, rotation: -8 },
-        {
-          opacity: 1,
-          scale: 1,
-          rotation: 0,
-          duration: 0.4,
-          stagger: 0.04,
-          ease: 'back.out(1.3)',
-          scrollTrigger: {
-            trigger: footer,
-            start: 'top 92%',
-            toggleActions: 'play none none reverse',
-          },
+        const icons = footer.querySelectorAll(`.${styles.socialIcon}`);
+        if (icons.length) {
+          gsap.fromTo(
+            icons,
+            { opacity: 0, scale: 0.8, rotation: -8 },
+            {
+              opacity: 1,
+              scale: 1,
+              rotation: 0,
+              duration: 0.4,
+              stagger: 0.04,
+              ease: 'back.out(1.3)',
+              scrollTrigger: {
+                trigger: footer,
+                start: 'top 80%',
+                toggleActions: 'play none none reverse',
+              },
+            },
+          );
         }
-      );
-    }, wrapperRef);
+      }, wrapperRef);
 
-    return () => ctx.revert();
-  }, { scope: wrapperRef, revertOnUpdate: true });
+      const refreshTimer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 150);
+
+      return () => {
+        clearTimeout(refreshTimer);
+        ctx.revert();
+      };
+    },
+    { scope: wrapperRef },
+  );
 
   return (
-    <div ref={wrapperRef} className={styles.wrapper}>
-      <footer
-        ref={footerRef}
-        id="footer"
-        className={styles.footer}
-        role="contentinfo"
-      >
+    <div ref={wrapperRef} id="footer-wrapper" className={`${styles.wrapper} footer-wrapper`}>
+      <footer ref={footerRef} id="footer" className={styles.footer} role="contentinfo">
         <div className={styles.footerBg} aria-hidden="true" />
         <div className={styles.footerInner}>
           <div className={`${styles.footerTop} ${styles.footerRow}`}>
             <div className={styles.footerBrand}>
               <span className={styles.footerLogo}>
                 <span className={styles.logoDot} aria-hidden="true" />
-                drme
+                {brandName}
               </span>
-              <p className={styles.footerTagline}>
-                Building things that matter. Open to interesting projects.
-              </p>
+              <p className={styles.footerTagline}>{brandTagline}</p>
             </div>
 
             <div className={styles.footerContact}>
               <a
-                href="mailto:hello@drme.dev"
+                href={`mailto:${email}`}
                 className={styles.contactLink}
                 aria-label="Email me"
               >
-                <FiMail size={16} aria-hidden="true" />
-                <span>hello@drme.dev</span>
-                <FiExternalLink size={12} aria-hidden="true" />
+                <FiMail aria-hidden="true" size={16} />
+                <span>{email}</span>
+                <FiExternalLink aria-hidden="true" size={12} />
               </a>
             </div>
           </div>
@@ -134,13 +145,9 @@ export function PremiumFooter() {
               <div className={styles.navColumn}>
                 <span className={styles.navTitle}>Navigate</span>
                 <ul className={styles.navList}>
-                  {navLinks.map((link) => (
+                  {footerNavLinks.map((link) => (
                     <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className={styles.navLink}
-                        prefetch={false}
-                      >
+                      <Link className={styles.navLink} href={link.href} prefetch={false}>
                         {link.label}
                       </Link>
                     </li>
@@ -151,8 +158,8 @@ export function PremiumFooter() {
               <div className={styles.navColumn}>
                 <span className={styles.navTitle}>Connect</span>
                 <ul className={styles.socialList} role="list">
-                  {socialLinks.map((link) => (
-                    <li key={link.label}>
+                  {footerSocialLinks.map((link) => (
+                    <li key={link.label} className={styles.socialIcon}>
                       <a
                         href={link.href}
                         target={link.external ? '_blank' : undefined}
@@ -160,11 +167,11 @@ export function PremiumFooter() {
                         className={styles.socialLink}
                         aria-label={link.label}
                       >
-                        <span className={`${styles.socialIcon} ${styles.footerRow}`} aria-hidden="true">
+                        <span className={styles.socialIcon} aria-hidden="true">
                           {link.label === 'GitHub' && <FiGithub size={16} />}
                           {link.label === 'Twitter/X' && <FiTwitter size={16} />}
                           {link.label === 'LinkedIn' && <FiLinkedin size={16} />}
-                          {link.label === 'Instagram' && <FiInstagram size={16} />}
+                          {link.label === 'Discord' && <SiDiscord size={16} />}
                         </span>
                         <span className={styles.socialLabel}>{link.label}</span>
                       </a>
@@ -176,25 +183,25 @@ export function PremiumFooter() {
 
             <div className={styles.footerSupport}>
               <a
-                href="https://ko-fi.com/drmebit"
+                href={kofiUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.kofiBtn}
                 aria-label="Support on Ko-fi"
               >
                 <img
-                  src="https://storage.ko-fi.com/cdn/kratom2/logo/normal-NoshandBG-transparent.png"
+                  src={kofiImage}
                   alt=""
                   className={styles.kofiImg}
                   loading="lazy"
                   aria-hidden="true"
                 />
-                <span>Buy me a coffee</span>
-                <FiExternalLink size={12} aria-hidden="true" />
+                <span>{supportLink.label}</span>
+                <FiExternalLink aria-hidden="true" size={12} />
               </a>
               <p className={styles.copyright}>
-                <FiHeart size={10} className={styles.heart} aria-hidden="true" />
-                {new Date().getFullYear()} drme. Built with curiosity.
+                <FiHeart aria-hidden="true" className={styles.heart} size={10} />
+                {currentYear} {brandName}. Built with curiosity.
               </p>
             </div>
           </div>

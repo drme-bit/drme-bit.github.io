@@ -4,15 +4,14 @@ import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react'
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLenis } from 'lenis/react';
-import { SKILLS_DATA, GROUP_COLORS } from '@/data/skillsData';
-import { EXPLORER_GUIDE, MAX_HISTORY } from '../lib/constants';
+import { graph, GROUP_COLORS, EXPLORER_GUIDE, MAX_HISTORY } from '../lib';
 import { useSkillHistory } from '../hooks/useSkillHistory';
 import { useCompareMode } from '../hooks/useCompareMode';
 import { GROUP_OPTIONS } from '../hooks/useSkillFilter';
-import { SkillPanel } from '../components/SkillPanel';
+import { SkillPanel } from './SkillPanel';
 import { FiSearch, FiX, FiChevronDown } from '@/shared/ui/atoms/Icon';
 import styles from './Skills.module.scss';
-import type { SkillItem } from '../types/skills';
+import type { Skill } from '../lib';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,7 +21,7 @@ const Globe = lazy(() => import('@/shared/ui/organisms/Globe/Globe'));
 
 const GROUP_COUNTS: Record<string, number> = {};
 GROUP_OPTIONS.forEach(({ key }) => {
-  GROUP_COUNTS[key] = SKILLS_DATA.filter((s) => s.group === key).length;
+  GROUP_COUNTS[key] = graph.skillsByGroup(key as any).length;
 });
 
 /*  Skills ── */
@@ -39,9 +38,9 @@ export default function Skills() {
   const [filterGroup, setFilterGroup] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [selectedSkill, setSelectedSkill] = useState<SkillItem | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [isCompareMode, setIsCompareMode] = useState(false);
-  const [compareSkill, setCompareSkill] = useState<SkillItem | null>(null);
+  const [compareSkill, setCompareSkill] = useState<Skill | null>(null);
 
   const { history, addSkill } = useSkillHistory();
 
@@ -121,7 +120,7 @@ export default function Skills() {
   }, []);
 
   const handleMarkerClick = useCallback((skillName: string) => {
-    const skill = SKILLS_DATA.find((s) => s.name === skillName);
+    const skill = graph.getSkill(skillName);
     if (!skill) return;
     globeRef.current?.select(skillName);
     addSkill(skill);
@@ -153,12 +152,12 @@ export default function Skills() {
     globeRef.current?.select(history[newIndex].name);
   }, [selectedSkill, history]);
 
-  const selectHistorySkill = useCallback((skill: SkillItem) => {
+  const selectHistorySkill = useCallback((skill: Skill) => {
     setSelectedSkill(skill);
     globeRef.current?.select(skill.name);
   }, []);
 
-  const selectRelatedSkill = useCallback((skill: SkillItem) => {
+  const selectRelatedSkill = useCallback((skill: Skill) => {
     setSelectedSkill(skill);
     addSkill(skill);
     globeRef.current?.select(skill.name);
@@ -257,7 +256,7 @@ export default function Skills() {
                   onClick={() => handleFilterGroup(null)}
                 >
                   all
-                  <span className={styles['skills-filter-option-count']}>{SKILLS_DATA.length}</span>
+                  <span className={styles['skills-filter-option-count']}>{graph.allSkills.length}</span>
                 </button>
                 {GROUP_OPTIONS.map(({ key, color }) => (
                   <button
@@ -290,7 +289,7 @@ export default function Skills() {
                 <span className={styles['skills-bg-card-title']}>frontend</span>
               </div>
               <div className={styles['skills-bg-card-content']}>
-                <span className={styles['skills-bg-card-value']}>9</span>
+                <span className={styles['skills-bg-card-value']}>{graph.skillsByGroup('frontend').length}</span>
                 <span className={styles['skills-bg-card-label']}>skills</span>
               </div>
             </div>
@@ -300,7 +299,7 @@ export default function Skills() {
                 <span className={styles['skills-bg-card-title']}>backend</span>
               </div>
               <div className={styles['skills-bg-card-content']}>
-                <span className={styles['skills-bg-card-value']}>8</span>
+                <span className={styles['skills-bg-card-value']}>{graph.skillsByGroup('backend').length}</span>
                 <span className={styles['skills-bg-card-label']}>skills</span>
               </div>
             </div>

@@ -82,6 +82,7 @@ export {
   SiRedis,
   SiGit,
   SiDocker,
+  SiDiscord,
   SiOpengl,
   SiLinux,
 } from 'react-icons/si';
@@ -89,3 +90,4 @@ export {
 export {
   DiJava,
 } from 'react-icons/di';
+

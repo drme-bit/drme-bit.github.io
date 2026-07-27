@@ -38,7 +38,6 @@
 
 }
 
-/* Остальные стили карточек оставляем без изменений... */
 .cardSeparator {
   position: relative;
   height: 1px;
@@ -98,6 +97,7 @@
 }
 
 .galleryImg {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -180,13 +180,20 @@
   background: rgba(52, 211, 153, 0.1);
 }
 
-.badge--archived {
+.badge--paused {
+  color: var(--accent-secondary);
+  border-color: rgba(125, 211, 252, 0.25);
+  background: rgba(125, 211, 252, 0.1);
+}
+
+.badge--deprecated {
   color: var(--text-ghost);
 }
 
-.badgeDot {
+.badgeIcon {
   font-size: 0.8em;
   opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .cardId {

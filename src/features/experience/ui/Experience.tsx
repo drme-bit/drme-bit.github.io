@@ -84,6 +84,11 @@ export default function Experience() {
       const iRatio = iWidth / iHeight;
       const isMobile = window.innerWidth < 768;
 
+      // On mobile, limit zoom to prevent viewport zoom issues
+      const maxScale = isMobile ? 2.5 : 6;
+      const headWidth = isMobile ? iWidth * 1.3 : iWidth;
+      const headHeight = isMobile ? iHeight * 0.8 : iHeight;
+
       const zoomTl = gsap.timeline({
         scrollTrigger: {
           trigger: zoomZone,
@@ -115,7 +120,7 @@ export default function Experience() {
         .to(
           zoomWrapper,
           {
-            scale: 6,
+            scale: maxScale,
             ease: 'power2.out',
           },
           0,
@@ -123,8 +128,8 @@ export default function Experience() {
         .to(
           head,
           {
-            width: isMobile ? iWidth * 1.5 : iWidth,
-            height: iHeight,
+            width: headWidth,
+            height: headHeight,
             zIndex: 99999,
             borderRadius: '0px',
             ease: 'power2.inOut',
@@ -143,11 +148,36 @@ export default function Experience() {
     };
   }, []);
 
+  // Prevent zoom on mobile during experience section scroll
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    const handleGestureStart = (e: Event) => {
+      e.preventDefault();
+    };
+
+    section.addEventListener('touchmove', handleTouchMove, { passive: false });
+    section.addEventListener('gesturestart', handleGestureStart, { passive: false });
+
+    return () => {
+      section.removeEventListener('touchmove', handleTouchMove);
+      section.removeEventListener('gesturestart', handleGestureStart);
+    };
+  }, []);
+
   return (
     <section
       id="experience"
       ref={sectionRef}
       className={`${styles.section} ${styles['section--experience']}`}
+      style={{ touchAction: 'pan-y' }}
     >
       <div ref={zoomWrapperRef} className={styles['zoom-wrapper']}>
         <SectionTitle title="experience" accent=" & background" />

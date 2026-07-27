@@ -186,7 +186,13 @@
   border: 1px solid rgba(52, 211, 153, 0.2);
 }
 
-.badge--archived {
+.badge--paused {
+  color: var(--accent-secondary);
+  background: rgba(125, 211, 252, 0.1);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+}
+
+.badge--deprecated {
   color: var(--text-ghost);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);

@@ -10,12 +10,12 @@ import {
   FiSearch,
   FiStar,
 } from '@/shared/ui/atoms/Icon';
-import { BLOG_POSTS, CATEGORIES } from '@/data/blogData';
-import type { BlogPost } from '@/data/blogData';
-import { usePostTransition } from './PostTransitionContext';
+import { blog, CATEGORIES } from '@/features/blog/lib';
+import type { BlogPost } from '@/features/blog/lib';
+import { usePostTransition } from '@/features/blog/lib/PostTransitionContext';
 import styles from './PostsList.module.scss';
 
-const ALL_CATEGORIES = ['All', ...new Set(BLOG_POSTS.map((p) => p.category))];
+const ALL_CATEGORIES = ['All', ...blog.categories];
 
 function FeaturedCard({ post }: { post: BlogPost }) {
   const router = useRouter();
@@ -145,8 +145,8 @@ export default function PostsList() {
     requestAnimationFrame(() => setMounted(true));
   }, []);
 
-  const featuredPost = BLOG_POSTS.find((p) => p.featured);
-  const regularPosts = BLOG_POSTS.filter((p) => !p.featured);
+  const featuredPost = blog.featured[0];
+  const regularPosts = blog.recent;
 
   const filteredPosts = regularPosts.filter((post) => {
     const matchesCategory = activeCategory === 'All' || post.category === activeCategory;

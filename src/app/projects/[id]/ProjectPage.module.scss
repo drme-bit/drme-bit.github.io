@@ -242,7 +242,11 @@
       color: var(--accent-success);
     }
 
-    &.badge--archived {
+    &.badge--paused {
+      color: var(--accent-secondary);
+    }
+
+    &.badge--deprecated {
       color: var(--text-dim);
     }
   }
