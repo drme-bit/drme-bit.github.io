@@ -59,7 +59,7 @@
   background: var(--terminal-bg);
   border: 1px solid var(--terminal-border);
   color: var(--text);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   padding: 0.2rem 0.5rem;
   border-radius: var(--radius-sm);

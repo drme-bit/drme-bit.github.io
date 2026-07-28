@@ -32,7 +32,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.6rem;
     color: var(--text-dim);
     text-decoration: none;
@@ -62,7 +62,7 @@
   &-link {
     background: none;
     border: none;
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.55rem;
     color: var(--text-dim);
     padding: 0.25rem 0.5rem;
@@ -186,7 +186,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.6rem;
     color: var(--text-ghost);
     margin-bottom: 1.5rem;
@@ -207,7 +207,7 @@
   }
 
   &-title {
-    font-family: var(--font-display);
+    font-family: var(--font-display), sans-serif;
     font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 600;
     color: var(--text);
@@ -217,7 +217,7 @@
   }
 
   &-desc {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: clamp(0.9rem, 1.1vw, 1rem);
     color: var(--text-secondary);
     line-height: 1.8;
@@ -233,7 +233,7 @@
   }
 
   &-status {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -252,7 +252,7 @@
   }
 
   &-counter {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.65rem;
     color: var(--text-ghost);
   }
@@ -267,7 +267,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--text);
@@ -321,7 +321,7 @@
 }
 
 .pp-right-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   font-weight: 500;
   color: var(--text-ghost);
@@ -340,7 +340,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.7rem;
   color: var(--text-dim);
   text-decoration: none;
@@ -365,7 +365,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -380,7 +380,7 @@
 }
 
 .pp-right-counter {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-ghost);
 }
@@ -392,7 +392,7 @@
 }
 
 .pp-right-tag {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   color: var(--text-dim);
   padding: 0.15rem 0.4rem;
@@ -414,7 +414,7 @@
   &-link {
     background: none;
     border: none;
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: 0.6rem;
     color: var(--text-dim);
     padding: 0.3rem 0;
@@ -452,14 +452,14 @@
   }
 
   &-number {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.6rem;
     color: var(--accent-secondary);
     opacity: 0.5;
   }
 
   &-title {
-    font-family: var(--font-display);
+    font-family: var(--font-display), sans-serif;
     font-size: clamp(1.2rem, 1.8vw, 1.5rem);
     font-weight: 600;
     color: var(--text);
@@ -471,7 +471,7 @@
   max-width: 640px;
 
   p {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: clamp(0.85rem, 1vw, 0.92rem);
     color: var(--text-secondary);
     line-height: 1.8;
@@ -505,7 +505,7 @@
   }
 
   &-num {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.6rem;
     color: var(--accent-secondary);
     opacity: 0.4;
@@ -530,7 +530,7 @@
   }
 
   &-title {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--text);
@@ -538,14 +538,14 @@
   }
 
   &-duration {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.55rem;
     color: var(--accent-secondary);
     opacity: 0.6;
   }
 
   &-desc {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: 0.85rem;
     color: var(--text-secondary);
     line-height: 1.7;
@@ -568,7 +568,7 @@
   background: var(--glass);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.8rem;
   color: var(--text-secondary);
   transition: border-color 0.2s;
@@ -601,7 +601,7 @@
     padding: 0.75rem 1rem;
     background: var(--bg-elevated);
     border-bottom: 1px solid var(--border);
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--text);
@@ -615,7 +615,7 @@
 .pp-arch-text {
   margin: 0;
   padding: 1rem;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.85rem;
   color: var(--text-secondary);
   line-height: 1.8;
@@ -773,7 +773,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: 0.7rem;
     color: var(--text-dim);
     text-decoration: none;

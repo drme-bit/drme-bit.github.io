@@ -46,7 +46,7 @@
 }
 
 .reviews-hero-title {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 700;
   color: var(--text);
@@ -59,7 +59,7 @@
 }
 
 .reviews-hero-desc {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.8rem;
   color: var(--text-dim);
   line-height: 1.6;
@@ -70,7 +70,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.72rem;
   padding: 0.65em 1.3em;
   background: var(--accent-muted);
@@ -128,7 +128,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text);
@@ -203,7 +203,7 @@
 }
 
 .review-card-role {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.58rem;
   color: var(--text-dim);
 }
@@ -255,7 +255,7 @@
   text-align: center;
   padding: var(--space-2xl);
   color: var(--text-dim);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.75rem;
 }
 
@@ -270,7 +270,7 @@
 }
 
 .review-modal-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.68rem;
   color: var(--text-dim);
   letter-spacing: 0.1em;
@@ -286,7 +286,7 @@
   padding: 0;
   color: var(--text-dim);
   cursor: pointer;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.68rem;
   display: inline-flex;
   align-items: center;
@@ -308,7 +308,7 @@
   gap: var(--space-xs);
 
   label {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.62rem;
     color: var(--text-dim);
     text-transform: uppercase;
@@ -317,7 +317,7 @@
 
   input,
   textarea {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: 0.85rem;
     padding: 0.75em 1em;
     background: var(--glass);
@@ -416,7 +416,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5em;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.78rem;
   padding: 0.85em 1.5em;
   background: rgba(125, 211, 252, 0.1);

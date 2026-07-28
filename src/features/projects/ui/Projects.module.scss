@@ -160,7 +160,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -196,14 +196,14 @@
 }
 
 .cardId {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: rgba(255, 255, 255, 0.35);
   letter-spacing: 0.12em;
 }
 
 .cardTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: 700;
   color: #fff;
@@ -221,7 +221,7 @@
 }
 
 .cardDesc {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: clamp(0.82rem, 1vw, 0.92rem);
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.7;
@@ -248,7 +248,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: rgba(255, 255, 255, 0.75);
   padding: 0.25rem 0.6rem;
@@ -266,7 +266,7 @@
 }
 
 .techMore {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   color: rgba(255, 255, 255, 0.35);
   padding: 0.25rem 0.4rem;
@@ -286,7 +286,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.4;
@@ -326,7 +326,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.75rem;
   font-weight: 500;
   color: #fff;

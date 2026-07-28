@@ -75,7 +75,7 @@
 
 .panelTitle {
   margin-left: auto;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--terminal-title);
   letter-spacing: 0.05em;
@@ -97,7 +97,7 @@
 }
 
 .sectionLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.48rem;
   color: var(--text-ghost);
   text-transform: uppercase;
@@ -145,7 +145,7 @@
 }
 
 .themeBtnLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.45rem;
   color: var(--text-dim);
 }
@@ -163,7 +163,7 @@
   background: var(--glass);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-dim);
   cursor: pointer;
@@ -193,7 +193,7 @@
 }
 
 .toggleLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-dim);
 }

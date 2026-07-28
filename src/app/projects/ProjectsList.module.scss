@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-ghost);
   margin-bottom: 1.5rem;
@@ -43,7 +43,7 @@
 }
 
 .heroTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 700;
   color: var(--text);
@@ -57,7 +57,7 @@
 }
 
 .heroDesc {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.72rem;
   color: var(--text-dim);
   margin: 0;
@@ -125,7 +125,7 @@
 }
 
 .cardIndex {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.45rem;
   color: var(--text-ghost);
   margin-bottom: 0.75rem;
@@ -141,7 +141,7 @@
 }
 
 .cardTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text);
@@ -149,7 +149,7 @@
 }
 
 .badge {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.45rem;
   font-weight: 500;
   padding: 0.2rem 0.5rem;
@@ -176,7 +176,7 @@
 }
 
 .cardDesc {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.62rem;
   color: var(--text-dim);
   line-height: 1.7;
@@ -195,7 +195,7 @@
 }
 
 .techTag {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.45rem;
   font-weight: 500;
   padding: 0.15rem 0.45rem;
@@ -206,7 +206,7 @@
 }
 
 .techMore {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.45rem;
   color: var(--text-ghost);
   padding: 0.15rem 0.2rem;
@@ -225,7 +225,7 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   font-weight: 500;
   color: var(--accent-secondary);
@@ -271,7 +271,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   font-weight: 500;
   color: var(--text-dim);

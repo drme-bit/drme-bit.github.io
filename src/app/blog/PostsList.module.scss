@@ -30,7 +30,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   z-index: 100;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .pl-hero-breadcrumb {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   color: var(--text-ghost);
   display: flex;
@@ -108,7 +108,7 @@
 }
 
 .pl-hero-title {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(2.5rem, 8vw, 4rem);
   font-weight: 700;
   color: var(--text);
@@ -118,7 +118,7 @@
 }
 
 .pl-hero-desc {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: clamp(0.9rem, 1.2vw, 1rem);
   color: var(--text-secondary);
   line-height: 1.7;
@@ -188,7 +188,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35em;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-dim);
   background: var(--bg);
@@ -200,7 +200,7 @@
 }
 
 .featured-card-cat {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-dim);
   letter-spacing: 0.05em;
@@ -208,7 +208,7 @@
 }
 
 .featured-card-title {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.4rem, 2.5vw, 1.8rem);
   font-weight: 600;
   color: var(--text);
@@ -218,7 +218,7 @@
 }
 
 .featured-card-excerpt {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.65;
@@ -229,7 +229,7 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-dim);
 }
@@ -251,7 +251,7 @@
 }
 
 .featured-card-tag {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.58rem;
   color: var(--text-dim);
   padding: 0.2rem 0.5rem;
@@ -305,7 +305,7 @@
 
 .pl-search-input {
   width: 100%;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.78rem;
   color: var(--text);
   background: var(--bg-elevated);
@@ -331,7 +331,7 @@
 }
 
 .pl-category-btn {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.68rem;
   color: var(--text-dim);
   background: var(--bg-elevated);
@@ -418,7 +418,7 @@
 }
 
 .posts-row-num {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-ghost);
   min-width: 1.5em;
@@ -441,7 +441,7 @@
 }
 
 .posts-row-category {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-dim);
   letter-spacing: 0.05em;
@@ -449,13 +449,13 @@
 }
 
 .posts-row-date {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-ghost);
 }
 
 .posts-row-title {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: var(--text);
@@ -472,7 +472,7 @@
 }
 
 .posts-row-excerpt {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.8rem;
   color: var(--text-secondary);
   line-height: 1.5;
@@ -501,7 +501,7 @@
 }
 
 .posts-row-tag {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-dim);
   padding: 0.15rem 0.4rem;
@@ -521,7 +521,7 @@
   display: flex;
   align-items: center;
   gap: 0.3em;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-ghost);
   flex-shrink: 0;
@@ -540,7 +540,7 @@
 .pl-empty {
   text-align: center;
   padding: 4rem 2rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.8rem;
   color: var(--text-ghost);
 }
@@ -563,7 +563,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.78rem;
   color: var(--text-dim);
   text-decoration: none;

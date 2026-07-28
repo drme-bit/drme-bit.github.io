@@ -12,7 +12,7 @@
   border: 1px solid var(--terminal-border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
 }
 
 /*  Terminal Bar ── */
@@ -133,7 +133,7 @@
 }
 
 .clickBtnInner {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.75rem;
   font-weight: 700;
   color: #fff;
@@ -145,7 +145,7 @@
 
 .particle {
   position: absolute;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--accent-secondary);

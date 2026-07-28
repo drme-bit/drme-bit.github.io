@@ -47,7 +47,7 @@
 }
 
 .headerTag {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -55,7 +55,7 @@
 }
 
 .headerTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 800;
   color: var(--text);
@@ -65,7 +65,7 @@
 }
 
 .headerSub {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   color: var(--text-dim);
   margin: 0;
@@ -163,7 +163,7 @@
 }
 
 .blog-card-category {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-dim);
   letter-spacing: 0.05em;
@@ -171,7 +171,7 @@
 }
 
 .blog-card-featured {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-dim);
   background: var(--bg);
@@ -185,7 +185,7 @@
 /*  Card Content ── */
 
 .blog-card-title {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text);
@@ -195,7 +195,7 @@
 }
 
 .blog-card-excerpt {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.85rem;
   color: var(--text-secondary);
   line-height: 1.6;
@@ -213,13 +213,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-dim);
 }
 
 .blog-card-date {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-dim);
 }
@@ -243,7 +243,7 @@
 }
 
 .blog-card-tag {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.58rem;
   color: var(--text-dim);
   padding: 0.2rem 0.5rem;
@@ -264,7 +264,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.72rem;
   color: var(--text-dim);
   transition: color 0.2s ease;
@@ -286,7 +286,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.78rem;
   color: var(--text-dim);
   background: var(--bg-elevated);

@@ -214,7 +214,7 @@
 }
 
 .tl-period {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: clamp(0.6rem, 0.65vw, 0.65rem);
   color: var(--text-dim);
   letter-spacing: 0.12em;
@@ -223,21 +223,21 @@
 }
 
 .tl-role {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-weight: 500;
   font-size: clamp(0.9rem, 1.15vw, 1.05rem);
   color: var(--text);
 }
 
 .tl-org {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-weight: 300;
   font-size: clamp(0.7rem, 0.9vw, 0.8rem);
   color: var(--text-dim);
 }
 
 .tl-desc {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-weight: 300;
   font-size: clamp(0.65rem, 0.8vw, 0.75rem);
   color: var(--text-secondary);

@@ -92,7 +92,7 @@
 }
 
 .footerLogo {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.25rem, 3vw, 1.5rem);
   font-weight: 600;
   color: var(--text);
@@ -103,7 +103,7 @@
 }
 
 .footerTagline {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.75rem;
   color: var(--text-secondary);
   max-width: 280px;
@@ -126,7 +126,7 @@
   border-radius: 0;
   color: var(--text-secondary);
   text-decoration: none;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.72rem;
   letter-spacing: 0.04em;
   border-bottom: 1px solid transparent;
@@ -207,7 +207,7 @@
 }
 
 .navTitle {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -250,7 +250,7 @@
 }
 
 .navLink {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.85rem;
   color: var(--text-secondary);
   text-decoration: none;
@@ -368,7 +368,7 @@
   border-radius: 0;
   color: var(--text-secondary);
   text-decoration: none;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   letter-spacing: 0.04em;
   width: 100%;
@@ -405,7 +405,7 @@
 }
 
 .copyright {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-dim);
   letter-spacing: 0.05em;

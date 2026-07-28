@@ -113,7 +113,7 @@
   border: 1px solid var(--terminal-border);
   border-radius: var(--radius-md);
   padding: 8px 12px;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   min-width: 140px;
   max-width: 240px;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset,
@@ -211,7 +211,7 @@
 
 .mascot-prompt-char {
   color: var(--terminal-prompt-arrow);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   font-weight: 600;
   flex-shrink: 0;
@@ -221,7 +221,7 @@
   border: none;
   background: none;
   outline: none;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.58rem;
   color: var(--terminal-cmd);
   width: 150px;

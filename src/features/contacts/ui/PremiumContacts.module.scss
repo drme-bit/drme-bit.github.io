@@ -56,7 +56,7 @@ $z-contact: 10;
 }
 
 .prompt {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: var(--space-sm);
   color: var(--accent-secondary);
   font-weight: 500;
@@ -64,7 +64,7 @@ $z-contact: 10;
 }
 
 .title {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 600;
   color: var(--text);
@@ -105,7 +105,7 @@ $z-contact: 10;
 }
 
 .fieldLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -132,7 +132,7 @@ $z-contact: 10;
   border-bottom: 1px solid var(--border);
   border-radius: 0;
   padding: var(--space-sm) 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.95rem;
   color: var(--text);
   outline: none;
@@ -181,7 +181,7 @@ $z-contact: 10;
 
 .fieldError {
   margin-top: 2px;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.62rem;
   color: var(--accent-danger);
   letter-spacing: 0.05em;
@@ -191,7 +191,7 @@ $z-contact: 10;
 }
 
 .charCount {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.62rem;
   color: var(--text-dim);
   margin-top: 2px;
@@ -214,7 +214,7 @@ $z-contact: 10;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text);
@@ -280,7 +280,7 @@ $z-contact: 10;
   gap: var(--space-sm);
   padding: var(--space-md);
   color: var(--accent-danger);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.85rem;
 }
 
@@ -319,7 +319,7 @@ $z-contact: 10;
 }
 
 .successTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text);
@@ -327,7 +327,7 @@ $z-contact: 10;
 }
 
 .successMessage {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.9rem;
   color: var(--text-secondary);
   margin: 0 0 var(--space-xl);
@@ -341,7 +341,7 @@ $z-contact: 10;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.85rem;
   color: var(--text-secondary);
   cursor: pointer;
@@ -376,7 +376,7 @@ $z-contact: 10;
 }
 
 .infoTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--text);
@@ -457,7 +457,7 @@ $z-contact: 10;
 }
 
 .cardTitle {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.88rem;
   font-weight: 500;
   color: var(--text);
@@ -466,7 +466,7 @@ $z-contact: 10;
 }
 
 .cardSubtitle {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.68rem;
   color: var(--text-dim);
   letter-spacing: 0.04em;
@@ -479,7 +479,7 @@ $z-contact: 10;
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.62rem;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -522,7 +522,7 @@ $z-contact: 10;
 }
 
 .actionText {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.62rem;
 }
 
@@ -574,7 +574,7 @@ $z-contact: 10;
 }
 
 .availabilityText {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.78rem;
   color: var(--text-dim);
 }
@@ -597,7 +597,7 @@ $z-contact: 10;
 }
 
 .socialTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--text);
@@ -658,7 +658,7 @@ $z-contact: 10;
 }
 
 .socialLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.62rem;
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -679,7 +679,7 @@ $z-contact: 10;
 }
 
 .footerText {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.82rem;
   color: var(--text-dim);
   margin: 0;
