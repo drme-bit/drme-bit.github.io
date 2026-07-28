@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
-import { SKILLS_DATA } from '@/data/skillsData';
-import type { SkillItem } from '../types/skills';
+import { graph } from '../lib';
+import type { Skill } from '../lib';
 
 export const GROUP_OPTIONS = [
   { key: 'all' as const, color: 'var(--text-secondary)' },
@@ -14,7 +14,7 @@ export function useSkillFilter() {
   const [activeGroup, setActiveGroup] = useState('all');
 
   const filteredSkills = useMemo(() => {
-    return SKILLS_DATA.filter((skill) => {
+    return graph.allSkills.filter((skill) => {
       const matchesGroup = activeGroup === 'all' || skill.group === activeGroup;
       const matchesSearch =
         !searchQuery ||

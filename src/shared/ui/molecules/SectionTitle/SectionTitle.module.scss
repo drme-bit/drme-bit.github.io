@@ -26,7 +26,7 @@
 }
 
 .sectionTitleHeading {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(2.5rem, 10vw, 4.5rem);
   font-weight: 700;
   color: var(--text);
@@ -44,7 +44,7 @@
 }
 
 .sectionTitleDesc {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.75rem;
   color: var(--text-dim);
   margin-top: 12px;

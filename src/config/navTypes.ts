@@ -1,6 +1,6 @@
 import type { IconType } from 'react-icons';
 
-/* ─── Nav item types ─────────────────────────────────────── */
+/*  Nav item types  */
 
 export type NavLinkBase = {
   id: string;
@@ -39,7 +39,7 @@ export type NavGroup = NavLinkBase & {
 
 export type NavItem = NavRouteLink | NavGroup;
 
-/* ─── Page overlay (registered per route) ────────────────── */
+/*  Page overlay (registered per route)  */
 
 export type NavPagination = {
   prev?: { label?: string; href: string; onClick?: () => void };

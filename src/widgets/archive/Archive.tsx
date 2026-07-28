@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { PROJECTS } from '@/data/projectsData';
-import { FiX, FiGrid, FiFolder } from 'react-icons/fi';
+import { projects } from '@/features/projects/lib/registry';
+import { FiX, FiGrid, FiFolder } from '@/shared/ui/atoms/Icon';
 import styles from './Archive.module.scss';
 
-/* ─── Types ──────────────────────────────────────────────── */
+/*  Types  */
 
 interface MediaItem {
   id: string;
@@ -26,12 +26,12 @@ interface ArchiveProps {
   onClose: () => void;
 }
 
-/* ─── Helpers ────────────────────────────────────────────── */
+/*  Helpers ─ */
 
 function collectMedia(): MediaItem[] {
   const items: MediaItem[] = [];
 
-  for (const project of PROJECTS) {
+  for (const project of projects.all) {
     if (project.logo) {
       items.push({
         id: `${project.id}-logo`,
@@ -71,7 +71,7 @@ function collectMedia(): MediaItem[] {
   return items;
 }
 
-/* ─── Archive ────────────────────────────────────────────── */
+/*  Archive ─ */
 
 export default function Archive({ onClose }: ArchiveProps) {
   const [media] = useState(collectMedia);
@@ -115,7 +115,7 @@ export default function Archive({ onClose }: ArchiveProps) {
   }, [onClose, previewIdx, closePreview, prevPreview, nextPreview]);
 
   const projectFilters: ProjectFilter[] = uniqueSources.map((src) => {
-    const p = PROJECTS.find((pr) => pr.id === src);
+    const p = projects.get(src);
     return { id: src, label: p?.title || src, logo: p?.logo };
   });
 

@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { FiHome, FiArrowLeft, FiTerminal } from 'react-icons/fi';
+import { TransitionLink } from '@/features/transitions';
+import { FiHome, FiArrowLeft, FiTerminal } from '@/shared/ui/atoms/Icon';
 import styles from './NotFound.module.scss';
 
 export default function NotFound() {
@@ -46,10 +46,10 @@ export default function NotFound() {
         </p>
 
         <div className={styles['nf-actions']}>
-          <Link href="/" className={`${styles['nf-btn']} ${styles['nf-btn--primary']}`}>
+          <TransitionLink href="/" className={`${styles['nf-btn']} ${styles['nf-btn--primary']}`}>
             <FiHome size={14} />
             <span>cd ~</span>
-          </Link>
+          </TransitionLink>
           <button
             onClick={() => router.back()}
             className={`${styles['nf-btn']} ${styles['nf-btn--secondary']}`}

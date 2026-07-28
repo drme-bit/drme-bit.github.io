@@ -33,8 +33,15 @@ export default function LocationMap({ lat, lng, zoom = 5, city, className }: Pro
     if (!containerRef.current || mapRef.current) return;
     if (typeof window === 'undefined') return;
 
+    // Guard: container already has a Leaflet instance (React strict-mode / HMR double-fire)
+    const container = containerRef.current;
+    if ((container as unknown as { _leaflet_id?: number })._leaflet_id != null) return;
+
+    let disposed = false;
+
     async function init() {
       const leaflet = await import('leaflet');
+      if (disposed) return;
       const L = leaflet.default;
 
       // Import Leaflet CSS
@@ -45,7 +52,7 @@ export default function LocationMap({ lat, lng, zoom = 5, city, className }: Pro
         document.head.appendChild(link);
       }
 
-      const map = L.map(containerRef.current!, {
+      const map = L.map(container, {
         center: [lat, lng],
         zoom,
         zoomControl: false,
@@ -81,6 +88,7 @@ export default function LocationMap({ lat, lng, zoom = 5, city, className }: Pro
     init();
 
     return () => {
+      disposed = true;
       if (mapRef.current && typeof mapRef.current === 'object' && 'remove' in mapRef.current) {
         (mapRef.current as { remove: () => void }).remove();
         mapRef.current = null;

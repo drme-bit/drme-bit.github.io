@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import useReveal from '@/shared/hooks/useReveal';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SectionTitle from '@/shared/ui/molecules/SectionTitle/SectionTitle';
 import LocationMap from '@/shared/ui/molecules/LocationMap/LocationMap';
 import aboutData from '@/data/aboutData';
 import styles from './About.module.scss';
 
-// utility
 import { log } from '@/shared/lib/logger'
 
 /* Icons */
@@ -16,41 +16,26 @@ import { BsFillKanbanFill } from 'react-icons/bs';
 import { LuTriangle } from 'react-icons/lu';
 import { RiOpenSourceFill, RiRobot2Fill } from 'react-icons/ri';
 
-/* ─── Intro Block ──────────────────────────────────────── */
+gsap.registerPlugin(ScrollTrigger);
 
-function IntroBlock({ text, active, delay }: { text: string; active: boolean; delay: number }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
+/*  Intro Block ─ */
+
+function IntroBlock({ text, delay }: { text: string; delay: number }) {
+  const ref = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    if (!active) return;
     const el = ref.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setOpen(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.2 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [active]);
+    gsap.fromTo(el, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay });
+  }, [delay]);
 
   return (
-    <p
-      ref={ref}
-      className={`${styles['about-intro-text']}${open ? ` ${styles['is-open']}` : ''}`}
-      style={{ transitionDelay: `${delay}s` }}
-    >
-      {text}
-    </p>
+    <p ref={ref} className={styles['about-intro-text']}>{text}</p>
   );
 }
 
-/* ─── GitHub Activity ──────────────────────────────────── */
+/*  GitHub Activity  */
+
 interface CommitInfo {
   hash: string;
   message: string;
@@ -67,11 +52,8 @@ function GitHubActivity() {
     async function fetchGitHub() {
       try {
         const res = await fetch('https://api.github.com/users/drme-bit/events/public?per_page=30');
-        if (!res.ok) {
-          log(`Github response with status code ${res.status} ${res.body}`);
-        } else {
-          log(`Github response with status code ${res.status} ${res.body}`);
-        }
+        if (!res.ok) { log(`Github response with status code ${res.status}`); }
+        else { log(`Github response with status code ${res.status}`); }
         const events = await res.json();
 
         const pushEvents = events
@@ -80,18 +62,13 @@ function GitHubActivity() {
 
         const detailed = await Promise.all(
           pushEvents.map(async (e: any) => {
-            const commitRes = await fetch(
-              `https://api.github.com/repos/${e.repo.name}/commits/${e.payload.head}`,
-            );
+            const commitRes = await fetch(`https://api.github.com/repos/${e.repo.name}/commits/${e.payload.head}`);
             if (!commitRes.ok) return null;
             const data = await commitRes.json();
             return {
               hash: data.sha.slice(0, 7),
               message: data.commit.message.split('\n')[0],
-              date: new Date(e.created_at).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              }),
+              date: new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
               repo: e.repo.name.split('/')[1],
             };
           }),
@@ -134,34 +111,55 @@ function GitHubActivity() {
   );
 }
 
-/* ─── About ──────────────────────────────────────────────── */
+/*  About  */
 
 const INTRO_LINES = [
   "Hello there! I'm Vyacheslav, a software engineer from Ukraine. I spend my days turning coffee into code and my nights wondering why it worked yesterday.",
   'I love building things — from web applications and backend services to developer tools that make life just a little easier. I enjoy solving problems, optimizing performance, and turning messy ideas into clean, reliable software. The bigger the challenge, the more interesting it becomes.',
   "I recently graduated with a Professional Junior Bachelor's degree in Software Engineering and have been constantly exploring new technologies ever since. Lately, I've been working with modern web stacks, backend development, APIs, databases, cloud infrastructure, and a bit of everything that catches my curiosity.",
-  "I believe the best way to learn is to build. That's why you'll usually find me experimenting with new projects, rewriting something \u201Cjust because it can be better,\u201D or diving into technologies I've never used before. I'm always looking for the next challenge… though sometimes it's just another excuse to open my IDE.",
+  "I believe the best way to learn is to build. That's why you'll usually find me experimenting with new projects, rewriting something 'just because it can be better,' or diving into technologies I've never used before. I'm always looking for the next challenge… though sometimes it's just another excuse to open my IDE.",
 ];
 
 export default function About() {
-  const [ref, visible] = useReveal();
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const ctx = gsap.context(() => {
+      // Section reveal
+      gsap.fromTo(section, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1, ease: 'power2.out', scrollTrigger: { trigger: section, start: 'top 80%', toggleActions: 'play none none reverse' } });
+
+      // Intro lines stagger
+      gsap.fromTo(`.${styles['about-intro-text']}`, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.12, scrollTrigger: { trigger: `.${styles['about-intro']}`, start: 'top 85%', toggleActions: 'play none none reverse' } });
+
+      // Bento cards stagger
+      gsap.fromTo(`.${styles['about-bento-card']}`, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', stagger: 0.08, scrollTrigger: { trigger: `.${styles['about-bento']}`, start: 'top 85%', toggleActions: 'play none none reverse' } });
+
+      // Stats stagger
+      gsap.fromTo(`.${styles['about-stat-item']}`, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.5)', stagger: 0.06, scrollTrigger: { trigger: `.${styles['about-stats-row']}`, start: 'top 90%', toggleActions: 'play none none reverse' } });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
     <section
       id="about"
-      ref={ref}
-      className={`${styles.section} ${styles['section--about']} ${styles.reveal}${visible ? ` ${styles['is-visible']}` : ''}`}
+      ref={sectionRef}
+      className={`${styles.section} ${styles['section--about']}`}
     >
-      <SectionTitle title="about" accent="_" visible={visible} />
+      <SectionTitle title="about" accent="_" />
 
       <div className={styles['about-whoami']}>
         <p className={styles['about-whoami-cmd']}>
-          <span className={styles['about-whoami-prompt']}>&gt;</span> whoami
+          <span className={styles['about-whoami-prompt']}>{'>'}</span> whoami
         </p>
         <h2 className={styles['about-whoami-name']}>Vyacheslav Tkachyk</h2>
         <p className={styles['about-whoami-tags']}>
           Software Engineer <span className={styles['about-whoami-sep']}>·</span> Coffee Lover{' '}
-          <span className={styles['about-whoami-sep']}>·</span> <s>Ukraine</s> Ukrai
+          <span className={styles['about-whoami-sep']}>·</span> {'Ukraine = Ukrai'}
           <span className={styles['about-whoami-error']}>TypeError: locate is not a function</span>
         </p>
       </div>
@@ -197,7 +195,7 @@ export default function About() {
           {/* ── Intro Paragraphs ── */}
           <div className={styles['about-intro']}>
             {INTRO_LINES.map((text, i) => (
-              <IntroBlock key={i} text={text} active={visible} delay={0.1 + i * 0.1} />
+              <IntroBlock key={i} text={text} delay={0.1 + i * 0.1} />
             ))}
           </div>
 

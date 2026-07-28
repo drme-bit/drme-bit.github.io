@@ -3,17 +3,71 @@
 
 .scrollProgress {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 25vh;
+  left: 0.5rem;
   right: 0;
-  height: 1px;
+  height: 50vh;
   z-index: 200;
+  width: 2px;
   background: var(--glass);
+  cursor: pointer;
+  overflow: visible;
 }
 
 .scrollProgressFill {
-  height: 100%;
+  width: 100%;
+  height: 0;
   background: var(--accent);
-  transition: width 0.1s linear;
   box-shadow: 0 0 8px var(--accent-muted);
+  pointer-events: none;
+}
+
+/*  Черточки-метки ── */
+
+.marker {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 2px;
+  padding: 0;
+  background: var(--text-dim);
+  border: none;
+  border-radius: 1px;
+  cursor: pointer;
+  z-index: 201;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--accent);
+    width: 12px;
+    box-shadow: 0 0 6px var(--accent-muted);
+
+    .markerTooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+  }
+}
+
+.markerTooltip {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateX(-4px) translateY(-50%);
+  background: var(--terminal-bg);
+  border: 1px solid var(--terminal-border);
+  color: var(--text);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-transform: lowercase;
 }

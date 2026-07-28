@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { FiSearch } from 'react-icons/fi';
+import { FiSearch } from '@/shared/ui/atoms/Icon';
 import styles from './SearchBar.module.scss';
 
 interface SearchBarProps {

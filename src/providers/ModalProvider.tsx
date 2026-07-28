@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useContext, createContext, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { FiX } from 'react-icons/fi';
+import { FiX } from '@/shared/ui/atoms/Icon';
 import styles from './ModalProvider.module.scss';
 
 interface ModalConfig {

@@ -6,6 +6,10 @@ import { ModalProvider } from '@/providers/ModalProvider';
 import { ActivityProvider } from '@/providers/ActivityProvider';
 import { NavProvider } from '@/providers/NavProvider';
 import Navbar from '@/widgets/navbar/Navbar';
+import { SmoothScrolling } from '@/widgets/smooth-scrolling/SmoothScrolling';
+import Mascot from '@/widgets/mascot/Mascot'
+import { LoadingCurtain } from '@/features/loading';
+import { PageTransitionProvider, TransitionLayer } from '@/features/transitions';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import './globals.scss';
@@ -60,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0a0a0a" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
@@ -73,10 +78,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ModalProvider>
               <ActivityProvider>
                 <NavProvider>
-                  <Navbar />
-                  <Analytics />
-                  <SpeedInsights />
-                  {children}
+                  <PageTransitionProvider>
+                    <LoadingCurtain />
+                    <TransitionLayer />
+                    <Navbar />
+                    <Analytics />
+                    <SpeedInsights />
+                    <SmoothScrolling>
+                      {children}
+                    </SmoothScrolling>
+                    <Mascot />
+                  </PageTransitionProvider>
                 </NavProvider>
               </ActivityProvider>
             </ModalProvider>

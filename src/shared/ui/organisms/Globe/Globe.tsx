@@ -9,10 +9,10 @@ import ThreeGlobe from 'three-globe';
 import countries from '@/data/globe.json';
 
 import {
-  SKILLS_DATA,
+  graph,
   GROUP_COLORS,
   ICON_MAP,
-} from '@/data/skillsData';
+} from '@/features/skills/lib/registry';
 
 import GlobeManager from './GlobeManager';
 
@@ -402,7 +402,7 @@ const Globe = forwardRef(function Globe({ className = '', onMarkerClick }: Globe
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const [themeVersion, setThemeVersion] = useState(0);
 
-  const markers = useMemo(() => buildMarkers(SKILLS_DATA), []);
+  const markers = useMemo(() => buildMarkers(graph.allSkills), []);
   const arcs = useMemo(() => buildArcs(markers), [markers, themeVersion]);
 
   useEffect(() => {

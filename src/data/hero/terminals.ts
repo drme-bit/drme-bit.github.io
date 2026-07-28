@@ -37,7 +37,7 @@ export const TERMINALS = [
       { t: '  [✓] 0015.3sum          48ms', c: 'var(--terminal-success)' },
       { t: '  [✓] 0042.trapping_water  32ms', c: 'var(--terminal-success)' },
       { t: '  [✓] 0076.min_window    61ms', c: 'var(--terminal-success)' },
-      { t: '  ─── 12/15 passed ───', c: 'var(--terminal-output-dim)' },
+      { t: '   12/15 passed ', c: 'var(--terminal-output-dim)' },
     ],
   },
   {

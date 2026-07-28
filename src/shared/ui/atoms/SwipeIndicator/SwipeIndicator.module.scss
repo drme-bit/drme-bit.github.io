@@ -32,7 +32,7 @@
 }
 
 .swipe-indicator-text {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-ghost);
   letter-spacing: 0.12em;

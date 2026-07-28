@@ -1,4 +1,4 @@
-import { SKILLS_DATA } from '@/data/skillsData';
+import { graph } from '@/features/skills/lib/registry';
 
 interface GlobeManagerState {
   selected: string | null;
@@ -46,7 +46,7 @@ export default class GlobeManager {
       return;
     }
 
-    const filtered = SKILLS_DATA.filter((s) => {
+    const filtered = graph.allSkills.filter((s) => {
       const matchesGroup = !g || s.group === g;
       const matchesSearch = !q || s.name.toLowerCase().includes(q);
       return matchesGroup && matchesSearch;

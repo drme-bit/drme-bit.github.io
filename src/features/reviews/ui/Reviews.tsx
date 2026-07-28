@@ -3,21 +3,20 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
 import { signInWithPopup, onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useLenis } from 'lenis/react';
 import { db, auth, googleProvider } from '@/shared/config/firebase';
-import useReveal from '@/shared/hooks/useReveal';
 import { useModal } from '@/providers/ModalProvider';
-import {
-  PiArrowRight,
-  PiCheckCircle,
-  PiSignOut,
-  PiStarFill,
-  PiUser,
-} from 'react-icons/pi';
+import { PiArrowRight, PiCheckCircle, PiSignOut, PiStarFill, PiUser } from '@/shared/ui/atoms/Icon';
 import styles from './Reviews.module.scss';
 import ReviewsHero from './ReviewsHero';
 import ReviewsForm from './ReviewsForm';
 
-/* ─── Types ──────────────────────────────────────────────── */
+gsap.registerPlugin(ScrollTrigger);
+
+/* Types */
 
 interface Review {
   id: string;
@@ -32,48 +31,22 @@ interface Review {
   createdAt?: Date | null;
 }
 
-/* ─── Constants ──────────────────────────────────────────── */
-
-const WORLD_W = 4000;
-const WORLD_H = 2500;
-const FOCUS_INTERVAL = 20000;
-const RESUME_DELAY = 8000;
-const BLUR_DURATION = 600;
-
-/* ─── Seeded random ──────────────────────────────────────── */
-
-function seededRandom(seed: number) {
-  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-function distributeCards(count: number) {
-  return Array.from({ length: count }, (_, i) => {
-    const angle = (i / count) * Math.PI * 2 * 1.618;
-    const radius = 200 + seededRandom(i) * 800;
-    const x = WORLD_W / 2 + Math.cos(angle) * radius - 140;
-    const y = WORLD_H / 2 + Math.sin(angle) * radius - 80;
-    return {
-      x: Math.max(60, Math.min(WORLD_W - 340, x)),
-      y: Math.max(60, Math.min(WORLD_H - 200, y)),
-      rotation: (seededRandom(i + 200) - 0.5) * 8,
-    };
-  });
-}
-
-/* ─── Reviews ────────────────────────────────────────────── */
+/* Reviews */
 
 export default function Reviews() {
-  const [ref, visible] = useReveal();
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+
   const [user, setUser] = useState<User | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasReviewed, setHasReviewed] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
+
   const { openModal } = useModal();
+  const lenis = useLenis();
 
-  /* ─── Auth ───────────────────────────────────────────── */
-
+  /* Auth & Firestore Subscriptions */
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsubAuth();
@@ -81,215 +54,145 @@ export default function Reviews() {
 
   useEffect(() => {
     const q = query(collection(db, 'reviews'), where('approved', '==', true));
-    const unsub = onSnapshot(q, (snap) => {
-      const items: Review[] = snap.docs.map((d) => {
-        const data = d.data();
-        return { id: d.id, ...data, createdAt: data.createdAt?.toDate?.() ?? null } as Review;
-      });
-      items.sort((a, b) => (b.createdAt?.getTime?.() ?? 0) - (a.createdAt?.getTime?.() ?? 0));
-      setReviews(items);
-      setLoading(false);
-    }, () => setLoading(false));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const items: Review[] = snap.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            ...data,
+            createdAt: data.createdAt?.toDate?.() ?? null,
+          } as Review;
+        });
+        items.sort((a, b) => (b.createdAt?.getTime?.() ?? 0) - (a.createdAt?.getTime?.() ?? 0));
+        setReviews(items);
+        setLoading(false);
+      },
+      () => setLoading(false),
+    );
     return () => unsub();
   }, []);
 
   useEffect(() => {
-    if (!user) { setHasReviewed(false); return; }
+    if (!user) {
+      setHasReviewed(false);
+      return;
+    }
     async function check() {
       try {
-        const q = query(collection(db, 'reviews'), where('uid', '==', user!.uid), where('approved', '==', true));
+        const q = query(
+          collection(db, 'reviews'),
+          where('uid', '==', user!.uid),
+          where('approved', '==', true),
+        );
         const snap = await getDocs(q);
         setHasReviewed(!snap.empty);
-      } catch { setHasReviewed(false); }
+      } catch {
+        setHasReviewed(false);
+      }
     }
     check();
   }, [user]);
 
   async function handleSignIn() {
-    try { await signInWithPopup(auth, googleProvider); } catch (e) { console.error(e); }
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async function handleSignOut() {
-    try { await signOut(auth); setHasReviewed(false); } catch (e) { console.error(e); }
+    try {
+      await signOut(auth);
+      setHasReviewed(false);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
-  /* ─── Scroll progress ──────────────────────────────────── */
+  /* GSAP Scroll Animations */
+  useGSAP(
+    () => {
+      const section = sectionRef.current;
+      const hero = heroRef.current;
+      const grid = gridRef.current;
+      if (!section) return;
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    function onScroll() {
-      const rect = el!.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const sectionHeight = rect.height;
-      const scrollable = sectionHeight - vh;
-      if (scrollable <= 0) return;
-      const scrolled = -rect.top;
-      const progress = Math.max(0, Math.min(1, scrolled / scrollable));
-      setScrollProgress(progress);
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [ref]);
-
-  /* ─── Canvas state ───────────────────────────────────── */
-
-  const worldRef = useRef<HTMLDivElement | null>(null);
-  const posRef = useRef({ x: 0, y: 0 });
-  const targetRef = useRef({ x: 0, y: 0 });
-  const rafRef = useRef<number | null>(null);
-  const focusIdx = useRef(0);
-  const userInteractedAt = useRef(0);
-  const focusedId = useRef<string | null>(null);
-  const [blurred, setBlurred] = useState(false);
-  const [hintHidden, setHintHidden] = useState(false);
-
-  useEffect(() => { const t = setTimeout(() => setHintHidden(true), 6000); return () => clearTimeout(t); }, []);
-
-  const cardPositions = useMemo(() => distributeCards(reviews.length), [reviews.length]);
-  const skeletonPositions = useMemo(() => distributeCards(6), []);
-
-  /* ─── Pan ────────────────────────────────────────────── */
-
-  const animate = useCallback(() => {
-    const el = worldRef.current;
-    if (!el) return;
-    const lerp = 0.04;
-    posRef.current.x += (targetRef.current.x - posRef.current.x) * lerp;
-    posRef.current.y += (targetRef.current.y - posRef.current.y) * lerp;
-    el.style.transform = `translate(${-posRef.current.x}px, ${-posRef.current.y}px)`;
-    if (Math.abs(targetRef.current.x - posRef.current.x) > 0.5 || Math.abs(targetRef.current.y - posRef.current.y) > 0.5) {
-      rafRef.current = requestAnimationFrame(animate);
-    }
-  }, []);
-
-  const panTo = useCallback((x: number, y: number) => {
-    targetRef.current = { x, y };
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(animate);
-  }, [animate]);
-
-  function focusOnCard(idx: number) {
-    const pos = cardPositions[idx];
-    if (!pos) return;
-    focusedId.current = reviews[idx].id;
-    userInteractedAt.current = Date.now();
-    setBlurred(true);
-    panTo(pos.x - window.innerWidth / 2 + 140, pos.y - window.innerHeight * 0.1);
-    setTimeout(() => setBlurred(false), BLUR_DURATION);
-  }
-
-  /* ─── Auto-focus ─────────────────────────────────────── */
-
-  useEffect(() => {
-    if (reviews.length === 0) return;
-    const startX = WORLD_W / 2 - window.innerWidth / 2;
-    const startY = WORLD_H / 2 - window.innerHeight / 2;
-    posRef.current = { x: startX, y: startY };
-    targetRef.current = { x: startX, y: startY };
-
-    const interval = setInterval(() => {
-      if (Date.now() - userInteractedAt.current < RESUME_DELAY) return;
-      focusIdx.current = (focusIdx.current + 1) % reviews.length;
-      focusOnCard(focusIdx.current);
-    }, FOCUS_INTERVAL);
-    return () => clearInterval(interval);
-  }, [reviews.length, cardPositions]);
-
-  /* ─── Keyboard ───────────────────────────────────────── */
-
-  const [activeIdx, setActiveIdx] = useState(0);
-
-  useEffect(() => {
-    if (reviews.length === 0) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        const next = (activeIdx + 1) % reviews.length;
-        setActiveIdx(next);
-        focusOnCard(next);
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        const prev = (activeIdx - 1 + reviews.length) % reviews.length;
-        setActiveIdx(prev);
-        focusOnCard(prev);
+      // Hero reveal
+      if (hero) {
+        gsap.fromTo(
+          hero,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: hero,
+              start: 'top 85%',
+              toggleActions: 'play none none reverse',
+            },
+          },
+        );
       }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [reviews.length, activeIdx]);
 
-  /* ─── Mouse drag ─────────────────────────────────────── */
+      // Staggered card reveals
+      if (grid) {
+        const cards = Array.from(grid.querySelectorAll(`.${styles['review-card']}`));
+        if (cards.length > 0) {
+          gsap.fromTo(
+            cards,
+            { opacity: 0, y: 30, scale: 0.95 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.6,
+              stagger: 0.08,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: grid,
+                start: 'top 80%',
+                toggleActions: 'play none none reverse',
+              },
+            },
+          );
+        }
+      }
+    },
+    { scope: sectionRef },
+  );
 
-  const isDragging = useRef(false);
-  const dragStart = useRef({ x: 0, y: 0 });
-  const [canvasDragging, setCanvasDragging] = useState(false);
+  /* GSAP: Reviews sticky, Contact slides over */
+  useEffect(() => {
+    const section = sectionRef.current;
+    const contact = document.getElementById('contact');
+    if (!section || !contact) return;
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest(`.${styles['review-card']}`) || (e.target as HTMLElement).closest(`.${styles['reviews-hero']}`)) return;
-    isDragging.current = true;
-    setCanvasDragging(true);
-    userInteractedAt.current = Date.now();
-    focusedId.current = null;
-    setBlurred(false);
-    setHintHidden(true);
-    dragStart.current = { x: e.clientX + posRef.current.x, y: e.clientY + posRef.current.y };
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    const ctx = gsap.context(() => {
+      gsap.to(section, {
+        filter: 'blur(6px)',
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: contact,
+          start: 'top 88%',
+          end: 'top top',
+          scrub: true,
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
-
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging.current) return;
-    const x = dragStart.current.x - e.clientX;
-    const y = dragStart.current.y - e.clientY;
-    posRef.current = { x, y };
-    targetRef.current = { x, y };
-    if (worldRef.current) worldRef.current.style.transform = `translate(${-x}px, ${-y}px)`;
-  }, []);
-
-  const onMouseUp = useCallback(() => {
-    isDragging.current = false;
-    setCanvasDragging(false);
-  }, []);
-
-  /* ─── Touch drag ─────────────────────────────────────── */
-
-  const touchStart = useRef({ x: 0, y: 0 });
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest(`.${styles['review-card']}`) || (e.target as HTMLElement).closest(`.${styles['reviews-hero']}`)) return;
-    const t = e.touches[0];
-    isDragging.current = true;
-    setCanvasDragging(true);
-    userInteractedAt.current = Date.now();
-    focusedId.current = null;
-    setBlurred(false);
-    setHintHidden(true);
-    touchStart.current = { x: t.clientX + posRef.current.x, y: t.clientY + posRef.current.y };
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isDragging.current) return;
-    const t = e.touches[0];
-    const x = touchStart.current.x - t.clientX;
-    const y = touchStart.current.y - t.clientY;
-    posRef.current = { x, y };
-    targetRef.current = { x, y };
-    if (worldRef.current) worldRef.current.style.transform = `translate(${-x}px, ${-y}px)`;
-  }, []);
-
-  const onTouchEnd = useCallback(() => {
-    isDragging.current = false;
-    setCanvasDragging(false);
-  }, []);
-
-  /* ─── Modal ──────────────────────────────────────────── */
-
   function openReviewModal() {
-    if (!user) { handleSignIn(); return; }
+    if (!user) {
+      handleSignIn();
+      return;
+    }
     openModal({
       className: 'modal-panel--reviews',
       content: (
@@ -314,38 +217,33 @@ export default function Reviews() {
     });
   }
 
-  /* ─── Render ─────────────────────────────────────────── */
-
+  /* Render */
   return (
     <section
       id="reviews"
-      ref={ref}
-      className={`${styles.section} ${styles['section--reviews']} ${styles.reveal}${visible ? ` ${styles['is-visible']}` : ''}`}
-      style={{ '--scroll-progress': scrollProgress } as React.CSSProperties}
+      ref={sectionRef}
+      className={`${styles.section} ${styles['section--reviews']}`}
     >
-      <div
-        className={`${styles['reviews-canvas']}${blurred ? ` ${styles['reviews-canvas--blurred']}` : ''}${canvasDragging ? ` ${styles['reviews-canvas--dragging']}` : ''}${visible ? ` ${styles['is-revealed']}` : ''}`}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        <ReviewsHero isRevealed={visible} progress={scrollProgress} onOpenModal={openReviewModal} />
+      {/* Decorative grid background */}
+      <div className={styles['reviews-bg-grid']}>
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="reviews-grid" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#reviews-grid)" />
+        </svg>
+      </div>
 
-        <div className={`${styles['reviews-drag-hint']}${hintHidden ? ` ${styles['is-hidden']}` : ''}`}>
-          <span>drag to explore</span>
-          <PiArrowRight size={10} />
-        </div>
+      <div ref={heroRef} className={styles['reviews-hero-wrap']} style={{ position: 'relative', zIndex: 1 }}>
+        <ReviewsHero onOpenModal={openReviewModal} />
+      </div>
 
-        <div ref={worldRef} className={styles['reviews-world']} style={{ width: WORLD_W, height: WORLD_H }}>
-          {loading && skeletonPositions.map((pos, i) => (
-            <div
-              key={`skel-${i}`}
-              className={styles['review-card']} style={{ left: pos.x, top: pos.y, transform: `rotate(${pos.rotation}deg)`, opacity: 0.3 }}
-            >
+      <div ref={gridRef} className={styles['reviews-grid']} style={{ position: 'relative', zIndex: 1 }}>
+        {loading &&
+          Array.from({ length: 6 }, (_, i) => (
+            <div key={`skel-${i}`} className={`${styles['review-card']} ${styles['review-card--skeleton']}`}>
               <div className={styles['review-card-skeleton']}>
                 <div className={styles['skeleton-line']} style={{ width: '60%' }} />
                 <div className={styles['skeleton-line']} style={{ width: '90%' }} />
@@ -354,59 +252,56 @@ export default function Reviews() {
             </div>
           ))}
 
-          {!loading && reviews.length === 0 && (
-            <div className={styles['reviews-empty']} style={{ left: WORLD_W / 2, top: WORLD_H / 2 }}>
-              no reviews yet. be the first!
-            </div>
-          )}
+        {!loading && reviews.length === 0 && (
+          <div className={styles['reviews-empty']}>no reviews yet. be the first!</div>
+        )}
 
-          {!loading && reviews.map((review, i) => {
-            const pos = cardPositions[i];
-            if (!pos) return null;
-            return (
-              <div
-                key={review.id}
-                className={`${styles['review-card']}${focusedId.current === review.id ? ` ${styles['is-focused']}` : ''}`}
-                style={{
-                  left: pos.x,
-                  top: pos.y,
-                  transform: `rotate(${pos.rotation}deg)`,
-                  transitionDelay: `${i * 0.06}s`,
-                }}
-              >
-                {review.header && (
-                  <div className={styles['review-card-header']}>
-                    <span className={styles['review-card-header-dot']} />
-                    {review.header}
-                  </div>
-                )}
-                <p className={styles['review-card-text']}>{review.text}</p>
-                <div className={styles['review-card-footer']}>
-                  <div className={styles['review-card-author']}>
-                    {review.photoURL ? (
-                      <img src={review.photoURL} alt="" className={styles['review-card-avatar']} />
-                    ) : (
-                      <div className={styles['review-card-avatar--fallback']}>
-                        <PiUser size={12} />
-                      </div>
-                    )}
-                    <div className={styles['review-card-info']}>
-                      <span className={styles['review-card-name']}>{review.name}</span>
-                      {review.role && <span className={styles['review-card-role']}>{review.role}</span>}
-                    </div>
-                  </div>
-                  {review.rating && (
-                    <div className={styles['review-card-stars']}>
-                      {Array.from({ length: 5 }, (_, s) => (
-                        <PiStarFill key={s} size={11} className={s < review.rating! ? styles['star-filled'] : styles['star-empty']} />
-                      ))}
+        {!loading &&
+          reviews.map((review) => (
+            <div key={review.id} className={styles['review-card']}>
+              {review.header && (
+                <div className={styles['review-card-header']}>
+                  <span className={styles['review-card-header-dot']} />
+                  {review.header}
+                </div>
+              )}
+              <p className={styles['review-card-text']}>{review.text}</p>
+              <div className={styles['review-card-footer']}>
+                <div className={styles['review-card-author']}>
+                  {review.photoURL ? (
+                    <img
+                      src={review.photoURL}
+                      alt=""
+                      className={styles['review-card-avatar']}
+                    />
+                  ) : (
+                    <div className={styles['review-card-avatar--fallback']}>
+                      <PiUser size={12} />
                     </div>
                   )}
+                  <div className={styles['review-card-info']}>
+                    <span className={styles['review-card-name']}>{review.name}</span>
+                    {review.role && (
+                      <span className={styles['review-card-role']}>{review.role}</span>
+                    )}
+                  </div>
                 </div>
+                {review.rating && (
+                  <div className={styles['review-card-stars']}>
+                    {Array.from({ length: 5 }, (_, s) => (
+                      <PiStarFill
+                        key={s}
+                        size={11}
+                        className={
+                          s < review.rating! ? styles['star-filled'] : styles['star-empty']
+                        }
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          ))}
       </div>
     </section>
   );

@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useRef, useCallback, useState } f
 import { doc, onSnapshot, increment, runTransaction } from 'firebase/firestore';
 import { db } from '@/shared/config/firebase';
 
-/* ─── Types ──────────────────────────────────────────────── */
+/*  Types  */
 
 interface PersonalStats {
   clicks: number;
@@ -32,7 +32,7 @@ interface ActivityContextValue {
   incrementSectionsRevealed: () => void;
 }
 
-/* ─── Constants ──────────────────────────────────────────── */
+/*  Constants ── */
 
 const STORAGE_KEY = 'drme_activity';
 const SAVE_INTERVAL = 5000;
@@ -47,7 +47,7 @@ const EMPTY_GLOBAL: GlobalStats = {
   totalSectionsRevealed: 0,
 };
 
-/* ─── Helpers ────────────────────────────────────────────── */
+/*  Helpers ─ */
 
 function loadPersonal(): PersonalStats {
   try {
@@ -63,7 +63,7 @@ function savePersonal(stats: PersonalStats) {
   } catch {}
 }
 
-/* ─── Context ────────────────────────────────────────────── */
+/*  Context ─ */
 
 const ActivityContext = createContext<ActivityContextValue | null>(null);
 
@@ -73,7 +73,7 @@ export function useActivity() {
   return ctx;
 }
 
-/* ─── Provider ───────────────────────────────────────────── */
+/*  Provider  */
 
 export function ActivityProvider({ children }: { children: React.ReactNode }) {
   const [personal, setPersonal] = useState<PersonalStats>(EMPTY);

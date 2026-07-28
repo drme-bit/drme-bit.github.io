@@ -10,7 +10,7 @@
   color: var(--text-secondary);
 }
 
-// ─── Hero ─────────────────────────────────────────────────
+//  Hero ─
 
 .hero {
   position: relative;
@@ -35,7 +35,7 @@
 
   &-badge {
     display: inline-block;
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.6rem;
     color: #a78bfa;
     background: rgba(167, 139, 250, 0.1);
@@ -48,7 +48,7 @@
   }
 
   &-title {
-    font-family: var(--font-display);
+    font-family: var(--font-display), sans-serif;
     font-size: clamp(2.2rem, 5vw, 3.5rem);
     font-weight: 700;
     color: var(--text);
@@ -62,7 +62,7 @@
   }
 
   &-desc {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: clamp(0.95rem, 1.1vw, 1.05rem);
     color: var(--text-secondary);
     line-height: 1.8;
@@ -71,7 +71,7 @@
   }
 
   &-meta {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.65rem;
     color: var(--text-ghost);
     display: flex;
@@ -84,7 +84,7 @@
   }
 }
 
-// ─── Sections ─────────────────────────────────────────────
+//  Sections
 
 .section {
   margin: 0 auto;
@@ -104,7 +104,7 @@
 }
 
 .section-title {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.2rem, 1.8vw, 1.5rem);
   font-weight: 600;
   color: var(--text);
@@ -115,14 +115,14 @@
 }
 
 .section-prompt {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: #a78bfa;
   opacity: 0.6;
 }
 
 .body-text {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: clamp(0.88rem, 1vw, 0.95rem);
   color: var(--text-secondary);
   line-height: 1.85;
@@ -132,7 +132,7 @@
   border-left: 2px solid rgba(167, 139, 250, 0.15);
 }
 
-// ─── Code Blocks ──────────────────────────────────────────
+//  Code Blocks
 
 .code-block {
   position: relative;
@@ -157,7 +157,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   color: rgba(167, 139, 250, 0.5);
   background: rgba(167, 139, 250, 0.06);
@@ -171,7 +171,7 @@
   margin: 0;
   padding: 1.25rem 1.5rem;
   overflow-x: auto;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.78rem;
   line-height: 1.7;
   color: var(--text-secondary);
@@ -187,7 +187,7 @@
   }
 }
 
-// ─── Architecture Diagram ─────────────────────────────────
+//  Architecture Diagram
 
 .arch {
   margin: 3rem 0;
@@ -229,27 +229,27 @@
   }
 
   &-node-label {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.7rem;
     font-weight: 600;
     color: var(--text);
   }
 
   &-node-sub {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.55rem;
     color: var(--text-ghost);
   }
 
   &-arrow {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 1.2rem;
     color: var(--text-ghost);
     flex-shrink: 0;
   }
 }
 
-// ─── Feature Grid ─────────────────────────────────────────
+//  Feature Grid ──
 
 .feature-grid {
   display: grid;
@@ -277,21 +277,21 @@
   }
 
   &-label {
-    font-family: var(--font-mono);
+    font-family: var(--font-mono), monospace;
     font-size: 0.72rem;
     font-weight: 600;
     color: var(--text);
   }
 
   &-desc {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), sans-serif;
     font-size: 0.75rem;
     color: var(--text-dim);
     line-height: 1.5;
   }
 }
 
-// ─── Responsive ───────────────────────────────────────────
+//  Responsive ─
 
 @media (max-width: 700px) {
   .hero {

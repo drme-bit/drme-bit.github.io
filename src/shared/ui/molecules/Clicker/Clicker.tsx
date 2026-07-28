@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useActivity } from '@/providers/ActivityProvider';
 import styles from './Clicker.module.scss';
 
-/* ─── Achievements ───────────────────────────────────────── */
+/*  Achievements ── */
 
 interface Achievement {
   id: string;
@@ -42,7 +42,7 @@ function getLevel(clicks: number): { level: number; progress: number; next: numb
   return { level: 1, progress: clicks / 100, next: 100 };
 }
 
-/* ─── Particles ──────────────────────────────────────────── */
+/*  Particles ── */
 
 interface Particle {
   id: number;
@@ -53,7 +53,7 @@ interface Particle {
 
 const PARTICLE_CHARS = ['+', '*', '·', '✦', '●'];
 
-/* ─── Clicker ────────────────────────────────────────────── */
+/*  Clicker ─ */
 
 export default function Clicker() {
   const { personal, global, incrementClicks } = useActivity();

@@ -13,7 +13,7 @@
   border-radius: var(--radius-xs);
   background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
   box-shadow: var(--shadow-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   @include fs(small);
   color: var(--text-secondary);
   font-weight: 600;
