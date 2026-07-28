@@ -150,7 +150,6 @@ export function ProjectsList() {
               meta={meta}
               images={images}
             />
-            {!isLast && <div className={styles.cardSeparator} />}
           </div>
         );
       })}
