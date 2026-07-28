@@ -1,0 +1,80 @@
+@use '../../../styles/mixins' as *;
+
+.code-block {
+  position: relative;
+  margin: 1.5rem 0;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #0d1117;
+
+  &:hover .code-copy {
+    opacity: 1;
+  }
+
+  &:hover .code-lang {
+    opacity: 1;
+  }
+}
+
+.code-copy {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  color: var(--text-ghost);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &--done {
+    opacity: 1;
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.3);
+    background: rgba(52, 211, 153, 0.1);
+  }
+}
+
+.code-lang {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.6rem;
+  z-index: 2;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.5rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.code-pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  background: transparent !important;
+
+  code {
+    font-family: var(--font-mono), monospace;
+    font-size: 0.7rem;
+    line-height: 1.6;
+    background: none;
+    padding: 0;
+  }
+}

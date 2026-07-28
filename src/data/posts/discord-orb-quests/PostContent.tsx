@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { CodeBlock } from '@/shared/ui/molecules/CodeBlock';
+import CodeBlock from '@/shared/ui/molecules/CodeBlock/CodeBlock';
 import styles from './PostContent.module.scss';
 
 function Section({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {

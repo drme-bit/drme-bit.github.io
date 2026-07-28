@@ -1,18 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import CodeBlock from '@/shared/ui/molecules/CodeBlock/CodeBlock';
 import styles from './PostContent.module.scss';
-
-function CodeBlock({ code, lang }: { code: string; lang: string }) {
-  return (
-    <div className={styles['code-block']}>
-      <div className={styles['code-lang']}>{lang}</div>
-      <pre className={styles['code-pre']}>
-        <code>{code}</code>
-      </pre>
-    </div>
-  );
-}
 
 function Section({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
