@@ -8,6 +8,8 @@ import { NavProvider } from '@/providers/NavProvider';
 import Navbar from '@/widgets/navbar/Navbar';
 import { SmoothScrolling } from '@/widgets/smooth-scrolling/SmoothScrolling';
 import Mascot from '@/widgets/mascot/Mascot'
+import { LoadingCurtain } from '@/features/loading';
+import { PageTransitionProvider, TransitionLayer } from '@/features/transitions';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import './globals.scss';
@@ -76,13 +78,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ModalProvider>
               <ActivityProvider>
                 <NavProvider>
-                  <Navbar />
-                  <Analytics />
-                  <SpeedInsights />
-                  <SmoothScrolling>
-                    {children}
-                  </SmoothScrolling>
-                  <Mascot />
+                  <PageTransitionProvider>
+                    <LoadingCurtain />
+                    <TransitionLayer />
+                    <Navbar />
+                    <Analytics />
+                    <SpeedInsights />
+                    <SmoothScrolling>
+                      {children}
+                    </SmoothScrolling>
+                    <Mascot />
+                  </PageTransitionProvider>
                 </NavProvider>
               </ActivityProvider>
             </ModalProvider>

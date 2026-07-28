@@ -374,7 +374,7 @@ export function Projects() {
           ease: 'none',
           scrollTrigger: {
             trigger: blog,
-            start: 'top bottom',
+            start: 'top 88%',
             end: 'top top',
             scrub: true,
           },

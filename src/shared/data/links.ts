@@ -12,7 +12,7 @@ export const socialLinks = [
 
 export const navLinks = [
   { label: 'Stats', href: '/stats' },
-  { label: 'Blog', href: '/posts' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Projects', href: '/projects' },
 ];
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { TransitionLink } from '@/features/transitions';
 import {
   FiArrowLeft,
   FiArrowRight,
@@ -25,7 +25,7 @@ function FeaturedCard({ post }: { post: BlogPost }) {
   function handleClick(e: React.MouseEvent<HTMLElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
     setTransitionFrom({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
-    router.push(`/posts/${post.slug}`);
+    router.push(`/blog/${post.slug}`);
   }
 
   return (
@@ -80,7 +80,7 @@ function PostRow({ post, index }: { post: BlogPost; index: number }) {
   function handleClick(e: React.MouseEvent<HTMLElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
     setTransitionFrom({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
-    router.push(`/posts/${post.slug}`);
+    router.push(`/blog/${post.slug}`);
   }
 
   return (
@@ -146,9 +146,9 @@ export default function PostsList() {
   }, []);
 
   const featuredPost = blog.featured[0];
-  const regularPosts = blog.recent;
+  const allPosts = blog.all.filter(p => p.slug !== featuredPost?.slug);
 
-  const filteredPosts = regularPosts.filter((post) => {
+  const filteredPosts = allPosts.filter((post) => {
     const matchesCategory = activeCategory === 'All' || post.category === activeCategory;
     const matchesSearch =
       !searchQuery ||
@@ -163,12 +163,12 @@ export default function PostsList() {
       <header className={styles['pl-hero']}>
         <div className={styles['pl-hero-inner']}>
           <div className={styles['pl-hero-breadcrumb']}>
-            <Link href="/">home</Link>
+            <TransitionLink href="/">home</TransitionLink>
             <span>/</span>
-            <span className={styles['pl-hero-bc-current']}>posts</span>
+            <span className={styles['pl-hero-bc-current']}>blog</span>
           </div>
 
-          <h1 className={styles['pl-hero-title']}>posts</h1>
+          <h1 className={styles['pl-hero-title']}>blog</h1>
           <p className={styles['pl-hero-desc']}>
             Notes on frontend, architecture, and design — short reads about building things that
             work.
@@ -224,10 +224,10 @@ export default function PostsList() {
 
       {/* Footer */}
       <footer className={styles['pl-footer']}>
-        <Link href="/" className={styles['pl-footer-home']}>
+        <TransitionLink href="/" className={styles['pl-footer-home']}>
           <FiArrowLeft size={14} />
           <span>back to home</span>
-        </Link>
+        </TransitionLink>
       </footer>
     </div>
   );

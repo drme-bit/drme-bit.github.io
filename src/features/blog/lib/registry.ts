@@ -6,6 +6,7 @@ import type { BlogPostData } from './types';
 import integratingMeta from '@/data/posts/integrating-nodejs/meta';
 import cobeMeta from '@/data/posts/why-i-replaced-cobe/meta';
 import portfolioMeta from '@/data/posts/building-my-portfolio/meta';
+import discordMeta from '@/data/posts/discord-orb-quests/meta';
 
 /*  Raw data array (used by list page for sync access)  */
 
@@ -13,6 +14,7 @@ export const BLOG_POSTS_DATA: BlogPostData[] = [
   integratingMeta,
   cobeMeta,
   portfolioMeta,
+  discordMeta,
 ];
 
 /*  Singleton repository instance  */

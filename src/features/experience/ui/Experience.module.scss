@@ -5,6 +5,8 @@
   @include section-base;
 
   &.section--experience {
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     padding-bottom: 75vh;

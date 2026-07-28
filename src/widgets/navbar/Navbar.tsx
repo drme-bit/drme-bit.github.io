@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { TransitionLink } from '@/features/transitions';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -199,10 +200,10 @@ function MobileNav() {
             const RouteIcon = route.icon;
             return (
               <SheetClose key={route.id} asChild>
-                <Link href={route.href} className={styles.sheetRouteLink}>
+                <TransitionLink href={route.href} className={styles.sheetRouteLink}>
                   {RouteIcon && <RouteIcon className={styles.sheetLinkIcon} />}
                   <span className={styles.sheetLinkLabel}>{route.label}</span>
-                </Link>
+                </TransitionLink>
               </SheetClose>
             );
           })}
@@ -259,7 +260,7 @@ export default function Navbar() {
 
   // Reset nav config when leaving projects/post pages
   useEffect(() => {
-    if (!pathname.includes('/projects/') && !pathname.includes('/posts/')) {
+    if (!pathname.includes('/projects/') && !pathname.includes('/blog/')) {
       setPageConfig(null);
     }
   }, [pathname, setPageConfig]);

@@ -179,7 +179,7 @@ export default function Reviews() {
         ease: 'none',
         scrollTrigger: {
           trigger: contact,
-          start: 'top bottom',
+          start: 'top 88%',
           end: 'top top',
           scrub: true,
         },

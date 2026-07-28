@@ -10,7 +10,11 @@ const SPARKLE_POSITIONS = [
   { cx: 50, cy: 52, delay: 1.2 },
   { cx: 30, cy: 4, delay: 0.6 },
   { cx: 4, cy: 30, delay: 1.0 },
-];
+].map(p => ({
+  ...p,
+  left: `${((p.cx / 60) * 100).toFixed(4)}%`,
+  top: `${((p.cy / 60) * 100).toFixed(4)}%`,
+}));
 
 interface CompanionCubeProps {
   size?: number;
@@ -73,14 +77,14 @@ export default function CompanionCube({ size = 36, onClick, anger = 0, shake = f
       />
 
       {/* Sparkle particles */}
-      {SPARKLE_POSITIONS.map(({ cx, cy, delay }, i) => (
+      {SPARKLE_POSITIONS.map(({ left, top, delay }, i) => (
         <div
           key={i}
           className="companion-sparkle"
           style={{
             position: 'absolute',
-            left: `${(cx / 60) * 100}%`,
-            top: `${(cy / 60) * 100}%`,
+            left,
+            top,
             width: 2,
             height: 2,
             borderRadius: '50%',

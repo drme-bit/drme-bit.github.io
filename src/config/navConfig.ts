@@ -83,7 +83,7 @@ export const GLOBAL_NAV: NavItem[] = [
         id: 'blog-nav',
         type: 'route',
         label: 'Read Blog',
-        href: '/posts',
+        href: '/blog',
         icon: FiFileText,
       },
     ],
@@ -141,7 +141,7 @@ export const GLOBAL_NAV: NavItem[] = [
     type: 'group',
     label: 'blog',
     icon: FiFileText,
-    href: '/posts',
+    href: '/blog',
     children: [
       // ── Featured cards (left column) ──
       {
@@ -149,7 +149,7 @@ export const GLOBAL_NAV: NavItem[] = [
         type: 'route',
         label: 'Building My Portfolio',
         description: 'Featured — how this site was built from scratch.',
-        href: '/posts/building-my-portfolio',
+        href: '/blog/building-my-portfolio',
         icon: FiStar,
       },
       {
@@ -157,7 +157,7 @@ export const GLOBAL_NAV: NavItem[] = [
         type: 'route',
         label: 'Replaced cobe with three-globe',
         description: 'Why I switched 3D globe libraries.',
-        href: '/posts/why-i-replaced-cobe',
+        href: '/blog/why-i-replaced-cobe',
         icon: FiGlobe,
       },
       {
@@ -165,7 +165,7 @@ export const GLOBAL_NAV: NavItem[] = [
         type: 'route',
         label: 'Node.js Backend',
         description: 'Integrating a Node.js backend into the stack.',
-        href: '/posts/integrating-nodejs',
+        href: '/blog/integrating-nodejs',
         icon: FiZap,
       },
       // ── Small items (right column) ──
@@ -173,7 +173,7 @@ export const GLOBAL_NAV: NavItem[] = [
         id: 'all-posts',
         type: 'route',
         label: 'All Posts',
-        href: '/posts',
+        href: '/blog',
         icon: FiArrowRight,
       },
       {

@@ -80,7 +80,7 @@ export default function Experience() {
       ScrollTrigger.refresh();
 
       const iWidth = window.innerWidth;
-      const iHeight = window.innerHeight * 1.35;
+      const iHeight = window.innerHeight * 1.5;
       const iRatio = iWidth / iHeight;
       const isMobile = window.innerWidth < 768;
 

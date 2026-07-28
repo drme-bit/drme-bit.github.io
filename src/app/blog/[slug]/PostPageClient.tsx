@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { motion } from 'motion/react';
 import {
@@ -54,6 +53,10 @@ const POST_COMPONENTS: Record<string, React.ComponentType> = {
     () => import('@/data/posts/building-my-portfolio/PostContent'),
     { ssr: false, loading: () => <div className={styles['post-loading']}>loading...</div> }
   ),
+  'discord-orb-quests': dynamic(
+    () => import('@/data/posts/discord-orb-quests/PostContent'),
+    { ssr: false, loading: () => <div className={styles['post-loading']}>loading...</div> }
+  ),
 };
 
 /*  Main Component  */
@@ -81,7 +84,7 @@ export default function PostPageClient() {
   }, [slug]);
 
   useEffect(() => {
-    if (!post) router.replace('/posts');
+    if (!post) router.replace('/blog');
   }, [post, router]);
 
   // Configure nav with prev/next arrows
@@ -90,10 +93,10 @@ export default function PostPageClient() {
     setPageConfig({
       pagination: {
         prev: prevPost
-          ? { label: prevPost.title, href: `/posts/${prevPost.slug}`, onClick: () => router.push(`/posts/${prevPost.slug}`) }
+          ? { label: prevPost.title, href: `/blog/${prevPost.slug}`, onClick: () => router.push(`/blog/${prevPost.slug}`) }
           : undefined,
         next: nextPost
-          ? { label: nextPost.title, href: `/posts/${nextPost.slug}`, onClick: () => router.push(`/posts/${nextPost.slug}`) }
+          ? { label: nextPost.title, href: `/blog/${nextPost.slug}`, onClick: () => router.push(`/blog/${nextPost.slug}`) }
           : undefined,
       },
     });

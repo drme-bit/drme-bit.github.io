@@ -28,10 +28,10 @@ function PostCard({ post, index }: { post: BlogPost; index: number }) {
         y: 0,
         duration: 0.7,
         ease: 'power2.out',
-        delay: index * 0.08,
+        delay: index * 0.04,
         scrollTrigger: {
           trigger: el,
-          start: 'top 85%',
+          start: 'top 88%',
           toggleActions: 'play none none reverse',
         },
       },
@@ -42,7 +42,7 @@ function PostCard({ post, index }: { post: BlogPost; index: number }) {
     <article
       ref={ref}
       className={`${styles['blog-card']}${post.featured ? ` ${styles['blog-card--featured']}` : ''}`}
-      onClick={() => router.push(`/posts/${post.slug}`)}
+      onClick={() => router.push(`/blog/${post.slug}`)}
     >
       <div className={styles['blog-card-inner']}>
         <div className={styles['blog-card-top']}>
@@ -95,7 +95,7 @@ export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useR
     const wrapperRef = useRef<HTMLDivElement>(null);
     const sectionRef = useRef<HTMLDivElement>(null);
     const featured = blog.featured;
-    const recent = blog.recent.slice(0, 2);
+    const recent = blog.recent.slice(0, 4);
 
     useImperativeHandle(ref, () => wrapperRef.current!);
 
@@ -118,7 +118,7 @@ export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useR
           </div>
 
           <div className={styles['blog-footer']}>
-            <button className={styles['blog-view-all']} onClick={() => router.push('/posts')}>
+            <button className={styles['blog-view-all']} onClick={() => router.push('/blog')}>
               <span>view all posts</span>
               <FiArrowRight size={13} />
             </button>

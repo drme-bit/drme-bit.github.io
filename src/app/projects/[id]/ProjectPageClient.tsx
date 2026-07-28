@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { TransitionLink } from '@/features/transitions';
 import {
   FiGithub,
   FiExternalLink,
@@ -374,7 +374,7 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
   if (!project) return null;
 
   return (
-    <div className={styles['projects-page']}>
+    <div className={styles['project-page']}>
       {/* Hero */}
       <header className={styles['pp-hero']}>
         {(project.video || project.image) && (
@@ -397,9 +397,9 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
         )}
         <div className={styles['pp-hero-inner']}>
           <div className={styles['pp-hero-breadcrumb']}>
-            <Link href="/">home</Link>
+            <TransitionLink href="/">home</TransitionLink>
             <span>/</span>
-            <Link href="/#projects">projects</Link>
+            <TransitionLink href="/#projects">projects</TransitionLink>
             <span>/</span>
             <span className={styles['pp-hero-bc-current']}>{project.id}</span>
           </div>

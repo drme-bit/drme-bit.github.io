@@ -42,7 +42,7 @@ function resolveActiveRouteId(
   }
 
   if (pathname.startsWith('/projects/')) return 'projects';
-  if (pathname.startsWith('/posts/')) return 'blog';
+  if (pathname.startsWith('/blog/')) return 'blog';
 
   return null;
 }

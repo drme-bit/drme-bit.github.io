@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import Link from 'next/link';
+import { TransitionLink } from '@/features/transitions';
 import {
   FiHeart,
   FiMail,
@@ -50,8 +50,8 @@ export function PremiumFooter() {
           force3D: true,
           scrollTrigger: {
             trigger: wrapper,
-            start: 'top bottom',
-            end: 'bottom bottom-=25%',
+            start: 'top 88%',
+            end: 'bottom bottom-=30%',
             scrub: true,
             invalidateOnRefresh: true,
           },
@@ -147,9 +147,9 @@ export function PremiumFooter() {
                 <ul className={styles.navList}>
                   {footerNavLinks.map((link) => (
                     <li key={link.label}>
-                      <Link className={styles.navLink} href={link.href} prefetch={false}>
+                      <TransitionLink className={styles.navLink} href={link.href}>
                         {link.label}
-                      </Link>
+                      </TransitionLink>
                     </li>
                   ))}
                 </ul>
