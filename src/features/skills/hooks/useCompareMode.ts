@@ -1,16 +1,16 @@
 import { useState, useCallback } from 'react';
-import type { SkillItem } from '../types/skills';
+import type { Skill } from '../lib';
 
 export function useCompareMode() {
   const [isCompareMode, setIsCompareMode] = useState(false);
-  const [compareSkill, setCompareSkill] = useState<SkillItem | null>(null);
+  const [compareSkill, setCompareSkill] = useState<Skill | null>(null);
 
   const toggleCompareMode = useCallback(() => {
     setIsCompareMode((prev) => !prev);
     setCompareSkill(null);
   }, []);
 
-  const selectCompareSkill = useCallback((skill: SkillItem) => {
+  const selectCompareSkill = useCallback((skill: Skill) => {
     setCompareSkill(skill);
   }, []);
 

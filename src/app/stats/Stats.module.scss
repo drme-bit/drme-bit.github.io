@@ -11,7 +11,7 @@
   margin: 0 auto;
 }
 
-/* ─── Header ─────────────────────────────────────────────── */
+/*  Header ── */
 
 .header {
   text-align: center;
@@ -19,7 +19,7 @@
 }
 
 .title {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   font-weight: 700;
   color: var(--text);
@@ -27,7 +27,7 @@
 }
 
 .subtitle {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   color: var(--text-ghost);
   letter-spacing: 0.1em;
@@ -35,7 +35,7 @@
   margin: 0;
 }
 
-/* ─── Profile Card ───────────────────────────────────────── */
+/*  Profile Card ── */
 
 .profileCard {
   display: flex;
@@ -73,7 +73,7 @@
 }
 
 .profileLevel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   font-weight: 700;
   color: #fff;
@@ -87,14 +87,14 @@
 }
 
 .profileName {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.8rem;
   color: var(--text);
   font-weight: 600;
 }
 
 .profileRank {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.15em;
@@ -112,7 +112,7 @@
 }
 
 .profileBigValue {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--text);
@@ -120,20 +120,20 @@
 }
 
 .profileBigLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-ghost);
   letter-spacing: 0.08em;
 }
 
-/* ─── Sections ───────────────────────────────────────────── */
+/*  Sections  */
 
 .section {
   margin-bottom: 2.5rem;
 }
 
 .sectionTitle {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text);
@@ -152,7 +152,7 @@
   flex-shrink: 0;
 }
 
-/* ─── Global Overview ────────────────────────────────────── */
+/*  Global Overview ── */
 
 .overviewGrid {
   display: grid;
@@ -177,14 +177,14 @@
 }
 
 .overviewValue {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--text);
 }
 
 .overviewLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   color: var(--text-ghost);
   letter-spacing: 0.08em;
@@ -192,7 +192,7 @@
   text-align: center;
 }
 
-/* ─── Your Stats Grid ────────────────────────────────────── */
+/*  Your Stats Grid ── */
 
 .yourStatsGrid {
   display: grid;
@@ -220,14 +220,14 @@
 }
 
 .yourStatValue {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 1.3rem;
   font-weight: 700;
   color: var(--text);
 }
 
 .yourStatLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   color: var(--text-dim);
   letter-spacing: 0.08em;
@@ -235,13 +235,13 @@
 }
 
 .yourStatPct {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.45rem;
   color: var(--accent-secondary);
   letter-spacing: 0.05em;
 }
 
-/* ─── Contribution Bars ──────────────────────────────────── */
+/*  Contribution Bars  */
 
 .contribList {
   display: flex;
@@ -262,7 +262,7 @@
 }
 
 .contribLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text);
   flex: 1;
@@ -271,7 +271,7 @@
 }
 
 .contribShare {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   font-weight: 700;
   color: var(--accent-secondary);
@@ -296,12 +296,12 @@
 .contribValues {
   display: flex;
   justify-content: space-between;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.45rem;
   color: var(--text-ghost);
 }
 
-/* ─── Achievements Grid ──────────────────────────────────── */
+/*  Achievements Grid  */
 
 .achievementsGrid {
   display: grid;
@@ -336,7 +336,7 @@
 }
 
 .achTitle {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   font-weight: 600;
   color: var(--text);
@@ -344,13 +344,13 @@
 }
 
 .achDesc {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.45rem;
   color: var(--text-ghost);
   text-align: center;
 }
 
-/* ─── Responsive ─────────────────────────────────────────── */
+/*  Responsive ─ */
 
 @media (max-width: 700px) {
   .page {

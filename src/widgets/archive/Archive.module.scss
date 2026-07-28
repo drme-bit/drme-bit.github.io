@@ -35,7 +35,7 @@
   animation: archiveSlideIn 0.35s cubic-bezier(0.32, 0.72, 0, 1);
 
   @media (max-width: 700px) {
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     border-radius: 0;
     border: none;
@@ -81,7 +81,7 @@
 }
 
 .archive-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-ghost);
   letter-spacing: 0.06em;
@@ -138,7 +138,7 @@
   text-align: left;
   background: none;
   border: none;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.58rem;
   color: var(--text-dim);
   padding: 0.4rem 0.85rem;
@@ -270,7 +270,7 @@
 }
 
 .archive-card-name {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.52rem;
   color: var(--text-secondary);
   white-space: nowrap;
@@ -285,7 +285,7 @@
   justify-content: center;
   height: 100%;
   min-height: 200px;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-ghost);
 }
@@ -297,7 +297,7 @@
   padding: 0.3rem 0.75rem;
   border-top: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.01);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.48rem;
   color: var(--text-ghost);
   flex-shrink: 0;
@@ -328,7 +328,7 @@
 }
 
 .archive-preview-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-secondary);
   letter-spacing: 0.04em;
@@ -340,7 +340,7 @@
 }
 
 .archive-preview-counter {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   color: var(--text-ghost);
   flex-shrink: 0;

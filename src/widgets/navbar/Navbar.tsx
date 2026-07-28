@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { TransitionLink } from '@/features/transitions';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   FiMenu,
-} from 'react-icons/fi';
+} from '@/shared/ui/atoms/Icon';
 import { useNav } from '@/providers/NavProvider';
 import { GLOBAL_NAV } from '@/config/navConfig';
 import type { NavGroup, NavRouteLink, NavSectionLink, NavLeaf } from '@/config/navTypes';
@@ -17,12 +18,19 @@ import {
   SheetTrigger,
 } from '@/shared/ui/organisms/Sheet/Sheet';
 
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import { NavDropdown } from './NavDropdown';
 import SearchBar from '@/shared/ui/molecules/SearchBar/SearchBar';
 import ChangeTheme from '@/shared/ui/molecules/ChangeTheme/ChangeTheme';
 import styles from './Navbar.module.scss';
 
-/* ─── Expandable tab (like ExpandableTabs component) ────── */
+//Init gsap plugin
+gsap.registerPlugin(ScrollTrigger);
+
+/*  Expandable tab (like ExpandableTabs component)  */
 
 const tabVariants = {
   initial: { gap: 0, paddingLeft: '.7rem', paddingRight: '.7rem' },
@@ -85,7 +93,7 @@ function ExpandableTab({
   );
 }
 
-/* ─── Group trigger ──────── */
+/*  Group trigger ── */
 
 function leafHref(leaf: NavLeaf): string {
   if (leaf.type === 'route') return leaf.href;
@@ -135,7 +143,7 @@ function GroupDropdown({
   );
 }
 
-/* ─── Mobile: Sheet nav ─────────────────────────────────── */
+/*  Mobile: Sheet nav ── */
 
 function MobileNav() {
   const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
@@ -192,10 +200,10 @@ function MobileNav() {
             const RouteIcon = route.icon;
             return (
               <SheetClose key={route.id} asChild>
-                <Link href={route.href} className={styles.sheetRouteLink}>
+                <TransitionLink href={route.href} className={styles.sheetRouteLink}>
                   {RouteIcon && <RouteIcon className={styles.sheetLinkIcon} />}
                   <span className={styles.sheetLinkLabel}>{route.label}</span>
-                </Link>
+                </TransitionLink>
               </SheetClose>
             );
           })}
@@ -205,7 +213,7 @@ function MobileNav() {
   );
 }
 
-/* ─── Main Navbar ───────────────────────────────────────── */
+/*  Main Navbar ── */
 
 export default function Navbar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -224,11 +232,14 @@ export default function Navbar() {
 
   const hasContextSections = (pageConfig?.contextItems?.length ?? 0) > 0;
 
-  const handleGroupOpen = useCallback((groupId: string) => {
-    clearTimeout(closeGroupIdTimer.current!);
-    prevGroupIndex.current = groups.findIndex((g) => g.id === groupId);
-    setOpenGroupId(groupId);
-  }, [groups]);
+  const handleGroupOpen = useCallback(
+    (groupId: string) => {
+      clearTimeout(closeGroupIdTimer.current!);
+      prevGroupIndex.current = groups.findIndex((g) => g.id === groupId);
+      setOpenGroupId(groupId);
+    },
+    [groups],
+  );
 
   const scheduleGroupClose = useCallback(() => {
     closeGroupIdTimer.current = setTimeout(() => {
@@ -249,36 +260,52 @@ export default function Navbar() {
 
   // Reset nav config when leaving projects/post pages
   useEffect(() => {
-    if (!pathname.includes('/projects/') && !pathname.includes('/posts/')) {
+    if (!pathname.includes('/projects/') && !pathname.includes('/blog/')) {
       setPageConfig(null);
     }
   }, [pathname, setPageConfig]);
 
-  // Collapse on scroll — position-based thresholds with smooth hysteresis
-  useEffect(() => {
-    const HIDE_Y = 80;
-    const SHOW_Y = 20;
-    let ticking = false;
+  useGSAP(() => {
+    const nav = ref.current;
+    if (!nav) return;
 
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
+    let isHovered = false;
 
-        if (y > HIDE_Y) {
-          setCollapsed(true);
-        } else if (y < SHOW_Y) {
-          setCollapsed(false);
+    const st = ScrollTrigger.create({
+      start: 'top top',
+      end: 'max',
+      onUpdate: (self) => {
+        if (isHovered) return;
+
+        if (self.direction === 1 && self.scroll() > 80) {
+          nav.classList.add(styles['nav--collapsed']);
+        } else if (self.direction === -1 || self.scroll() < 20) {
+          nav.classList.remove(styles['nav--collapsed']);
         }
-        ticking = false;
-      });
+      },
+    });
+
+    const handleMouseEnter = () => {
+      isHovered = true;
+      nav.classList.remove(styles['nav--collapsed']);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    const handleMouseLeave = () => {
+      isHovered = false;
+
+      if (window.scrollY > 80) {
+        nav.classList.add(styles['nav--collapsed']);
+      }
+    };
+
+    nav.addEventListener('mouseenter', handleMouseEnter);
+    nav.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      st.kill();
+      nav.removeEventListener('mouseenter', handleMouseEnter);
+      nav.removeEventListener('mouseleave', handleMouseLeave);
+    };
   }, []);
 
   const handleGroupLinkClick = useCallback(
@@ -298,17 +325,14 @@ export default function Navbar() {
     [pathname, setActiveSection],
   );
 
-  const handleTabSelect = useCallback(
-    (index: number, item: NavRouteLink) => {
-      setSelectedTab(index);
-      if (item.href === '/') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        window.location.href = item.href;
-      }
-    },
-    [],
-  );
+  const handleTabSelect = useCallback((index: number, item: NavRouteLink) => {
+    setSelectedTab(index);
+    if (item.href === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.location.href = item.href;
+    }
+  }, []);
 
   const handleContextClick = useCallback(
     (item: NavLeaf) => {
@@ -357,6 +381,7 @@ export default function Navbar() {
 
       <nav
         ref={ref}
+        data-section={active.sectionId || undefined}
         className={`${styles.nav}${collapsed ? ` ${styles['nav--collapsed']}` : ''}${
           hasContextSections ? ` ${styles['nav--context']}` : ''
         }`}
@@ -378,65 +403,65 @@ export default function Navbar() {
           </svg>
         </Link>
 
-      {/* Desktop navigation */}
-      <div className={styles.desktopNav}>
-        <ul className={styles.navList}>
-          {groups.map((group) => (
-            <GroupDropdown
-              key={group.id}
-              group={group}
-              isActive={active.routeId === group.id}
-              isOpen={openGroupId === group.id}
-              onOpen={() => handleGroupOpen(group.id)}
-              onScheduleClose={scheduleGroupClose}
-              onCancelClose={cancelGroupClose}
-              router={router}
-            />
-          ))}
-
-          {routes.map((route, index) => (
-            <li key={route.id}>
-              <ExpandableTab
-                item={route}
-                isSelected={selectedTab === index}
-                isRouteActive={active.routeId === route.id}
-                onSelect={() => handleTabSelect(index, route)}
+        {/* Desktop navigation */}
+        <div className={styles.desktopNav}>
+          <ul className={styles.navList}>
+            {groups.map((group) => (
+              <GroupDropdown
+                key={group.id}
+                group={group}
+                isActive={active.routeId === group.id}
+                isOpen={openGroupId === group.id}
+                onOpen={() => handleGroupOpen(group.id)}
+                onScheduleClose={scheduleGroupClose}
+                onCancelClose={cancelGroupClose}
+                router={router}
               />
-            </li>
-          ))}
-        </ul>
-      </div>
+            ))}
 
-      {/* Context items (sections / page TOC) */}
-      {hasContextSections && pageConfig?.contextItems && (
-        <>
-          <div className={styles.divider} />
-          <div className={styles.contextItems}>
-            {pageConfig.contextItems.map((item) => {
-              const isActive = active.sectionId === item.id;
-              return (
-                <button
-                  key={item.id}
-                  className={`${styles.contextItem}${
-                    isActive ? ` ${styles['contextItem--active']}` : ''
-                  }`}
-                  onClick={() => handleContextClick(item)}
-                >
-                  {item.label}
-                  {isActive && <span className={styles.contextIndicator} />}
-                </button>
-              );
-            })}
-          </div>
-        </>
-      )}
+            {routes.map((route, index) => (
+              <li key={route.id}>
+                <ExpandableTab
+                  item={route}
+                  isSelected={selectedTab === index}
+                  isRouteActive={active.routeId === route.id}
+                  onSelect={() => handleTabSelect(index, route)}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      {/* Mobile menu */}
-      <MobileNav />
+        {/* Context items (sections / page TOC) */}
+        {hasContextSections && pageConfig?.contextItems && (
+          <>
+            <div className={styles.divider} />
+            <div className={styles.contextItems}>
+              {pageConfig.contextItems.map((item) => {
+                const isActive = active.sectionId === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    className={`${styles.contextItem}${
+                      isActive ? ` ${styles['contextItem--active']}` : ''
+                    }`}
+                    onClick={() => handleContextClick(item)}
+                  >
+                    {item.label}
+                    {isActive && <span className={styles.contextIndicator} />}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
 
-      {/* Dropdown panel */}
-      {dropdownPanel}
-    </nav>
+        {/* Mobile menu */}
+        <MobileNav />
+
+        {/* Dropdown panel */}
+        {dropdownPanel}
+      </nav>
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useTheme, THEMES, type ThemeId, type FontSize } from '@/providers/ThemeProvider';
-import { FiSettings } from 'react-icons/fi';
+import { FiSettings } from '@/shared/ui/atoms/Icon';
 import styles from './ChangeTheme.module.scss';
 
 export default function ChangeTheme() {

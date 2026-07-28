@@ -2,38 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { TransitionLink } from '@/features/transitions';
 import {
   FiGithub,
   FiExternalLink,
   FiCheck,
   FiCode,
   FiAlertCircle,
-} from 'react-icons/fi';
-import { getProjectById, getProjectIndex, PROJECTS } from '@/data/projectsData';
+} from '@/shared/ui/atoms/Icon';
+import { projects } from '@/features/projects/lib/registry';
+import { STATUS_META } from '@/features/projects/lib/constants';
+import type { Project } from '@/features/projects/lib/project-repository';
 import { NavLeaf, useNav } from '@/providers/NavProvider';
 import styles from './ProjectPage.module.scss';
-
-interface Project {
-  id: string;
-  title: string;
-  url?: string;
-  repo?: string;
-  desc: string;
-  fullDesc?: string;
-  tech: string[];
-  status: string;
-  image?: string | null;
-  images?: string[];
-  video?: string | null;
-  stages?: { title: string; duration?: string; desc: string }[];
-  features?: string[];
-  architecture?: string;
-  challenges?: string;
-  plans?: string;
-  sections?: ContentSection[];
-  [key: string]: unknown;
-}
 
 interface ContentSection {
   id: string;
@@ -44,10 +25,7 @@ interface ContentSection {
   cards?: { title: string; icon?: React.ComponentType<{ size?: number }>; body: string }[];
 }
 
-const STATUS_META: Record<string, { icon: string; cls: string; label: string }> = {
-  ACTIVE: { icon: '●', cls: 'badge--active', label: 'active' },
-  ARCHIVED: { icon: '◌', cls: 'badge--archived', label: 'archived' },
-};
+
 
 function splitParagraphs(text: string | undefined | null): string[] {
   if (!text) return [];
@@ -305,7 +283,7 @@ function renderSectionContent(section: ContentSection) {
 export default function ProjectPageClient({ params }: { params: Promise<{ id: string }> }) {
   const { id } = useParams() as { id: string };
   const router = useRouter();
-  const project = getProjectById(id) as Project | undefined;
+  const project = projects.get(id);
   const { setPageConfig, setActiveSection } = useNav();
 
   useEffect(() => {
@@ -316,11 +294,13 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
     if (!project) router.replace('/');
   }, [project, router]);
 
-  const meta = project ? STATUS_META[project.status] || STATUS_META.ARCHIVED : null;
-  const currentIndex = project ? getProjectIndex(id) : -1;
-  const prevProject = currentIndex > 0 ? PROJECTS[currentIndex - 1] : null;
+  const meta = project ? STATUS_META[project.status] || STATUS_META.ACTIVE : null;
+  const StatusIcon = meta?.icon;
+  const allProjects = projects.all;
+  const currentIndex = project ? allProjects.findIndex(p => p.id === id) : -1;
+  const prevProject = currentIndex > 0 ? allProjects[currentIndex - 1] : null;
   const nextProject =
-    project && currentIndex < PROJECTS.length - 1 ? PROJECTS[currentIndex + 1] : null;
+    project && currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null;
   const contentSections: ContentSection[] = project
     ? Array.isArray(project.sections) && project.sections.length > 0
       ? (project.sections as ContentSection[])
@@ -394,7 +374,7 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
   if (!project) return null;
 
   return (
-    <div className={styles['projects-page']}>
+    <div className={styles['project-page']}>
       {/* Hero */}
       <header className={styles['pp-hero']}>
         {(project.video || project.image) && (
@@ -417,9 +397,9 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
         )}
         <div className={styles['pp-hero-inner']}>
           <div className={styles['pp-hero-breadcrumb']}>
-            <Link href="/">home</Link>
+            <TransitionLink href="/">home</TransitionLink>
             <span>/</span>
-            <Link href="/#projects">projects</Link>
+            <TransitionLink href="/#projects">projects</TransitionLink>
             <span>/</span>
             <span className={styles['pp-hero-bc-current']}>{project.id}</span>
           </div>
@@ -427,11 +407,11 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
           <p className={styles['pp-hero-desc']}>{project.desc}</p>
           <div className={styles['pp-hero-meta']}>
             <span className={`${styles['pp-hero-status']} ${styles[meta!.cls]}`}>
-              {meta!.icon} {meta!.label}
+              {StatusIcon && <StatusIcon size={12} />} {meta!.label}
             </span>
             <span className={styles['pp-hero-counter']}>
               {String(currentIndex + 1).padStart(2, '0')} /{' '}
-              {String(PROJECTS.length).padStart(2, '0')}
+              {String(allProjects.length).padStart(2, '0')}
             </span>
           </div>
           <div className={styles['pp-hero-actions']}>
@@ -508,11 +488,11 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
             <div className={styles['pp-right-section']}>
               <span className={styles['pp-right-label']}>Status</span>
               <span className={`${styles['pp-right-status']} ${styles[meta!.cls]}`}>
-                {meta!.icon} {meta!.label}
+                {StatusIcon && <StatusIcon size={12} />} {meta!.label}
               </span>
               <span className={styles['pp-right-counter']}>
                 {String(currentIndex + 1).padStart(2, '0')} /{' '}
-                {String(PROJECTS.length).padStart(2, '0')}
+                {String(allProjects.length).padStart(2, '0')}
               </span>
             </div>
 
@@ -520,7 +500,7 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
             <div className={styles['pp-right-section']}>
               <span className={styles['pp-right-label']}>Stack</span>
               <div className={styles['pp-right-stack']}>
-                {project.tech.map((t) => (
+                {project.techNames.map((t) => (
                   <span key={t} className={styles['pp-right-tag']}>
                     {t}
                   </span>

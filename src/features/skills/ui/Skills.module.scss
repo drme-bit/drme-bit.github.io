@@ -1,7 +1,7 @@
 @use '../../../shared/styles/mixins' as *;
 @use '../../../shared/styles/animations' as *;
 
-/* ── Section shell ─────────────────────────────────────── */
+/* ── Section shell  */
 .section {
   @include section-base;
 
@@ -22,7 +22,7 @@
   @include reveal-base;
 }
 
-/* ── Sticky viewport ───────────────────────────────────── */
+/* ── Sticky viewport ─ */
 .skills-sticky {
   position: sticky;
   top: 0;
@@ -30,7 +30,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: visible;
+  overflow: hidden;
   padding: 0 6vw;
 
   @media (max-width: 900px) {
@@ -43,7 +43,7 @@
   }
 }
 
-/* ── Skills header (left side) ─────────────────────────── */
+/* ── Skills header (left side)  */
 .skills-header {
   position: absolute;
   left: 6vw;
@@ -71,7 +71,7 @@
 
 .skills-header-num {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--accent-secondary);
   margin-bottom: 4px;
@@ -82,7 +82,7 @@
 }
 
 .skills-header-title {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(2.5rem, 10vw, 4.5rem);
   color: var(--text);
   margin: 0;
@@ -98,7 +98,7 @@
 }
 
 .skills-header-desc {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.75rem;
   color: var(--text-dim);
   margin-top: 12px;
@@ -109,7 +109,7 @@
   }
 }
 
-/* ── Filters bar (top center) ──────────────────────────── */
+/* ── Filters bar (top center) ─ */
 .skills-filters {
   position: absolute;
   top: 3vh;
@@ -181,7 +181,7 @@
   background: none;
   border: none;
   outline: none;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   color: var(--text);
   min-width: 0;
@@ -232,7 +232,7 @@
   background: none;
   border: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
   border-radius: var(--radius-full);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-dim);
   cursor: pointer;
@@ -305,7 +305,7 @@
   background: none;
   border: none;
   border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-dim);
   cursor: pointer;
@@ -331,7 +331,7 @@
 }
 
 .skills-filter-count {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-ghost);
   padding: 0 4px;
@@ -357,7 +357,7 @@
   }
 }
 
-/* ── Globe layout ──────────────────────────────────────── */
+/* ── Globe layout ─ */
 .skills-layout {
   display: flex;
   align-items: center;
@@ -370,7 +370,7 @@
   }
 }
 
-/* ── Background decorative cards ───────────────────────── */
+/* ── Background decorative cards ─ */
 .skills-bg-cards {
   position: absolute;
   inset: 0;
@@ -424,7 +424,7 @@
 }
 
 .skills-bg-card-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -438,7 +438,7 @@
 }
 
 .skills-bg-card-value {
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--text);
@@ -446,7 +446,7 @@
 }
 
 .skills-bg-card-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-ghost);
 }
@@ -513,7 +513,7 @@
   z-index: 2;
 }
 
-/* ── Skill level dots (modal) ──────────────────────────── */
+/* ── Skill level dots (modal) ─ */
 .skill-level {
   display: flex;
   align-items: center;
@@ -534,19 +534,19 @@
 }
 
 .skill-level-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-ghost);
   margin-left: 6px;
 }
 
-/* ── Modal sheet ───────────────────────────────────────── */
+/* ── Modal sheet ── */
 .skills-sheet-tag {
   padding: 4px 10px;
   background: color-mix(in srgb, var(--accent-secondary) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent-secondary) 30%, transparent);
   border-radius: 6px;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--accent-secondary);
   transition: all 0.2s ease;
@@ -629,13 +629,13 @@
 
 .skills-mobile-sheet-name {
   display: block;
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
 }
 
 .skills-mobile-sheet-group {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-ghost);
   text-transform: uppercase;
@@ -650,7 +650,7 @@
 }
 
 .skills-sheet-fun {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   font-style: italic;
   color: var(--accent-secondary);
@@ -667,7 +667,7 @@
 
 .skills-sheet-section-title {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-ghost);
   text-transform: uppercase;
@@ -681,7 +681,7 @@
   gap: 6px;
 }
 
-/* ─── Fun Tips Panel ────────────────────────────────────── */
+/*  Fun Tips Panel ── */
 
 .skills-guide {
   position: absolute;
@@ -730,7 +730,7 @@
 
 .skills-tips-title {
   margin-left: auto;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--terminal-title);
   letter-spacing: 0.05em;
@@ -758,7 +758,7 @@
 }
 
 .skills-guide-step {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   color: var(--accent-secondary);
 }
@@ -771,7 +771,7 @@
 
 .skills-guide-copy {
   display: flex;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   flex-direction: column;
   gap: 0.1rem;
 
@@ -787,7 +787,7 @@
   }
 }
 
-/* ── Slide-out skill panel ─────────────────────────────── */
+/* ── Slide-out skill panel ─ */
 .skills-panel {
   position: fixed;
   top: 50%;
@@ -833,7 +833,7 @@
   }
 }
 
-/* ── Panel toolbar ──────────────────────────────────────── */
+/* ── Panel toolbar ─ */
 .skills-panel-toolbar {
   display: flex;
   align-items: center;
@@ -915,7 +915,7 @@
   }
 }
 
-/* ── History bar ────────────────────────────────────────── */
+/* ── History bar  */
 .skills-panel-history {
   display: flex;
   align-items: center;
@@ -950,7 +950,7 @@
   background: none;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-dim);
   cursor: pointer;
@@ -969,7 +969,7 @@
   }
 }
 
-/* ── Compare mode ───────────────────────────────────────── */
+/* ── Compare mode ── */
 .skills-panel-compare {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -1000,7 +1000,7 @@
 }
 
 .skills-panel-compare-vs {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-ghost);
   text-transform: uppercase;
@@ -1012,7 +1012,7 @@
   align-items: center;
   gap: 8px;
   color: var(--text-ghost);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   text-align: center;
   padding: 16px;
@@ -1063,14 +1063,14 @@
 
 .skills-panel-name {
   display: block;
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .skills-panel-group {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-ghost);
   text-transform: uppercase;
@@ -1099,14 +1099,14 @@
 }
 
 .skills-panel-level-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .skills-panel-fun {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.75rem;
   font-style: italic;
   color: var(--accent-secondary);
@@ -1131,7 +1131,7 @@
 
 .skills-panel-section-title {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   color: var(--text-ghost);
   text-transform: uppercase;
@@ -1150,7 +1150,7 @@
   background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent-secondary) 25%, transparent);
   border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--accent-secondary);
   transition: all 0.2s ease;
@@ -1184,7 +1184,7 @@
   }
 }
 
-/* ── Related skills constellation ──────────────────────── */
+/* ── Related skills constellation  */
 .skills-panel-related {
   display: flex;
   align-items: center;
@@ -1210,7 +1210,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.6rem;
   font-weight: 600;
   color: var(--bg);
@@ -1274,14 +1274,14 @@
 }
 
 .skills-panel-related-name {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.65rem;
   color: var(--text-dim);
   transition: color 0.2s ease;
   white-space: nowrap;
 }
 
-/* ── Project cards in panel ─────────────────────────────── */
+/* ── Project cards in panel ─ */
 .skills-panel-projects {
   display: flex;
   flex-direction: column;
@@ -1337,7 +1337,7 @@
 }
 
 .skills-panel-project-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   font-weight: 500;
   color: var(--text);
@@ -1356,7 +1356,7 @@
   padding: 2px 6px;
   background: color-mix(in srgb, var(--accent-tertiary) 10%, transparent);
   border-radius: 3px;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.5rem;
   color: var(--accent-tertiary);
 }

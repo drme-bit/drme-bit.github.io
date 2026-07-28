@@ -10,7 +10,7 @@ const meta = {
   summary:
     'A short note on why I chose to build this site myself, what tech stack I picked, and what I learned along the way.',
   tags: ['React', 'Next.js', 'SCSS', 'Firebase'],
-  featured: true,
+  featured: false,
   theme: {
     primary: '#fbbf24',
     bg: 'linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 50%, #16213e 100%)',

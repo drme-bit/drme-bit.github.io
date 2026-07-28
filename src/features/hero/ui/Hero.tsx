@@ -1,15 +1,26 @@
 'use client';
 
+//React
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { FiGithub, FiLinkedin, FiMail, FiArrowDown } from 'react-icons/fi';
+import { FiGithub, FiLinkedin, FiMail, FiArrowDown } from '@/shared/ui/atoms/Icon';
+//GSAP
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { CustomEase } from 'gsap/CustomEase';
+import { useGSAP } from '@gsap/react';
+//Other
 import useTypewriter from '@/shared/hooks/useTypewriter';
 import useGithubStats from '@/shared/hooks/useGithubStats';
 import { TOOLS } from '@/data/hero/tools';
 import { TERMINALS } from '@/data/hero/terminals';
 import { TYPEWRITER_STRINGS, GITHUB_USERNAME } from '@/data/hero/config';
+//Styles
 import styles from './Hero.module.scss';
 
-/* ─── Types ──────────────────────────────────────────────── */
+gsap.registerPlugin(CustomEase);
+gsap.registerPlugin(ScrollTrigger);
+
+/*  Types  */
 
 interface TerminalLine {
   prompt?: boolean;
@@ -42,7 +53,7 @@ interface ContactRowProps {
   stats: GithubStats | null;
 }
 
-/* ─── Sub-components ─────────────────────────────────────── */
+/*  Sub-components  */
 
 function Terminals({ heroRef }: TerminalsProps) {
   const termRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -200,7 +211,7 @@ function ContactRow({ stats }: ContactRowProps) {
   );
 }
 
-/* ─── Hero ───────────────────────────────────────────────── */
+/*  Hero ─ */
 
 export default function Hero() {
   const [show, setShow] = useState(false);
@@ -209,8 +220,91 @@ export default function Hero() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
+  useGSAP(
+    () => {
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.5,
+        pin: true,
+        pinSpacing: false,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      });
+    },
+    { scope: sectionRef },
+  );
+
+  useGSAP(
+    () => {
+      if (!show) return;
+
+      const tl = gsap.timeline({
+        defaults: { ease: 'power3.out' },
+      });
+
+      tl.fromTo(
+        `.${styles['h-avatar']}`,
+        { scale: 0.8, opacity: 0, y: 20, filter: 'blur(8px)' },
+        { scale: 1, opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8 },
+      )
+        .fromTo(
+          `.${styles['h-name']}`,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.7, stagger: 0.15 },
+          '-=0.4',
+        )
+        .fromTo(
+          `.${styles['h-role']}`,
+          { y: 15, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6 },
+          '-=0.4',
+        )
+        .fromTo(
+          `.${styles['h-tools']}`,
+          { y: 15, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6 },
+          '-=0.3',
+        )
+        .fromTo(
+          `.${styles['h-contacts']}`,
+          { y: 15, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6 },
+          '-=0.3',
+        )
+        .fromTo(
+          `.${styles['h-tagline']}`,
+          { y: 10, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.5 },
+          '-=0.3',
+        )
+        .fromTo(
+          `.${styles['h-scroll']}`,
+          { opacity: 0, y: -10 },
+          { opacity: 1, y: 0, duration: 0.5 },
+          '-=0.2',
+        );
+
+      gsap.to(overlayRef.current, {
+        opacity: 0,
+        scale: 0.95,
+        filter: 'blur(10px)',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true,
+          invalidateOnRefresh: true,
+        },
+      });
+    },
+    { scope: sectionRef, dependencies: [show] },
+  );
+
   useEffect(() => {
-    const t = setTimeout(() => setShow(true), 200);
+    const t = setTimeout(() => setShow(true), 150);
     return () => clearTimeout(t);
   }, []);
 
@@ -243,13 +337,10 @@ export default function Hero() {
 
   return (
     <section id="hero" ref={sectionRef} className={`${styles.section} ${styles['section--hero']}`}>
-      <div
-        ref={overlayRef}
-        className={styles['h-overlay']}
-      >
+      <div ref={overlayRef} className={styles['h-overlay']}>
         <Terminals heroRef={sectionRef} />
 
-        <div className={`${styles['h-main']} ${show ? styles['is-show'] : ''}`}>
+        <div className={styles['h-main']}>
           <Avatar />
 
           <h1 className={styles['h-name']}>
@@ -258,7 +349,8 @@ export default function Hero() {
           </h1>
 
           <p className={styles['h-role']}>
-            {'> '}{typed}
+            {'> '}
+            {typed}
             <span className={styles['h-cursor']} />
           </p>
 

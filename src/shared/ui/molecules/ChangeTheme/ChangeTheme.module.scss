@@ -31,7 +31,7 @@
   fill: currentColor;
 }
 
-/* ─── Panel ─────────────────────────────────────────────── */
+/*  Panel ── */
 
 .panel {
   position: absolute;
@@ -75,7 +75,7 @@
 
 .panelTitle {
   margin-left: auto;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--terminal-title);
   letter-spacing: 0.05em;
@@ -88,7 +88,7 @@
   gap: 0.75rem;
 }
 
-/* ─── Section ───────────────────────────────────────────── */
+/*  Section  */
 
 .section {
   display: flex;
@@ -97,14 +97,14 @@
 }
 
 .sectionLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.48rem;
   color: var(--text-ghost);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
-/* ─── Theme grid ────────────────────────────────────────── */
+/*  Theme grid  */
 
 .themeGrid {
   display: grid;
@@ -145,12 +145,12 @@
 }
 
 .themeBtnLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.45rem;
   color: var(--text-dim);
 }
 
-/* ─── Option row ────────────────────────────────────────── */
+/*  Option row  */
 
 .optionRow {
   display: flex;
@@ -163,7 +163,7 @@
   background: var(--glass);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-dim);
   cursor: pointer;
@@ -182,7 +182,7 @@
   }
 }
 
-/* ─── Toggle ────────────────────────────────────────────── */
+/*  Toggle ─ */
 
 .toggleRow {
   display: flex;
@@ -193,7 +193,7 @@
 }
 
 .toggleLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.55rem;
   color: var(--text-dim);
 }
