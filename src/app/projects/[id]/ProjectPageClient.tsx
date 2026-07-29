@@ -14,6 +14,7 @@ import { projects } from '@/features/projects/lib/registry';
 import { STATUS_META } from '@/features/projects/lib/constants';
 import type { Project } from '@/features/projects/lib/project-repository';
 import { NavLeaf, useNav } from '@/providers/NavProvider';
+import { useActivity } from '@/providers/ActivityProvider';
 import styles from './ProjectPage.module.scss';
 
 interface ContentSection {
@@ -285,10 +286,12 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
   const router = useRouter();
   const project = projects.get(id);
   const { setPageConfig, setActiveSection } = useNav();
+  const { incrementProjectsViewed } = useActivity();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [id]);
+    incrementProjectsViewed();
+  }, [id, incrementProjectsViewed]);
 
   useEffect(() => {
     if (!project) router.replace('/');

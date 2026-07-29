@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+// gsap
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+// other
 import SectionTitle from '@/shared/ui/molecules/SectionTitle/SectionTitle';
 import LocationMap from '@/shared/ui/molecules/LocationMap/LocationMap';
 import aboutData from '@/data/aboutData';
@@ -11,14 +14,14 @@ import styles from './About.module.scss';
 
 import { log } from '@/shared/lib/logger'
 
-/* Icons */
+// Icons
 import { BsFillKanbanFill } from 'react-icons/bs';
 import { LuTriangle } from 'react-icons/lu';
 import { RiOpenSourceFill, RiRobot2Fill } from 'react-icons/ri';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/*  Intro Block ─ */
+// Intro Block
 
 function IntroBlock({ text, delay }: { text: string; delay: number }) {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -34,7 +37,7 @@ function IntroBlock({ text, delay }: { text: string; delay: number }) {
   );
 }
 
-/*  GitHub Activity  */
+// GitHub Activity
 
 interface CommitInfo {
   hash: string;
@@ -137,8 +140,8 @@ export default function About() {
       // Bento cards stagger
       gsap.fromTo(`.${styles['about-bento-card']}`, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', stagger: 0.08, scrollTrigger: { trigger: `.${styles['about-bento']}`, start: 'top 85%', toggleActions: 'play none none reverse' } });
 
-      // Stats stagger
-      gsap.fromTo(`.${styles['about-stat-item']}`, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.5)', stagger: 0.06, scrollTrigger: { trigger: `.${styles['about-stats-row']}`, start: 'top 90%', toggleActions: 'play none none reverse' } });
+      // Sidebar stats stagger
+      gsap.fromTo(`.${styles['about-sidebar-stat']}`, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.5)', stagger: 0.06, scrollTrigger: { trigger: `.${styles['about-sidebar-stats']}`, start: 'top 85%', toggleActions: 'play none none reverse' } });
     }, sectionRef);
 
     return () => ctx.revert();
@@ -152,21 +155,9 @@ export default function About() {
     >
       <SectionTitle title="about" accent="_" />
 
-      <div className={styles['about-whoami']}>
-        <p className={styles['about-whoami-cmd']}>
-          <span className={styles['about-whoami-prompt']}>{'>'}</span> whoami
-        </p>
-        <h2 className={styles['about-whoami-name']}>Vyacheslav Tkachyk</h2>
-        <p className={styles['about-whoami-tags']}>
-          Software Engineer <span className={styles['about-whoami-sep']}>·</span> Coffee Lover{' '}
-          <span className={styles['about-whoami-sep']}>·</span> {'Ukraine = Ukrai'}
-          <span className={styles['about-whoami-error']}>TypeError: locate is not a function</span>
-        </p>
-      </div>
-
       <div className={styles['about-layout']}>
-        {/* ── Photo Column ── */}
-        <div className={styles['about-photo-col']}>
+        {/* ── Sidebar ── */}
+        <aside className={styles['about-sidebar']}>
           <div className={styles['about-photo-frame']}>
             <Image
               src="/images/17969af76asf9y986ad9fy.jpg"
@@ -180,6 +171,11 @@ export default function About() {
             <div className={styles['about-photo-glow']} />
           </div>
 
+          <div className={styles['about-sidebar-status']}>
+            <span className={styles['about-sidebar-status-dot']} />
+            <span>available for work</span>
+          </div>
+
           <LocationMap
             lat={46.482952}
             lng={30.712481}
@@ -187,19 +183,39 @@ export default function About() {
             zoom={5}
             className={styles['about-map-canvas']}
           />
-          <div className={styles['about-map-coords']}>46.482952&deg; N, 30.712481&deg; E</div>
-        </div>
 
-        {/* ── Content Column ── */}
-        <div className={styles['about-content-col']}>
-          {/* ── Intro Paragraphs ── */}
+          <div className={styles['about-sidebar-stats']}>
+            {aboutData.stats.map((stat: { value: string; label: string }, i: number) => (
+              <div key={stat.label} className={styles['about-sidebar-stat']}>
+                <span className={styles['about-sidebar-stat-value']}>{stat.value}</span>
+                <span className={styles['about-sidebar-stat-label']}>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        {/* ── Content ── */}
+        <div className={styles['about-content']}>
+          <div className={styles['about-whoami']}>
+            <p className={styles['about-whoami-cmd']}>
+              <span className={styles['about-whoami-prompt']}>{'>'}</span> whoami
+            </p>
+            <h2 className={styles['about-whoami-name']}>Vyacheslav Tkachyk</h2>
+            <p className={styles['about-whoami-tags']}>
+              Software Engineer <span className={styles['about-whoami-sep']}>·</span> Coffee Lover{' '}
+              <span className={styles['about-whoami-sep']}>·</span> {'Ukraine = Ukrai'}
+              <span className={styles['about-whoami-error']}>TypeError: locate is not a function</span>
+            </p>
+          </div>
+
           <div className={styles['about-intro']}>
             {INTRO_LINES.map((text, i) => (
               <IntroBlock key={i} text={text} delay={0.1 + i * 0.1} />
             ))}
           </div>
 
-          {/* ── Bento Grid ── */}
+          <div className={styles['about-divider']} />
+
           <div className={styles['about-bento']}>
             <div className={`${styles['about-bento-card']} ${styles['about-bento-card--wide']}`}>
               <BsFillKanbanFill />
@@ -269,20 +285,6 @@ export default function About() {
               </p>
               <span className={styles['about-bento-tag']}>community</span>
             </div>
-          </div>
-
-          {/* ── Stats ── */}
-          <div className={styles['about-stats-row']}>
-            {aboutData.stats.map((stat: { value: string; label: string }, i: number) => (
-              <div
-                key={stat.label}
-                className={styles['about-stat-item']}
-                style={{ animationDelay: `${0.4 + i * 0.08}s` }}
-              >
-                <span className={styles['about-stat-value']}>{stat.value}</span>
-                <span className={styles['about-stat-label']}>{stat.label}</span>
-              </div>
-            ))}
           </div>
 
           {/* ── GitHub Activity ── */}

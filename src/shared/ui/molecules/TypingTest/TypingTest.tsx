@@ -3,6 +3,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import styles from './TypingTest.module.scss';
 
+const STORAGE_KEY = 'drme_typing';
+
+interface TypingRecord {
+  wpm: number;
+  accuracy: number;
+  time: number;
+}
+
 /*  Word pool ── */
 
 const WORDS = [
@@ -41,16 +49,32 @@ function pickWords(count: number, seed?: number): string[] {
 
 export default function TypingTest() {
   const [mounted, setMounted] = useState(false);
-  const [words] = useState(() => pickWords(50));
+  const [words, setWords] = useState(() => pickWords(50));
   const [typed, setTyped] = useState('');
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [active, setActive] = useState(false);
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
+  const [best, setBest] = useState<TypingRecord | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) setBest(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  const saveBest = useCallback((wpm: number, accuracy: number, time: number) => {
+    if (!best || wpm > best.wpm) {
+      const record: TypingRecord = { wpm, accuracy, time };
+      setBest(record);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch {}
+    }
+  }, [best]);
 
   const fullText = useMemo(() => words.join(' '), [words]);
   const isComplete = typed.length >= fullText.length;
@@ -59,22 +83,17 @@ export default function TypingTest() {
 
   // WPM
   const wpm = useMemo(() => {
-    if (!startTime || !endTime) return 0;
-    const minutes = (endTime - startTime) / 60000;
+    if (!startTime) return 0;
+    const end = endTime ?? Date.now();
+    const minutes = (end - startTime) / 60000;
     if (minutes <= 0) return 0;
-    // count correct words only
-    let correctWords = 0;
-    for (let i = 0; i < words.length; i++) {
-      const wordStart = i === 0 ? 0 : fullText.lastIndexOf(' ', i * 2 - 1) + 1;
-      // actually just check each word by splitting
-    }
     const typedWords = typed.split(' ');
     let correct = 0;
     for (let i = 0; i < Math.min(typedWords.length, words.length); i++) {
       if (typedWords[i] === words[i]) correct++;
     }
     return Math.round(correct / minutes) || 0;
-  }, [startTime, endTime, typed, words, fullText]);
+  }, [startTime, endTime, typed, words, fullText, tick]);
 
   // Accuracy
   const accuracy = useMemo(() => {
@@ -89,9 +108,9 @@ export default function TypingTest() {
   // Elapsed seconds
   const elapsed = useMemo(() => {
     if (!startTime) return 0;
-    const end = endTime || (mounted ? Date.now() : startTime);
+    const end = endTime || Date.now();
     return Math.floor((end - startTime) / 1000);
-  }, [startTime, endTime, mounted]);
+  }, [startTime, endTime, tick]);
 
   // Live timer tick
   useEffect(() => {
@@ -129,10 +148,27 @@ export default function TypingTest() {
 
       // Check completion after this keystroke
       if (typed.length + 1 >= fullText.length) {
-        setEndTime(Date.now());
+        const now = Date.now();
+        setEndTime(now);
+        // compute final wpm & accuracy for saving
+        const minutes = (now - (startTime ?? now)) / 60000;
+        const finalTyped = typed + char;
+        const typedWords = finalTyped.split(' ');
+        let correctWords = 0;
+        for (let i = 0; i < Math.min(typedWords.length, words.length); i++) {
+          if (typedWords[i] === words[i]) correctWords++;
+        }
+        const finalWpm = minutes > 0 ? Math.round(correctWords / minutes) : 0;
+        let correctChars = 0;
+        for (let i = 0; i < finalTyped.length; i++) {
+          if (finalTyped[i] === fullText[i]) correctChars++;
+        }
+        const finalAcc = Math.round((correctChars / finalTyped.length) * 100);
+        const secs = Math.floor((now - (startTime ?? now)) / 1000);
+        saveBest(finalWpm, finalAcc, secs);
       }
     },
-    [active, isComplete, typed, fullText],
+    [active, isComplete, typed, fullText, startTime, words, saveBest],
   );
 
   // Reset
@@ -143,6 +179,7 @@ export default function TypingTest() {
     setActive(false);
     setTick(0);
     inputRef.current?.focus();
+    setWords(pickWords(50));
   }, []);
 
   // Render highlighted characters
@@ -183,6 +220,12 @@ export default function TypingTest() {
           <span className={styles.statValue}>{elapsed}s</span>
           <span className={styles.statLabel}>time</span>
         </div>
+        {best && (
+          <div className={styles.stat}>
+            <span className={styles.statValue}>{best.wpm}</span>
+            <span className={styles.statLabel}>best</span>
+          </div>
+        )}
         {isComplete && (
           <button className={styles.resetBtn} onClick={reset}>
             restart

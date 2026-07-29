@@ -25,12 +25,12 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['projects', 'work', 'what have you built', 'what did you make', 'showcase', 'portfolio projects'],
     answer:
-      "Three featured projects: 1) drme-bit.github.io — this very portfolio with 3D globe and terminal UI. 2) Nexagon — game server monitoring dashboard built with Rust, React, and WebGPU. 3) Freelance Roblox developer — admin panels, vehicle systems, anti-cheat for communities with 2000+ daily players. Check the system registry section!",
+      "Two featured projects: 1) drme-bit.github.io — this very portfolio with 3D globe and terminal UI. 2) Nexagon — game server monitoring dashboard built with Rust, React, and WebGPU. He also does freelance development — Roblox experiences, bots, backend APIs, and custom full-stack solutions.",
   },
   {
     keywords: ['experience', 'job', 'work history', 'career', 'background', 'professional', 'employment'],
     answer:
-      "Three entries on the timeline: 1) Freelance Roblox Developer (2023–present) — custom game systems for Roblox. 2) Nexagon diploma projects (2026) — bachelor's in Software Engineering. 3) Bot Developer (2023–present) — freelance automation and bots.",
+      "Timeline highlights: Freelance development since 2021 — Roblox experiences, bots, and backend systems. Nexagon diploma projects (2026) — a game server monitoring platform for his bachelor's in Software Engineering. Also built banking app backends and various automation tools.",
   },
   {
     keywords: ['contact', 'email', 'reach', 'get in touch', 'social', 'hire', 'message'],

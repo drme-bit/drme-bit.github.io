@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { NavLeaf, useNav } from '@/providers/NavProvider';
+import { useActivity } from '@/providers/ActivityProvider';
 import useLockOrientation from '@/shared/hooks/useLockOrientation';
 import Hero from '@/features/hero/ui/Hero';
 import About from '@/features/about/ui/About';
@@ -22,6 +23,8 @@ const SoundEffects = dynamic(() => import('@/shared/ui/organisms/SoundEffects/So
 
 function MainInner() {
   const { setPageConfig, setActiveSection } = useNav();
+  const { incrementSectionsRevealed } = useActivity();
+  const revealedSections = useRef(new Set<string>());
 
   useLockOrientation();
 
@@ -54,7 +57,13 @@ function MainInner() {
 
       const observer = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(item.id);
+          if (entry.isIntersecting) {
+            setActiveSection(item.id);
+            if (!revealedSections.current.has(item.id)) {
+              revealedSections.current.add(item.id);
+              incrementSectionsRevealed();
+            }
+          }
         },
         { threshold: 0.4 },
       );

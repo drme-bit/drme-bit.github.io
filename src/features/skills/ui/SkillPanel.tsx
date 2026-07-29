@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiX, FiChevronLeft, FiChevronRight, FiCopy } from '@/shared/ui/atoms/Icon';
+import { useActivity } from '@/providers/ActivityProvider';
 import { graph, GROUP_COLORS } from '../lib';
 import { projects } from '@/features/projects/lib/registry';
 import { SkillLevel } from './SkillLevel';
@@ -35,6 +37,15 @@ export function SkillPanel({
   onSelectRelated,
 }: SkillPanelProps) {
   const router = useRouter();
+  const { incrementSkillsChecked } = useActivity();
+  const countedSkillRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (skill && skill.name !== countedSkillRef.current) {
+      countedSkillRef.current = skill.name;
+      incrementSkillsChecked();
+    }
+  }, [skill, incrementSkillsChecked]);
 
   const renderSkillPanel = (s: Skill, isCompare = false) => (
     <div className={styles['skills-panel-content']}>

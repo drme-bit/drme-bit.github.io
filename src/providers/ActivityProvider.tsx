@@ -195,6 +195,14 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
     incGlobal('totalSectionsRevealed');
   }, [markDirty, incGlobal]);
 
+  // Track all clicks globally
+  useEffect(() => {
+    if (!mounted) return;
+    const handler = () => incrementClicks();
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [mounted, incrementClicks]);
+
   return (
     <ActivityContext.Provider
       value={{

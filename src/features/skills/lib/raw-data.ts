@@ -42,7 +42,7 @@ export const SKILLS_DATA: SkillData[] = [
     desc: 'Type-safe JavaScript for maintainable large-scale apps.',
     funLevel: 'types everything, even the types',
     related: ['React', 'JavaScript', 'Node.js'],
-    projects: ['fivem-roblox'],
+    projects: [],
   },
   {
     name: 'JavaScript',
@@ -207,7 +207,7 @@ export const SKILLS_DATA: SkillData[] = [
     desc: 'Scripting language for Roblox game development.',
     funLevel: 'makes Roblox do things it shouldnt',
     related: ['TypeScript'],
-    projects: ['fivem-roblox'],
+    projects: ['gmod-roblox', 'bloxingbad'],
   },
   {
     name: 'Git',
@@ -218,7 +218,7 @@ export const SKILLS_DATA: SkillData[] = [
     desc: 'Version control and collaborative development workflows.',
     funLevel: 'git push --force is a lifestyle',
     related: ['Linux'],
-    projects: ['nexagon', 'fivem-roblox', 'bank-rest-api-app'],
+    projects: ['nexagon', 'bank-rest-api-app'],
   },
   {
     name: 'Docker',

@@ -105,11 +105,11 @@ export const GLOBAL_NAV: NavItem[] = [
         icon: FiZap,
       },
       {
-        id: 'proj-roblox',
+        id: 'freelance-nav',
         type: 'route',
-        label: 'Freelance Dev',
-        description: 'Custom mechanics & admin panels for Roblox/FiveM.',
-        href: '/projects/fivem-roblox',
+        label: 'Freelance',
+        description: 'Roblox, bots, backend & custom solutions.',
+        href: '/#experience',
         icon: FiBriefcase,
       },
       // ── Small items (right column) ──

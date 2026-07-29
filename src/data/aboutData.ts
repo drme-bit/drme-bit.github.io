@@ -1,9 +1,10 @@
 const aboutData = {
   stats: [
-    { value: 'many', label: 'Projects' },
-    { value: 'a lot ._.', label: 'Years Coding' },
+    { value: '6', label: 'Projects' },
+    { value: '5', label: 'Years Coding' },
     { value: '8', label: 'Languages' },
     { value: '∞', label: 'Coffee Cups' },
+    { value: '—', label: 'Typing (WPM)' },
   ],
   timeline: [
     {

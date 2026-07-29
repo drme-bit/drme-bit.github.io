@@ -14,9 +14,10 @@ interface ExperienceEntry {
 const experienceData: ExperienceEntry[] = [
   {
     period: '2021 — present',
-    role: 'Roblox Developer (Freelance)',
-    org: 'Roblox Talents',
-    desc: 'Developed multiple commission-based experiences on Roblox across various genres. Created anime-themed games (JoJo’s Bizarre Adventure, One Piece inspired), a full item trading economy system, and the horror game "Vault 8166" (creepypasta style). Implemented complex gameplay mechanics, server-side logic, data management, monetization systems, and optimized performance using Luau.',
+    role: 'Freelance Developer',
+    org: 'Self-Employed',
+    desc: 'Built custom software solutions for clients across multiple platforms. Developed Roblox experiences (anime games, trading economies, horror titles) serving 2000+ daily players with admin panels, vehicle systems, and anti-cheat. Created Telegram/Discord bots for moderation, automation, and community management. Delivered backend APIs and full-stack web apps tailored to client needs. Managed all aspects: requirements gathering, architecture, development, deployment, and maintenance.',
+    tech: ['Luau', 'TypeScript', 'Python', 'Node.js', 'MySQL'],
   },
   {
     period: '2023 — 2025',

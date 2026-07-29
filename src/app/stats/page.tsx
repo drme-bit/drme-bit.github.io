@@ -1,9 +1,7 @@
 'use client';
 
 import { useActivity } from '@/providers/ActivityProvider';
-import Clicker from '@/shared/ui/molecules/Clicker/Clicker';
 import TypingTest from '@/shared/ui/molecules/TypingTest/TypingTest';
-import { FiGlobe, FiActivity, FiTrendingUp, FiAward, FiZap, FiTerminal } from '@/shared/ui/atoms/Icon';
 import styles from './Stats.module.scss';
 
 /*  Achievement definitions  */
@@ -48,43 +46,23 @@ function formatTime(seconds: number): string {
 function getPercent(personal: number, global: number): string {
   if (global === 0) return '0';
   const pct = (personal / global) * 100;
-  if (pct >= 1) return pct.toFixed(1);
-  return pct.toFixed(2);
-}
-
-function getRank(pct: number): { rank: string; color: string } {
-  if (pct >= 10) return { rank: 'LEGENDARY', color: 'var(--accent-warm)' };
-  if (pct >= 5) return { rank: 'ELITE', color: 'var(--accent-secondary)' };
-  if (pct >= 2) return { rank: 'VETERAN', color: 'var(--accent)' };
-  if (pct >= 0.5) return { rank: 'REGULAR', color: 'var(--text)' };
-  return { rank: 'NEWCOMER', color: 'var(--text-dim)' };
+  return pct >= 1 ? pct.toFixed(1) : pct.toFixed(2);
 }
 
 /*  Contribution Bar ─ */
 
-function ContributionBar({
-  label,
-  personal,
-  global: globalVal,
-}: {
-  label: string;
-  personal: number;
-  global: number;
-}) {
+function ContributionBar({ label, personal, global: globalVal }: { label: string; personal: number; global: number }) {
   const pct = globalVal > 0 ? Math.min((personal / globalVal) * 100, 100) : 0;
   const share = getPercent(personal, globalVal);
 
   return (
     <div className={styles.contrib}>
-      <div className={styles.contribHeader}>
+      <div className={styles.contribHead}>
         <span className={styles.contribLabel}>{label}</span>
         <span className={styles.contribShare}>{share}%</span>
       </div>
       <div className={styles.contribBar}>
-        <div
-          className={styles.contribFill}
-          style={{ width: `${Math.max(pct, 0.5)}%` }}
-        />
+        <div className={styles.contribFill} style={{ width: `${Math.max(pct, 0.5)}%` }} />
       </div>
       <div className={styles.contribValues}>
         <span>you: {personal.toLocaleString()}</span>
@@ -100,109 +78,82 @@ export default function StatsPage() {
   const { personal, global, mounted } = useActivity();
 
   const unlocked = mounted ? ACHIEVEMENTS.filter((a) => a.check(personal)) : [];
-  const totalPct = global.totalClicks > 0 ? (personal.clicks / global.totalClicks) * 100 : 0;
-  const { rank, color: rankColor } = getRank(totalPct);
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        {/* Header */}
-        <div className={styles.header}>
-          <h1 className={styles.title}>site stats</h1>
-          <p className={styles.subtitle}>your activity & contribution</p>
-        </div>
-
-        {/* Profile Card */}
-        <div className={styles.profileCard}>
-          <div className={styles.profileLeft}>
-            <div className={styles.profileAvatar}>
-              <span className={styles.profileLevel}>⚡ LVL {mounted ? Math.floor(Math.log10(Math.max(personal.clicks, 1)) + 1) : 1}</span>
-            </div>
-            <div className={styles.profileInfo}>
-              <span className={styles.profileName}>visitor</span>
-              <span className={styles.profileRank} style={{ color: rankColor }}>{rank}</span>
-            </div>
-          </div>
-          <div className={styles.profileRight}>
-            <div className={styles.profileBigStat}>
-              <span className={styles.profileBigValue}>{getPercent(personal.clicks, global.totalClicks)}%</span>
-              <span className={styles.profileBigLabel}>of all clicks</span>
-            </div>
-          </div>
-        </div>
+        {/* Hero */}
+        <header className={styles.hero}>
+          <h1 className={styles.heroTitle}>
+            site stats<span className={styles.heroDot}>.</span>
+          </h1>
+          <p className={styles.heroDesc}>your activity &amp; contribution</p>
+        </header>
 
         {/* Global Overview */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>
-            <FiGlobe className={styles.sectionIcon} />
-            global overview
-          </h2>
-          <div className={styles.overviewGrid}>
-            <div className={styles.overviewCard}>
-              <span className={styles.overviewValue}>{global.totalClicks.toLocaleString()}</span>
-              <span className={styles.overviewLabel}>total clicks</span>
+        <div className={styles.card}>
+          <div className={styles.sectionHead}>
+            <span className={styles.sectionTag}>global</span>
+          </div>
+          <div className={styles.grid4}>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{global.totalClicks.toLocaleString()}</span>
+              <span className={styles.statLabel}>total clicks</span>
             </div>
-            <div className={styles.overviewCard}>
-              <span className={styles.overviewValue}>{global.totalVisitors.toLocaleString()}</span>
-              <span className={styles.overviewLabel}>visitors</span>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{global.totalVisitors.toLocaleString()}</span>
+              <span className={styles.statLabel}>visitors</span>
             </div>
-            <div className={styles.overviewCard}>
-              <span className={styles.overviewValue}>{global.totalSkillsChecked.toLocaleString()}</span>
-              <span className={styles.overviewLabel}>skills explored</span>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{global.totalSkillsChecked.toLocaleString()}</span>
+              <span className={styles.statLabel}>skills explored</span>
             </div>
-            <div className={styles.overviewCard}>
-              <span className={styles.overviewValue}>{global.totalProjectsViewed.toLocaleString()}</span>
-              <span className={styles.overviewLabel}>projects viewed</span>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{global.totalProjectsViewed.toLocaleString()}</span>
+              <span className={styles.statLabel}>projects viewed</span>
             </div>
           </div>
         </div>
 
         {/* Your Stats */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>
-            <FiActivity className={styles.sectionIcon} />
-            your stats
-          </h2>
-          <div className={styles.yourStatsGrid}>
-            <div className={styles.yourStatCard}>
-              <span className={styles.yourStatValue}>{personal.clicks.toLocaleString()}</span>
-              <span className={styles.yourStatLabel}>clicks</span>
-              <span className={styles.yourStatPct}>{getPercent(personal.clicks, global.totalClicks)}% of global</span>
+        <div className={styles.card}>
+          <div className={styles.sectionHead}>
+            <span className={styles.sectionTag}>personal</span>
+          </div>
+          <div className={styles.grid3}>
+            <div className={styles.statPanel}>
+              <span className={styles.statPanelValue}>{personal.clicks.toLocaleString()}</span>
+              <span className={styles.statPanelLabel}>clicks</span>
+              <span className={styles.statPanelPct}>{getPercent(personal.clicks, global.totalClicks)}% of global</span>
             </div>
-            <div className={styles.yourStatCard}>
-              <span className={styles.yourStatValue}>{personal.skillsChecked}</span>
-              <span className={styles.yourStatLabel}>skills checked</span>
-              <span className={styles.yourStatPct}>{getPercent(personal.skillsChecked, global.totalSkillsChecked)}% of global</span>
+            <div className={styles.statPanel}>
+              <span className={styles.statPanelValue}>{personal.skillsChecked}</span>
+              <span className={styles.statPanelLabel}>skills checked</span>
+              <span className={styles.statPanelPct}>{getPercent(personal.skillsChecked, global.totalSkillsChecked)}% of global</span>
             </div>
-            <div className={styles.yourStatCard}>
-              <span className={styles.yourStatValue}>{personal.projectsViewed}</span>
-              <span className={styles.yourStatLabel}>projects viewed</span>
-              <span className={styles.yourStatPct}>{getPercent(personal.projectsViewed, global.totalProjectsViewed)}% of global</span>
+            <div className={styles.statPanel}>
+              <span className={styles.statPanelValue}>{personal.projectsViewed}</span>
+              <span className={styles.statPanelLabel}>projects viewed</span>
+              <span className={styles.statPanelPct}>{getPercent(personal.projectsViewed, global.totalProjectsViewed)}% of global</span>
             </div>
-            <div className={styles.yourStatCard}>
-              <span className={styles.yourStatValue}>{personal.sectionsRevealed}</span>
-              <span className={styles.yourStatLabel}>sections revealed</span>
-              <span className={styles.yourStatPct}>{getPercent(personal.sectionsRevealed, global.totalSectionsRevealed)}% of global</span>
+            <div className={styles.statPanel}>
+              <span className={styles.statPanelValue}>{personal.sectionsRevealed}</span>
+              <span className={styles.statPanelLabel}>sections revealed</span>
+              <span className={styles.statPanelPct}>{getPercent(personal.sectionsRevealed, global.totalSectionsRevealed)}% of global</span>
             </div>
-            <div className={styles.yourStatCard}>
-              <span className={styles.yourStatValue}>{mounted ? formatTime(personal.timeOnSite) : '0s'}</span>
-              <span className={styles.yourStatLabel}>time on site</span>
-              <span className={styles.yourStatPct}>this session</span>
-            </div>
-            <div className={styles.yourStatCard}>
-              <span className={styles.yourStatValue}>{unlocked.length}/{ACHIEVEMENTS.length}</span>
-              <span className={styles.yourStatLabel}>achievements</span>
-              <span className={styles.yourStatPct}>{Math.round((unlocked.length / ACHIEVEMENTS.length) * 100)}% complete</span>
+            <div className={styles.statPanel}>
+              <span className={styles.statPanelValue}>{mounted ? formatTime(personal.timeOnSite) : '0s'}</span>
+              <span className={styles.statPanelLabel}>time on site</span>
+              <span className={styles.statPanelPct}>this session</span>
             </div>
           </div>
         </div>
 
-        {/* Contribution Breakdown */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>
-            <FiTrendingUp className={styles.sectionIcon} />
-            your contribution
-          </h2>
+        {/* Contribution */}
+        <div className={styles.card}>
+          <div className={styles.sectionHead}>
+            <span className={styles.sectionTag}>contribution</span>
+          </div>
           <div className={styles.contribList}>
             <ContributionBar label="clicks" personal={personal.clicks} global={global.totalClicks} />
             <ContributionBar label="skills explored" personal={personal.skillsChecked} global={global.totalSkillsChecked} />
@@ -212,18 +163,19 @@ export default function StatsPage() {
         </div>
 
         {/* Achievements */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>
-            <FiAward className={styles.sectionIcon} />
-            achievements ({unlocked.length}/{ACHIEVEMENTS.length})
-          </h2>
-          <div className={styles.achievementsGrid}>
+        <div className={styles.card}>
+          <div className={styles.sectionHead}>
+            <span className={styles.sectionTag}>
+              achievements <span className={styles.achCount}>{unlocked.length}/{ACHIEVEMENTS.length}</span>
+            </span>
+          </div>
+          <div className={styles.achGrid}>
             {ACHIEVEMENTS.map((ach) => {
               const isUnlocked = ach.check(personal);
               return (
                 <div
                   key={ach.id}
-                  className={`${styles.achCard}${isUnlocked ? ` ${styles['achCard--unlocked']}` : ''}`}
+                  className={`${styles.achCard}${isUnlocked ? ` ${styles['achCard--on']}` : ''}`}
                   title={`${ach.title}: ${ach.description}`}
                 >
                   <span className={styles.achTitle}>{ach.title}</span>
@@ -234,23 +186,20 @@ export default function StatsPage() {
           </div>
         </div>
 
-        {/* Clicker */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>
-            <FiZap className={styles.sectionIcon} />
-            clicker
-          </h2>
-          <Clicker />
-        </div>
-
         {/* Typing Test */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>
-            <FiTerminal className={styles.sectionIcon} />
-            typing test
-          </h2>
+        <div className={styles.card}>
+          <div className={styles.sectionHead}>
+            <span className={styles.sectionTag}>typing test</span>
+          </div>
           <TypingTest />
         </div>
+
+        {/* Footer */}
+        <footer className={styles.footer}>
+          <span className={styles.footerText}>
+            stats reset on browser data clear &middot; global stats persist via firebase
+          </span>
+        </footer>
       </div>
     </div>
   );
