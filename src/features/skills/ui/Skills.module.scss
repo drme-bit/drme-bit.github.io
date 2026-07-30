@@ -471,6 +471,7 @@
   opacity: var(--globe-opacity, 1);
   transform: translateX(var(--globe-x, 13vw));
   pointer-events: auto;
+  overflow: hidden;
 
   &::before {
     content: '';

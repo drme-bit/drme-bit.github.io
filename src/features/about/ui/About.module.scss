@@ -8,12 +8,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 95vw;
+    width: 100%;
     margin: 0 auto;
     position: relative;
     transform: none;
     padding-top: 0;
     padding-bottom: 0;
+
+    @media (max-width: 700px) {
+      padding-top: 2rem;
+    }
   }
 }
 
@@ -37,7 +41,7 @@
 
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 }
 
@@ -64,12 +68,15 @@
 
   @media (max-width: 700px) {
     position: static;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "photo info"
+      "stats stats"
+      "map   map";
+    gap: 0.75rem;
     width: 100%;
-    padding: 0.75rem;
+    padding: 1rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--glass);
@@ -90,10 +97,11 @@
   }
 
   @media (max-width: 700px) {
-    width: 7.5rem;
-    height: 7.5rem;
+    width: 6rem;
+    height: 6rem;
     aspect-ratio: 1;
     border-radius: var(--radius-full);
+    grid-area: photo;
   }
 }
 
@@ -114,8 +122,8 @@
   }
 
   @media (max-width: 700px) {
-    width: 7.5rem;
-    height: 7.5rem;
+    width: 6rem;
+    height: 6rem;
     aspect-ratio: 1;
     border-radius: var(--radius-full);
   }
@@ -136,7 +144,7 @@
   }
 
   @media (max-width: 700px) {
-    inset: -12px;
+    inset: -8px;
     border-radius: var(--radius-full);
   }
 }
@@ -154,6 +162,13 @@
   color: var(--text-dim);
   letter-spacing: 0.03em;
   text-transform: uppercase;
+
+  @media (max-width: 700px) {
+    margin-top: 0;
+    grid-area: info;
+    align-self: center;
+    width: 100%;
+  }
 }
 
 .about-sidebar-status-dot {
@@ -182,8 +197,10 @@
   }
 
   @media (max-width: 700px) {
-    gap: 1.25rem;
-    padding: 1rem;
+    gap: 1rem;
+    padding: 0.75rem;
+    min-width: 0;
+    overflow: hidden;
   }
 }
 
@@ -264,6 +281,13 @@
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border);
+
+  @media (max-width: 700px) {
+    margin-top: 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    grid-area: stats;
+  }
 }
 
 .about-sidebar-stat {
@@ -392,11 +416,13 @@
 
   @media (max-width: 700px) {
     flex-wrap: wrap;
-    row-gap: 0.3rem;
+    row-gap: 0.2rem;
+    padding: 0.4rem 0.5rem;
+    gap: 0.4rem;
 
     &::before {
       align-self: flex-start;
-      margin-top: 0.35rem;
+      margin-top: 0.25rem;
     }
   }
 }
@@ -486,6 +512,10 @@
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--text);
+
+  @media (max-width: 700px) {
+    font-size: 1.3rem;
+  }
 }
 
 .about-whoami-tags {
@@ -561,11 +591,12 @@
   }
 
   @media (max-width: 700px) {
-    width: 80px;
-    height: 80px;
+    width: 100%;
+    height: 140px;
     margin-top: 0;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     flex-shrink: 0;
+    grid-area: map;
   }
 }
 
@@ -591,12 +622,17 @@
   }
 
   @media (max-width: 700px) {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "kanban"
-      "ai"
-      "persistent"
-      "open";
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+    width: 100%;
+    max-width: 100%;
+
+    &::-webkit-scrollbar { display: none; }
   }
 }
 
@@ -638,8 +674,11 @@
   }
 
   @media (max-width: 700px) {
-    padding: 0.8rem 0.9rem;
-    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    gap: 0.4rem;
+    width: 78vw;
+    scroll-snap-align: start;
+    flex-shrink: 0;
   }
 }
 
@@ -653,6 +692,9 @@
 
   @media (max-width: 700px) {
     margin: 0.3rem 0;
+    aspect-ratio: 16 / 10;
+    height: auto;
+    min-height: 100px;
   }
 }
 
@@ -677,6 +719,10 @@
   line-height: 1.6;
   color: var(--text-secondary);
   flex: 1;
+
+  @media (max-width: 700px) {
+    font-size: 0.78rem;
+  }
 }
 
 .about-bento-tag {
@@ -693,13 +739,13 @@
 
 .about-bento-card--wide {
   @media (max-width: 700px) {
-    grid-column: 1 / -1;
+    width: 85vw;
   }
 }
 
 .about-bento-card--tall {
   @media (max-width: 700px) {
-    grid-column: 1 / -1;
+    width: 78vw;
   }
 }
 

@@ -276,6 +276,7 @@ export default function Navbar() {
       end: 'max',
       onUpdate: (self) => {
         if (isHovered) return;
+        if (window.innerWidth <= 700) return;
 
         if (self.direction === 1 && self.scroll() > 80) {
           nav.classList.add(styles['nav--collapsed']);

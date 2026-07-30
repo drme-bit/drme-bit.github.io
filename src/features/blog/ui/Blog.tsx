@@ -22,16 +22,15 @@ function PostCard({ post, index }: { post: BlogPost; index: number }) {
     const el = ref.current;
     if (!el) return;
     gsap.fromTo(el,
-      { opacity: 0, y: 30 },
+      { y: 30 },
       {
-        opacity: 1,
         y: 0,
-        duration: 0.7,
+        duration: 0.6,
         ease: 'power2.out',
         delay: index * 0.04,
         scrollTrigger: {
           trigger: el,
-          start: 'top 88%',
+          start: 'top 95%',
           toggleActions: 'play none none reverse',
         },
       },

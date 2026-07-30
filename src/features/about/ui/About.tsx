@@ -179,8 +179,8 @@ export default function About() {
           <LocationMap
             lat={46.482952}
             lng={30.712481}
-            city={'Im here :3'}
-            zoom={5}
+            city="Odesa, Ukraine"
+            zoom={7}
             className={styles['about-map-canvas']}
           />
 
