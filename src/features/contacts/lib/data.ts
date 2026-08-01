@@ -1,5 +1,5 @@
-import type { PremiumContactFormField, PremiumContactInfoItem, PremiumSocialLink, PremiumNavLink } from '../types/index';
-import { socialLinks, navLinks } from '@/shared/data/links';
+import type { PremiumContactFormField, PremiumContactInfoItem } from '../types/index';
+import { profile, socialLinks } from '@/shared/data/profile';
 
 export const fieldConfigs: PremiumContactFormField[] = [
   { name: 'name', label: 'Full Name', type: 'text', placeholder: 'Your name', required: true, maxLength: 50 },
@@ -23,7 +23,7 @@ export const contactItems: PremiumContactInfoItem[] = [
     icon: 'calendar',
     title: 'Schedule a Call',
     subtitle: '30 min · Calendly',
-    href: 'https://calendly.com/vacheslavtkachik/30min',
+    href: profile.calendlyUrl,
     external: true,
     actionLabel: 'Book',
   },
@@ -31,17 +31,17 @@ export const contactItems: PremiumContactInfoItem[] = [
     id: 'email',
     icon: 'mail',
     title: 'Email Me',
-    subtitle: 'vacheslavtkachik@gmail.com',
-    copyText: 'vacheslavtkachik@gmail.com',
+    subtitle: profile.email,
+    copyText: profile.email,
   },
   {
     id: 'phone',
     icon: 'phone',
     title: 'Call Me',
-    subtitle: '+380 96 004 5028',
-    copyText: '+380 96 004 5028',
+    subtitle: profile.phone,
+    copyText: profile.phone,
   },
-  { id: 'location', icon: 'mapPin', title: 'Location', subtitle: 'Odessa, Ukraine (GMT+3)' },
+  { id: 'location', icon: 'mapPin', title: 'Location', subtitle: profile.location },
 ];
 
-export { socialLinks, navLinks };
+export { socialLinks };

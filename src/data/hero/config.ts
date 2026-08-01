@@ -3,5 +3,3 @@ export const TYPEWRITER_STRINGS = [
   'creative technologist',
   'open source contributor',
 ];
-
-export const GITHUB_USERNAME = 'drme-bit';

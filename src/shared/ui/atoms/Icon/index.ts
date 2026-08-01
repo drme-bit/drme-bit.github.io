@@ -41,6 +41,8 @@ export {
   FiMenu,
   FiHome,
   FiCpu,
+  FiDownload,
+  FiFileText,
 } from 'react-icons/fi';
 
 export {

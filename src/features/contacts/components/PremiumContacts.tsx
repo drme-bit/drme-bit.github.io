@@ -23,7 +23,8 @@ import {
 } from '@/shared/ui/atoms/Icon';
 import { useContactForm } from '../hooks/useContactForm';
 import type { ContactFormData } from '../types/contacts';
-import { fieldConfigs, contactItems, socialLinks, navLinks } from '../lib/data';
+import { profile } from '@/shared/data/profile';
+import { fieldConfigs, contactItems, socialLinks } from '../lib/data';
 import styles from '../ui/PremiumContacts.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -381,8 +382,8 @@ function PremiumSocialLinks() {
       <div className={styles.socialFooter}>
         <p className={styles.footerText}>
           Prefer email?{' '}
-          <a href="mailto:vacheslavtkachik@gmail.com" className={styles.footerLink}>
-            vacheslavtkachik@gmail.com
+          <a href={`mailto:${profile.email}`} className={styles.footerLink}>
+            {profile.email}
           </a>
         </p>
       </div>

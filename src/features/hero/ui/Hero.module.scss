@@ -414,6 +414,31 @@
   letter-spacing: 0.04em;
 }
 
+.h-resume {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.45em 0.85em;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s var(--ease-out);
+
+  &:hover {
+    color: var(--text);
+    border-color: var(--accent-secondary);
+    background: rgba(125, 211, 252, 0.12);
+    transform: translateY(-2px);
+  }
+}
+
 .h-tagline {
   font-family: var(--font-mono), monospace;
   font-size: clamp(0.65rem, 0.7vw, 0.7rem);

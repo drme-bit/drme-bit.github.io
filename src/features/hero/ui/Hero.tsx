@@ -2,7 +2,7 @@
 
 //React
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { FiGithub, FiLinkedin, FiMail, FiArrowDown } from '@/shared/ui/atoms/Icon';
+import { FiGithub, FiLinkedin, FiMail, FiArrowDown, FiDownload, SiDiscord } from '@/shared/ui/atoms/Icon';
 //GSAP
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -13,7 +13,8 @@ import useTypewriter from '@/shared/hooks/useTypewriter';
 import useGithubStats from '@/shared/hooks/useGithubStats';
 import { TOOLS } from '@/data/hero/tools';
 import { TERMINALS } from '@/data/hero/terminals';
-import { TYPEWRITER_STRINGS, GITHUB_USERNAME } from '@/data/hero/config';
+import { TYPEWRITER_STRINGS } from '@/data/hero/config';
+import { profile, socialLinks } from '@/shared/data/profile';
 //Styles
 import styles from './Hero.module.scss';
 
@@ -146,15 +147,15 @@ function Avatar() {
   return (
     <div className={`${styles['h-avatar']} ${loaded ? styles['is-visible'] : ''}`}>
       <a
-        href={`https://github.com/${GITHUB_USERNAME}`}
+        href={`https://github.com/${profile.githubUsername}`}
         target="_blank"
         rel="noopener noreferrer"
         className={styles['h-avatar-link']}
       >
         <div className={styles['h-avatar-glow']} />
         <img
-          src={`https://github.com/${GITHUB_USERNAME}.png`}
-          alt={GITHUB_USERNAME}
+          src={`https://github.com/${profile.githubUsername}.png`}
+          alt={profile.githubUsername}
           className={styles['h-avatar-img']}
           onLoad={() => setLoaded(true)}
         />
@@ -178,27 +179,48 @@ function ToolStrip() {
   );
 }
 
-function ContactRow({ stats }: ContactRowProps) {
-  const links = [
-    { Icon: FiGithub, href: `https://github.com/${GITHUB_USERNAME}`, label: 'GitHub' },
-    { Icon: FiLinkedin, href: 'https://linkedin.com/in/vyacheslav-tkachik-2a3b8a277', label: 'LinkedIn' },
-    { Icon: FiMail, href: 'mailto:vacheslavtkachik@gmail.com', label: 'Email' },
-  ];
+const heroIconMap = {
+  github: FiGithub,
+  linkedin: FiLinkedin,
+  discord: SiDiscord,
+} as const;
 
+function ContactRow({ stats }: ContactRowProps) {
   return (
     <div className={styles['h-contacts']}>
-      {links.map(({ Icon, href, label }) => (
-        <a
-          key={label}
-          href={href}
-          target={href.startsWith('mailto') ? undefined : '_blank'}
-          rel={href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
-          className={styles['h-contact']}
-          aria-label={label}
-        >
-          <Icon size={14} />
-        </a>
-      ))}
+      {socialLinks.map((link) => {
+        const Icon = heroIconMap[link.icon];
+        return (
+          <a
+            key={link.id}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles['h-contact']}
+            aria-label={link.label}
+          >
+            <Icon size={14} />
+          </a>
+        );
+      })}
+      <a
+        href={`mailto:${profile.email}`}
+        className={styles['h-contact']}
+        aria-label="Email"
+      >
+        <FiMail size={14} />
+      </a>
+
+      <a
+        href={profile.resumeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles['h-resume']}
+      >
+        <FiDownload size={12} />
+        <span>resume</span>
+      </a>
+
       {stats && (
         <>
           <span className={styles['h-dot']} />
@@ -216,7 +238,7 @@ function ContactRow({ stats }: ContactRowProps) {
 export default function Hero() {
   const [show, setShow] = useState(false);
   const typed = useTypewriter(TYPEWRITER_STRINGS, 45, 2200);
-  const stats = useGithubStats(GITHUB_USERNAME);
+  const stats = useGithubStats(profile.githubUsername);
   const sectionRef = useRef<HTMLElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
@@ -344,8 +366,8 @@ export default function Hero() {
           <Avatar />
 
           <h1 className={styles['h-name']}>
-            <span className={styles['h-name-first']}>Vyacheslav</span>
-            <span className={styles['h-name-last']}>Tkachyk</span>
+            <span className={styles['h-name-first']}>{profile.firstName}</span>
+            <span className={styles['h-name-last']}>{profile.lastName}</span>
           </h1>
 
           <p className={styles['h-role']}>

@@ -60,7 +60,7 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['terminal', 'hero', 'terminal section', 'whoami', 'crt', 'scanlines'],
     answer:
-      "The hero section features a terminal with CRT scanlines, a live clock, ambient particles floating upward, and a glowing pulse animation. There's a $ whoami greeting, location, and a 'resume' button. It sets the whole hacker aesthetic.",
+      "The hero section features a terminal with CRT scanlines, a live clock, ambient particles floating upward, and a glowing pulse animation. There's a $ whoami greeting, location, and a resume button that downloads his CV. It sets the whole hacker aesthetic.",
   },
   {
     keywords: ['companion cube', 'mascot', 'who are you', 'what are you', 'cube'],
@@ -96,7 +96,7 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['status', 'available', 'freelance', 'open to work', 'hiring', 'resume'],
     answer:
-      "Vyacheslav is currently available for freelance work! Check the hero section for his status — there's an 'available for work' indicator and a resume button (inactive for now, but the info is there).",
+      "Vyacheslav is currently available for freelance work! Check the hero section for his status and a downloadable resume button.",
   },
   {
     keywords: ['github', 'source code', 'repository', 'repo', 'open source'],
