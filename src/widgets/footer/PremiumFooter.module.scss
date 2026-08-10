@@ -1,35 +1,22 @@
 @use '../../shared/styles/mixins' as *;
 @use '../../shared/styles/animations' as *;
 
-.wrapper {
-  position: relative;
-  z-index: 5;
-  width: 100%;
-  will-change: transform;
-  overflow: hidden;
-  isolation: isolate;
-  height: 30vh;
-}
-
 .footer {
   position: relative;
   z-index: 1;
-  height: 100%;
   width: 100%;
   background: var(--bg-surface);
-  pointer-events: auto;
-  display: flex;
-  flex-direction: column;
   border-top: 1px solid var(--border);
+  pointer-events: auto;
 }
 
 .footerBg {
   position: absolute;
   inset: 0;
-  background:
-          radial-gradient(ellipse 80% 50% at 50% 0%, var(--accent-warm-glow, rgba(251, 191, 36, 0.06)) 0%, transparent 70%);
-  opacity: 1;
   pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 0%, var(--accent-warm-glow, rgba(251, 191, 36, 0.06)) 0%, transparent 70%),
+    linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg-surface) 85%, var(--accent-secondary-glow)) 100%);
 }
 
 .footerInner {
@@ -38,49 +25,24 @@
   margin: 0 auto;
   width: 100%;
   max-width: 1200px;
-  padding: var(--space-xl) var(--space-md) var(--space-md);
+  padding: clamp(2rem, 6vw, 3.5rem) var(--space-md) var(--space-md);
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
-  height: 100%;
-  justify-content: space-between;
-
-  @include respond-to(desktop) {
-    padding: var(--space-lg) var(--space-lg) var(--space-md);
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-lg);
-  }
-
-  @include respond-to(tablet) {
-    padding: var(--space-xl) var(--space-xl) var(--space-md);
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--space-xl);
-  }
+  gap: var(--space-lg);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   FOOTER TOP - BRAND & CONTACT
-   ═══════════════════════════════════════════════════════════════ */
+/* ── Top: brand + contact ── */
 
 .footerTop {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-  padding-top: var(--space-sm);
+  padding-top: var(--space-xs);
 
   @include respond-to(desktop) {
-    flex-direction: column;
-    gap: var(--space-md);
-    text-align: left;
-  }
-
-  @include respond-to(tablet) {
-    flex-direction: column;
-    gap: var(--space-md);
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
     text-align: left;
   }
 }
@@ -100,6 +62,18 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
+
+  &::before {
+    content: '❯';
+    color: var(--accent-secondary);
+    font-family: var(--font-mono), monospace;
+    font-size: 0.8em;
+    opacity: 0.8;
+  }
+}
+
+.logoDot {
+  display: none;
 }
 
 .footerTagline {
@@ -130,23 +104,20 @@
   font-size: 0.72rem;
   letter-spacing: 0.04em;
   border-bottom: 1px solid transparent;
-  transition: color 0.2s var(--ease-out),
-  border-color 0.2s var(--ease-out);
+  transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
 
   &:hover {
-    border-bottom-color: var(--accent-warm);
-    color: var(--accent-warm);
+    border-bottom-color: var(--accent-secondary);
+    color: var(--accent-secondary);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--accent-warm);
+    outline: 2px solid var(--accent-secondary);
     outline-offset: 2px;
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   DIVIDER
-   ═══════════════════════════════════════════════════════════════ */
+/* ── Divider ── */
 
 .footerDivide {
   position: relative;
@@ -154,9 +125,7 @@
   background: linear-gradient(90deg, transparent, var(--border-hover), transparent);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   FOOTER BOTTOM - NAV & SOCIAL
-   ═══════════════════════════════════════════════════════════════ */
+/* ── Bottom: nav + support ── */
 
 .footerBottom {
   display: flex;
@@ -164,14 +133,6 @@
   gap: var(--space-lg);
   padding-bottom: var(--space-sm);
   width: 100%;
-
-  @include respond-to(tablet) {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--space-lg);
-    flex-wrap: wrap;
-  }
 
   @include respond-to(desktop) {
     flex-direction: row;
@@ -187,12 +148,6 @@
   gap: var(--space-lg);
   width: 100%;
 
-  @include respond-to(tablet) {
-    flex-direction: row;
-    gap: var(--space-2xl);
-    flex: 1;
-  }
-
   @include respond-to(desktop) {
     flex-direction: row;
     gap: var(--space-2xl);
@@ -203,7 +158,7 @@
 .navColumn {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
 }
 
 .navTitle {
@@ -225,27 +180,10 @@
   list-style: none;
 }
 
-@include respond-to(tablet) {
-  .navList {
-    flex-direction: row;
-    gap: var(--space-lg);
-  }
-  
-  .socialList {
-    flex-direction: row;
-    gap: var(--space-sm);
-  }
-}
-
 @include respond-to(desktop) {
   .navList {
     flex-direction: row;
     gap: var(--space-lg);
-  }
-  
-  .socialList {
-    flex-direction: row;
-    gap: var(--space-sm);
   }
 }
 
@@ -265,7 +203,7 @@
     left: 0;
     width: 0;
     height: 1px;
-    background: var(--accent-warm);
+    background: var(--accent-secondary);
     transition: width 0.3s var(--ease-out);
   }
 
@@ -278,20 +216,24 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--accent-warm);
+    outline: 2px solid var(--accent-secondary);
     outline-offset: 4px;
   }
 }
 
-/* Social List */
+/* Social list — glass pills */
+
 .socialList {
   flex-direction: row;
   gap: var(--space-sm);
   flex-wrap: wrap;
+}
 
-  @include respond-to(desktop) {
-    justify-content: center;
-  }
+.socialItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
 }
 
 .socialLink {
@@ -300,21 +242,27 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 0;
-  background: transparent;
+  border-radius: var(--radius-full);
+  background: var(--glass);
   border: 1px solid var(--border);
   color: var(--text-secondary);
   text-decoration: none;
   transition: border-color 0.2s var(--ease-out),
-  color 0.2s var(--ease-out);
+    color 0.2s var(--ease-out),
+    background 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out),
+    box-shadow 0.25s var(--ease-out);
 
   &:hover {
-    border-color: var(--accent-warm);
-    color: var(--accent-warm);
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+    background: var(--accent-secondary-glow);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -6px var(--accent-secondary-glow);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--accent-warm);
+    outline: 2px solid var(--accent-secondary);
     outline-offset: 2px;
   }
 }
@@ -323,33 +271,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform var(--duration-fast) var(--ease-out);
 }
 
-.socialLink:hover .socialIcon {
-  transform: scale(1.1);
-}
-
-.socialLabel {
-  display: none;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   FOOTER SUPPORT
-   ═══════════════════════════════════════════════════════════════ */
+/* ── Support ── */
 
 .footerSupport {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   text-align: left;
   width: 100%;
-
-  @include respond-to(tablet) {
-    align-items: flex-end;
-    width: auto;
-  }
 
   @include respond-to(desktop) {
     align-items: flex-end;
@@ -361,11 +293,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
-  background: transparent;
+  background: var(--glass);
   border: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: var(--radius-full);
   color: var(--text-secondary);
   text-decoration: none;
   font-family: var(--font-mono), monospace;
@@ -373,11 +305,8 @@
   letter-spacing: 0.04em;
   width: 100%;
   transition: border-color 0.2s var(--ease-out),
-  color 0.2s var(--ease-out);
-
-  @include respond-to(tablet) {
-    width: auto;
-  }
+    color 0.2s var(--ease-out),
+    background 0.2s var(--ease-out);
 
   @include respond-to(desktop) {
     width: auto;
@@ -386,6 +315,7 @@
   &:hover {
     border-color: var(--accent-warm);
     color: var(--accent-warm);
+    background: color-mix(in srgb, var(--accent-warm) 8%, transparent);
   }
 
   &:focus-visible {
@@ -398,10 +328,16 @@
   }
 }
 
+/* Theme-aware ko-fi logo: white in dark themes, full-color in light */
+
 .kofiImg {
   width: 14px;
   height: 14px;
   filter: brightness(0) invert(1);
+}
+
+:global(html.light) .kofiImg {
+  filter: none;
 }
 
 .copyright {
@@ -416,11 +352,6 @@
   justify-content: flex-start;
   width: 100%;
 
-  @include respond-to(tablet) {
-    justify-content: flex-end;
-    width: auto;
-  }
-
   @include respond-to(desktop) {
     justify-content: flex-end;
     width: auto;
@@ -432,30 +363,44 @@
   animation: heartbeat 1.2s ease-in-out infinite;
 }
 
+.backToTop {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.5em 1em;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out),
+    background 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
+
+  &:hover {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+    background: var(--accent-secondary-glow);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+  }
+}
+
 @keyframes heartbeat {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.2); }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   ANIMATION TARGETS
-   ═══════════════════════════════════════════════════════════════ */
-
-.footer-row,
-.footerRow {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.social-icon,
-.socialIcon {
-  opacity: 0;
-  transform: scale(0.8) rotate(-10deg);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   REDUCED MOTION
-   ═══════════════════════════════════════════════════════════════ */
+/* ── Reduced motion ── */
 
 @media (prefers-reduced-motion: reduce) {
   .footerBg,
@@ -464,40 +409,19 @@
   .socialLink,
   .kofiBtn,
   .logoDot,
-  .heart {
+  .heart,
+  .backToTop {
     transition: none !important;
     animation: none !important;
   }
-
-  .footer-row,
-  .footerRow,
-  .social-icon,
-  .socialIcon {
-    opacity: 1 !important;
-    transform: none !important;
-  }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   MOBILE OVERRIDES — minimal: social icons + copyright
-   ═══════════════════════════════════════════════════════════════ */
+/* ── Mobile ── */
 
 @include respond-to(mobile) {
-  .wrapper {
-    height: 120px;
-    min-height: 0;
-  }
-
-  .footer {
-    height: 100%;
-    min-height: 0;
-  }
-
   .footerInner {
-    padding: var(--space-lg) var(--space-md);
+    padding: var(--space-lg) var(--space-md) var(--space-md);
     gap: var(--space-md);
-    flex-direction: column;
-    align-items: center;
   }
 
   .footerTop,
@@ -520,7 +444,7 @@
   .footerNav {
     flex-direction: column;
     align-items: center;
-    gap: 0;
+    gap: var(--space-md);
   }
 
   .socialList {
@@ -534,9 +458,17 @@
     border-color: var(--border-hover);
   }
 
+  .footerSupport {
+    align-items: center;
+  }
+
   .copyright {
     justify-content: center;
     font-size: 0.55rem;
     color: var(--text-ghost);
+  }
+
+  .backToTop {
+    align-self: center;
   }
 }

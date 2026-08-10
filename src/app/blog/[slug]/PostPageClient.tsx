@@ -9,7 +9,7 @@ import {
   FiArrowRight,
 } from '@/shared/ui/atoms/Icon';
 import { blog } from '@/features/blog/lib';
-import { useNav } from '@/providers/NavProvider';
+import { useNav } from '@/app/providers/NavProvider';
 import { usePostTransition } from '@/features/blog/lib/PostTransitionContext';
 import styles from './PostPage.module.scss';
 
@@ -42,19 +42,19 @@ function ProgressBar() {
 
 const POST_COMPONENTS: Record<string, React.ComponentType> = {
   'integrating-nodejs': dynamic(
-    () => import('@/data/posts/integrating-nodejs/PostContent'),
+    () => import('@/entities/post/integrating-nodejs/PostContent'),
     { ssr: false, loading: () => <div className={styles['post-loading']}>loading...</div> }
   ),
   'why-i-replaced-cobe': dynamic(
-    () => import('@/data/posts/why-i-replaced-cobe/PostContent'),
+    () => import('@/entities/post/why-i-replaced-cobe/PostContent'),
     { ssr: false, loading: () => <div className={styles['post-loading']}>loading...</div> }
   ),
   'building-my-portfolio': dynamic(
-    () => import('@/data/posts/building-my-portfolio/PostContent'),
+    () => import('@/entities/post/building-my-portfolio/PostContent'),
     { ssr: false, loading: () => <div className={styles['post-loading']}>loading...</div> }
   ),
   'discord-orb-quests': dynamic(
-    () => import('@/data/posts/discord-orb-quests/PostContent'),
+    () => import('@/entities/post/discord-orb-quests/PostContent'),
     { ssr: false, loading: () => <div className={styles['post-loading']}>loading...</div> }
   ),
 };

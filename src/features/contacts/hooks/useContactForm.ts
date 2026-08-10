@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/shared/config/firebase';
-import type { ContactFormData } from '../types/contacts';
+import type { ContactFormData } from '../model/contacts';
 
 interface UseContactFormReturn {
   isSubmitting: boolean;

@@ -1,59 +1,221 @@
 @use '../../shared/styles/mixins' as *;
 
+$logo-size: clamp(160px, 26vmin, 260px);
+
 .curtain {
   position: fixed;
   inset: 0;
   z-index: 9999;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   background: var(--bg);
+  pointer-events: none;
+  clip-path: inset(0);
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 72% 64% at 50% 46%, black 28%, transparent 74%);
+  -webkit-mask-image: radial-gradient(ellipse 72% 64% at 50% 46%, black 28%, transparent 74%);
+  opacity: 0.5;
+}
+
+.orb-one,
+.orb-two {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+}
+
+.orb-one {
+  width: 360px;
+  height: 360px;
+  left: -120px;
+  top: -120px;
+  background: radial-gradient(circle, var(--accent-secondary-glow) 0%, transparent 70%);
+}
+
+.orb-two {
+  width: 320px;
+  height: 320px;
+  right: -100px;
+  bottom: -140px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 1.5rem;
-  pointer-events: none;
+  width: 100%;
+  max-width: 460px;
+  padding: var(--space-xl);
 }
 
-.lines {
+/*  Stage: mark + halo  */
+
+.stage {
+  position: relative;
+  width: $logo-size;
+  aspect-ratio: 150 / 136.9;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+}
+
+.halo {
+  position: absolute;
+  inset: -14%;
+  opacity: 0;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+}
+
+.logo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: var(--accent);
+  opacity: 0;
+  will-change: transform;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+}
+
+.logo-path {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/*  Brand  */
+
+.brand {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: 60px;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: center;
+  opacity: 0;
 }
 
-.line {
-  display: block;
-  width: 100%;
-  height: 2px;
+.brand-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--accent-secondary);
+}
+
+.brand-cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 0.3rem;
   background: var(--accent-secondary);
+  animation: blink 0.9s steps(2, start) infinite;
+  transform: translateY(0.12em);
+}
+
+.tagline {
+  margin: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.78rem;
+  color: var(--text-ghost);
+}
+
+.progress {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+}
+
+.progress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--border);
+}
+
+.progress-bar {
+  position: relative;
+  display: block;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--accent-secondary), var(--accent));
+  box-shadow: 0 0 12px var(--accent-secondary-glow);
   transform: scaleX(0);
   transform-origin: left;
 }
 
-.brand {
+.progress-label {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  opacity: 0;
-  transform: translateY(8px);
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent-secondary);
-  animation: pulse 1s ease-in-out infinite alternate;
+.progress-hint {
+  color: var(--terminal-text);
 }
 
-.name {
-  font-family: var(--font-display), sans-serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -0.02em;
+.progress-num {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
 }
 
-@keyframes pulse {
-  from { opacity: 0.5; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1.1); }
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-cursor {
+    animation: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: var(--space-md);
+    gap: 1.2rem;
+  }
+
+  .logo-path {
+    stroke-width: 7;
+  }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useTheme, THEMES, type ThemeId, type FontSize } from '@/providers/ThemeProvider';
+import { useTheme, THEMES, type ThemeId, type FontSize } from '@/app/providers/ThemeProvider';
 import { FiSettings } from '@/shared/ui/atoms/Icon';
 import styles from './ChangeTheme.module.scss';
 

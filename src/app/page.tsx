@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { NavLeaf, useNav } from '@/providers/NavProvider';
-import { useActivity } from '@/providers/ActivityProvider';
+import { NavLeaf, useNav } from '@/app/providers/NavProvider';
+import { useActivity } from '@/app/providers/ActivityProvider';
 import useLockOrientation from '@/shared/hooks/useLockOrientation';
 import Hero from '@/features/hero/ui/Hero';
 import About from '@/features/about/ui/About';
@@ -13,6 +13,7 @@ import Reviews from '@/features/reviews/ui/Reviews';
 import Contacts from '@/features/contacts/ui/Contacts';
 import PremiumFooter from '@/widgets/footer/PremiumFooter';
 import ScrollProgressBar from '@/shared/ui/molecules/ScrollProgressBar/ScrollProgressBar';
+import { OnboardingIntro } from '@/widgets/onboarding/OnboardingIntro';
 
 const Scene = dynamic(() => import('@/widgets/scene/Scene'), { ssr: true });
 const Skills = dynamic(() => import('@/features/skills/ui/Skills'), { ssr: false });
@@ -80,6 +81,7 @@ function MainInner() {
     <>
       <Cursor />
       <ScrollProgressBar />
+      <OnboardingIntro />
 
       <Scene />
 

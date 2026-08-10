@@ -2,6 +2,7 @@
 
 //react
 import { useEffect, useRef } from 'react';
+import type { CSSProperties } from 'react';
 //gsap
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -9,9 +10,11 @@ import { useGSAP } from '@gsap/react';
 //other
 import SectionTitle from '@/shared/ui/molecules/SectionTitle/SectionTitle';
 import styles from './Experience.module.scss';
-import { experienceData, ExperienceEntry } from '@/data/experienceData';
+import { experienceData, ExperienceEntry } from '@/entities/experience';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const CHIP_COLORS = ['var(--accent)', 'var(--accent-secondary)', 'var(--accent-tertiary)'];
 
 export default function Experience() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -199,10 +202,44 @@ export default function Experience() {
               >
                 <span className={styles['tl-dot']} />
                 <div className={styles['tl-body']}>
-                  <span className={styles['tl-period']}>{e.period}</span>
-                  <span className={styles['tl-role']}>{e.role}</span>
-                  <span className={styles['tl-org']}>{e.org}</span>
-                  <p className={styles['tl-desc']}>{e.desc}</p>
+                  <div className={styles['tl-body-bar']}>
+                    <span className={styles['tl-body-dots']}>
+                      <i className={styles['tl-dot-r']} />
+                      <i className={styles['tl-dot-y']} />
+                      <i className={styles['tl-dot-g']} />
+                    </span>
+                    <span className={styles['tl-body-path']}>~/exp/{String(i + 1).padStart(2, '0')}</span>
+                  </div>
+                  <div className={styles['tl-body-content']}>
+                    <span className={styles['tl-period']}>[ {e.period} ]</span>
+                    <span className={styles['tl-role']}>{e.role}</span>
+                    <span className={styles['tl-org']}>{e.org}</span>
+                    <p className={styles['tl-desc']}>{e.desc}</p>
+                    {e.tech && e.tech.length > 0 && (
+                      <div className={styles['tl-tech']}>
+                        {e.tech.map((t, ti) => (
+                          <span
+                            key={t}
+                            className={styles['tl-tech-chip']}
+                            style={{ '--chip-color': CHIP_COLORS[ti % CHIP_COLORS.length] } as CSSProperties}
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {e.link && (
+                      <a
+                        href={e.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles['tl-link']}
+                      >
+                        {e.linkText ?? 'view project'}
+                        <span className={styles['tl-link-arrow']}>→</span>
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

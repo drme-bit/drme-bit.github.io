@@ -118,6 +118,7 @@ export class BlogRepository {
   prevNext(slug: string): { prev: BlogPost | null; next: BlogPost | null } {
     const list = this.all;
     const idx = list.findIndex(p => p.slug === slug);
+    if (idx === -1) return { prev: null, next: null };
     return {
       prev: idx > 0 ? list[idx - 1] : null,
       next: idx < list.length - 1 ? list[idx + 1] : null,

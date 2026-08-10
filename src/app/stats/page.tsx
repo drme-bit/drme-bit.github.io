@@ -1,6 +1,6 @@
 'use client';
 
-import { useActivity } from '@/providers/ActivityProvider';
+import { useActivity } from '@/app/providers/ActivityProvider';
 import TypingTest from '@/shared/ui/molecules/TypingTest/TypingTest';
 import styles from './Stats.module.scss';
 

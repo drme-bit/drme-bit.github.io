@@ -11,10 +11,10 @@ import { useGSAP } from '@gsap/react';
 //Other
 import useTypewriter from '@/shared/hooks/useTypewriter';
 import useGithubStats from '@/shared/hooks/useGithubStats';
-import { TOOLS } from '@/data/hero/tools';
-import { TERMINALS } from '@/data/hero/terminals';
-import { TYPEWRITER_STRINGS } from '@/data/hero/config';
-import { profile, socialLinks } from '@/shared/data/profile';
+import { TOOLS } from '@/entities/hero';
+import { TERMINALS } from '@/entities/hero';
+import { TYPEWRITER_STRINGS } from '@/entities/hero';
+import { profile, socialLinks } from '@/entities/profile';
 //Styles
 import styles from './Hero.module.scss';
 

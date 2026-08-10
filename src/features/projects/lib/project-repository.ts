@@ -1,4 +1,4 @@
-import type { Skill, SkillGroup, SkillCategory } from '@/features/skills/lib/skill-graph';
+import type { Skill, SkillGroup, SkillCategory } from '@/entities/skill';
 
 /*  Types ── */
 

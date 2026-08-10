@@ -44,46 +44,85 @@ export default function Skills() {
 
   const { history, addSkill } = useSkillHistory();
 
-  // ── GSAP ScrollTrigger for section scroll animations ──
+  // ── GSAP ScrollTrigger: rising world → centered explorer ──
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
+    const vh = window.innerHeight;
+    const endSize = window.innerWidth <= 900 ? Math.min(window.innerWidth * 0.82, 340) : 500;
+    const startSize = vh * 1.6;
+    const startTop = vh * 0.48;
+    const startY = startTop - vh * 0.5 + startSize / 2;
+
+    const setEnd = () => {
+      const el = section;
+      el.style.setProperty('--header-opacity', '0');
+      el.style.setProperty('--header-ty', '-8vh');
+      el.style.setProperty('--header-s', '0.95');
+      el.style.setProperty('--globe-size', `${endSize}px`);
+      el.style.setProperty('--globe-y', '0px');
+      el.style.setProperty('--tips-opacity', '1');
+      el.style.setProperty('--tips-x', '0rem');
+      el.style.setProperty('--tips-y', '0rem');
+      el.style.setProperty('--filters-opacity', '1');
+      el.style.setProperty('--filters-y', '0rem');
+      el.style.setProperty('--cards-opacity', '1');
+      el.style.setProperty('--card-1-y', '0px');
+      el.style.setProperty('--card-2-y', '0px');
+      el.classList.add(styles['filters-visible']);
+    };
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setEnd();
+      return;
+    }
+
     ScrollTrigger.refresh();
+
+    const apply = (p: number) => {
+      const el = section;
+
+      // header: looms above the rising world, then dissolves (gone by the end)
+      const header = Math.min(p / 0.35, 1);
+      // globe: giant world peeking from the bottom → reduced, centered
+      const globe = Math.min(p / 0.55, 1);
+      const tips = Math.min(Math.max((p - 0.3) / 0.2, 0), 1);
+      const filters = Math.min(Math.max((p - 0.45) / 0.18, 0), 1);
+      const cards = Math.min(Math.max((p - 0.12) / 0.32, 0), 1);
+
+      el.style.setProperty('--header-opacity', String(1 - header));
+      el.style.setProperty('--header-ty', `${-8 * header}vh`);
+      el.style.setProperty('--header-s', String(1.25 - header * 0.3));
+
+      el.style.setProperty('--globe-size', `${(startSize - endSize) * (1 - globe) + endSize}px`);
+      el.style.setProperty('--globe-y', `${startY * (1 - globe)}px`);
+
+      el.style.setProperty('--tips-opacity', String(tips));
+      el.style.setProperty('--tips-x', `${(1 - tips) * 6}rem`);
+      el.style.setProperty('--tips-y', `${(1 - tips) * 0.75}rem`);
+
+      el.style.setProperty('--filters-opacity', String(filters));
+      el.style.setProperty('--filters-y', `${(1 - filters) * -0.75}rem`);
+
+      el.style.setProperty('--cards-opacity', String(cards));
+      el.style.setProperty('--card-1-y', `${(1 - cards) * 40}px`);
+      el.style.setProperty('--card-2-y', `${(1 - cards) * 60}px`);
+
+      const filtersVisible = p > 0.45;
+      el.classList.toggle(styles['filters-visible'], filtersVisible);
+    };
 
     const ctx = gsap.context(() => {
       const st = ScrollTrigger.create({
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
-        onUpdate: (self) => {
-          const p = self.progress;
-          const el = section;
-          
-          const headerProgress = Math.min(p / 0.32, 1);
-          const globeProgress = Math.min(Math.max((p - 0.08) / 0.45, 0), 1);
-          const tipsProgress = Math.min(Math.max((p - 0.46) / 0.2, 0), 1);
-          const filtersProgress = Math.min(Math.max((p - 0.62) / 0.16, 0), 1);
-          const cardsProgress = Math.min(Math.max((p - 0.15) / 0.3, 0), 1);
-
-          el.style.setProperty('--header-opacity', String(1 - headerProgress));
-          el.style.setProperty('--header-x', `${headerProgress * -4}vw`);
-          el.style.setProperty('--header-y', `${headerProgress * -1.5}rem`);
-          el.style.setProperty('--globe-size', `${385 + globeProgress * 135}px`);
-          el.style.setProperty('--globe-x', `${(1 - globeProgress) * 13}vw`);
-          el.style.setProperty('--tips-opacity', String(tipsProgress));
-          el.style.setProperty('--tips-x', `${(1 - tipsProgress) * 6}rem`);
-          el.style.setProperty('--tips-y', `${(1 - tipsProgress) * 0.75}rem`);
-          el.style.setProperty('--filters-opacity', String(filtersProgress));
-          el.style.setProperty('--filters-y', `${(1 - filtersProgress) * -0.75}rem`);
-          el.style.setProperty('--cards-opacity', String(cardsProgress));
-          el.style.setProperty('--card-1-y', `${(1 - cardsProgress) * 40}px`);
-          el.style.setProperty('--card-2-y', `${(1 - cardsProgress) * 60}px`);
-
-          const filtersVisible = p > 0.62;
-          el.classList.toggle(styles['filters-visible'], filtersVisible);
-        },
+        onRefresh: (self) => apply(self.progress),
+        onUpdate: (self) => apply(self.progress),
       });
+
+      apply(0);
 
       return () => st.kill();
     }, sectionRef);
@@ -206,13 +245,37 @@ export default function Skills() {
     >
       <div className={styles['skills-sticky']}>
         <div className={styles['skills-header']}>
-          <span className={styles['skills-header-num']}>02</span>
+          <span className={styles['skills-header-kicker']}>
+            <span className={styles['skills-header-bracket']}>[</span>
+            <span className={styles['skills-header-num']}>02</span>
+            <span className={styles['skills-header-bracket']}>]</span>
+            <span className={styles['skills-header-label']}>skills explorer</span>
+          </span>
           <h2 className={styles['skills-header-title']}>
             skills<span className={styles['skills-header-accent']}>_</span>
+            <span className={styles['skills-header-cursor']} aria-hidden="true" />
           </h2>
           <p className={styles['skills-header-desc']}>
-            Click any marker on the globe to explore a skill in detail
+            click any marker on the globe to explore a skill in detail
           </p>
+          <div className={styles['skills-header-stats']}>
+            <span className={styles['skills-header-stat']}>
+              <i className={styles['skills-header-stat-dot']} style={{ background: GROUP_COLORS.frontend }} />
+              {GROUP_COUNTS.frontend ?? 0} frontend
+            </span>
+            <span className={styles['skills-header-sep']}>/</span>
+            <span className={styles['skills-header-stat']}>
+              <i className={styles['skills-header-stat-dot']} style={{ background: GROUP_COLORS.backend }} />
+              {GROUP_COUNTS.backend ?? 0} backend
+            </span>
+            <span className={styles['skills-header-sep']}>/</span>
+            <span className={styles['skills-header-stat']}>
+              <i className={styles['skills-header-stat-dot']} style={{ background: GROUP_COLORS.tools }} />
+              {GROUP_COUNTS.tools ?? 0} tools
+            </span>
+            <span className={styles['skills-header-sep']}>/</span>
+            <span className={styles['skills-header-stat']}>{graph.allSkills.length} nodes</span>
+          </div>
         </div>
 
         <div className={styles['skills-filters']}>
@@ -337,7 +400,9 @@ export default function Skills() {
             </aside>
           </div>
 
-          {/* Skill detail panel */}
+          {/* Skill detail panel — anchored to the sticky viewport, rides with the section */}
+          </div>
+
           <SkillPanel
             skill={selectedSkill}
             history={history}
@@ -350,7 +415,6 @@ export default function Skills() {
             onSelectRelated={selectRelatedSkill}
           />
         </div>
-      </div>
     </section>
   );
 }

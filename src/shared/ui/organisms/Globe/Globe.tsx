@@ -6,7 +6,7 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { Color, Vector3 } from 'three';
 import ThreeGlobe from 'three-globe';
-import countries from '@/data/globe.json';
+import countries from '@/entities/geo/globe.json';
 
 import {
   graph,
@@ -20,12 +20,16 @@ import styles from './Globe.module.scss';
 
 const _isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
+const reducedMotionGlobe =
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 const cameraZ = 300;
 
 interface MarkerEntry {
   el: HTMLElement;
   lat: number;
   lng: number;
+  mag: { x: number; y: number };
 }
 
 interface Arc {
@@ -214,6 +218,21 @@ interface MarkerProps {
 
 function Marker({ name, group, lat, lng, onClick, elemRef }: MarkerProps) {
   const Icon = (ICON_MAP as Record<string, React.ComponentType<{ className?: string }>>)[name];
+
+  const handleMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2);
+    const dy = e.clientY - (r.top + r.height / 2);
+    el.style.setProperty('--mag-x', `${Math.max(-18, Math.min(18, dx / 5))}px`);
+    el.style.setProperty('--mag-y', `${Math.max(-18, Math.min(18, dy / 5))}px`);
+  };
+
+  const handleLeave = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.setProperty('--mag-x', '0px');
+    e.currentTarget.style.setProperty('--mag-y', '0px');
+  };
+
   return (
     <button
       type="button"
@@ -222,6 +241,8 @@ function Marker({ name, group, lat, lng, onClick, elemRef }: MarkerProps) {
       data-skill={name}
       aria-label={`View ${name} skill details`}
       onPointerDown={(e) => { e.stopPropagation(); onClick?.(name); }}
+      onPointerMove={handleMove}
+      onPointerLeave={handleLeave}
     >
       <div
         className={styles.globeMarkerInner}
@@ -354,7 +375,14 @@ function GlobeInner({ markers, arcs, globeObjRef, markerRefsRef, themeVersion }:
       const screenX = (worldPos.x * 0.5 + 0.5) * w;
       const screenY = (-worldPos.y * 0.5 + 0.5) * h;
 
-      el.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%)`;
+      if (!reducedMotionGlobe) {
+        const targetX = parseFloat(el.style.getPropertyValue('--mag-x')) || 0;
+        const targetY = parseFloat(el.style.getPropertyValue('--mag-y')) || 0;
+        entry.mag.x += (targetX - entry.mag.x) * 0.22;
+        entry.mag.y += (targetY - entry.mag.y) * 0.22;
+      }
+
+      el.style.transform = `translate(${screenX + entry.mag.x}px, ${screenY + entry.mag.y}px) translate(-50%, -50%)`;
 
       const dimmed = !isDisabled && hasFilter && !filtered!.has(name);
       const active = selectedName === name;
@@ -434,7 +462,7 @@ const Globe = forwardRef(function Globe({ className = '', onMarkerClick }: Globe
   const setMarkerRef = useCallback((name: string, el: HTMLButtonElement | null) => {
     const marker = markers.find((m) => m.name === name);
     if (marker && el) {
-      markerRefsRef.current[name] = { el, lat: marker.lat, lng: marker.lng };
+      markerRefsRef.current[name] = { el, lat: marker.lat, lng: marker.lng, mag: { x: 0, y: 0 } };
     }
   }, [markers]);
 
@@ -458,7 +486,7 @@ const Globe = forwardRef(function Globe({ className = '', onMarkerClick }: Globe
           enableRotate
           minDistance={cameraZ}
           maxDistance={cameraZ}
-          autoRotate
+          autoRotate={!reducedMotionGlobe}
           autoRotateSpeed={0.4}
           minPolarAngle={Math.PI / 3.5}
           maxPolarAngle={Math.PI - Math.PI / 3}

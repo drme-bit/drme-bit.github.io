@@ -3,8 +3,8 @@
 import { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useTheme } from '@/providers/ThemeProvider';
-import { useTerrain } from '@/providers/TerrainProvider';
+import { useTheme } from '@/app/providers/ThemeProvider';
+import { useTerrain } from '@/app/providers/TerrainProvider';
 
 const _isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 const GRID_X = _isMobile ? 65 : 85;

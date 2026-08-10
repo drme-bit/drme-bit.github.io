@@ -4,7 +4,7 @@ import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { FiGrid } from '@/shared/ui/atoms/Icon';
 import styles from './Navbar.module.scss';
-import type { NavGroup, NavLeaf, NavSectionLink } from '@/config/navTypes';
+import type { NavGroup, NavLeaf, NavSectionLink } from '@/shared/config/navTypes';
 
 interface NavDropdownProps {
   groups: NavGroup[];

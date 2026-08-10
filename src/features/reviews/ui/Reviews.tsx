@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
 import { signInWithPopup, onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useLenis } from 'lenis/react';
 import { db, auth, googleProvider } from '@/shared/config/firebase';
-import { useModal } from '@/providers/ModalProvider';
-import { PiArrowRight, PiCheckCircle, PiSignOut, PiStarFill, PiUser } from '@/shared/ui/atoms/Icon';
+import { useModal } from '@/app/providers/ModalProvider';
+import { PiCheckCircle, PiSignOut, PiStarFill, PiUser } from '@/shared/ui/atoms/Icon';
 import styles from './Reviews.module.scss';
 import ReviewsHero from './ReviewsHero';
 import ReviewsForm from './ReviewsForm';
@@ -31,20 +30,31 @@ interface Review {
   createdAt?: Date | null;
 }
 
+const RATING_OPTIONS = [5, 4, 3, 2, 1] as const;
+
+function formatDate(d?: Date | null): string | null {
+  if (!d || Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /* Reviews */
 
 export default function Reviews() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const firstRender = useRef(true);
 
   const [user, setUser] = useState<User | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasReviewed, setHasReviewed] = useState(false);
+  const [ratingFilter, setRatingFilter] = useState(0);
 
   const { openModal } = useModal();
-  const lenis = useLenis();
 
   /* Auth & Firestore Subscriptions */
   useEffect(() => {
@@ -74,26 +84,54 @@ export default function Reviews() {
     return () => unsub();
   }, []);
 
+  /* Block duplicate submissions: any review (approved or not) for this uid. */
   useEffect(() => {
     if (!user) {
       setHasReviewed(false);
       return;
     }
+    const uid = user.uid;
+    let cancelled = false;
     async function check() {
       try {
-        const q = query(
-          collection(db, 'reviews'),
-          where('uid', '==', user!.uid),
-          where('approved', '==', true),
-        );
+        const q = query(collection(db, 'reviews'), where('uid', '==', uid));
         const snap = await getDocs(q);
-        setHasReviewed(!snap.empty);
+        if (!cancelled) setHasReviewed(!snap.empty);
       } catch {
-        setHasReviewed(false);
+        if (!cancelled) setHasReviewed(false);
       }
     }
     check();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
+
+  /* Derived stats */
+  const counts = useMemo(() => {
+    const c = [0, 0, 0, 0, 0];
+    for (const r of reviews) {
+      const rating = Math.min(5, Math.max(1, Math.floor(r.rating ?? 0)));
+      c[rating - 1] += 1;
+    }
+    return c;
+  }, [reviews]);
+
+  const average = reviews.length
+    ? reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / reviews.length
+    : 0;
+
+  const filters: { value: number; label: string; count: number }[] = useMemo(() => {
+    const withCount = RATING_OPTIONS.map((value) => ({
+      value,
+      label: String(value) + ' ★',
+      count: counts[value - 1],
+    })).filter((f) => f.count > 0);
+    return [{ value: 0, label: 'All', count: reviews.length }, ...withCount];
+  }, [counts, reviews.length]);
+
+  const visible =
+    ratingFilter === 0 ? reviews : reviews.filter((r) => Math.floor(r.rating ?? 0) === ratingFilter);
 
   async function handleSignIn() {
     try {
@@ -120,8 +158,7 @@ export default function Reviews() {
       const grid = gridRef.current;
       if (!section) return;
 
-      // Hero reveal
-      if (hero) {
+      if (hero && !prefersReducedMotion()) {
         gsap.fromTo(
           hero,
           { opacity: 0, y: 40 },
@@ -139,8 +176,7 @@ export default function Reviews() {
         );
       }
 
-      // Staggered card reveals
-      if (grid) {
+      if (grid && !prefersReducedMotion()) {
         const cards = Array.from(grid.querySelectorAll(`.${styles['review-card']}`));
         if (cards.length > 0) {
           gsap.fromTo(
@@ -156,7 +192,7 @@ export default function Reviews() {
               scrollTrigger: {
                 trigger: grid,
                 start: 'top 80%',
-                toggleActions: 'play none none reverse',
+                once: true,
               },
             },
           );
@@ -165,6 +201,23 @@ export default function Reviews() {
     },
     { scope: sectionRef },
   );
+
+  /* Re-animate the grid when the rating filter changes */
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    const grid = gridRef.current;
+    if (!grid || prefersReducedMotion()) return;
+    const cards = Array.from(grid.querySelectorAll(`.${styles['review-card']}`));
+    if (cards.length === 0) return;
+    gsap.fromTo(
+      cards,
+      { opacity: 0, y: 26, scale: 0.97 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05, ease: 'power2.out' },
+    );
+  }, [ratingFilter]);
 
   /* GSAP: Reviews sticky, Contact slides over */
   useEffect(() => {
@@ -188,6 +241,7 @@ export default function Reviews() {
 
     return () => ctx.revert();
   }, []);
+
   function openReviewModal() {
     if (!user) {
       handleSignIn();
@@ -210,7 +264,7 @@ export default function Reviews() {
               <p>You have already left a review.</p>
             </div>
           ) : (
-            <ReviewsForm user={user} onSignOut={handleSignOut} />
+            <ReviewsForm user={user} onSignOut={handleSignOut} onSubmitted={() => setHasReviewed(true)} />
           )}
         </div>
       ),
@@ -224,41 +278,66 @@ export default function Reviews() {
       ref={sectionRef}
       className={`${styles.section} ${styles['section--reviews']}`}
     >
-      {/* Decorative grid background */}
-      <div className={styles['reviews-bg-grid']}>
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="reviews-grid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#reviews-grid)" />
-        </svg>
-      </div>
+      <div className={styles['reviews-bg-grid']} aria-hidden="true" />
 
       <div ref={heroRef} className={styles['reviews-hero-wrap']} style={{ position: 'relative', zIndex: 1 }}>
-        <ReviewsHero onOpenModal={openReviewModal} />
+        <ReviewsHero onOpenModal={openReviewModal} average={average} count={reviews.length} />
       </div>
+
+      {!loading && reviews.length > 0 && (
+        <div className={styles['reviews-toolbar']} style={{ position: 'relative', zIndex: 1 }}>
+          <span className={styles['reviews-toolbar-label']}>filter by rating</span>
+          <div className={styles['reviews-filter']} role="group" aria-label="Filter reviews by rating">
+            {filters.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                className={`${styles['reviews-filter-btn']} ${ratingFilter === f.value ? styles['reviews-filter-btn--active'] : ''}`}
+                aria-pressed={ratingFilter === f.value}
+                onClick={() => setRatingFilter(f.value)}
+              >
+                <span>{f.label}</span>
+                <span className={styles['reviews-filter-count']}>{f.count}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div ref={gridRef} className={styles['reviews-grid']} style={{ position: 'relative', zIndex: 1 }}>
         {loading &&
           Array.from({ length: 6 }, (_, i) => (
             <div key={`skel-${i}`} className={`${styles['review-card']} ${styles['review-card--skeleton']}`}>
               <div className={styles['review-card-skeleton']}>
-                <div className={styles['skeleton-line']} style={{ width: '60%' }} />
-                <div className={styles['skeleton-line']} style={{ width: '90%' }} />
+                <div className={styles['skeleton-line']} style={{ width: '55%' }} />
+                <div className={styles['skeleton-line']} style={{ width: '92%' }} />
+                <div className={styles['skeleton-line']} style={{ width: '70%' }} />
                 <div className={styles['skeleton-line']} style={{ width: '40%' }} />
+                <div className={styles['skeleton-author']}>
+                  <span className={styles['skeleton-avatar']} />
+                  <div className={styles['skeleton-author-lines']}>
+                    <div className={styles['skeleton-line']} style={{ width: '80%' }} />
+                    <div className={styles['skeleton-line']} style={{ width: '55%' }} />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
 
         {!loading && reviews.length === 0 && (
-          <div className={styles['reviews-empty']}>no reviews yet. be the first!</div>
+          <div className={styles['reviews-empty']}>
+            <span className={styles['reviews-empty-mark']}>//</span>
+            <p>no reviews yet — be the first to leave one.</p>
+            <button type="button" className={styles['reviews-cta']} onClick={openReviewModal}>
+              <PiUser size={13} />
+              leave a review
+            </button>
+          </div>
         )}
 
         {!loading &&
-          reviews.map((review) => (
-            <div key={review.id} className={styles['review-card']}>
+          visible.map((review, i) => (
+            <article key={review.id} className={styles['review-card']}>
               {review.header && (
                 <div className={styles['review-card-header']}>
                   <span className={styles['review-card-header-dot']} />
@@ -269,11 +348,7 @@ export default function Reviews() {
               <div className={styles['review-card-footer']}>
                 <div className={styles['review-card-author']}>
                   {review.photoURL ? (
-                    <img
-                      src={review.photoURL}
-                      alt=""
-                      className={styles['review-card-avatar']}
-                    />
+                    <img src={review.photoURL} alt="" className={styles['review-card-avatar']} />
                   ) : (
                     <div className={styles['review-card-avatar--fallback']}>
                       <PiUser size={12} />
@@ -281,26 +356,28 @@ export default function Reviews() {
                   )}
                   <div className={styles['review-card-info']}>
                     <span className={styles['review-card-name']}>{review.name}</span>
-                    {review.role && (
-                      <span className={styles['review-card-role']}>{review.role}</span>
-                    )}
+                    {review.role && <span className={styles['review-card-role']}>{review.role}</span>}
+                    <span className={styles['review-card-date']}>
+                      {formatDate(review.createdAt) ?? 'verified'}
+                    </span>
                   </div>
                 </div>
-                {review.rating && (
-                  <div className={styles['review-card-stars']}>
-                    {Array.from({ length: 5 }, (_, s) => (
-                      <PiStarFill
-                        key={s}
-                        size={11}
-                        className={
-                          s < review.rating! ? styles['star-filled'] : styles['star-empty']
-                        }
-                      />
-                    ))}
-                  </div>
-                )}
+                <div className={styles['review-card-side']}>
+                  {review.rating ? (
+                    <div className={styles['review-card-stars']}>
+                      {Array.from({ length: 5 }, (_, s) => (
+                        <PiStarFill
+                          key={s}
+                          size={11}
+                          className={s < review.rating! ? styles['star-filled'] : styles['star-empty']}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                  <span className={styles['review-card-index']}>{String(i + 1).padStart(2, '0')}</span>
+                </div>
               </div>
-            </div>
+            </article>
           ))}
       </div>
     </section>

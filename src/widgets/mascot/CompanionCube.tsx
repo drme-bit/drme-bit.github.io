@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { useTheme } from '@/providers/ThemeProvider';
+import { useTheme } from '@/app/providers/ThemeProvider';
 
 const SPARKLE_POSITIONS = [
   { cx: 8, cy: 10, delay: 0 },

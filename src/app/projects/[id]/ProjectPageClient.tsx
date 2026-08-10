@@ -13,8 +13,8 @@ import {
 import { projects } from '@/features/projects/lib/registry';
 import { STATUS_META } from '@/features/projects/lib/constants';
 import type { Project } from '@/features/projects/lib/project-repository';
-import { NavLeaf, useNav } from '@/providers/NavProvider';
-import { useActivity } from '@/providers/ActivityProvider';
+import { NavLeaf, useNav } from '@/app/providers/NavProvider';
+import { useActivity } from '@/app/providers/ActivityProvider';
 import styles from './ProjectPage.module.scss';
 
 interface ContentSection {

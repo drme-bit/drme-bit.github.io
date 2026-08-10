@@ -1,5 +1,5 @@
-import { profile, socialLinks } from '@/shared/data/profile';
-import { navLinks as footerNavLinks } from '@/shared/data/links';
+import { profile, socialLinks } from '@/entities/profile';
+import { navLinks as footerNavLinks } from '@/entities/profile';
 
 export { footerNavLinks };
 

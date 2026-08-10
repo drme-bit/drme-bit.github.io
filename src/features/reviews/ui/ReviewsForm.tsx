@@ -12,9 +12,10 @@ import styles from './Reviews.module.scss'
 interface Props {
   user: User
   onSignOut: () => void
+  onSubmitted?: () => void
 }
 
-const ReviewsForm: FC<Props> = ({ user, onSignOut }) => {
+const ReviewsForm: FC<Props> = ({ user, onSignOut, onSubmitted }) => {
   const [name, setName] = useState(user.displayName ?? '')
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
@@ -46,6 +47,7 @@ const ReviewsForm: FC<Props> = ({ user, onSignOut }) => {
         createdAt: serverTimestamp(),
       })
       setSuccess(true)
+      onSubmitted?.()
     } catch (err) {
       console.error(err)
       setError('Failed to submit review. Please try again.')

@@ -8,9 +8,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   FiMenu,
 } from '@/shared/ui/atoms/Icon';
-import { useNav } from '@/providers/NavProvider';
-import { GLOBAL_NAV } from '@/config/navConfig';
-import type { NavGroup, NavRouteLink, NavSectionLink, NavLeaf } from '@/config/navTypes';
+import { useNav } from '@/app/providers/NavProvider';
+import { GLOBAL_NAV } from '@/shared/config/navConfig';
+import type { NavGroup, NavRouteLink, NavSectionLink, NavLeaf } from '@/shared/config/navTypes';
 import {
   Sheet,
   SheetClose,
@@ -362,6 +362,7 @@ export default function Navbar() {
       {/* Logo — fixed left on desktop, in navbar on mobile */}
       <Link href="/" className={styles.logo} aria-label="Home">
         <svg
+          data-nav-logo
           className={styles.logoIcon}
           viewBox="0 0 150 136.9"
           fill="none"
@@ -392,6 +393,7 @@ export default function Navbar() {
         {/* Mobile logo */}
         <Link href="/" className={styles.mobileLogo} aria-label="Home">
           <svg
+            data-mobile-nav-logo
             className={styles.logoIcon}
             viewBox="0 0 150 136.9"
             fill="none"

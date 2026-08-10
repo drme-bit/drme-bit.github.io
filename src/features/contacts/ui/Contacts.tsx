@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 
-const PremiumContacts = dynamic(() => import('@/features/contacts/components/PremiumContacts').then(mod => mod.PremiumContacts), {
+const PremiumContacts = dynamic(() => import('@/features/contacts/ui/PremiumContacts').then(mod => mod.PremiumContacts), {
   ssr: false,
 });
 

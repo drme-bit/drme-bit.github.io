@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google';
-import { SettingsProvider } from '@/providers/ThemeProvider';
-import { TerrainProvider } from '@/providers/TerrainProvider';
-import { ModalProvider } from '@/providers/ModalProvider';
-import { ActivityProvider } from '@/providers/ActivityProvider';
-import { NavProvider } from '@/providers/NavProvider';
+import { SettingsProvider } from '@/app/providers/ThemeProvider';
+import { TerrainProvider } from '@/app/providers/TerrainProvider';
+import { ModalProvider } from '@/app/providers/ModalProvider';
+import { ActivityProvider } from '@/app/providers/ActivityProvider';
+import { NavProvider } from '@/app/providers/NavProvider';
 import Navbar from '@/widgets/navbar/Navbar';
 import { SmoothScrolling } from '@/widgets/smooth-scrolling/SmoothScrolling';
 import Mascot from '@/widgets/mascot/Mascot'

@@ -3,10 +3,10 @@ import type { BlogPostData } from './types';
 
 /*  Import all post metadata  */
 
-import integratingMeta from '@/data/posts/integrating-nodejs/meta';
-import cobeMeta from '@/data/posts/why-i-replaced-cobe/meta';
-import portfolioMeta from '@/data/posts/building-my-portfolio/meta';
-import discordMeta from '@/data/posts/discord-orb-quests/meta';
+import integratingMeta from '@/entities/post/integrating-nodejs/meta';
+import cobeMeta from '@/entities/post/why-i-replaced-cobe/meta';
+import portfolioMeta from '@/entities/post/building-my-portfolio/meta';
+import discordMeta from '@/entities/post/discord-orb-quests/meta';
 
 /*  Raw data array (used by list page for sync access)  */
 

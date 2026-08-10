@@ -1,5 +1,5 @@
 import { ProjectRepository } from './project-repository';
-import { PROJECTS } from './raw-data';
+import { PROJECTS } from '@/entities/project';
 import { graph } from '@/features/skills/lib/registry';
 import type { ProjectData } from './project-repository';
 
