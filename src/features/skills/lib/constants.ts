@@ -1,5 +1,4 @@
 import { FiMove, FiMousePointer, FiSliders } from 'react-icons/fi';
-import type { IconType } from 'react-icons';
 
 export const GROUP_COLORS: Record<string, string> = {
   frontend: 'var(--accent)',

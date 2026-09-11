@@ -281,7 +281,7 @@ function renderSectionContent(section: ContentSection) {
   return null;
 }
 
-export default function ProjectPageClient({ params }: { params: Promise<{ id: string }> }) {
+export default function ProjectPageClient({ params: _params }: { params: Promise<{ id: string }> }) {
   const { id } = useParams() as { id: string };
   const router = useRouter();
   const project = projects.get(id);

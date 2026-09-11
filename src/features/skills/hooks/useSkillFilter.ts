@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
 import { graph } from '../lib';
-import type { Skill } from '../lib';
 
 export const GROUP_OPTIONS = [
   { key: 'all' as const, color: 'var(--text-secondary)' },

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTypingSound } from '@/shared/hooks/useTypingSound';
-import findAnswer from '@/entities/knowledge';
 import { FACTS } from '@/entities/mascot';
 import { getMockMessage, pickResponse } from '@/entities/mascot';
 import CompanionCube from './CompanionCube';

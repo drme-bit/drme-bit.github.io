@@ -9,7 +9,7 @@ import { useSkillHistory } from '../hooks/useSkillHistory';
 import { GROUP_OPTIONS } from '../hooks/useSkillFilter';
 import { SkillPanel } from './SkillPanel';
 import { FiSearch, FiX, FiChevronDown } from '@/shared/ui/atoms/Icon';
-import type { Skill } from '../lib';
+import type { Skill, SkillGroup } from '../lib';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,9 +17,10 @@ const Globe = lazy(() => import('@/shared/ui/organisms/Globe/Globe'));
 
 /*  Derived data ── */
 
-const GROUP_COUNTS: Record<string, number> = {};
+const GROUP_COUNTS: Partial<Record<SkillGroup, number>> = {};
 GROUP_OPTIONS.forEach(({ key }) => {
-  GROUP_COUNTS[key] = graph.skillsByGroup(key as any).length;
+  if (key === 'all') return;
+  GROUP_COUNTS[key as SkillGroup] = graph.skillsByGroup(key as SkillGroup).length;
 });
 
 /*  Skills ── */

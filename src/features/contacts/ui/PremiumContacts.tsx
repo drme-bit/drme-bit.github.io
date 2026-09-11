@@ -65,8 +65,6 @@ function FormField({
   onChange: (name: keyof ContactFormData, value: string) => void;
   onBlur: (name: keyof ContactFormData) => void;
 }) {
-  const [isFocused, setIsFocused] = useState(false);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     onChange(config.name, e.target.value);
   };
@@ -92,8 +90,7 @@ function FormField({
           className={`${inputBase} min-h-[120px] leading-[1.55]`}
           value={value}
           onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => { setIsFocused(false); onBlur(config.name); }}
+          onBlur={() => onBlur(config.name)}
           placeholder={config.placeholder}
           rows={5}
           maxLength={config.maxLength}
@@ -109,8 +106,7 @@ function FormField({
             className={`${inputBase} cursor-pointer appearance-none`}
             value={value}
             onChange={handleChange}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => { setIsFocused(false); onBlur(config.name); }}
+            onBlur={() => onBlur(config.name)}
             aria-invalid={isError ? 'true' : 'false'}
             aria-describedby={isError ? `${config.name}-error` : undefined}
             aria-required={config.required}
@@ -130,8 +126,7 @@ function FormField({
           className={inputBase}
           value={value}
           onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => { setIsFocused(false); onBlur(config.name); }}
+          onBlur={() => onBlur(config.name)}
           placeholder={config.placeholder}
           maxLength={config.maxLength}
           aria-invalid={isError ? 'true' : 'false'}
@@ -209,7 +204,13 @@ function ContactForm() {
     setErrors(newErrors);
     if (hasErrors) {
       const first = fieldConfigs.find((f) => newErrors[f.name]);
-      first && (document.querySelector(`[data-field="${first.name}"] input, [data-field="${first.name}"] textarea, [data-field="${first.name}"] select`) as HTMLElement)?.focus();
+      if (first) {
+        (
+          document.querySelector(
+            `[data-field="${first.name}"] input, [data-field="${first.name}"] textarea, [data-field="${first.name}"] select`,
+          ) as HTMLElement
+        )?.focus();
+      }
       return;
     }
     await submit(formData);
@@ -410,7 +411,7 @@ export function PremiumContacts() {
       <div ref={innerRef} className="relative mx-auto w-full max-w-[1400px] px-[4vw] py-24 max-[700px]:px-5 max-[700px]:py-16">
         <header className="mb-[1.1rem] flex flex-col gap-[0.4rem] max-[700px]:mb-[0.9rem]">
           <span className="font-mono text-[0.55rem] uppercase tracking-[0.15em] text-[var(--text-ghost)]">
-            // open channel
+            {'// open channel'}
           </span>
           <h2 className="m-0 font-display text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-none tracking-[-0.03em] text-foreground">
             Contact

@@ -9,7 +9,6 @@ import {
   FiMail,
   FiBarChart2,
   FiCalendar,
-  FiDownload,
   FiMessageSquare,
   FiArrowRight,
   FiGlobe,

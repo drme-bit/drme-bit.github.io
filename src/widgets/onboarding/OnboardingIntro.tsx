@@ -155,10 +155,10 @@ export function OnboardingIntro() {
             this is a <span>live portfolio</span>
           </h2>
           <p className={styles['heading-sub']}>
-            Hi — I'm Vyacheslav (drme-bit), a full-stack developer from Odesa.
+            Hi — I&apos;m Vyacheslav (drme-bit), a full-stack developer from Odesa.
             This site is built like a terminal: spin the 3D skills globe, open
             projects &amp; the blog, then say hello. Everything here responds —
-            that's the whole point.
+            that&apos;s the whole point.
           </p>
         </header>
 

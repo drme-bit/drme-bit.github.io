@@ -23,7 +23,7 @@ interface CompanionCubeProps {
   shake?: boolean;
 }
 
-export default function CompanionCube({ size = 36, onClick, anger = 0, shake = false }: CompanionCubeProps) {
+export default function CompanionCube({ size = 36, onClick, anger = 0, shake: _shake = false }: CompanionCubeProps) {
   const uid = useId().replace(/:/g, '_');
   const { theme } = useTheme();
   const isLight = theme === 'light';

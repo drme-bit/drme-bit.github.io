@@ -90,7 +90,8 @@ function PostCard({ post, index }: { post: BlogPost; index: number }) {
 
 export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useRouter> }>(
   function Blog({ router: routerProp }, ref) {
-    const router = routerProp || useRouter();
+    const defaultRouter = useRouter();
+    const router = routerProp ?? defaultRouter;
     const wrapperRef = useRef<HTMLDivElement>(null);
     const sectionRef = useRef<HTMLDivElement>(null);
     const featured = blog.featured;

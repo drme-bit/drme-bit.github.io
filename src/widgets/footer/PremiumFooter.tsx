@@ -44,19 +44,21 @@ export function PremiumFooter() {
     if (prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
-      // Footer starts high above its final spot, far behind the previous
-      // section, then descends into place over the whole entry — the top edge
-      // appears first and the sheet unfolds downward.
+      // Footer stays in its natural layout slot the whole scroll — its bottom
+      // edge is pinned to the page bottom. Depth comes from an upward
+      // clip-path wipe plus a slight inner parallax, so no empty band can ever
+      // appear below the footer during the scrub.
       gsap.fromTo(
         footer,
-        { yPercent: -80 },
+        { clipPath: 'inset(100% 0% 0% 0%)', opacity: 0.3 },
         {
-          yPercent: 0,
+          clipPath: 'inset(0% 0% 0% 0%)',
+          opacity: 1,
           ease: 'none',
           scrollTrigger: {
             trigger: footer,
             start: 'top bottom',
-            end: 'top top',
+            end: 'bottom bottom',
             scrub: 1,
           },
         },
@@ -66,14 +68,14 @@ export function PremiumFooter() {
       if (inner) {
         gsap.fromTo(
           inner,
-          { yPercent: 28 },
+          { yPercent: 18 },
           {
             yPercent: 0,
             ease: 'none',
             scrollTrigger: {
               trigger: footer,
               start: 'top bottom',
-              end: 'top top',
+              end: 'bottom bottom',
               scrub: 1,
             },
           },

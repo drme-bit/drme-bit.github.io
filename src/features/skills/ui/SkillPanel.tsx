@@ -4,8 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiX, FiChevronLeft, FiChevronRight, FiCopy } from '@/shared/ui/atoms/Icon';
 import { useActivity } from '@/app/providers/ActivityProvider';
-import { graph, GROUP_COLORS } from '../lib';
-import { projects } from '@/features/projects/lib/registry';
+import { GROUP_COLORS } from '../lib';
 import { SkillLevel } from './SkillLevel';
 import { RelatedSkills } from './RelatedSkills';
 import { HistoryBar } from './HistoryBar';
@@ -47,7 +46,7 @@ export function SkillPanel({
     }
   }, [skill, incrementSkillsChecked]);
 
-  const renderSkillPanel = (s: Skill, isCompare = false) => (
+  const renderSkillPanel = (s: Skill, _isCompare = false) => (
     <div className="sp-content p-0">
       <div className="mb-5 flex items-center gap-3.5 pr-10">
         <div

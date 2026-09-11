@@ -18,8 +18,6 @@ import GlobeManager from './GlobeManager';
 
 import styles from './Globe.module.scss';
 
-const _isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-
 const reducedMotionGlobe =
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -217,7 +215,7 @@ interface MarkerProps {
   elemRef: (el: HTMLButtonElement | null) => void;
 }
 
-function Marker({ name, group, lat, lng, onClick, onHover, elemRef }: MarkerProps) {
+function Marker({ name, group, lat: _lat, lng: _lng, onClick, onHover, elemRef }: MarkerProps) {
   const Icon = (ICON_MAP as Record<string, React.ComponentType<{ className?: string }>>)[name];
 
   const handleMove = (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -290,7 +288,10 @@ function GlobeInner({
   const worldPos = useMemo(() => new Vector3(), []);
   const canvasSize = useRef({ w: 0, h: 0 });
   const baseArcsRef = useRef(arcs);
-  baseArcsRef.current = arcs;
+
+  useEffect(() => {
+    baseArcsRef.current = arcs;
+  }, [arcs]);
 
   /*  Manager changes (selection) drive related-arcs redraw  */
 
@@ -532,7 +533,7 @@ interface HaloSpritesProps {
   markerBySkill: Record<string, Marker>;
 }
 
-function HaloSprites({ markers, groupColors, markerBySkill }: HaloSpritesProps) {
+function HaloSprites({ markers, groupColors, markerBySkill: _markerBySkill }: HaloSpritesProps) {
   const refs = useRef<Record<string, THREE.Sprite>>({});
 
   useFrame(() => {
@@ -765,7 +766,7 @@ const Globe = forwardRef(function Globe({ className = '', onMarkerClick }: Globe
       >
         <ambientLight color={tc.ambientLight} intensity={tc.ambientIntensity} />
         <OrbitControls
-          ref={controlsRef as React.Ref<any>}
+          ref={controlsRef as React.Ref<import('three-stdlib').OrbitControls>}
           enablePan={false}
           enableZoom={false}
           enableRotate

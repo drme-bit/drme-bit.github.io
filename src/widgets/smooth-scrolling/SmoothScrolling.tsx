@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { ReactLenis } from 'lenis/react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -12,18 +12,9 @@ interface SmoothScrollingProps {
 }
 
 function SmoothScrolling({ children }: SmoothScrollingProps) {
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
   useEffect(() => {
 
-    const update = (time: number) => {
+    const update = (_time: number) => {
       ScrollTrigger.update();
     };
 

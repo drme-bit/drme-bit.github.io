@@ -18,9 +18,6 @@ import { OnboardingIntro } from '@/widgets/onboarding/OnboardingIntro';
 const Scene = dynamic(() => import('@/widgets/scene/Scene'), { ssr: true });
 const Skills = dynamic(() => import('@/features/skills/ui/Skills'), { ssr: false });
 const Cursor = dynamic(() => import('@/shared/ui/organisms/Cursor/Cursor'), { ssr: false });
-const SoundEffects = dynamic(() => import('@/shared/ui/organisms/SoundEffects/SoundEffects'), {
-  ssr: false,
-});
 
 function MainInner() {
   const { setPageConfig, setActiveSection } = useNav();

@@ -1,6 +1,6 @@
 'use client';
 
-import { graph, GROUP_COLORS, ICON_MAP } from '../lib';
+import { GROUP_COLORS } from '../lib';
 import type { Skill } from '../lib';
 
 interface RelatedSkillsProps {

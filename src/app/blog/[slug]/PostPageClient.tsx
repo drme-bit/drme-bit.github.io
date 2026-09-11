@@ -4,10 +4,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion } from 'motion/react';
-import {
-  FiArrowLeft,
-  FiArrowRight,
-} from '@/shared/ui/atoms/Icon';
 import { blog } from '@/features/blog/lib';
 import { useNav } from '@/app/providers/NavProvider';
 import { usePostTransition } from '@/features/blog/lib/PostTransitionContext';
@@ -83,6 +79,8 @@ export default function PostPageClient() {
     window.scrollTo(0, 0);
   }, [slug]);
 
+  const { prev: prevPost, next: nextPost } = blog.prevNext(slug);
+
   useEffect(() => {
     if (!post) router.replace('/blog');
   }, [post, router]);
@@ -104,7 +102,6 @@ export default function PostPageClient() {
 
   if (!post) return null;
 
-  const { prev: prevPost, next: nextPost } = blog.prevNext(slug);
   const PostContent = POST_COMPONENTS[slug];
 
   return (
