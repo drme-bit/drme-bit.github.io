@@ -86,6 +86,7 @@ function MainInner() {
       <Scene />
 
       <Hero />
+
       <About />
       <Skills />
       <Experience />
@@ -94,10 +95,8 @@ function MainInner() {
         <Projects />
       </div>
 
-      <div id="reviews-contacts" className="reviews-contacts-wrapper">
-        <Reviews />
-        <Contacts />
-      </div>
+      <Reviews />
+      <Contacts />
       <PremiumFooter />
     </>
   );

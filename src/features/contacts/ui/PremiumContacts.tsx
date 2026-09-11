@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -23,13 +23,24 @@ import {
 } from '@/shared/ui/atoms/Icon';
 import { useContactForm } from '../hooks/useContactForm';
 import type { ContactFormData } from '../model/contacts';
-import { profile } from '@/entities/profile';
 import { fieldConfigs, contactItems, socialLinks } from '@/entities/contact';
-import styles from './PremiumContacts.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/*  Icon Map  */
+// Inverted light band: white background, black elements, no gradients.
+const SECTION_TOKENS = [
+  '[--bg:#ffffff]',
+  '[--bg-surface:#f6f6f4]',
+  '[--text:#101010]',
+  '[--text-dim:#484844]',
+  '[--text-ghost:#8c8c86]',
+  '[--border:#e4e2dd]',
+  '[--terminal-border:#e4e2dd]',
+  '[--terminal-bar:#faf9f7]',
+  '[--terminal-bar-border:rgba(10,10,10,0.08)]',
+  '[--glass:rgba(10,10,10,0.05)]',
+  '[--glass-hover:rgba(10,10,10,0.09)]',
+].join(' ');
 
 const iconMap = {
   calendar: FiCalendar,
@@ -55,90 +66,93 @@ function FormField({
   onBlur: (name: keyof ContactFormData) => void;
 }) {
   const [isFocused, setIsFocused] = useState(false);
-  const [hasValue, setHasValue] = useState(false);
-
-  useEffect(() => { setHasValue(value.length > 0); }, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     onChange(config.name, e.target.value);
   };
 
-  const isError = error && touched;
+  const isError = Boolean(error && touched);
+
+  const inputBase = [
+    'w-full resize-y rounded-[var(--radius-sm)] border bg-background px-[0.85rem] py-[0.7rem] font-inherit text-[0.82rem] text-foreground transition-[border-color,box-shadow] duration-200 placeholder:text-[var(--text-ghost)] focus:border-[var(--accent-secondary)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--accent-secondary)_15%,transparent)] focus:outline-none',
+    isError ? 'border-[var(--accent-danger)]' : 'border-border',
+  ].join(' ');
 
   return (
-    <div
-      className={`${styles.formField} ${isFocused ? styles.focused : ''} ${hasValue ? styles.hasValue : ''} ${isError ? styles.hasError : ''}`}
-      data-field={config.name}
-    >
-      <label className={styles.fieldLabel} htmlFor={config.name}>
+    <div className="relative flex flex-col gap-[0.4rem]" data-field={config.name}>
+      <label className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--text-ghost)]" htmlFor={config.name}>
         {config.label}
-        {config.required && <span className={styles.requiredMark} aria-hidden="true">*</span>}
+        {config.required && <span className="ml-[0.2rem] text-[var(--accent-secondary)]" aria-hidden="true">*</span>}
       </label>
 
-      <div className={styles.fieldInputWrapper}>
-        {config.type === 'textarea' ? (
-          <textarea
+      {config.type === 'textarea' ? (
+        <textarea
+          id={config.name}
+          name={config.name}
+          className={`${inputBase} min-h-[120px] leading-[1.55]`}
+          value={value}
+          onChange={handleChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => { setIsFocused(false); onBlur(config.name); }}
+          placeholder={config.placeholder}
+          rows={5}
+          maxLength={config.maxLength}
+          aria-invalid={isError ? 'true' : 'false'}
+          aria-describedby={isError ? `${config.name}-error` : undefined}
+          aria-required={config.required}
+        />
+      ) : config.type === 'select' ? (
+        <div className="relative">
+          <select
             id={config.name}
             name={config.name}
-            className={`${styles.fieldInput} ${styles.fieldTextarea}`}
-            value={value}
-            onChange={handleChange}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder={config.placeholder}
-            rows={5}
-            maxLength={config.maxLength}
-            aria-invalid={isError ? 'true' : 'false'}
-            aria-describedby={isError ? `${config.name}-error` : undefined}
-            aria-required={config.required}
-          />
-        ) : config.type === 'select' ? (
-          <div className={styles.selectWrapper}>
-            <select
-              id={config.name}
-              name={config.name}
-              className={`${styles.fieldInput} ${styles.fieldSelect}`}
-              value={value}
-              onChange={handleChange}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => { setIsFocused(false); onBlur(config.name); }}
-              aria-invalid={isError ? 'true' : 'false'}
-              aria-describedby={isError ? `${config.name}-error` : undefined}
-              aria-required={config.required}
-            >
-              <option value="" disabled>{config.placeholder}</option>
-              {config.options?.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-        ) : (
-          <input
-            id={config.name}
-            name={config.name}
-            type={config.type}
-            className={styles.fieldInput}
+            className={`${inputBase} cursor-pointer appearance-none`}
             value={value}
             onChange={handleChange}
             onFocus={() => setIsFocused(true)}
             onBlur={() => { setIsFocused(false); onBlur(config.name); }}
-            placeholder={config.placeholder}
-            maxLength={config.maxLength}
             aria-invalid={isError ? 'true' : 'false'}
             aria-describedby={isError ? `${config.name}-error` : undefined}
             aria-required={config.required}
-          />
-        )}
+          >
+            <option value="" disabled>{config.placeholder}</option>
+            {config.options?.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <span className="pointer-events-none absolute right-[0.85rem] top-1/2 -translate-y-1/2 text-[0.7rem] text-[var(--text-ghost)]" aria-hidden="true">▾</span>
+        </div>
+      ) : (
+        <input
+          id={config.name}
+          name={config.name}
+          type={config.type}
+          className={inputBase}
+          value={value}
+          onChange={handleChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => { setIsFocused(false); onBlur(config.name); }}
+          placeholder={config.placeholder}
+          maxLength={config.maxLength}
+          aria-invalid={isError ? 'true' : 'false'}
+          aria-describedby={isError ? `${config.name}-error` : undefined}
+          aria-required={config.required}
+        />
+      )}
 
-        {config.maxLength && config.type !== 'select' && (
-          <div className={styles.charCount} aria-hidden="true">
-            {value.length} / {config.maxLength}
-          </div>
-        )}
-      </div>
+      {config.maxLength && config.type !== 'select' && (
+        <div
+          className={`pointer-events-none absolute bottom-[0.45rem] font-mono text-[0.52rem] text-[var(--text-ghost)] ${
+            config.type === 'textarea' ? 'right-[0.85rem]' : 'right-[0.7rem]'
+          }`}
+          aria-hidden="true"
+        >
+          {value.length} / {config.maxLength}
+        </div>
+      )}
 
       {isError && (
-        <p id={`${config.name}-error`} className={styles.fieldError} role="alert">
+        <p id={`${config.name}-error`} className="m-0 flex items-center gap-[0.35rem] text-[0.68rem] text-[var(--accent-danger)]" role="alert">
           <FiX size={10} aria-hidden="true" />
           {error}
         </p>
@@ -210,22 +224,28 @@ function ContactForm() {
 
   if (isSuccess) {
     return (
-      <div className={styles.successState} role="status" aria-live="polite">
-        <div className={styles.successIcon} aria-hidden="true"><FiCheck size={22} /></div>
-        <h3 className={styles.successTitle}>Message Sent!</h3>
-        <p className={styles.successMessage}>Thanks for reaching out. I&apos;ll get back to you within 24 hours.</p>
-        <button onClick={handleReset} className={styles.resetBtn} type="button">
-          <FiSend size={14} aria-hidden="true" />
-          Send Another Message
+      <div className="flex flex-col items-start gap-[0.6rem] rounded-[var(--radius-lg)] border border-[color-mix(in_srgb,var(--accent-success)_35%,transparent)] bg-[var(--terminal-bar)] p-10" role="status" aria-live="polite">
+        <FiCheck className="text-[var(--accent-success)]" size={34} />
+        <h3 className="m-0 font-display text-[1.4rem] font-bold text-foreground">Message sent</h3>
+        <p className="m-0 max-w-[42ch] text-[0.82rem] leading-[1.55] text-muted-foreground">
+          Thanks for reaching out — I&apos;ll get back to you within 24 hours.
+        </p>
+        <button
+          onClick={handleReset}
+          type="button"
+          className="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--terminal-bar-border)] bg-transparent px-4 py-[0.55rem] font-mono text-[0.64rem] tracking-[0.04em] text-[var(--text-secondary)] transition-colors duration-200 hover:border-[var(--accent-secondary)] hover:text-[var(--accent-secondary)]"
+        >
+          <FiSend size={13} aria-hidden="true" />
+          send another
         </button>
       </div>
     );
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className={styles.contactForm} noValidate>
-      <div className={styles.formFields} role="group" aria-labelledby="form-title">
-        <div className={styles.fieldRow}>
+    <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-[1.1rem]" noValidate>
+      <div className="flex flex-col gap-4" role="group" aria-labelledby="form-title">
+        <div className="grid grid-cols-2 gap-4 max-[560px]:grid-cols-1">
           <FormField config={fieldConfigs[0]} value={formData.name} error={errors.name} touched={touched.name} onChange={handleChange} onBlur={handleBlur} />
           <FormField config={fieldConfigs[1]} value={formData.email} error={errors.email} touched={touched.email} onChange={handleChange} onBlur={handleBlur} />
         </div>
@@ -234,217 +254,194 @@ function ContactForm() {
       </div>
 
       {error && (
-        <div className={styles.formError} role="alert">
+        <div className="flex items-center gap-2 rounded-[var(--radius-sm)] border border-[color-mix(in_srgb,var(--accent-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--accent-danger)_10%,transparent)] px-[0.8rem] py-[0.55rem] text-[0.75rem] text-[var(--accent-danger)]" role="alert">
           <FiAlertCircle size={14} aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}
 
-      <button type="submit" className={styles.submitBtn} disabled={isSubmitting} aria-busy={isSubmitting}>
-        <span className={styles.btnContent}>
-          {isSubmitting ? (
-            <>
-              <span className={styles.btnSpinner} aria-hidden="true">
-                <FiLoader size={16} className={styles.spinning} />
-              </span>
-              <span>Sending...</span>
-            </>
-          ) : (
-            <>
-              <span>Send Message</span>
-              <FiSend size={16} className={styles.btnIcon} aria-hidden="true" />
-            </>
-          )}
-        </span>
+      <button
+        type="submit"
+        className="group inline-flex cursor-pointer items-center justify-center gap-[0.6rem] self-start rounded-[var(--radius-md)] border-none bg-[var(--accent-secondary)] px-6 py-[0.8rem] font-mono text-[0.68rem] uppercase tracking-[0.06em] text-[#02120f] transition-[filter,transform] duration-200 hover:-translate-y-px hover:brightness-110 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-55"
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
+      >
+        {isSubmitting ? (
+          <>
+            <span className="inline-flex items-center justify-center" aria-hidden="true">
+              <FiLoader size={16} className="animate-spin" />
+            </span>
+            <span>sending…</span>
+          </>
+        ) : (
+          <>
+            <span>send message</span>
+            <FiSend size={15} className="transition-transform duration-200 group-hover:-rotate-45 group-hover:translate-x-0.5" aria-hidden="true" />
+          </>
+        )}
       </button>
     </form>
   );
 }
 
-/*  Contact Info ── */
+/*  Direct lines ── */
 
-function ContactInfoCard({ item, index }: { item: typeof contactItems[0]; index: number }) {
+function Line({ item }: { item: typeof contactItems[0] }) {
   const [copied, setCopied] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    if (!cardRef.current) return;
-    gsap.from(cardRef.current, {
-      opacity: 0, y: 16, duration: 0.5, delay: index * 0.06,
-      ease: 'power2.out',
-      scrollTrigger: { trigger: cardRef.current, start: 'top 90%', toggleActions: 'play none none reverse' },
-    });
-  }, [index]);
 
   const handleCopy = useCallback(async () => {
     if (!item.copyText) return;
     try { await navigator.clipboard.writeText(item.copyText); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { /* noop */ }
   }, [item.copyText]);
 
-  const isActionable = !!item.href || !!item.copyText;
   const IconComponent = iconMap[item.icon];
 
   return (
-    <article
-      ref={cardRef}
-      className={`${styles.infoCard} ${isActionable ? styles.actionable : ''} ${copied ? styles.copied : ''}`}
-    >
-      <div className={styles.cardIconWrapper}>
-        <span className={styles.cardIcon} aria-hidden="true"><IconComponent size={18} /></span>
+    <article className="flex items-center gap-[0.85rem] border-t border-[var(--terminal-bar-border)] py-[0.7rem] first:border-t-0">
+      <span className="inline-flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[var(--radius-sm)] border border-[color-mix(in_srgb,var(--accent-secondary)_22%,transparent)] bg-[color-mix(in_srgb,var(--accent-secondary)_10%,transparent)] text-[var(--accent-secondary)]" aria-hidden="true">
+        <IconComponent size={16} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <h3 className="m-0 font-display text-[0.9rem] font-semibold leading-[1.2] text-foreground">{item.title}</h3>
+        <p className="m-[0.15rem_0_0] truncate text-[0.7rem] text-muted-foreground">{item.subtitle}</p>
       </div>
-
-      <div className={styles.cardContent}>
-        <h3 className={styles.cardTitle}>{item.title}</h3>
-        <p className={styles.cardSubtitle}>{item.subtitle}</p>
-      </div>
-
       {item.href && (
-        <a href={item.href} target="_blank" rel="noopener noreferrer" className={`${styles.cardAction} ${styles.external}`} aria-label={`${item.actionLabel || 'Open'} ${item.title}`}>
-          <span className={styles.actionText}>{item.actionLabel || 'Open'}</span>
-          <FiExternalLink size={12} aria-hidden="true" />
+        <a href={item.href} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 cursor-pointer items-center gap-[0.35rem] rounded-[var(--radius-sm)] border border-[var(--terminal-bar-border)] bg-transparent px-[0.6rem] py-[0.38rem] font-mono text-[0.6rem] uppercase tracking-[0.05em] text-[var(--text-ghost)] no-underline transition-colors duration-200 hover:border-[var(--accent-secondary)] hover:text-[var(--accent-secondary)]" aria-label={`${item.actionLabel || 'Open'} — ${item.title}`}>
+          <span>{item.actionLabel || 'open'}</span>
+          <FiExternalLink size={11} aria-hidden="true" />
         </a>
       )}
-
       {item.copyText && !item.href && (
-        <button onClick={handleCopy} className={`${styles.cardAction} ${styles.copy}`} aria-label={`Copy ${item.title.toLowerCase()}`} aria-pressed={copied}>
-          {copied ? (
-            <><FiCheck size={12} aria-hidden="true" /><span className={styles.actionText}>Copied</span></>
-          ) : (
-            <><FiCopy size={12} aria-hidden="true" /><span className={styles.actionText}>Copy</span></>
-          )}
+        <button
+          onClick={handleCopy}
+          className="inline-flex shrink-0 cursor-pointer items-center gap-[0.35rem] rounded-[var(--radius-sm)] border border-[var(--terminal-bar-border)] bg-transparent px-[0.6rem] py-[0.38rem] font-mono text-[0.6rem] uppercase tracking-[0.05em] text-[var(--text-ghost)] transition-colors duration-200 hover:border-[var(--accent-secondary)] hover:text-[var(--accent-secondary)]"
+          aria-label={`Copy ${item.title.toLowerCase()}`}
+          aria-pressed={copied}
+        >
+          {copied
+            ? (<><FiCheck size={11} aria-hidden="true" /><span>copied</span></>)
+            : (<><FiCopy size={11} aria-hidden="true" /><span>copy</span></>)}
         </button>
       )}
     </article>
   );
 }
 
-function ContactInfo() {
+function Conduits() {
   return (
-    <aside className={styles.contactInfo} aria-label="Contact Information">
-      <header className={styles.infoHeader}>
-        <span className={styles.prompt} aria-hidden="true">$</span>
-        <h2 className={styles.infoTitle}>Get in Touch</h2>
-      </header>
-
-      <div className={styles.infoGrid} role="list">
-        {contactItems.map((item, i) => (
-          <ContactInfoCard key={item.id} item={item} index={i} />
+    <div className="rounded-[var(--radius-lg)] border border-border bg-[var(--terminal-bar)] px-[1.6rem] py-6">
+      <p className="m-0 mb-[0.9rem] font-mono text-[0.58rem] uppercase tracking-[0.15em] text-[var(--text-ghost)]">
+        Direct lines
+      </p>
+      <div className="flex flex-col" role="list">
+        {contactItems.map((item) => (
+          <Line key={item.id} item={item} />
         ))}
       </div>
-
-      <div className={styles.availability}>
-        <div className={styles.availabilityIndicator} aria-hidden="true"><span className={styles.statusDot} /></div>
-        <span className={styles.availabilityText}>Usually responds within a few hours</span>
-      </div>
-    </aside>
+    </div>
   );
 }
 
-/*  Social Links ── */
+/*  Elsewhere ── */
 
-function SocialCard({ link, index }: { link: typeof socialLinks[0]; index: number }) {
-  const cardRef = useRef<HTMLAnchorElement>(null);
-  const IconComponent = iconMap[link.icon];
-
-  useGSAP(() => {
-    if (!cardRef.current) return;
-    gsap.from(cardRef.current, {
-      opacity: 0, y: 12, duration: 0.4, delay: index * 0.05,
-      ease: 'power2.out',
-      scrollTrigger: { trigger: cardRef.current, start: 'top 92%', toggleActions: 'play none none reverse' },
-    });
-  }, [index]);
-
+function Routes() {
   return (
-    <a ref={cardRef} href={link.href} target="_blank" rel="noopener noreferrer" className={styles.socialCard} aria-label={link.label}>
-      <span className={styles.socialIcon} aria-hidden="true"><IconComponent size={18} /></span>
-      <span className={styles.socialLabel}>{link.label}</span>
-    </a>
-  );
-}
-
-function PremiumSocialLinks() {
-  return (
-    <section className={styles.socialLinks} aria-label="Social Links">
-      <header className={styles.socialHeader}>
-        <span className={styles.prompt} aria-hidden="true">
-          $
-        </span>
-        <h2 className={styles.socialTitle}>Connect</h2>
-      </header>
-
-      <div className={styles.socialGrid} role="list">
-        {socialLinks.map((link, i) => (
-          <SocialCard key={link.id} link={link} index={i} />
-        ))}
+    <div className="rounded-[var(--radius-lg)] border border-border bg-[var(--terminal-bar)] px-[1.6rem] py-6">
+      <p className="m-0 mb-[0.9rem] font-mono text-[0.58rem] uppercase tracking-[0.15em] text-[var(--text-ghost)]">
+        Elsewhere
+      </p>
+      <div className="grid grid-cols-2 gap-[0.4rem]" role="list">
+        {socialLinks.map((link) => {
+          const IconComponent = iconMap[link.icon];
+          return (
+            <a
+              key={link.id}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-2 rounded-[var(--radius-sm)] border border-border bg-background px-[0.6rem] py-[0.55rem] text-[0.72rem] text-muted-foreground no-underline transition-all duration-200 hover:-translate-y-px hover:border-[color-mix(in_srgb,var(--accent-secondary)_45%,transparent)] hover:text-[var(--accent-secondary)]"
+              aria-label={link.label}
+            >
+              <span className="inline-flex text-[var(--text-ghost)] transition-colors duration-200 group-hover:text-[var(--accent-secondary)]" aria-hidden="true">
+                <IconComponent size={14} />
+              </span>
+              <span className="min-w-0 truncate">{link.label}</span>
+              <span className="ml-auto text-[var(--text-ghost)] transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">→</span>
+            </a>
+          );
+        })}
       </div>
-
-      <div className={styles.socialFooter}>
-        <p className={styles.footerText}>
-          Prefer email?{' '}
-          <a href={`mailto:${profile.email}`} className={styles.footerLink}>
-            {profile.email}
-          </a>
-        </p>
-      </div>
-    </section>
+    </div>
   );
 }
 
 /*  Main Component  */
 
 export function PremiumContacts() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    const wrapper = wrapperRef.current;
-    const section = sectionRef.current;
-    if (!wrapper || !section) return;
-
     const ctx = gsap.context(() => {
-      const formWrapper = section.querySelector(`.${styles.formWrapper}`);
-      const sideWrapper = section.querySelector(`.${styles.sideWrapper}`);
-
-      [formWrapper, sideWrapper].forEach((el, i) => {
+      const cols = [
+        sectionRef.current?.querySelector('[data-col="form"]'),
+        sectionRef.current?.querySelector('[data-col="info"]'),
+        sectionRef.current?.querySelector('[data-reveal="lead"]'),
+      ];
+      cols.forEach((el, i) => {
         if (el) {
           gsap.fromTo(el,
             { opacity: 0, y: 30 },
             {
               opacity: 1, y: 0, duration: 0.6, delay: i * 0.1,
               ease: 'power3.out',
-              scrollTrigger: { trigger: wrapper, start: 'top 75%', toggleActions: 'play none none reverse' },
+              scrollTrigger: { trigger: innerRef.current, start: 'top 65%', toggleActions: 'play none none reverse' },
             }
           );
         }
       });
-    }, wrapperRef);
+    }, sectionRef);
 
     return () => ctx.revert();
-  }, { scope: wrapperRef, revertOnUpdate: true });
+  }, { scope: sectionRef, revertOnUpdate: true });
 
   return (
-    <div id="contact" ref={wrapperRef} className={styles.wrapper}>
-      <section id="contact-section" ref={sectionRef} className={styles.section}>
-        <div className={styles.inner}>
-          <header className={styles.header}>
-            <span className={styles.prompt} aria-hidden="true">$</span>
-            <h2 className={styles.title}>Get in Touch</h2>
-          </header>
+    <section id="contact" ref={sectionRef} className={`relative z-10 border-t border-[#e4e2dd] bg-white ${SECTION_TOKENS}`}>
+      <div ref={innerRef} className="relative mx-auto w-full max-w-[1400px] px-[4vw] py-24 max-[700px]:px-5 max-[700px]:py-16">
+        <header className="mb-[1.1rem] flex flex-col gap-[0.4rem] max-[700px]:mb-[0.9rem]">
+          <span className="font-mono text-[0.55rem] uppercase tracking-[0.15em] text-[var(--text-ghost)]">
+            // open channel
+          </span>
+          <h2 className="m-0 font-display text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-none tracking-[-0.03em] text-foreground">
+            Contact
+          </h2>
+          <p className="m-0 font-mono text-[0.7rem] lowercase tracking-[0.1em] text-muted-foreground">
+            drop a line — one message, one reply.
+          </p>
+        </header>
 
-          <div className={styles.grid}>
-            <div className={styles.formWrapper}>
-              <ContactForm />
-            </div>
+        <p data-reveal="lead" className="mb-12 max-w-[52ch] font-mono text-[0.78rem] leading-[1.7] text-muted-foreground max-[700px]:mb-9">
+          Tell me about a project, a role, or a thought worth crossing oceans for. I read
+          everything and reply to most of it — usually within 24 hours.
+        </p>
 
-            <div className={styles.sideWrapper}>
-              <ContactInfo />
-              <PremiumSocialLinks />
-            </div>
+        <div className="grid grid-cols-[minmax(0,7fr)_minmax(320px,5fr)] items-start gap-x-16 gap-y-12 max-[980px]:grid-cols-1 max-[980px]:gap-y-12">
+          <div data-col="form" className="min-w-0">
+            <ContactForm />
           </div>
+
+          <aside data-col="info" className="flex min-w-0 flex-col gap-5">
+            <div className="flex items-center gap-[0.6rem] rounded-[var(--radius-md)] border border-border bg-[var(--terminal-bar)] px-4 py-[0.8rem] font-mono text-[0.62rem] uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+              <span className="h-2 w-2 animate-status-pulse rounded-full bg-[var(--accent-success)]" aria-hidden="true" />
+              <span>available for work</span>
+              <span className="ml-auto normal-case tracking-[0.04em] text-[var(--text-ghost)]">replies &lt; 24h</span>
+            </div>
+            <Conduits />
+            <Routes />
+          </aside>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }
 

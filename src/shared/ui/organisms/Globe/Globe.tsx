@@ -213,10 +213,11 @@ interface MarkerProps {
   lat: number;
   lng: number;
   onClick?: (name: string) => void;
+  onHover?: (name: string | null) => void;
   elemRef: (el: HTMLButtonElement | null) => void;
 }
 
-function Marker({ name, group, lat, lng, onClick, elemRef }: MarkerProps) {
+function Marker({ name, group, lat, lng, onClick, onHover, elemRef }: MarkerProps) {
   const Icon = (ICON_MAP as Record<string, React.ComponentType<{ className?: string }>>)[name];
 
   const handleMove = (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -242,7 +243,11 @@ function Marker({ name, group, lat, lng, onClick, elemRef }: MarkerProps) {
       aria-label={`View ${name} skill details`}
       onPointerDown={(e) => { e.stopPropagation(); onClick?.(name); }}
       onPointerMove={handleMove}
-      onPointerLeave={handleLeave}
+      onPointerEnter={() => onHover?.(name)}
+      onPointerLeave={(e) => {
+        handleLeave(e);
+        onHover?.(null);
+      }}
     >
       <div
         className={styles.globeMarkerInner}
@@ -261,14 +266,70 @@ interface GlobeInnerProps {
   globeObjRef: React.MutableRefObject<ThreeGlobe | null>;
   markerRefsRef: React.MutableRefObject<Record<string, MarkerEntry>>;
   themeVersion: number;
+  managerRef: React.MutableRefObject<GlobeManager>;
+  markerBySkill: Record<string, Marker>;
+  groupColors: Record<string, THREE.Texture>;
+  controlsRef: React.MutableRefObject<unknown>;
 }
 
-function GlobeInner({ markers, arcs, globeObjRef, markerRefsRef, themeVersion }: GlobeInnerProps) {
+function GlobeInner({
+  markers,
+  arcs,
+  globeObjRef,
+  markerRefsRef,
+  themeVersion,
+  managerRef,
+  markerBySkill,
+  groupColors,
+  controlsRef,
+}: GlobeInnerProps) {
   const { camera, gl } = useThree();
   const groupRef = useRef<THREE.Group | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [selectionVersion, setSelectionVersion] = useState<number>(0);
   const worldPos = useMemo(() => new Vector3(), []);
   const canvasSize = useRef({ w: 0, h: 0 });
+  const baseArcsRef = useRef(arcs);
+  baseArcsRef.current = arcs;
+
+  /*  Manager changes (selection) drive related-arcs redraw  */
+
+  useEffect(() => {
+    const mgr = managerRef.current;
+    if (!mgr) return;
+    return mgr.subscribe(() => setSelectionVersion((v) => v + 1));
+  }, [managerRef]);
+
+  useEffect(() => {
+    const globe = globeObjRef.current;
+    if (!globe || !isInitialized) return;
+    const mgr = managerRef.current;
+    if (!mgr) return;
+
+    const sel = mgr.state.selected;
+    if (!sel || !markerBySkill[sel]) {
+      globe.arcsData(baseArcsRef.current);
+      return;
+    }
+
+    const mk = markerBySkill[sel];
+    const related = graph.relatedSkills(sel);
+    const relatedArcs = related
+      .map((r) => ({ r, rm: markerBySkill[r.name] }))
+      .filter((x): x is { r: typeof related[number]; rm: Marker } => Boolean(x.rm))
+      .map(({ r, rm }, i) => ({
+        startLat: mk.lat,
+        startLng: mk.lng,
+        endLat: rm.lat,
+        endLng: rm.lng,
+        color: getArcColorStr(r.group),
+        arcAlt: 0.2,
+        order: 400 + i,
+        group: r.group,
+      }));
+
+    globe.arcsData([...baseArcsRef.current, ...relatedArcs]);
+  }, [isInitialized, selectionVersion, markerBySkill, managerRef]);
 
   useEffect(() => {
     if (!globeObjRef.current && groupRef.current) {
@@ -333,7 +394,7 @@ function GlobeInner({ markers, arcs, globeObjRef, markerRefsRef, themeVersion }:
   useFrame(() => {
     const refs = markerRefsRef.current;
     const globe = globeObjRef.current;
-    const mgr = window.__globeManager;
+    const mgr = managerRef.current;
     if (!refs || !globe || !mgr) return;
 
     const { w, h } = canvasSize.current;
@@ -414,7 +475,220 @@ function GlobeInner({ markers, arcs, globeObjRef, markerRefsRef, themeVersion }:
     }
   });
 
-  return <group ref={groupRef} />;
+  return (
+    <group ref={groupRef}>
+      <HaloSprites markers={markers} groupColors={groupColors} markerBySkill={markerBySkill} />
+      <SelectionRing markerBySkill={markerBySkill} />
+      <FlyCamera controlsRef={controlsRef} markerBySkill={markerBySkill} />
+    </group>
+  );
+}
+
+/*  3D overlay helpers & layers ── */
+
+const tempVec = new Vector3();
+
+function latLngToWorld(lat: number, lng: number, r = 100, out = tempVec): Vector3 {
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lng + 180) * (Math.PI / 180);
+  return out.set(
+    -r * Math.sin(phi) * Math.cos(theta),
+    r * Math.cos(phi),
+    r * Math.sin(phi) * Math.sin(theta),
+  );
+}
+
+/*  Soft additive halo sprites — one per marker, group-tinted  */
+
+function makeHaloTexture(color: string): THREE.Texture {
+  const size = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    g.addColorStop(0, color);
+    g.addColorStop(0.35, color);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, size, size);
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function groupHaloTextures(groups: string[]): Record<string, THREE.Texture> {
+  const out: Record<string, THREE.Texture> = {};
+  for (const g of groups) {
+    if (!out[g]) out[g] = makeHaloTexture(getGroupColor(g));
+  }
+  return out;
+}
+
+interface HaloSpritesProps {
+  markers: Marker[];
+  groupColors: Record<string, THREE.Texture>;
+  markerBySkill: Record<string, Marker>;
+}
+
+function HaloSprites({ markers, groupColors, markerBySkill }: HaloSpritesProps) {
+  const refs = useRef<Record<string, THREE.Sprite>>({});
+
+  useFrame(() => {
+    const mgr = window.__globeManager;
+    if (!mgr) return;
+    const filtered = mgr.getFilteredNames();
+    const hasFilter = filtered !== null;
+    const isDisabled = mgr.state.disabled;
+    const selectedName = mgr.state.selected;
+    const hoveredName = mgr.state.hover;
+
+    for (const m of markers) {
+      const spr = refs.current[m.name];
+      if (!spr) continue;
+      const dimmed = !isDisabled && hasFilter && !filtered!.has(m.name);
+      const active = selectedName === m.name;
+      const hovered = hoveredName === m.name && !active;
+
+      let scale = 2.6 + (m.size || 1) * 1.5;
+      if (dimmed && !active) scale *= 0.45;
+      else if (active) scale *= 1.55;
+      else if (hovered) scale *= 1.25;
+
+      spr.scale.setScalar(scale);
+      const mat = spr.material as THREE.SpriteMaterial;
+      mat.opacity = dimmed && !active ? 0.12 : active ? 1 : 0.55;
+    }
+  });
+
+  return (
+    <group>
+      {markers.map((m) => (
+        <sprite
+          key={m.name}
+          ref={(el) => {
+            if (el) refs.current[m.name] = el;
+          }}
+          position={latLngToWorld(m.lat, m.lng, 100)}
+        >
+          <spriteMaterial
+            map={groupColors[m.group]}
+            transparent
+            opacity={0.55}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </sprite>
+      ))}
+    </group>
+  );
+}
+
+/*  Pulsing selection ring in 3D  */
+
+function SelectionRing({ markerBySkill }: { markerBySkill: Record<string, Marker> }) {
+  const ref = useRef<THREE.Mesh>(null);
+  const target = useRef(new Vector3());
+
+  useFrame((_, dt) => {
+    const mesh = ref.current;
+    if (!mesh) return;
+    const mgr = window.__globeManager;
+    if (!mgr) return;
+
+    const sel = mgr.state.selected;
+    const mk = sel ? markerBySkill[sel] : undefined;
+    if (!mk) {
+      mesh.visible = false;
+      return;
+    }
+
+    const k = 1 - Math.exp(-dt * 6);
+    latLngToWorld(mk.lat, mk.lng, 100, target.current);
+    mesh.position.lerp(target.current, k);
+    mesh.visible = true;
+
+    const t = performance.now() / 1000;
+    const pulse = 1 + Math.sin(t * 3.2) * 0.06;
+    mesh.scale.setScalar((4.1 + pulse) * 0.28);
+    mesh.lookAt(mesh.position.x * 2, mesh.position.y * 2, mesh.position.z * 2);
+  });
+
+  return (
+    <mesh ref={ref} visible={false}>
+      <ringGeometry args={[0.92, 1, 64]} />
+      <meshBasicMaterial
+        color="#ffffff"
+        transparent
+        opacity={0.85}
+        side={THREE.DoubleSide}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+}
+
+/*  Camera fly-to: eases orbit so the selected marker faces the viewer  */
+
+function FlyCamera({
+  controlsRef,
+  markerBySkill,
+}: {
+  controlsRef: React.MutableRefObject<unknown>;
+  markerBySkill: Record<string, Marker>;
+}) {
+  const fly = useRef<{ name: string | null; active: boolean }>({ name: null, active: false });
+  const tmp = useRef(new Vector3());
+
+  useFrame((_, dt) => {
+    const ctrl = controlsRef.current as {
+      getPolarAngle: () => number;
+      setPolarAngle: (v: number) => void;
+      getAzimuthalAngle: () => number;
+      setAzimuthalAngle: (v: number) => void;
+      minPolarAngle: number;
+      maxPolarAngle: number;
+    } | null;
+    if (!ctrl) return;
+    const mgr = window.__globeManager;
+    if (!mgr) return;
+
+    const sel = mgr.state.selected;
+    if (sel !== fly.current.name) {
+      fly.current.name = sel;
+      fly.current.active = Boolean(sel);
+    }
+    if (!fly.current.active) return;
+
+    const mk = sel ? markerBySkill[sel] : undefined;
+    if (!mk) {
+      fly.current.active = false;
+      return;
+    }
+
+    latLngToWorld(mk.lat, mk.lng, 1, tmp.current);
+    const eye = tmp.current;
+    let goalPhi = Math.acos(THREE.MathUtils.clamp(eye.y, -1, 1));
+    const goalTheta = Math.atan2(eye.x, eye.z);
+    goalPhi = Math.min(ctrl.maxPolarAngle, Math.max(ctrl.minPolarAngle, goalPhi));
+
+    const curPhi = ctrl.getPolarAngle();
+    const curTheta = ctrl.getAzimuthalAngle();
+    const k = 1 - Math.exp(-dt * 3.2);
+    const np = curPhi + (goalPhi - curPhi) * k;
+    const nt = curTheta + (goalTheta - curTheta) * k;
+
+    ctrl.setPolarAngle(np);
+    ctrl.setAzimuthalAngle(nt);
+
+    if (Math.abs(goalPhi - np) < 0.004 && Math.abs(goalTheta - nt) < 0.004) {
+      fly.current.active = false;
+    }
+  });
+
+  return null;
 }
 
 interface GlobeProps {
@@ -425,13 +699,23 @@ interface GlobeProps {
 const Globe = forwardRef(function Globe({ className = '', onMarkerClick }: GlobeProps, ref) {
   const [mounted, setMounted] = useState<boolean>(false);
   const globeObjRef = useRef<ThreeGlobe | null>(null);
-  const managerRef = useRef(new GlobeManager());
+  const managerRef = useRef<GlobeManager>(new GlobeManager());
   const markerRefsRef = useRef<Record<string, MarkerEntry>>({});
   const overlayRef = useRef<HTMLDivElement | null>(null);
+  const controlsRef = useRef<unknown>(null);
   const [themeVersion, setThemeVersion] = useState(0);
 
   const markers = useMemo(() => buildMarkers(graph.allSkills), []);
   const arcs = useMemo(() => buildArcs(markers), [markers, themeVersion]);
+  const markerBySkill = useMemo(() => {
+    const map: Record<string, Marker> = {};
+    for (const m of markers) map[m.name] = m;
+    return map;
+  }, [markers]);
+  const groupColors = useMemo(() => {
+    const groups = [...new Set(markers.map((m) => m.group))];
+    return groupHaloTextures(groups);
+  }, [markers, themeVersion]);
 
   useEffect(() => {
     window.__globeManager = managerRef.current;
@@ -481,6 +765,7 @@ const Globe = forwardRef(function Globe({ className = '', onMarkerClick }: Globe
       >
         <ambientLight color={tc.ambientLight} intensity={tc.ambientIntensity} />
         <OrbitControls
+          ref={controlsRef as React.Ref<any>}
           enablePan={false}
           enableZoom={false}
           enableRotate
@@ -497,6 +782,10 @@ const Globe = forwardRef(function Globe({ className = '', onMarkerClick }: Globe
           globeObjRef={globeObjRef}
           markerRefsRef={markerRefsRef}
           themeVersion={themeVersion}
+          managerRef={managerRef}
+          markerBySkill={markerBySkill}
+          groupColors={groupColors}
+          controlsRef={controlsRef}
         />
       </Canvas>
 
@@ -509,6 +798,7 @@ const Globe = forwardRef(function Globe({ className = '', onMarkerClick }: Globe
             lat={m.lat}
             lng={m.lng}
             onClick={handleMarkerClick}
+            onHover={(name) => managerRef.current.setHover(name)}
             elemRef={(el) => setMarkerRef(m.name, el)}
           />
         ))}

@@ -3,16 +3,38 @@ import { graph } from '@/features/skills/lib/registry';
 interface GlobeManagerState {
   selected: string | null;
   disabled: boolean;
+  hover: string | null;
 }
 
 export default class GlobeManager {
-  state: GlobeManagerState = { selected: null, disabled: false };
+  state: GlobeManagerState = { selected: null, disabled: false, hover: null };
   private filteredNames: Set<string> | null = null;
   private searchQuery: string | null = null;
   private filterGroup: string | null = null;
+  private listeners = new Set<() => void>();
+  private _version = 0;
+
+  get version(): number {
+    return this._version;
+  }
+
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  private bump(): void {
+    this._version++;
+    this.listeners.forEach((l) => l());
+  }
 
   select(name: string | null): void {
     this.state.selected = name;
+    this.bump();
+  }
+
+  setHover(name: string | null): void {
+    this.state.hover = name;
   }
 
   setDisabled(disabled: boolean): void {
@@ -58,8 +80,10 @@ export default class GlobeManager {
   reset(): void {
     this.state.selected = null;
     this.state.disabled = false;
+    this.state.hover = null;
     this.filteredNames = null;
     this.searchQuery = null;
     this.filterGroup = null;
+    this.bump();
   }
 }

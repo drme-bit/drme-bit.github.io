@@ -11,13 +11,24 @@
   --color-foreground: var(--text);
   --color-muted-foreground: var(--text-dim);
   --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-popover: var(--bg-elevated);
   --color-popover-foreground: var(--text);
+  --color-card: var(--bg-elevated);
   --color-primary: var(--accent-secondary);
   --color-primary-foreground: var(--bg);
   --color-secondary: var(--bg-elevated);
   --color-secondary-foreground: var(--text);
+  --color-muted: var(--accent-muted);
+  --color-accent: var(--accent-secondary);
+  --color-accent-foreground: var(--bg);
+  --color-ring: var(--border-hover);
+  --color-input: var(--border);
   --color-destructive: var(--accent-danger);
   --color-destructive-foreground: var(--bg);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -39,6 +50,53 @@
         scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1))
         rotate(var(--tw-exit-rotate, 0));
       filter: blur(var(--tw-exit-blur, 0));
+    }
+  }
+
+  --animate-rise: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  --animate-status-pulse: status-pulse 2.4s ease-out infinite;
+  @keyframes status-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-success) 50%, transparent);
+    }
+    70% {
+      box-shadow: 0 0 0 7px transparent;
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+
+  --animate-scroll-bounce: scroll-bounce 2s ease-in-out infinite;
+  @keyframes scroll-bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  --animate-scroll-arrow: scroll-arrow 2s ease-in-out infinite;
+  @keyframes scroll-arrow {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
     }
   }
 }
@@ -639,14 +697,14 @@ html {
 body {
   padding: 0;
   margin: 0;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
   padding-bottom: env(safe-area-inset-bottom);
 
   // ── Dot grid overlay
@@ -860,6 +918,8 @@ html.no-blur {
 
 .projects-wrapper {
   position: relative;
+  /* 100vh buffer cancels the last entry's padding, the hero rises over it. */
+  margin-top: var(--projects-overlap, -100vh);
 }
 
 .projects-wrapper .tl-head-wrapper {
@@ -868,29 +928,41 @@ html.no-blur {
   background: var(--bg);
 }
 
-.reviews-contacts-wrapper {
-  position: relative;
-  background: var(--bg);
-}
-
-/* Reviews is sticky at top, gets pinned */
-.reviews-contacts-wrapper #reviews {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  height: 100vh;
-}
-
-/* Contacts wrapper slides over pinned Reviews, revealing footer */
-.reviews-contacts-wrapper #contact {
-  position: relative;
-  z-index: 10;
-}
-
-/* Footer wrapper positioned after contact in flow, animated via GSAP */
-.reviews-contacts-wrapper .footer-wrapper {
+.footer-wrapper {
   position: relative;
   z-index: 5;
   width: 100%;
+}
+
+/* ── Skills explorer animations ── */
+
+@keyframes skills-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes filter-menu-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes skills-panel-content-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes skills-panel-fill-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes card-float-1 {
+  0% { transform: translateY(var(--card-1-y, 40px)) rotate(-3deg); }
+  100% { transform: translateY(calc(var(--card-1-y, 40px) - 8px)) rotate(-2deg); }
+}
+
+@keyframes card-float-2 {
+  0% { transform: translateY(var(--card-2-y, 60px)) rotate(2deg); }
+  100% { transform: translateY(calc(var(--card-2-y, 60px) - 10px)) rotate(3deg); }
 }
 

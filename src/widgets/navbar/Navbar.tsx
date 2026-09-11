@@ -1,251 +1,71 @@
 'use client';
 
 import Link from 'next/link';
-import { TransitionLink } from '@/features/transitions';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import {
-  FiMenu,
-} from '@/shared/ui/atoms/Icon';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion } from 'motion/react';
 import { useNav } from '@/app/providers/NavProvider';
 import { GLOBAL_NAV } from '@/shared/config/navConfig';
-import type { NavGroup, NavRouteLink, NavSectionLink, NavLeaf } from '@/shared/config/navTypes';
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTrigger,
-} from '@/shared/ui/organisms/Sheet/Sheet';
+import type { NavGroup, NavRouteLink, NavLeaf } from '@/shared/config/navTypes';
+import { cn } from '@/shared/lib/cn';
+import { Separator } from '@/shared/ui/atoms';
 
-import { gsap } from 'gsap';
-import { useGSAP } from '@gsap/react';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
+import { ExpandableTab } from './ExpandableTab';
+import { GroupDropdown } from './GroupDropdown';
+import { MobileNav } from './MobileNav';
 import { NavDropdown } from './NavDropdown';
-import SearchBar from '@/shared/ui/molecules/SearchBar/SearchBar';
+import SearchBar, { type SearchItem } from '@/shared/ui/molecules/SearchBar/SearchBar';
 import ChangeTheme from '@/shared/ui/molecules/ChangeTheme/ChangeTheme';
-import styles from './Navbar.module.scss';
 
-//Init gsap plugin
-gsap.registerPlugin(ScrollTrigger);
+const pillSpring = { type: 'spring' as const, stiffness: 420, damping: 32, mass: 0.6 };
 
-/*  Expandable tab (like ExpandableTabs component)  */
-
-const tabVariants = {
-  initial: { gap: 0, paddingLeft: '.7rem', paddingRight: '.7rem' },
-  animate: (isSelected: boolean) => ({
-    gap: isSelected ? '.4rem' : 0,
-    paddingLeft: isSelected ? '.85rem' : '.7rem',
-    paddingRight: isSelected ? '.85rem' : '.7rem',
-  }),
-};
-
-const labelVariants = {
-  initial: { width: 0, opacity: 0 },
-  animate: { width: 'auto', opacity: 1 },
-  exit: { width: 0, opacity: 0 },
-};
-
-const springTransition = { delay: 0.1, type: 'spring' as const, bounce: 0, duration: 0.6 };
-
-function ExpandableTab({
-  item,
-  isSelected,
-  isRouteActive,
-  onSelect,
-}: {
-  item: NavRouteLink;
-  isSelected: boolean;
-  isRouteActive: boolean;
-  onSelect: () => void;
-}) {
-  const Icon = item.icon;
-
+function LogoMark() {
   return (
-    <motion.button
-      className={`${styles.expandTab}${
-        isSelected || isRouteActive ? ` ${styles['expandTab--active']}` : ''
-      }`}
-      onClick={onSelect}
-      variants={tabVariants}
-      initial={false}
-      animate="animate"
-      custom={isSelected}
-      transition={springTransition}
+    <svg
+      data-nav-logo
+      className="size-6 shrink-0 text-foreground transition-colors"
+      viewBox="0 0 150 136.9"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
     >
-      {Icon && <Icon className={styles.expandTabIcon} />}
-      <AnimatePresence initial={false}>
-        {isSelected && (
-          <motion.span
-            variants={labelVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={springTransition}
-            className={styles.expandTabLabel}
-          >
-            {item.label}
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </motion.button>
+      <path
+        d="m125.6 94.2v14.8c0 2.4-1.8 4.3-4.3 4.3h-48.3c-4-0.1-7.4-3-7.4-7.3v-39.4c0-3.1-1.8-6.8-3.7-8.7l-29.4-30.8c-1.4-1.5-2.8-2.4-5.4-2.4h-14.6c-2.2 0-3.2 1.1-3.2 3.1v96.3c0 2.3 1.7 3.7 4 3.7h7.5c2.5 0.1 4.2-1.5 4.2-4.2v-82.8c0-1.4 1.5-2.6 3-1l21.1 22.5c0.2 2 1.3 2.1 1.3 4.1l0.1 57.9c0 2.1 1.2 3.5 3.4 3.5h81c3.5 0 5.8-2.4 5.8-6.1v-27.4c0-2.4-1.8-4.7-4.7-4.7h-5.8c-2.3-0.2-4.6 1.5-4.6 4.6zm-92.3-69.5v-12.6c0-1.5 0.9-2.8 2.8-2.8h96.1c4.2 0 6.9 2.9 6.9 6.8v31.2c0 1.7-0.5 3.2-2 4.3s-2.4 1-8.2 1c-1.9 0-4.9-1-4.9-5.1 0-3.2 0-16.3-0.1-18 0-2.9-2.2-5.1-5.5-5.1h-82.8-2.3v0.3zm58.6 69.2 8.8-2.9c3.5-1.1 3.7-3.6 3.7-5.2 0-7.4-0.2-39.4-0.2-40.5 0-2.5-1.8-4.7-4.5-4.7h-5.8c-1.7 0-3.4 0.7-4.9 2.3-2.5 2.7-8.2 9.8-13.2 16.1-2 2.4-2.2 4.9-2.2 8.1v5c0.1 3.9 4 6.1 6.4 3l7.9-9.7c1.1-1.2 2.6-2 2.6 0v27.4c0 1.1 0.6 1.5 1.4 1.1z"
+        fill="currentColor"
+      />
+    </svg>
   );
 }
-
-/*  Group trigger ── */
-
-function leafHref(leaf: NavLeaf): string {
-  if (leaf.type === 'route') return leaf.href;
-  if (leaf.type === 'section') return `/#${leaf.targetId}`;
-  return '#';
-}
-
-function GroupDropdown({
-  group,
-  isActive,
-  isOpen,
-  onOpen,
-  onScheduleClose,
-  onCancelClose,
-  router,
-}: {
-  group: NavGroup;
-  isActive: boolean;
-  isOpen: boolean;
-  onOpen: () => void;
-  onScheduleClose: () => void;
-  onCancelClose: () => void;
-  router: ReturnType<typeof useRouter>;
-}) {
-  const Icon = group.icon;
-
-  return (
-    <li className={`${styles.dropdown}${isOpen ? ` ${styles['dropdown--open']}` : ''}`}>
-      <button
-        className={`${styles.navTrigger}${isOpen ? ` ${styles['navTrigger--open']}` : ''}${isActive ? ` ${styles['navTrigger--active']}` : ''}`}
-        onClick={() => {
-          if (isOpen) onCancelClose();
-          else onOpen();
-          router.push(group.href || '/');
-        }}
-        onMouseEnter={() => { onCancelClose(); onOpen(); }}
-        onMouseLeave={() => onScheduleClose()}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
-        aria-controls={`dropdown-${group.id}`}
-        id={`trigger-${group.id}`}
-      >
-        {Icon && <Icon className={styles.navTriggerIcon} />}
-        <span className={styles.navTriggerLabel}>{group.label}</span>
-      </button>
-    </li>
-  );
-}
-
-/*  Mobile: Sheet nav ── */
-
-function MobileNav() {
-  const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
-  const routes = GLOBAL_NAV.filter((item): item is NavRouteLink => item.type === 'route');
-
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <button className={styles.menuBtn} aria-label="Open menu">
-          <FiMenu className={styles.menuBtnIcon} />
-        </button>
-      </SheetTrigger>
-      <SheetContent className={styles.sheetContent} showClose={false} side="right">
-        <div className={styles.sheetHeader}>
-          <span className={styles.sheetTitle}>menu</span>
-          <SheetClose asChild>
-            <button className={styles.sheetCloseBtn} aria-label="Close menu">
-              <span className={styles.sheetCloseX}>✕</span>
-            </button>
-          </SheetClose>
-        </div>
-        <div className={styles.sheetBody}>
-          {groups.map((group) => (
-            <div key={group.id} className={styles.sheetGroup}>
-              <span className={styles.sheetGroupLabel}>{group.label}</span>
-              <ul className={styles.sheetLinkList}>
-                {group.children.map((child) => {
-                  const href = leafHref(child);
-                  const ChildIcon = child.icon;
-                  return (
-                    <li key={child.id}>
-                      <SheetClose asChild>
-                        <a
-                          href={href}
-                          className={styles.sheetLink}
-                          onClick={() => {
-                            window.location.href = href;
-                          }}
-                        >
-                          {ChildIcon && <ChildIcon className={styles.sheetLinkIcon} />}
-                          <span className={styles.sheetLinkLabel}>{child.label}</span>
-                        </a>
-                      </SheetClose>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-
-          <div className={styles.sheetDivider} />
-
-          {routes.map((route) => {
-            const RouteIcon = route.icon;
-            return (
-              <SheetClose key={route.id} asChild>
-                <TransitionLink href={route.href} className={styles.sheetRouteLink}>
-                  {RouteIcon && <RouteIcon className={styles.sheetLinkIcon} />}
-                  <span className={styles.sheetLinkLabel}>{route.label}</span>
-                </TransitionLink>
-              </SheetClose>
-            );
-          })}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-/*  Main Navbar ── */
 
 export default function Navbar() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<number | null>(null);
+  const [scrolled, setScrolled] = useState(false);
   const [openGroupId, setOpenGroupId] = useState<string | null>(null);
-  const prevGroupIndex = useRef<number>(-1);
   const closeGroupIdTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const pathname = usePathname();
   const router = useRouter();
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
 
   const { pageConfig, setPageConfig, active, setActiveSection } = useNav();
 
   const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
   const routes = GLOBAL_NAV.filter((item): item is NavRouteLink => item.type === 'route');
 
-  const hasContextSections = (pageConfig?.contextItems?.length ?? 0) > 0;
+  const handleTabSelect = useCallback((item: NavRouteLink) => {
+    if (item.href === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.location.href = item.href;
+    }
+  }, []);
 
-  const handleGroupOpen = useCallback(
-    (groupId: string) => {
-      clearTimeout(closeGroupIdTimer.current!);
-      prevGroupIndex.current = groups.findIndex((g) => g.id === groupId);
-      setOpenGroupId(groupId);
-    },
-    [groups],
-  );
+  const handleGroupOpen = useCallback((groupId: string) => {
+    clearTimeout(closeGroupIdTimer.current!);
+    setOpenGroupId(groupId);
+  }, []);
 
   const scheduleGroupClose = useCallback(() => {
     closeGroupIdTimer.current = setTimeout(() => {
       setOpenGroupId(null);
-      prevGroupIndex.current = -1;
-    }, 200);
+    }, 180);
   }, []);
 
   const cancelGroupClose = useCallback(() => {
@@ -255,216 +75,189 @@ export default function Navbar() {
   const closeGroupImmediate = useCallback(() => {
     clearTimeout(closeGroupIdTimer.current!);
     setOpenGroupId(null);
-    prevGroupIndex.current = -1;
   }, []);
 
-  // Reset nav config when leaving projects/post pages
   useEffect(() => {
     if (!pathname.includes('/projects/') && !pathname.includes('/blog/')) {
       setPageConfig(null);
     }
   }, [pathname, setPageConfig]);
 
-  useGSAP(() => {
-    const nav = ref.current;
-    if (!nav) return;
-
-    let isHovered = false;
-
-    const st = ScrollTrigger.create({
-      start: 'top top',
-      end: 'max',
-      onUpdate: (self) => {
-        if (isHovered) return;
-        if (window.innerWidth <= 700) return;
-
-        if (self.direction === 1 && self.scroll() > 80) {
-          nav.classList.add(styles['nav--collapsed']);
-        } else if (self.direction === -1 || self.scroll() < 20) {
-          nav.classList.remove(styles['nav--collapsed']);
-        }
-      },
-    });
-
-    const handleMouseEnter = () => {
-      isHovered = true;
-      nav.classList.remove(styles['nav--collapsed']);
-    };
-
-    const handleMouseLeave = () => {
-      isHovered = false;
-
-      if (window.scrollY > 80) {
-        nav.classList.add(styles['nav--collapsed']);
-      }
-    };
-
-    nav.addEventListener('mouseenter', handleMouseEnter);
-    nav.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      st.kill();
-      nav.removeEventListener('mouseenter', handleMouseEnter);
-      nav.removeEventListener('mouseleave', handleMouseLeave);
-    };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const handleGroupLinkClick = useCallback(
-    (item: NavSectionLink) => {
-      if (item.type === 'section') {
+  const handleLeafNavigate = useCallback(
+    (leaf: NavLeaf) => {
+      if (leaf.type === 'section') {
         if (pathname === '/') {
-          const el = document.getElementById(item.targetId);
+          const el = document.getElementById(leaf.targetId);
           if (el) {
             el.scrollIntoView({ behavior: 'smooth' });
-            setActiveSection(item.id);
+            setActiveSection(leaf.id);
           }
         } else {
-          window.location.href = `/#${item.targetId}`;
+          window.location.href = `/#${leaf.targetId}`;
         }
+      } else if (leaf.type === 'route') {
+        router.push(leaf.href);
+      }
+    },
+    [pathname, router, setActiveSection],
+  );
+
+  const searchItems = useMemo(() => {
+    const list: SearchItem[] = [];
+    groups.forEach((g) =>
+      g.children.forEach((c) => {
+        const base: SearchItem = {
+          id: c.id,
+          label: c.label,
+          hint: c.description,
+          icon: c.icon,
+          group: g.label,
+        };
+        if (c.type === 'route') base.href = c.href;
+        else if (c.type === 'section') base.sectionId = c.targetId;
+        list.push(base);
+      }),
+    );
+    routes.forEach((r) => list.push({ id: r.id, label: r.label, icon: r.icon, href: r.href }));
+    pageConfig?.contextItems?.forEach((c) => {
+      if (c.type === 'section') {
+        list.push({ id: c.id, label: c.label, sectionId: c.targetId });
+      } else if (c.type === 'route') {
+        list.push({ id: c.id, label: c.label, href: c.href });
+      }
+    });
+    return list;
+  }, [groups, routes, pageConfig]);
+
+  const handleSearchSelect = useCallback(
+    (item: SearchItem) => {
+      if (item.sectionId) {
+        if (pathname === '/') {
+          const el = document.getElementById(item.sectionId);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          setActiveSection(item.sectionId);
+        } else {
+          window.location.href = `/#${item.sectionId}`;
+        }
+      } else if (item.href) {
+        window.location.href = item.href;
       }
     },
     [pathname, setActiveSection],
   );
 
-  const handleTabSelect = useCallback((index: number, item: NavRouteLink) => {
-    setSelectedTab(index);
-    if (item.href === '/') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      window.location.href = item.href;
-    }
-  }, []);
-
-  const handleContextClick = useCallback(
-    (item: NavLeaf) => {
-      setActiveSection(item.id);
-      pageConfig?.onSectionClick?.(item.id);
-    },
-    [pageConfig, setActiveSection],
-  );
-
-  // Render dropdown panel — always mounted, handles its own show/hide
   const dropdownPanel = (
     <NavDropdown
       key="nav-dropdown"
       groups={groups}
+      routes={routes}
       activeGroupId={openGroupId}
+      activeRouteId={active.routeId}
       onClose={scheduleGroupClose}
       onCloseImmediate={closeGroupImmediate}
       onCancelClose={cancelGroupClose}
-      onLinkClick={handleGroupLinkClick}
+      onNavigateLeaf={handleLeafNavigate}
       router={router}
     />
   );
 
   return (
-    <>
-      {/* Logo — fixed left on desktop, in navbar on mobile */}
-      <Link href="/" className={styles.logo} aria-label="Home">
-        <svg
-          data-nav-logo
-          className={styles.logoIcon}
-          viewBox="0 0 150 136.9"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="m125.6 94.2v14.8c0 2.4-1.8 4.3-4.3 4.3h-48.3c-4-0.1-7.4-3-7.4-7.3v-39.4c0-3.1-1.8-6.8-3.7-8.7l-29.4-30.8c-1.4-1.5-2.8-2.4-5.4-2.4h-14.6c-2.2 0-3.2 1.1-3.2 3.1v96.3c0 2.3 1.7 3.7 4 3.7h7.5c2.5 0.1 4.2-1.5 4.2-4.2v-82.8c0-1.4 1.5-2.6 3-1l21.1 22.5c0.2 2 1.3 2.1 1.3 4.1l0.1 57.9c0 2.1 1.2 3.5 3.4 3.5h81c3.5 0 5.8-2.4 5.8-6.1v-27.4c0-2.4-1.8-4.7-4.7-4.7h-5.8c-2.3-0.2-4.6 1.5-4.6 4.6zm-92.3-69.5v-12.6c0-1.5 0.9-2.8 2.8-2.8h96.1c4.2 0 6.9 2.9 6.9 6.8v31.2c0 1.7-0.5 3.2-2 4.3s-2.4 1-8.2 1c-1.9 0-4.9-1-4.9-5.1 0-3.2 0-16.3-0.1-18 0-2.9-2.2-5.1-5.5-5.1h-82.8-2.3v0.3zm58.6 69.2 8.8-2.9c3.5-1.1 3.7-3.6 3.7-5.2 0-7.4-0.2-39.4-0.2-40.5 0-2.5-1.8-4.7-4.5-4.7h-5.8c-1.7 0-3.4 0.7-4.9 2.3-2.5 2.7-8.2 9.8-13.2 16.1-2 2.4-2.2 4.9-2.2 8.1v5c0.1 3.9 4 6.1 6.4 3l7.9-9.7c1.1-1.2 2.6-2 2.6 0v27.4c0 1.1 0.6 1.5 1.4 1.1z"
-            fill="currentColor"
-          />
-        </svg>
-      </Link>
-
-      {/* Search & Settings — fixed right on desktop */}
-      <div className={styles.navActions}>
-        <SearchBar />
-        <ChangeTheme />
-      </div>
-
-      <nav
-        ref={ref}
-        data-section={active.sectionId || undefined}
-        className={`${styles.nav}${collapsed ? ` ${styles['nav--collapsed']}` : ''}${
-          hasContextSections ? ` ${styles['nav--context']}` : ''
-        }`}
-        aria-label="Navigation"
-        onMouseEnter={setCollapsed.bind(null, false)}
+    <nav
+      ref={ref}
+      data-section={active.sectionId || undefined}
+      className={cn(
+        'sticky top-0 z-[999] mx-auto w-full max-w-5xl px-4 transition-all duration-300 ease-out sm:px-6',
+        scrolled
+          ? 'border-b border-border bg-background/80 backdrop-blur-xl md:top-3 md:max-w-4xl md:rounded-2xl md:border md:border-border md:bg-popover/85 md:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] md:backdrop-blur-2xl'
+          : 'border-b border-transparent',
+      )}
+      aria-label="Navigation"
+    >
+      <div
+        className={cn(
+          'mx-auto flex h-11 w-full items-center justify-between gap-3 transition-all duration-300 ease-out',
+          scrolled && 'md:h-9',
+        )}
       >
-        {/* Mobile logo */}
-        <Link href="/" className={styles.mobileLogo} aria-label="Home">
-          <svg
-            data-mobile-nav-logo
-            className={styles.logoIcon}
-            viewBox="0 0 150 136.9"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="m125.6 94.2v14.8c0 2.4-1.8 4.3-4.3 4.3h-48.3c-4-0.1-7.4-3-7.4-7.3v-39.4c0-3.1-1.8-6.8-3.7-8.7l-29.4-30.8c-1.4-1.5-2.8-2.4-5.4-2.4h-14.6c-2.2 0-3.2 1.1-3.2 3.1v96.3c0 2.3 1.7 3.7 4 3.7h7.5c2.5 0.1 4.2-1.5 4.2-4.2v-82.8c0-1.4 1.5-2.6 3-1l21.1 22.5c0.2 2 1.3 2.1 1.3 4.1l0.1 57.9c0 2.1 1.2 3.5 3.4 3.5h81c3.5 0 5.8-2.4 5.8-6.1v-27.4c0-2.4-1.8-4.7-4.7-4.7h-5.8c-2.3-0.2-4.6 1.5-4.6 4.6zm-92.3-69.5v-12.6c0-1.5 0.9-2.8 2.8-2.8h96.1c4.2 0 6.9 2.9 6.9 6.8v31.2c0 1.7-0.5 3.2-2 4.3s-2.4 1-8.2 1c-1.9 0-4.9-1-4.9-5.1 0-3.2 0-16.3-0.1-18 0-2.9-2.2-5.1-5.5-5.1h-82.8-2.3v0.3zm58.6 69.2 8.8-2.9c3.5-1.1 3.7-3.6 3.7-5.2 0-7.4-0.2-39.4-0.2-40.5 0-2.5-1.8-4.7-4.5-4.7h-5.8c-1.7 0-3.4 0.7-4.9 2.3-2.5 2.7-8.2 9.8-13.2 16.1-2 2.4-2.2 4.9-2.2 8.1v5c0.1 3.9 4 6.1 6.4 3l7.9-9.7c1.1-1.2 2.6-2 2.6 0v27.4c0 1.1 0.6 1.5 1.4 1.1z"
-              fill="currentColor"
-            />
-          </svg>
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-2.5 text-foreground transition-opacity hover:opacity-80"
+          aria-label="Home"
+        >
+          <LogoMark />
+          <span className="hidden font-mono text-[13px] font-semibold lowercase tracking-[0.14em] sm:inline">
+            drme<span className="text-accent">_</span>
+          </span>
         </Link>
 
-        {/* Desktop navigation */}
-        <div className={styles.desktopNav}>
-          <ul className={styles.navList}>
-            {groups.map((group) => (
-              <GroupDropdown
-                key={group.id}
-                group={group}
-                isActive={active.routeId === group.id}
-                isOpen={openGroupId === group.id}
-                onOpen={() => handleGroupOpen(group.id)}
-                onScheduleClose={scheduleGroupClose}
-                onCancelClose={cancelGroupClose}
-                router={router}
-              />
-            ))}
-
-            {routes.map((route, index) => (
-              <li key={route.id}>
-                <ExpandableTab
-                  item={route}
-                  isSelected={selectedTab === index}
-                  isRouteActive={active.routeId === route.id}
-                  onSelect={() => handleTabSelect(index, route)}
+        <div className="hidden min-w-0 flex-1 items-center justify-center lg:flex">
+          <ul className="flex items-center gap-0.5">
+            {groups.map((group) => {
+              const groupActive = active.routeId === group.id;
+              return (
+                <GroupDropdown
+                  key={group.id}
+                  group={group}
+                  isActive={groupActive}
+                  isOpen={openGroupId === group.id}
+                  pill={
+                    groupActive ? (
+                      <motion.span
+                        layoutId="navActive"
+                        className="absolute inset-0 rounded-lg bg-secondary"
+                        transition={pillSpring}
+                      />
+                    ) : undefined
+                  }
+                  onOpen={() => handleGroupOpen(group.id)}
+                  onScheduleClose={scheduleGroupClose}
+                  onCancelClose={cancelGroupClose}
                 />
-              </li>
-            ))}
+              );
+            })}
+
+            {routes.map((route) => {
+              const routeActive = active.routeId === route.id;
+              return (
+                <li key={route.id} className="relative flex">
+                  {routeActive && (
+                    <motion.span
+                      layoutId="navActive"
+                      className="absolute inset-0 rounded-lg bg-secondary"
+                      transition={pillSpring}
+                    />
+                  )}
+                  <ExpandableTab
+                    item={route}
+                    isRouteActive={routeActive}
+                    onSelect={() => handleTabSelect(route)}
+                  />
+                </li>
+              );
+            })}
           </ul>
         </div>
 
-        {/* Context items (sections / page TOC) */}
-        {hasContextSections && pageConfig?.contextItems && (
-          <>
-            <div className={styles.divider} />
-            <div className={styles.contextItems}>
-              {pageConfig.contextItems.map((item) => {
-                const isActive = active.sectionId === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    className={`${styles.contextItem}${
-                      isActive ? ` ${styles['contextItem--active']}` : ''
-                    }`}
-                    onClick={() => handleContextClick(item)}
-                  >
-                    {item.label}
-                    {isActive && <span className={styles.contextIndicator} />}
-                  </button>
-                );
-              })}
+        <div className="flex shrink-0 items-center gap-1.5">
+          <SearchBar items={searchItems} onSelect={handleSearchSelect} />
+          <Separator orientation="vertical" className="hidden h-5 sm:block" />
+          <div className="flex items-center gap-0.5">
+            <div className="hidden sm:flex">
+              <ChangeTheme />
             </div>
-          </>
-        )}
+            <MobileNav />
+          </div>
+        </div>
+      </div>
 
-        {/* Mobile menu */}
-        <MobileNav />
-
-        {/* Dropdown panel */}
-        {dropdownPanel}
-      </nav>
-    </>
+      {dropdownPanel}
+    </nav>
   );
 }

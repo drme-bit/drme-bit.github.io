@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   title: 'Dr.ME — Full-Stack Developer Portfolio',
   description:
     'Terminal-inspired portfolio of Dr.ME — full-stack developer specializing in React, Three.js, and modern web technologies.',
-  keywords: ['portfolio', 'developer', 'React', 'Three.js', 'full-stack', 'web development'],
+  keywords: ['portfolio', 'developer', 'Dr.ME', 'drme', 'drme-bit'],
   authors: [{ name: 'Dr.ME' }],
   openGraph: {
     type: 'website',
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     title: 'Dr.ME — Full-Stack Developer Portfolio',
     description: 'Terminal-inspired portfolio showcasing projects, skills, and blog posts.',
   },
-  metadataBase: new URL('https://drme-bit.github.io'),
+  metadataBase: new URL('https://drme.me'),
   icons: {
     icon: '/favicon.svg',
     apple: '/favicon.svg',

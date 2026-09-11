@@ -29,6 +29,36 @@
   z-index: 1;
 }
 
+/*  Reveal (CSS + useInView, replaces GSAP ScrollTrigger) ─ */
+
+.ab-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--i, 0) * 0.1s);
+}
+
+.ab-reveal--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ab-stat-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--i, 0) * 0.08s);
+}
+
+.ab-stat-reveal--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /*  Wrapper — full width editorial container ─ */
 
 .ab-wrap {
@@ -569,6 +599,16 @@
   background: var(--terminal-bg);
   overflow: hidden;
   box-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s var(--ease-out),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ab-github--in {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .ab-github-head {
@@ -972,6 +1012,16 @@
   display: flex;
   width: max-content;
   will-change: transform;
+  animation: ab-marquee-scroll 26s linear infinite;
+}
+
+.ab-marquee:hover .ab-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes ab-marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 .ab-marquee-group {
@@ -1009,24 +1059,6 @@
 }
 
 /*  Responsive ─ */
-
-@media (max-width: 1024px) {
-  .ab-work {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .ab-rail-label {
-    flex-direction: row;
-    writing-mode: horizontal-tb;
-    justify-content: flex-start;
-    gap: 0.75rem;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    padding-right: 0;
-    padding-bottom: 0.9rem;
-  }
-}
 
 @media (max-width: 768px) {
   .ab-accordion {
@@ -1130,23 +1162,14 @@
   .ab-marquee-track {
     width: 100%;
     flex-wrap: wrap;
+    animation: none;
   }
 
-  .ab-char,
-  .ab-tag-word,
-  .ab-cmd,
-  .ab-head-chip,
-  .ab-hairline,
-  .ab-step,
-  .ab-lead-main > p,
-  .ab-lead-aside,
-  .ab-photo-card,
-  .ab-rail-label,
-  .ab-panel,
-  .ab-bot-side,
-  .ab-bot-main,
-  .ab-marquee,
-  .ab-stat {
+  .ab-reveal,
+  .ab-reveal--in,
+  .ab-stat-reveal,
+  .ab-stat-reveal--in,
+  .ab-github {
     opacity: 1 !important;
     transform: none !important;
   }
