@@ -2,6 +2,10 @@
 @use '../shared/styles/mixins' as *;
 @use '../shared/styles/animations' as *;
 
+// App is dark by default; `.light` on <html>/<body> opts out.
+// Maps Tailwind's `dark:` variant to "no .light anywhere above".
+@custom-variant dark (&:where(:root:not(.light), :root:not(.light) *));
+
 // ═══════════════════════════════════════════════════════════
 // ACCORDION ANIMATIONS (Radix UI)
 // ═══════════════════════════════════════════════════════════
@@ -26,9 +30,9 @@
   --color-input: var(--border);
   --color-destructive: var(--accent-danger);
   --color-destructive-foreground: var(--bg);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --font-display: var(--font-display);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-geist-sans);
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -65,6 +69,54 @@
     }
   }
 
+  --animate-marquee: marquee 30s linear infinite;
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  --animate-dock-in: dock-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  @keyframes dock-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  --animate-name-shimmer: name-shimmer 5s ease-in-out infinite;
+  @keyframes name-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  --animate-tools-scroll: tools-scroll 25s linear infinite;
+  @keyframes tools-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  --animate-avatar-glow: avatar-glow 4s ease-in-out infinite;
+  @keyframes avatar-glow {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.08); }
+  }
+
+  --animate-kenburns: kenburns 24s ease-in-out infinite alternate;
+  @keyframes kenburns {
+    from { transform: scale(1.04); }
+    to { transform: scale(1.13); }
+  }
+
+  --animate-graph-draw: graph-draw 0.5s ease-out both;
+  @keyframes graph-draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  --animate-graph-pop: graph-pop 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  @keyframes graph-pop {
+    from { opacity: 0; transform: scale(0); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
   --animate-status-pulse: status-pulse 2.4s ease-out infinite;
   @keyframes status-pulse {
     0% {
@@ -75,6 +127,30 @@
     }
     100% {
       box-shadow: 0 0 0 0 transparent;
+    }
+  }
+
+  --animate-msg-in: msg-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  @keyframes msg-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  --animate-typing-dot: typing-dot 1.2s ease-in-out infinite;
+  @keyframes typing-dot {
+    0%, 60%, 100% {
+      opacity: 0.25;
+      transform: translateY(0) scale(0.9);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-3px) scale(1);
     }
   }
 
@@ -173,6 +249,11 @@
 // ═══════════════════════════════════════════════════════════
 
 :root {
+  // ── Vercel discipline: ink-only primary, one link blue, mesh gradient hero-only ─
+  --geist-radius: 6px;
+  --link: #0070f3;
+  --link-hover: #0070f3;
+
   // ── Colors ─
   --bg: #0a0a0a;
   --bg-elevated: #111111;
@@ -220,11 +301,36 @@
   --overlay-bg: rgba(0, 0, 0, 0.5);
   --panel-bg: rgba(10, 10, 10, 0.95);
 
-  // ── Shadows
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 40px rgba(125, 211, 252, 0.06);
+  // ── Shadows — stacked hairline + offsets, no heavy drops (Vercel) ─
+  --shadow-sm: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 4px 8px rgba(0, 0, 0, 0.32), 0 2px 4px rgba(0, 0, 0, 0.24);
+  --shadow-lg: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 12px 24px rgba(0, 0, 0, 0.32), 0 4px 8px rgba(0, 0, 0, 0.24);
+  --shadow-glow: 0 0 0 1px rgba(125, 211, 252, 0.18);
+  // Border-only glow: ring on the border, never a wash over the card
+  --border-glow: 0 0 0 1px var(--border-hover), 0 0 16px -4px var(--accent-secondary-glow);
+
+  // ── Typography — Geist, 400/500/600 max, tight tracking ─
+  --font-display: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), 'SF Mono', monospace;
+  --tracking-hero: -0.05em;   // ≈ -2.4px @ 48px
+  --tracking-section: -0.04em; // ≈ -1.28px @ 32px
+  --tracking-tight: -0.02em;
+
+  // ── Radii — app surfaces squared (6px), marketing pills stay 100px ──
+  --radius-xs: 4px;
+  --radius-sm: var(--geist-radius);
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+
+  // ── Geist foundations — status + focus alias the theme palette so every
+  // theme (dark/light/nord/…) stays consistent automatically. ──
+  --geist-success: var(--accent-success);
+  --geist-error: var(--accent-danger);
+  --geist-warning: #f5a524;
+  --geist-focus: #0070f3;
+  --geist-marketing-gray: #888;
 
   // ── Terminal ──
   --terminal-bg: rgba(18, 18, 18, 0.88);
@@ -251,11 +357,6 @@
   --card-bg: rgba(26, 26, 26, 0.85);
   --card-border: rgba(255, 255, 255, 0.06);
 
-  // ── Typography
-  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-
   // ── Spacing
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -264,14 +365,6 @@
   --space-xl: 2rem;
   --space-2xl: 3rem;
   --space-3xl: 4rem;
-
-  // ── Radii ──
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
 
   // ── Timing ─
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -360,6 +453,8 @@
 
   --card-bg: rgba(255, 255, 255, 0.9);
   --card-border: rgba(0, 0, 0, 0.06);
+
+  --geist-warning: #97570d;
 
   color-scheme: light;
 }
@@ -682,6 +777,8 @@
 
 * {
   box-sizing: border-box;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -733,6 +830,14 @@ body {
   outline-offset: 2px;
 }
 
+// Chat + command palette carry their own focus language (tints, rings).
+// The global accent outline reads there as an off-theme square, and even
+// a neutral ring clashes — so no outline at all inside both surfaces.
+#chat :focus-visible,
+[role='dialog'] :focus-visible {
+  outline: none;
+}
+
 // ═══════════════════════════════════════════════════════════
 // SCROLLBAR
 // ═══════════════════════════════════════════════════════════
@@ -758,7 +863,9 @@ body {
   position: fixed !important;
   inset: 0;
   width: 100%;
-  height: 100dvh;
+  // lvh (not dvh): stable canvas when the iOS toolbar shows/hides.
+  height: 100vh;
+  height: 100lvh;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -769,7 +876,7 @@ body {
   body.custom-cursor-active {
     cursor: none;
 
-    a, button, [role="button"], input, textarea, select, label {
+    a, button, [role="button"], label {
       cursor: none;
     }
   }
@@ -813,6 +920,70 @@ body {
 
 .glass-card {
   @include glass-card;
+}
+
+// ── Vercel type scale — sentence case, tight tracking, 600 max ──
+.display-hero {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: var(--tracking-hero);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.display-section {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: var(--tracking-section);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+// ── Flat surface: 1px hairline + stacked shadow, border-only glow ──
+.surface-flat {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.surface-flat:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.border-glow {
+  box-shadow: var(--border-glow);
+}
+
+// ── Vercel link: gray → ink + arrow nudge, blue only inline ──
+.vercel-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  text-underline-offset: 4px;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.vercel-link:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border-hover);
+}
+
+.vercel-link--blue {
+  color: inherit;
+}
+
+.vercel-link--blue:hover {
+  color: var(--link);
+  text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent);
+}
+
+.vercel-link .vercel-link-arrow {
+  display: inline-block;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.vercel-link:hover .vercel-link-arrow {
+  transform: translate(2px, -2px);
 }
 
 // ── Reveal animation (global) ──
@@ -904,6 +1075,8 @@ html.no-blur {
 
 @utility bg-muted\/20 { background: color-mix(in srgb, var(--text-dim) 4%, transparent); }
 @utility bg-muted\/30 { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+@utility animate-flip-in { animation: flip-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@utility animate-flip-out { animation: flip-out 0.18s ease-in both; }
 @utility fill-border\/50 { fill: color-mix(in srgb, var(--border) 50%, transparent); }
 @utility stroke-border { stroke: var(--border); }
 @utility stroke-border\/50 { stroke: color-mix(in srgb, var(--border) 50%, transparent); }
@@ -915,11 +1088,19 @@ html.no-blur {
 @utility ring-ring { --tw-ring-color: rgba(255, 255, 255, 0.15); }
 @utility ring-offset-background { --tw-ring-offset-color: var(--bg); }
 
+// ── Safari compat ────────────────────────────────────────────
+// Tailwind v4 emits `background-clip: text` without the -webkit- prefix,
+// which Safari <18 needs — without it clipped text renders invisible.
+.bg-clip-text {
+  -webkit-background-clip: text;
+}
+
 
 .projects-wrapper {
   position: relative;
-  /* 100vh buffer cancels the last entry's padding, the hero rises over it. */
-  margin-top: var(--projects-overlap, -100vh);
+  /* No negative overlap: the portal dive sits between Experience and
+     Projects, so the hero must not be pulled up over it. */
+  margin-top: 0;
 }
 
 .projects-wrapper .tl-head-wrapper {
@@ -934,35 +1115,66 @@ html.no-blur {
   width: 100%;
 }
 
-/* ── Skills explorer animations ── */
-
-@keyframes skills-cursor {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+/* Footer entrance: hidden until scrolled into view, inner slides up.
+   Plain IO state — no positioning tricks, works in every environment. */
+#footer {
+  opacity: 0;
+  visibility: hidden;
 }
 
-@keyframes filter-menu-in {
-  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+#footer.is-revealed {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.45s ease;
 }
 
-@keyframes skills-panel-content-in {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
+#footer .footer-inner {
+  transform: translateY(24px);
 }
 
-@keyframes skills-panel-fill-in {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+#footer.is-revealed .footer-inner {
+  transform: none;
+  transition: transform 0.5s var(--ease-out);
 }
 
-@keyframes card-float-1 {
-  0% { transform: translateY(var(--card-1-y, 40px)) rotate(-3deg); }
-  100% { transform: translateY(calc(var(--card-1-y, 40px) - 8px)) rotate(-2deg); }
+@media (prefers-reduced-motion: reduce) {
+  #footer,
+  #footer.is-revealed {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #footer .footer-inner,
+  #footer.is-revealed .footer-inner {
+    transform: none;
+  }
 }
 
-@keyframes card-float-2 {
-  0% { transform: translateY(var(--card-2-y, 60px)) rotate(2deg); }
-  100% { transform: translateY(calc(var(--card-2-y, 60px) - 10px)) rotate(3deg); }
+/* Experience bleeds violet into its tail so the portal field doesn't
+   start with a hard cut: dark Scene → violet wash → violet field. */
+#experience {
+  position: relative;
+}
+
+#experience::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 38vh;
+  background: linear-gradient(to bottom, transparent, rgba(21, 13, 49, 0.65));
+  pointer-events: none;
+}
+
+/* ── Split-flap board ── */
+
+@keyframes flip-in {
+  from { opacity: 0; transform: rotateX(-80deg) translateY(6px); }
+  to { opacity: 1; transform: rotateX(0) translateY(0); }
+}
+
+@keyframes flip-out {
+  from { opacity: 1; transform: rotateX(0); }
+  to { opacity: 0; transform: rotateX(70deg) translateY(-4px); }
 }
 

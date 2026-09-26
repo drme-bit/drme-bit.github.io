@@ -27,7 +27,12 @@ export function useInView<T extends HTMLElement = HTMLElement>(
   options?: UseInViewOptions,
 ): [RefObject<T | null>, boolean] {
   const ref = useRef<T>(null);
-  const [inView, setInView] = useState(false);
+  const [inView, setInView] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
+    if (typeof IntersectionObserver === 'undefined') return true;
+    return false;
+  });
 
   const { threshold = 0.15, once = true, rootMargin } = options || {};
 
@@ -35,16 +40,9 @@ export function useInView<T extends HTMLElement = HTMLElement>(
     const el = ref.current;
     if (!el) return;
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) {
-      setInView(true);
-      return;
-    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    if (typeof IntersectionObserver === 'undefined') {
-      setInView(true);
-      return;
-    }
+    if (typeof IntersectionObserver === 'undefined') return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {

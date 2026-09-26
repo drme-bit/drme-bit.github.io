@@ -9,128 +9,126 @@ import {
   FiClock,
   FiSearch,
   FiStar,
-} from '@/shared/ui/atoms/Icon';
+} from '@/shared/ui/Icon';
 import { blog, CATEGORIES } from '@/features/blog/lib';
 import type { BlogPost } from '@/features/blog/lib';
-import { usePostTransition } from '@/features/blog/lib/PostTransitionContext';
-import styles from './PostsList.module.scss';
+import { usePostTransition } from '@/features/blog/model/PostTransitionContext';
 
 const ALL_CATEGORIES = ['All', ...blog.categories];
 
-function FeaturedCard({ post }: { post: BlogPost }) {
+function useOpenPost() {
   const router = useRouter();
   const { setTransitionFrom } = usePostTransition();
-  const cat = CATEGORIES[post.category] || CATEGORIES.Frontend;
-
-  function handleClick(e: React.MouseEvent<HTMLElement>) {
+  return (post: BlogPost) => (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setTransitionFrom({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
     router.push(`/blog/${post.slug}`);
-  }
+  };
+}
+
+function fmtDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function FeaturedCard({ post }: { post: BlogPost }) {
+  const openPost = useOpenPost();
+  const cat = CATEGORIES[post.category] || CATEGORIES.Frontend;
 
   return (
     <article
-      className={styles['featured-card']}
-      style={{ '--card-gradient': cat.gradient, '--card-color': cat.color } as React.CSSProperties}
-      onClick={handleClick}
+      onClick={openPost(post)}
+      className="group animate-rise cursor-pointer rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)] p-6 transition-colors duration-200 hover:border-[var(--border-hover)] max-[700px]:p-5"
     >
-      <div className={styles['featured-card-glow']} />
-      <div className={styles['featured-card-content']}>
-        <div className={styles['featured-card-top']}>
-          <span className={styles['featured-badge']}>
-            <FiStar size={10} />
-            Featured
-          </span>
-          <span className={styles['featured-card-cat']}>{post.category}</span>
-        </div>
-        <h2 className={styles['featured-card-title']}>{post.title}</h2>
-        <p className={styles['featured-card-excerpt']}>{post.excerpt}</p>
-        <div className={styles['featured-card-meta']}>
-          <span className={styles['featured-card-date']}>
-            {new Date(post.date).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </span>
-          <span className={styles['featured-card-sep']}>·</span>
-          <span className={styles['featured-card-readtime']}>
-            <FiClock size={11} />
-            {post.readTime}
-          </span>
-        </div>
-        <div className={styles['featured-card-tags']}>
-          {post.tags.slice(0, 4).map((tag: string) => (
-            <span key={tag} className={styles['featured-card-tag']}>
-              {tag}
-            </span>
-          ))}
-        </div>
+      <div className="flex items-center justify-between gap-3">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--text-secondary)]">
+          <FiStar size={10} aria-hidden="true" />
+          Featured
+        </span>
+        <span className="inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-[var(--text-dim)]">
+          <span
+            aria-hidden="true"
+            className="size-1.5 rounded-full"
+            style={{ backgroundColor: cat.color }}
+          />
+          {post.category}
+        </span>
       </div>
-      <FiArrowRight size={18} className={styles['featured-card-arrow']} />
+
+      <h2 className="m-0 mt-4 font-display text-[clamp(1.4rem,3vw,1.9rem)] font-semibold leading-[1.15] tracking-[var(--tracking-tight)] text-foreground">
+        {post.title}
+      </h2>
+      <p className="m-0 mt-2 max-w-[62ch] text-[0.86rem] leading-[1.65] text-muted-foreground">
+        {post.excerpt}
+      </p>
+
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <span className="font-mono text-[0.66rem] text-[var(--text-ghost)]">{fmtDate(post.date)}</span>
+        <span className="inline-flex items-center gap-1 font-mono text-[0.66rem] text-[var(--text-ghost)]">
+          <FiClock size={11} aria-hidden="true" />
+          {post.readTime}
+        </span>
+        <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[0.7rem] text-[var(--text-dim)] transition-all duration-200 group-hover:translate-x-1 group-hover:text-foreground">
+          read <FiArrowRight size={13} aria-hidden="true" />
+        </span>
+      </div>
     </article>
   );
 }
 
 function PostRow({ post, index }: { post: BlogPost; index: number }) {
-  const router = useRouter();
-  const { setTransitionFrom } = usePostTransition();
+  const openPost = useOpenPost();
   const cat = CATEGORIES[post.category] || CATEGORIES.Frontend;
-
-  function handleClick(e: React.MouseEvent<HTMLElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setTransitionFrom({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
-    router.push(`/blog/${post.slug}`);
-  }
 
   return (
     <article
-      className={styles['posts-row']}
-      style={{
-        '--row-accent': cat.color,
-        animationDelay: `${index * 0.06}s`,
-      } as React.CSSProperties}
-      onClick={handleClick}
+      onClick={openPost(post)}
+      style={{ animationDelay: `${Math.min(index, 8) * 0.05}s` }}
+      className="group animate-rise flex cursor-pointer items-baseline gap-5 border-b border-[var(--border)] py-5 transition-colors duration-200 first:border-t hover:bg-[var(--glass)] max-[700px]:gap-3"
     >
-      <div className={styles['posts-row-accent']} />
-      <div className={styles['posts-row-num']}>{String(index + 1).padStart(2, '0')}</div>
+      <span className="w-8 shrink-0 font-mono text-[0.62rem] text-[var(--text-ghost)] max-[700px]:hidden">
+        {String(index + 1).padStart(2, '0')}
+      </span>
 
-      <div className={styles['posts-row-content']}>
-        <div className={styles['posts-row-top']}>
-          <span className={styles['posts-row-category']}>
-            <span className={styles['posts-row-cat-dot']} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="inline-flex items-center gap-1.5 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--text-dim)]">
+            <span
+              aria-hidden="true"
+              className="size-1.5 rounded-full"
+              style={{ backgroundColor: cat.color }}
+            />
             {post.category}
           </span>
-          <span className={styles['posts-row-date']}>
-            {new Date(post.date).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}
-          </span>
+          <span className="font-mono text-[0.62rem] text-[var(--text-ghost)]">{fmtDate(post.date)}</span>
         </div>
-
-        <h3 className={styles['posts-row-title']}>{post.title}</h3>
-        <p className={styles['posts-row-excerpt']}>{post.excerpt}</p>
-
-        <div className={styles['posts-row-bottom']}>
-          <div className={styles['posts-row-tags']}>
-            {post.tags.slice(0, 3).map((tag: string) => (
-              <span key={tag} className={styles['posts-row-tag']}>
-                {tag}
-              </span>
-            ))}
-          </div>
-          <span className={styles['posts-row-readtime']}>
-            <FiClock size={10} />
+        <h3 className="m-0 mt-1.5 font-display text-[1.05rem] font-semibold leading-snug tracking-[var(--tracking-tight)] text-foreground transition-transform duration-200 group-hover:translate-x-1">
+          {post.title}
+        </h3>
+        <p className="m-0 mt-1 line-clamp-2 max-w-[68ch] text-[0.82rem] leading-[1.6] text-muted-foreground">
+          {post.excerpt}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+          {post.tags.slice(0, 3).map((tag: string) => (
+            <span key={tag} className="font-mono text-[0.62rem] text-[var(--text-ghost)]">
+              #{tag}
+            </span>
+          ))}
+          <span className="ml-auto inline-flex items-center gap-1 font-mono text-[0.62rem] text-[var(--text-ghost)]">
+            <FiClock size={10} aria-hidden="true" />
             {post.readTime}
           </span>
         </div>
       </div>
 
-      <div className={styles['posts-row-arrow']}>
-        <FiArrowRight size={14} />
-      </div>
+      <FiArrowRight
+        size={14}
+        aria-hidden="true"
+        className="shrink-0 self-center text-[var(--text-ghost)] opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100 group-hover:text-foreground"
+      />
     </article>
   );
 }
@@ -158,50 +156,53 @@ export default function PostsList() {
   });
 
   return (
-    <div className={`${styles['posts-list-page']}${mounted ? ` ${styles['is-mounted']}` : ''}`}>
-      {/* Hero */}
-      <header className={styles['pl-hero']}>
-        <div className={styles['pl-hero-inner']}>
-          <div className={styles['pl-hero-breadcrumb']}>
-            <TransitionLink href="/">home</TransitionLink>
-            <span>/</span>
-            <span className={styles['pl-hero-bc-current']}>blog</span>
-          </div>
-
-          <h1 className={styles['pl-hero-title']}>blog</h1>
-          <p className={styles['pl-hero-desc']}>
-            Notes on frontend, architecture, and design — short reads about building things that
-            work.
-          </p>
-        </div>
+    <div className={`mx-auto w-full max-w-[880px] px-5 pb-20 pt-28 max-[700px]:pt-24 ${mounted ? '' : 'opacity-0'}`}>
+      <header>
+        <p className="m-0 font-mono text-[0.62rem] tracking-[0.1em] text-[var(--text-ghost)]">
+          <TransitionLink href="/">home</TransitionLink>
+          <span aria-hidden="true"> / </span>
+          <span className="text-[var(--text-dim)]">blog</span>
+        </p>
+        <h1 className="m-0 mt-3 font-display text-[clamp(2.4rem,6vw,3.6rem)] font-bold leading-none tracking-[var(--tracking-section)] text-foreground">
+          blog
+        </h1>
+        <p className="m-0 mt-3 max-w-[52ch] text-[0.9rem] leading-[1.65] text-muted-foreground">
+          Notes on frontend, architecture, and design — short reads about building things that
+          work.
+        </p>
       </header>
 
-      {/* Featured */}
       {featuredPost && activeCategory === 'All' && !searchQuery && (
-        <section className={styles['pl-featured']}>
+        <section className="mt-10">
           <FeaturedCard post={featuredPost} />
         </section>
       )}
 
-      {/* Filters */}
-      <div className={styles['pl-filters']}>
-        <div className={styles['pl-search']}>
-          <FiSearch size={14} className={styles['pl-search-icon']} />
+      <div className="mt-8 flex flex-col gap-3">
+        <label className="flex items-center gap-2.5 rounded-[var(--radius-md)] border border-[var(--border)] bg-transparent px-3.5 py-2.5 transition-colors focus-within:border-[var(--border-hover)]">
+          <FiSearch size={14} aria-hidden="true" className="shrink-0 text-[var(--text-ghost)]" />
           <input
             type="text"
             placeholder="search posts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={styles['pl-search-input']}
+            aria-label="Search posts"
+            className="h-6 w-full bg-transparent text-[0.85rem] text-foreground outline-none placeholder:text-[var(--text-ghost)]"
           />
-        </div>
+        </label>
 
-        <div className={styles['pl-categories']}>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by category">
           {ALL_CATEGORIES.map((cat) => (
             <button
               key={cat}
-              className={`${styles['pl-category-btn']}${activeCategory === cat ? ` ${styles['is-active']}` : ''}`}
+              type="button"
               onClick={() => setActiveCategory(cat)}
+              aria-pressed={activeCategory === cat}
+              className={`cursor-pointer rounded-full border px-3 py-1 font-mono text-[0.66rem] tracking-[0.04em] transition-all duration-200 active:scale-95 ${
+                activeCategory === cat
+                  ? 'border-[var(--accent-secondary)]/50 bg-[var(--accent-secondary)]/10 text-foreground'
+                  : 'border-[var(--border)] text-[var(--text-dim)] hover:border-[var(--border-hover)] hover:text-foreground'
+              }`}
             >
               {cat}
             </button>
@@ -209,12 +210,11 @@ export default function PostsList() {
         </div>
       </div>
 
-      {/* Posts */}
-      <main className={styles['pl-posts']}>
+      <main className="mt-6">
         {filteredPosts.length === 0 ? (
-          <div className={styles['pl-empty']}>
-            <span>No posts found matching &quot;{searchQuery || activeCategory}&quot;</span>
-          </div>
+          <p className="m-0 border border-dashed border-[var(--border)] p-8 text-center font-mono text-[0.72rem] text-[var(--text-ghost)]">
+            No posts found matching &quot;{searchQuery || activeCategory}&quot;
+          </p>
         ) : (
           filteredPosts.map((post, i) => (
             <PostRow key={post.slug} post={post} index={i} />
@@ -222,10 +222,12 @@ export default function PostsList() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className={styles['pl-footer']}>
-        <TransitionLink href="/" className={styles['pl-footer-home']}>
-          <FiArrowLeft size={14} />
+      <footer className="mt-12">
+        <TransitionLink
+          href="/"
+          className="inline-flex items-center gap-2 font-mono text-[0.7rem] text-[var(--text-dim)] transition-colors hover:text-foreground"
+        >
+          <FiArrowLeft size={14} aria-hidden="true" />
           <span>back to home</span>
         </TransitionLink>
       </footer>

@@ -20,8 +20,8 @@ import {
   FiLinkedin,
   SiDiscord,
   FiAlertCircle,
-} from '@/shared/ui/atoms/Icon';
-import { useContactForm } from '../hooks/useContactForm';
+} from '@/shared/ui/Icon';
+import { useContactForm } from '../model/useContactForm';
 import type { ContactFormData } from '../model/contacts';
 import { fieldConfigs, contactItems, socialLinks } from '@/entities/contact';
 
@@ -299,8 +299,8 @@ function Line({ item }: { item: typeof contactItems[0] }) {
 
   return (
     <article className="flex items-center gap-[0.85rem] border-t border-[var(--terminal-bar-border)] py-[0.7rem] first:border-t-0">
-      <span className="inline-flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[var(--radius-sm)] border border-[color-mix(in_srgb,var(--accent-secondary)_22%,transparent)] bg-[color-mix(in_srgb,var(--accent-secondary)_10%,transparent)] text-[var(--accent-secondary)]" aria-hidden="true">
-        <IconComponent size={16} />
+      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-sm)] border border-[color-mix(in_srgb,var(--accent-secondary)_22%,transparent)] bg-[color-mix(in_srgb,var(--accent-secondary)_10%,transparent)] text-[var(--accent-secondary)]" aria-hidden="true">
+        <IconComponent size={20} />
       </span>
       <div className="min-w-0 flex-1">
         <h3 className="m-0 font-display text-[0.9rem] font-semibold leading-[1.2] text-foreground">{item.title}</h3>
@@ -330,7 +330,7 @@ function Line({ item }: { item: typeof contactItems[0] }) {
 
 function Conduits() {
   return (
-    <div className="rounded-[var(--radius-lg)] border border-border bg-[var(--terminal-bar)] px-[1.6rem] py-6">
+    <div className="rounded-[var(--radius-lg)] border border-border px-[1.6rem] py-6">
       <p className="m-0 mb-[0.9rem] font-mono text-[0.58rem] uppercase tracking-[0.15em] text-[var(--text-ghost)]">
         Direct lines
       </p>
@@ -347,7 +347,7 @@ function Conduits() {
 
 function Routes() {
   return (
-    <div className="rounded-[var(--radius-lg)] border border-border bg-[var(--terminal-bar)] px-[1.6rem] py-6">
+    <div className="rounded-[var(--radius-lg)] border border-border px-[1.6rem] py-6">
       <p className="m-0 mb-[0.9rem] font-mono text-[0.58rem] uppercase tracking-[0.15em] text-[var(--text-ghost)]">
         Elsewhere
       </p>
@@ -364,7 +364,7 @@ function Routes() {
               aria-label={link.label}
             >
               <span className="inline-flex text-[var(--text-ghost)] transition-colors duration-200 group-hover:text-[var(--accent-secondary)]" aria-hidden="true">
-                <IconComponent size={14} />
+                <IconComponent size={18} />
               </span>
               <span className="min-w-0 truncate">{link.label}</span>
               <span className="ml-auto text-[var(--text-ghost)] transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">→</span>
@@ -432,7 +432,7 @@ export function PremiumContacts() {
           </div>
 
           <aside data-col="info" className="flex min-w-0 flex-col gap-5">
-            <div className="flex items-center gap-[0.6rem] rounded-[var(--radius-md)] border border-border bg-[var(--terminal-bar)] px-4 py-[0.8rem] font-mono text-[0.62rem] uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+            <div className="flex items-center gap-[0.6rem] rounded-[var(--radius-md)] border border-border px-4 py-[0.8rem] font-mono text-[0.62rem] uppercase tracking-[0.08em] text-[var(--text-secondary)]">
               <span className="h-2 w-2 animate-status-pulse rounded-full bg-[var(--accent-success)]" aria-hidden="true" />
               <span>available for work</span>
               <span className="ml-auto normal-case tracking-[0.04em] text-[var(--text-ghost)]">replies &lt; 24h</span>

@@ -1,74 +1,13 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Image from 'next/image';
 import { useInView } from '@/shared/hooks/useInView';
-import { PiStarFill, FiTwitter, FiLinkedin, FiInstagram, FiGithub } from '@/shared/ui/atoms/Icon';
+import { ENDORSEMENTS } from '@/entities/review';
+import type { Endorsement } from '@/entities/review';
+import { PiStarFill, FiTwitter, FiLinkedin, FiInstagram, FiGithub, SiDiscord } from '@/shared/ui/Icon';
 
-/*  Static testimonials (Firebase removed)  */
-
-interface Endorsement {
-  id: string;
-  name: string;
-  role: string;
-  rating: number;
-  text: string;
-  social?: {
-    twitter?: string;
-    linkedin?: string;
-    instagram?: string;
-    github?: string;
-  };
-}
-
-const ENDORSEMENTS: Endorsement[] = [
-  {
-    id: 'chadrack',
-    name: 'Chadrack',
-    role: 'director of photography',
-    rating: 5,
-    text: 'Needed a portfolio that could sell frames as confidently as the filmic work they document. What shipped reads less like a website and more like a reel you can scroll. Detail-obsessed from 1440px down to mobile.',
-    social: { twitter: 'https://twitter.com', linkedin: 'https://linkedin.com' },
-  },
-  {
-    id: 'mak',
-    name: 'Mak VieSAinte',
-    role: 'founder',
-    rating: 5,
-    text: 'Fast, opinionated, zero hand-holding. Every build came back better than the brief — one conversation became a full design system, and the deadline never slipped once.',
-  },
-  {
-    id: 'osiris',
-    name: 'Osiris Balonga',
-    role: 'lead front-end',
-    rating: 5,
-    text: 'Rare to hand over a codebase that feels cleaner than your own. Typography, motion, keyboard paths — all thought through. I stole three patterns from this for our own product.',
-    social: { github: 'https://github.com', linkedin: 'https://linkedin.com' },
-  },
-  {
-    id: 'jacques',
-    name: 'Jacques',
-    role: 'product owner',
-    rating: 5,
-    text: 'We keep coming back because the work survives contact with real users. Direction shifts mid-project? Absorbed without drama. That is the whole job, and it was handled.',
-    social: { linkedin: 'https://linkedin.com' },
-  },
-  {
-    id: 'riche',
-    name: 'Riche Makso',
-    role: 'cto · product designer',
-    rating: 5,
-    text: 'The rare person who moves between engineering and product cleanly. Specs arrived tight, craftsmanship even tighter, and every deliverable had the why attached. Hire without hesitation.',
-    social: { twitter: 'https://twitter.com', github: 'https://github.com' },
-  },
-  {
-    id: 'jemima',
-    name: 'Jemima',
-    role: 'make-up artiste',
-    rating: 5,
-    text: 'Didn’t need to understand the tech — just knew it felt like the work would never embarrass us. It didn’t. Clients saw the site and assumed the team was twice our size.',
-    social: { instagram: 'https://instagram.com' },
-  },
-];
+/*  Static testimonials (Firebase removed) — data lives in entities/review.  */
 
 /*  Small pieces ── */
 
@@ -79,7 +18,7 @@ function Stars({ rating, size = 12 }: { rating: number; size?: number }) {
         <PiStarFill
           key={s}
           size={size}
-          className={s < rating ? 'text-[var(--accent-warm)]' : 'text-border'}
+          className={s < rating ? 'text-[var(--accent-warm)]' : 'text-black/20'}
         />
       ))}
     </span>
@@ -110,19 +49,27 @@ function Tile({
     : index % 3 === 2 ? 'h-[168px] w-[158px] max-[640px]:h-[111px] max-[640px]:w-[103px]'
       : 'h-[158px] w-[148px] max-[640px]:h-[104px] max-[640px]:w-[96px]';
 
+  const portrait =
+    e.image && (/^(https?:|data:|\/)/.test(e.image) ? e.image : `/${e.image}`);
+
   return (
     <button
       type="button"
       onMouseEnter={() => onHover(e.id)}
       onFocus={() => onHover(e.id)}
       aria-label={e.name}
-      className={`relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-[var(--radius-lg)] bg-[#101010] p-0 transition-all duration-300 focus-visible:[outline:1px_solid_var(--accent-secondary)] focus-visible:outline-offset-3 ${size} ${
+      style={portrait ? undefined : { backgroundColor: e.color ?? '#101010' }}
+      className={`relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-[var(--radius-lg)] p-0 transition-all duration-300 focus-visible:[outline:1px_solid_var(--accent-secondary)] focus-visible:outline-offset-3 ${size} ${
         active ? '-translate-y-0.5 border border-[var(--accent-secondary)]' : 'border border-[#101010]'
       }`}
     >
-      <span className="font-display text-[clamp(1.2rem,2.2vw,1.7rem)] font-bold tracking-[-0.02em] text-white max-[640px]:text-[1.05rem]">
-        {initialsOf(e.name)}
-      </span>
+      {portrait ? (
+        <Image src={portrait} alt={e.name} fill sizes="168px" className="object-cover" />
+      ) : (
+        <span className="font-display text-[clamp(1.2rem,2.2vw,1.7rem)] font-bold tracking-[-0.02em] text-white max-[640px]:text-[1.05rem]">
+          {initialsOf(e.name)}
+        </span>
+      )}
     </button>
   );
 }
@@ -137,9 +84,12 @@ function Row({
   onHover: (id: string) => void;
 }) {
   return (
-    <button
-      type="button"
-      className={`group flex w-full cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] border-none bg-transparent p-[0.55rem_0.4rem] text-left transition-colors duration-200 hover:bg-[var(--glass)] focus-visible:[outline:1px_solid_var(--accent-secondary)] focus-visible:outline-offset-2`}
+    <div
+      role="option"
+      aria-selected={active}
+      aria-label={`${e.name}, ${e.role}`}
+      tabIndex={0}
+      className={`group flex w-full items-center gap-3 rounded-[var(--radius-sm)] border-none bg-transparent p-[0.55rem_0.4rem] text-left transition-colors duration-200 outline-none hover:bg-[var(--glass)] focus-visible:bg-[var(--glass)]`}
       onMouseEnter={() => onHover(e.id)}
       onFocus={() => onHover(e.id)}
     >
@@ -158,19 +108,38 @@ function Row({
         </span>
       </span>
       <span
-        aria-hidden="true"
+        aria-hidden="false"
         className={`pointer-events-none ml-auto inline-flex gap-[0.4rem] text-[var(--text-ghost)] transition-all duration-200 ${
           active
             ? 'translate-x-0 opacity-100'
             : '-translate-x-1.5 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100'
         }`}
       >
-        {e.social?.twitter && <FiTwitter size={11} />}
-        {e.social?.linkedin && <FiLinkedin size={11} />}
-        {e.social?.instagram && <FiInstagram size={11} />}
-        {e.social?.github && <FiGithub size={11} />}
+        {(
+          [
+            ['twitter', e.social?.twitter, FiTwitter, 'Twitter'],
+            ['linkedin', e.social?.linkedin, FiLinkedin, 'LinkedIn'],
+            ['instagram', e.social?.instagram, FiInstagram, 'Instagram'],
+            ['github', e.social?.github, FiGithub, 'GitHub'],
+            ['discord', e.social?.discord, SiDiscord, 'Discord'],
+          ] as const
+        ).map(([key, href, Icon, label]) =>
+          href ? (
+            <a
+              key={key}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${e.name} on ${label}`}
+              onClick={(ev) => ev.stopPropagation()}
+              className="pointer-events-auto inline-flex text-[var(--text-dim)] transition-colors hover:text-foreground"
+            >
+              <Icon size={12} />
+            </a>
+          ) : null,
+        )}
       </span>
-    </button>
+    </div>
   );
 }
 
@@ -211,7 +180,7 @@ export default function Reviews() {
             03 / 03
           </span>
           <h2 className="m-0 font-display text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-none tracking-[-0.03em] text-foreground">
-            Testimonials
+            Kind words
           </h2>
           <p className="m-0 font-mono text-[0.7rem] lowercase tracking-[0.1em] text-muted-foreground">
             what people say after the merge is green
@@ -261,7 +230,12 @@ export default function Reviews() {
           </div>
           <div className="flex flex-wrap items-center gap-2 text-[0.82rem] text-muted-foreground">
             <span className="font-semibold text-foreground">{active.name}</span>
-            <span className="text-[var(--text-ghost)]">· {active.role}</span>
+            <span className="text-[var(--text-dim)]">· {active.role}</span>
+            {active.discordTag && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--terminal-bar-border)] bg-[var(--terminal-bar)] px-2 py-0.5 font-mono text-[0.68rem] text-[var(--text-dim)]">
+                <SiDiscord size={11} aria-hidden="true" />@{active.discordTag}
+              </span>
+            )}
             <span className="ml-auto font-mono text-[0.62rem] tracking-[0.12em] text-[var(--text-ghost)]">
               {String(busyIdx).padStart(2, '0')} / {String(busy).padStart(2, '0')}
             </span>

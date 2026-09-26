@@ -1,12 +1,23 @@
-import type { IconType } from 'react-icons';
+import type { ComponentType } from 'react';
+
+/*  Nav icons come from lucide-react: any component taking size/className.  */
+
+export type NavIcon = ComponentType<{ size?: number | string; className?: string }>;
 
 /*  Nav item types  */
 
 export type NavLinkBase = {
   id: string;
   label: string;
-  icon?: IconType;
+  icon?: NavIcon;
   description?: string;
+  /** Featured links render as rich cards in the dropdown's main column. */
+  featured?: boolean;
+  /** Rich preview: photo thumbnail … */
+  image?: string;
+  /** …or a solid tint tile with a mono glyph (no gradients). */
+  tint?: string;
+  glyph?: string;
 };
 
 /** Navigates to another page */

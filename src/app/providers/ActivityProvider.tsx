@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useCallback, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useCallback, useState, useSyncExternalStore } from 'react';
 import { doc, onSnapshot, increment, runTransaction } from 'firebase/firestore';
 import { db } from '@/shared/config/firebase';
 
@@ -50,6 +50,7 @@ const EMPTY_GLOBAL: GlobalStats = {
 /*  Helpers ─ */
 
 function loadPersonal(): PersonalStats {
+  if (typeof window === 'undefined') return EMPTY;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
@@ -61,6 +62,18 @@ function savePersonal(stats: PersonalStats) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
   } catch {}
+}
+
+function subscribeMounted(): () => void {
+  return () => {};
+}
+
+function snapshotMountedClient(): boolean {
+  return true;
+}
+
+function snapshotMountedServer(): boolean {
+  return false;
 }
 
 /*  Context ─ */
@@ -76,17 +89,22 @@ export function useActivity() {
 /*  Provider  */
 
 export function ActivityProvider({ children }: { children: React.ReactNode }) {
-  const [personal, setPersonal] = useState<PersonalStats>(EMPTY);
+  const [personal, setPersonal] = useState<PersonalStats>(() =>
+    typeof window === 'undefined' ? EMPTY : loadPersonal(),
+  );
   const [global, setGlobal] = useState<GlobalStats>(EMPTY_GLOBAL);
-  const [mounted, setMounted] = useState(false);
+  // Mounted flag without a setState-in-effect: false during SSR, true on the client.
+  const mounted = useSyncExternalStore(
+    subscribeMounted,
+    snapshotMountedClient,
+    snapshotMountedServer,
+  );
   const dirtyRef = useRef(false);
   const startTime = useRef(0);
 
-  // Hydrate from localStorage after mount (avoids SSR mismatch)
+  // Record session start (ref write only — no setState, safe in an effect).
   useEffect(() => {
-    setPersonal(loadPersonal());
     startTime.current = Date.now();
-    setMounted(true);
   }, []);
 
   // Listen to global stats

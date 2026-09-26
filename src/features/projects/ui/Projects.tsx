@@ -2,10 +2,11 @@
 
 import { useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { FiArrowRight, FiExternalLink, FiGithub } from '@/shared/ui/atoms/Icon';
+import { FiArrowRight, FiExternalLink, FiGithub } from '@/shared/ui/Icon';
 import { projects } from '../lib/registry';
 import { STATUS_META } from '../lib/constants';
 import type { Project } from '../lib/project-repository';
@@ -50,61 +51,60 @@ function useMarquee(
   const lastTimeRef = useRef(0);
   const pausedRef = useRef(false);
   const initializedRef = useRef(false);
+  // Cached track half-width: scrollWidth forces layout, so measure only
+  // on resize — never inside the frame loop.
+  const halfRef = useRef(0);
   const baseSpeed = 80;
 
-  const tick = useCallback(() => {
-    if (pausedRef.current) {
-      rafRef.current = requestAnimationFrame(tick);
-      return;
-    }
-
-    const now = performance.now();
-    const dt = lastTimeRef.current ? (now - lastTimeRef.current) / 1000 : 0;
-    lastTimeRef.current = now;
-
-    speedRef.current += (targetSpeedRef.current - speedRef.current) * Math.min(dt * 3, 1);
-
-    const track = trackRef.current;
-    if (!track || setCount <= 0) {
-      rafRef.current = requestAnimationFrame(tick);
-      return;
-    }
-
-    const half = track.scrollWidth / 2;
-    if (half <= 0) {
-      rafRef.current = requestAnimationFrame(tick);
-      return;
-    }
-
-    if (!initializedRef.current) {
-      if (isReversed) {
-        offsetRef.current = -half;
-      }
-      initializedRef.current = true;
-    }
-
-    const dir = isReversed ? 1 : -1;
-    offsetRef.current += dir * baseSpeed * speedRef.current * dt;
-
-    if (isReversed) {
-      if (offsetRef.current >= 0) {
-        offsetRef.current -= half;
-      }
-    } else {
-      if (Math.abs(offsetRef.current) >= half) {
-        offsetRef.current += half;
-      }
-    }
-
-    track.style.transform = `translateX(${offsetRef.current}px)`;
-    rafRef.current = requestAnimationFrame(tick);
-  }, [isReversed, trackRef, setCount]);
+  useEffect(() => {
+    const measure = () => {
+      const track = trackRef.current;
+      halfRef.current = track ? track.scrollWidth / 2 : 0;
+    };
+    measure();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    if (trackRef.current && ro) ro.observe(trackRef.current);
+    return () => ro?.disconnect();
+  }, [trackRef, setCount]);
 
   useEffect(() => {
+    const loop = () => {
+      if (!pausedRef.current) {
+        const now = performance.now();
+        const dt = lastTimeRef.current ? (now - lastTimeRef.current) / 1000 : 0;
+        lastTimeRef.current = now;
+
+        speedRef.current += (targetSpeedRef.current - speedRef.current) * Math.min(dt * 3, 1);
+
+        const track = trackRef.current;
+        if (track && setCount > 0) {
+          const half = halfRef.current;
+          if (half > 0) {
+            if (!initializedRef.current) {
+              if (isReversed) offsetRef.current = -half;
+              initializedRef.current = true;
+            }
+
+            const dir = isReversed ? 1 : -1;
+            offsetRef.current += dir * baseSpeed * speedRef.current * dt;
+
+            if (isReversed) {
+              if (offsetRef.current >= 0) offsetRef.current -= half;
+            } else if (Math.abs(offsetRef.current) >= half) {
+              offsetRef.current += half;
+            }
+
+            track.style.transform = `translateX(${offsetRef.current}px)`;
+          }
+        }
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+
     lastTimeRef.current = 0;
-    rafRef.current = requestAnimationFrame(tick);
+    rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [tick]);
+  }, [trackRef, isReversed, setCount]);
 
   const onEnter = useCallback(() => {
     targetSpeedRef.current = 0.15;
@@ -202,8 +202,8 @@ function ProjectCardItem({
     e.currentTarget.style.setProperty('--mouse-y', `${y}%`);
   };
 
-  // Quadruple (even count) ensures seamless loop at midpoint
-  const marqueeImages = [...images, ...images, ...images, ...images];
+  // Doubled (even count) for a seamless loop at the midpoint.
+  const marqueeImages = [...images, ...images];
 
   useGSAP(() => {
     const card = cardRef.current;
@@ -222,6 +222,8 @@ function ProjectCardItem({
   return (
     <div
       ref={cardRef}
+      data-cursor="view"
+      data-cursor-label="Open"
       className="pr-card group/card relative w-full min-h-[520px] cursor-default overflow-hidden max-[700px]:min-h-[420px]"
       onMouseMove={handleMouseMove}
       onMouseEnter={onEnter}
@@ -237,11 +239,13 @@ function ProjectCardItem({
               key={`slide-${index}-${i}`}
               className="group/slide relative h-full w-[42vw] min-w-[280px] shrink-0 overflow-hidden rounded-[2px] max-[700px]:w-[65vw] max-[700px]:min-w-[220px]"
             >
-              <img
+              <Image
                 src={src}
-                alt=""
-                className="block h-full w-full object-cover transition-transform duration-[0.8s] ease-[var(--ease-out)] group-hover/slide:scale-[1.04]"
-                loading={i < 4 ? 'eager' : 'lazy'}
+                alt={`${project.title} preview`}
+                fill
+                sizes="(max-width: 700px) 65vw, 42vw"
+                className="object-cover transition-transform duration-[0.8s] ease-[var(--ease-out)] group-hover/slide:scale-[1.04]"
+                priority={index === 0 && i < images.length}
                 draggable={false}
               />
             </div>
@@ -257,7 +261,7 @@ function ProjectCardItem({
       >
         <div className={`flex items-center gap-4 ${isReversed ? 'flex-row-reverse' : ''}`}>
           <span
-            className={`inline-flex items-center gap-[0.4rem] rounded-full border px-[0.7rem] py-[0.3rem] font-mono text-[0.6rem] uppercase tracking-[0.1em] backdrop-blur-lg ${
+            className={`inline-flex items-center gap-[0.4rem] rounded-[var(--radius-sm)] border px-[0.7rem] py-[0.3rem] font-mono text-[0.6rem] uppercase tracking-[0.1em] backdrop-blur-lg ${
               BADGE_TW[project.status] || BADGE_TW.ACTIVE
             }`}
           >
@@ -286,7 +290,7 @@ function ProjectCardItem({
             return (
               <span
                 key={t.name}
-                className="inline-flex items-center gap-[0.3rem] rounded-full border border-white/10 bg-black/35 px-[0.6rem] py-[0.25rem] font-mono text-[0.6rem] tracking-[0.03em] text-white/75 backdrop-blur-lg"
+                className="inline-flex items-center gap-[0.3rem] rounded-[var(--radius-sm)] border border-white/10 bg-black/35 px-[0.6rem] py-[0.25rem] font-mono text-[0.6rem] tracking-[0.03em] text-white/75 backdrop-blur-lg"
               >
                 {Icon && <Icon className="text-[0.7em] opacity-70" />}
                 {t.name}
@@ -323,7 +327,7 @@ function ProjectCardItem({
         >
           <button
             type="button"
-            className="group/cta inline-flex cursor-pointer items-center gap-[0.6rem] rounded-[var(--radius-sm)] border border-white/10 bg-white/[0.08] px-[1.2rem] py-[0.6rem] font-mono text-[0.75rem] font-medium text-white backdrop-blur-md transition-all duration-300 ease-[var(--ease-out)] hover:-translate-y-px hover:border-[rgba(125,211,252,0.35)] hover:bg-[rgba(125,211,252,0.15)] hover:text-[var(--accent-secondary)]"
+            className="group/cta inline-flex cursor-pointer items-center gap-[0.6rem] rounded-[var(--radius-sm)] border border-white/10 bg-white/[0.08] px-[1.2rem] py-[0.6rem] font-mono text-[0.75rem] font-medium text-white backdrop-blur-md transition-[border-color,background-color,color] duration-300 ease-[var(--ease-out)] hover:border-[rgba(125,211,252,0.35)] hover:bg-[rgba(125,211,252,0.15)] hover:text-[var(--accent-secondary)]"
             onClick={() => router.push(`/projects/${project.id}`)}
           >
             <span>cat details.md</span>
@@ -337,7 +341,7 @@ function ProjectCardItem({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Repository"
-                className="flex size-[34px] items-center justify-center rounded-[var(--radius-sm)] border border-white/10 text-white/50 backdrop-blur transition-all duration-300 ease-[var(--ease-out)] hover:border-[rgba(125,211,252,0.3)] hover:bg-[rgba(125,211,252,0.1)] hover:text-white"
+                className="flex size-[34px] items-center justify-center rounded-[var(--radius-sm)] border border-white/10 text-white/50 backdrop-blur transition-[border-color,background-color,color] duration-300 ease-[var(--ease-out)] hover:border-[rgba(125,211,252,0.3)] hover:bg-[rgba(125,211,252,0.1)] hover:text-white"
                 onClick={(e) => e.stopPropagation()}
               >
                 <FiGithub />
@@ -349,7 +353,7 @@ function ProjectCardItem({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Live demo"
-                className="flex size-[34px] items-center justify-center rounded-[var(--radius-sm)] border border-white/10 text-white/50 backdrop-blur transition-all duration-300 ease-[var(--ease-out)] hover:border-[rgba(125,211,252,0.3)] hover:bg-[rgba(125,211,252,0.1)] hover:text-white"
+                className="flex size-[34px] items-center justify-center rounded-[var(--radius-sm)] border border-white/10 text-white/50 backdrop-blur transition-[border-color,background-color,color] duration-300 ease-[var(--ease-out)] hover:border-[rgba(125,211,252,0.3)] hover:bg-[rgba(125,211,252,0.1)] hover:text-white"
                 onClick={(e) => e.stopPropagation()}
               >
                 <FiExternalLink />
@@ -377,31 +381,11 @@ export function Projects() {
 
   useGSAP(() => {
     const container = containerRef.current;
-    const hero = heroRef.current;
     const listWrapper = listWrapperRef.current;
     const blog = blogRef.current;
-    if (!container || !hero || !listWrapper || !blog) return;
+    if (!container || !listWrapper || !blog) return;
 
     const ctx = gsap.context(() => {
-      // 0. Seamless handoff from Experience: the solid hero rides up over the
-      // previous section's buffer and settles at its natural sticky position,
-      // so the opaque band never slams into the timeline's last card.
-      gsap.fromTo(
-        hero,
-        { yPercent: 80, immediateRender: false },
-        {
-          yPercent: 0,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: container,
-            start: 'top 100%',
-            end: 'top top',
-            scrub: true,
-            immediateRender: false,
-          },
-        },
-      );
-
       // 1. ProjectList slides up from behind Hero (which is sticky)
       gsap.fromTo(
         listWrapper,
@@ -419,11 +403,11 @@ export function Projects() {
         },
       );
 
-      // 2. As Blog approaches and overlaps, ProjectList gets blur/grayscale/scale
-      // Opacity only fades when Blog fully covers it
+      // 2. As Blog approaches and overlaps, ProjectList recedes.
+      // Compositor-only (scale/opacity): animating CSS filters here would
+      // repaint the whole list every scroll frame.
       gsap.to(listWrapper, {
-        filter: 'blur(8px) grayscale(100%)',
-        scale: 0.95,
+        scale: 0.96,
         ease: 'none',
         scrollTrigger: {
           trigger: blog,
@@ -471,12 +455,12 @@ export function Projects() {
         ref={heroRef}
         className="sticky top-0 z-[1] h-[100vh] w-full will-change-transform"
       >
-        <ProjectsHero />
+        <ProjectsHero triggerRef={containerRef} />
       </div>
 
       <div
         ref={listWrapperRef}
-        className="relative z-[2] w-full overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-background shadow-[0_-12px_40px_rgba(0,0,0,0.3)] will-change-[transform,filter,opacity]"
+        className="relative z-[2] w-full overflow-hidden border-x-0 border-b-0 border-t border-t-[var(--border)] bg-background will-change-[transform,opacity]"
       >
         <ProjectsList />
       </div>

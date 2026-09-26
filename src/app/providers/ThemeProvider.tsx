@@ -108,24 +108,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       blurEffects: saved.blurEffects ?? true,
     };
   });
-  const [mounted, setMounted] = useState(false);
   const [colors, setColors] = useState<ThemeColors>(readColors);
 
   useEffect(() => {
-    const saved = loadSettings();
-    setState((s) => ({
-      ...s,
-      theme: (saved.theme as ThemeId) || s.theme,
-      fontSize: saved.fontSize || s.fontSize,
-      reducedMotion: saved.reducedMotion ?? s.reducedMotion,
-      compactMode: saved.compactMode ?? s.compactMode,
-      blurEffects: saved.blurEffects ?? s.blurEffects,
-    }));
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
     const html = document.documentElement;
     const body = document.body;
 
@@ -149,8 +134,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     html.classList.toggle('no-blur', !state.blurEffects);
 
     saveSettings(state);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- re-read computed theme colors after applying classes to document
     setColors(readColors());
-  }, [state, mounted]);
+  }, [state]);
 
   useEffect(() => {
     const observer = new MutationObserver(() => setColors(readColors()));

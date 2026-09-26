@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { blog } from '@/features/blog/lib';
 import type { BlogPost } from '@/features/blog/lib';
-import { FiArrowRight, FiClock } from '@/shared/ui/atoms/Icon';
+import { FiArrowRight, FiClock } from '@/shared/ui/Icon';
 import styles from './Blog.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -40,6 +40,8 @@ function PostCard({ post, index }: { post: BlogPost; index: number }) {
   return (
     <article
       ref={ref}
+      data-cursor="view"
+      data-cursor-label="Read"
       className={`${styles['blog-card']}${post.featured ? ` ${styles['blog-card--featured']}` : ''}`}
       onClick={() => router.push(`/blog/${post.slug}`)}
     >

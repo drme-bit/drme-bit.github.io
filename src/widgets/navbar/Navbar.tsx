@@ -3,21 +3,22 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion } from 'motion/react';
 import { useNav } from '@/app/providers/NavProvider';
 import { GLOBAL_NAV } from '@/shared/config/navConfig';
 import type { NavGroup, NavRouteLink, NavLeaf } from '@/shared/config/navTypes';
 import { cn } from '@/shared/lib/cn';
-import { Separator } from '@/shared/ui/atoms';
+import { Separator } from '@/shared/ui';
 
 import { ExpandableTab } from './ExpandableTab';
 import { GroupDropdown } from './GroupDropdown';
 import { MobileNav } from './MobileNav';
 import { NavDropdown } from './NavDropdown';
-import SearchBar, { type SearchItem } from '@/shared/ui/molecules/SearchBar/SearchBar';
-import ChangeTheme from '@/shared/ui/molecules/ChangeTheme/ChangeTheme';
-
-const pillSpring = { type: 'spring' as const, stiffness: 420, damping: 32, mass: 0.6 };
+import SearchBar, { type SearchItem } from '@/shared/ui/SearchBar/SearchBar';
+import ChangeTheme from '@/shared/ui/ChangeTheme/ChangeTheme';
+import { useChat } from '@/app/providers/ChatProvider';
+import { PresenceStack } from '@/features/presence';
+import { scrollToTarget, scrollToTop } from '@/widgets/smooth-scrolling/lenisStore';
+import CompanionCube from '@/widgets/mascot/CompanionCube';
 
 function LogoMark() {
   return (
@@ -45,13 +46,14 @@ export default function Navbar() {
   const ref = useRef<HTMLElement>(null);
 
   const { pageConfig, setPageConfig, active, setActiveSection } = useNav();
+  const { open: chatOpen, toggle: toggleChat } = useChat();
 
   const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
   const routes = GLOBAL_NAV.filter((item): item is NavRouteLink => item.type === 'route');
 
   const handleTabSelect = useCallback((item: NavRouteLink) => {
     if (item.href === '/') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTop();
     } else {
       window.location.href = item.href;
     }
@@ -84,21 +86,28 @@ export default function Navbar() {
   }, [pathname, setPageConfig]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        setScrolled(window.scrollY > 24);
+      });
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   const handleLeafNavigate = useCallback(
     (leaf: NavLeaf) => {
       if (leaf.type === 'section') {
         if (pathname === '/') {
-          const el = document.getElementById(leaf.targetId);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
-            setActiveSection(leaf.id);
-          }
+          scrollToTarget(`#${leaf.targetId}`);
+          setActiveSection(leaf.id);
         } else {
           window.location.href = `/#${leaf.targetId}`;
         }
@@ -140,8 +149,7 @@ export default function Navbar() {
     (item: SearchItem) => {
       if (item.sectionId) {
         if (pathname === '/') {
-          const el = document.getElementById(item.sectionId);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          scrollToTarget(`#${item.sectionId}`);
           setActiveSection(item.sectionId);
         } else {
           window.location.href = `/#${item.sectionId}`;
@@ -172,33 +180,35 @@ export default function Navbar() {
     <nav
       ref={ref}
       data-section={active.sectionId || undefined}
-      className={cn(
-        'sticky top-0 z-[999] mx-auto w-full max-w-5xl px-4 transition-all duration-300 ease-out sm:px-6',
-        scrolled
-          ? 'border-b border-border bg-background/80 backdrop-blur-xl md:top-3 md:max-w-4xl md:rounded-2xl md:border md:border-border md:bg-popover/85 md:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] md:backdrop-blur-2xl'
-          : 'border-b border-transparent',
-      )}
+      className="sticky top-0 z-[999] w-full px-4 transition-colors duration-300 sm:px-6"
       aria-label="Navigation"
     >
-      <div
-        className={cn(
-          'mx-auto flex h-11 w-full items-center justify-between gap-3 transition-all duration-300 ease-out',
-          scrolled && 'md:h-9',
-        )}
-      >
-        <Link
-          href="/"
-          className="flex shrink-0 items-center gap-2.5 text-foreground transition-opacity hover:opacity-80"
-          aria-label="Home"
-        >
-          <LogoMark />
-          <span className="hidden font-mono text-[13px] font-semibold lowercase tracking-[0.14em] sm:inline">
-            drme<span className="text-accent">_</span>
-          </span>
-        </Link>
+      <div className="grid h-11 w-full grid-cols-[1fr_auto_1fr] items-center gap-3">
+        {/* Left edge: logo */}
+        <div className="flex min-w-0 items-center justify-self-start">
+          <Link
+            href="/"
+            className="flex shrink-0 items-center gap-2.5 text-foreground transition-opacity hover:opacity-80"
+            aria-label="Home"
+          >
+            <LogoMark />
+            <span className="hidden font-mono text-[13px] font-semibold lowercase tracking-[0.14em] sm:inline">
+              drme<span className="text-accent">_</span>
+            </span>
+          </Link>
+        </div>
 
-        <div className="hidden min-w-0 flex-1 items-center justify-center lg:flex">
-          <ul className="flex items-center gap-0.5">
+        {/* Center: nav pill + command palette trigger.
+            The pill is always present (no pop-in): only its tint deepens. */}
+        <div data-nav-pill className="flex min-w-0 items-center justify-center gap-2 justify-self-center">
+          <ul
+            className={cn(
+              'hidden items-center gap-0.5 px-1.5 py-1 transition-colors duration-300 lg:flex',
+              scrolled
+                ? 'rounded-lg border border-border/60 bg-secondary/40 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.5)] backdrop-blur-md'
+                : 'rounded-lg border border-border/40 bg-secondary/20',
+            )}
+          >
             {groups.map((group) => {
               const groupActive = active.routeId === group.id;
               return (
@@ -207,15 +217,6 @@ export default function Navbar() {
                   group={group}
                   isActive={groupActive}
                   isOpen={openGroupId === group.id}
-                  pill={
-                    groupActive ? (
-                      <motion.span
-                        layoutId="navActive"
-                        className="absolute inset-0 rounded-lg bg-secondary"
-                        transition={pillSpring}
-                      />
-                    ) : undefined
-                  }
                   onOpen={() => handleGroupOpen(group.id)}
                   onScheduleClose={scheduleGroupClose}
                   onCancelClose={cancelGroupClose}
@@ -227,13 +228,6 @@ export default function Navbar() {
               const routeActive = active.routeId === route.id;
               return (
                 <li key={route.id} className="relative flex">
-                  {routeActive && (
-                    <motion.span
-                      layoutId="navActive"
-                      className="absolute inset-0 rounded-lg bg-secondary"
-                      transition={pillSpring}
-                    />
-                  )}
                   <ExpandableTab
                     item={route}
                     isRouteActive={routeActive}
@@ -243,10 +237,29 @@ export default function Navbar() {
               );
             })}
           </ul>
+
+          <Separator orientation="vertical" className="hidden h-5 lg:block" />
+          <SearchBar items={searchItems} onSelect={handleSearchSelect} />
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
-          <SearchBar items={searchItems} onSelect={handleSearchSelect} />
+        {/* Right edge: presence, ask AI + settings */}
+        <div className="flex shrink-0 items-center gap-1.5 justify-self-end">
+          <PresenceStack />
+          <button
+            type="button"
+            onClick={toggleChat}
+            aria-label={chatOpen ? 'Close AI chat' : 'Open AI chat'}
+            aria-expanded={chatOpen}
+            className={cn(
+              'flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 font-mono text-[12px] font-medium lowercase tracking-[0.08em] transition-all active:scale-95',
+              chatOpen
+                ? 'border-[var(--accent-secondary)]/50 bg-[var(--accent-secondary)]/15 text-[var(--text)]'
+                : 'border-border/40 bg-secondary/20 text-muted-foreground hover:border-[var(--accent-secondary)]/40 hover:text-foreground',
+            )}
+          >
+            <CompanionCube size={15} />
+            <span className="max-sm:hidden">ask</span>
+          </button>
           <Separator orientation="vertical" className="hidden h-5 sm:block" />
           <div className="flex items-center gap-0.5">
             <div className="hidden sm:flex">

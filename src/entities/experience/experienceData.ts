@@ -26,15 +26,15 @@ const experienceData: ExperienceEntry[] = [
     tech: ['Luau', 'TypeScript', 'Python', 'Node.js', 'MySQL'],
     gallery: [
       {
-        src: '/media/projects/roblox/images/vault_overview.png',
+        src: '/media/projects/roblox/images/vault_overview.webp',
         alt: 'Roblox vault game overview',
       },
       {
-        src: '/media/projects/roblox/images/garden_vs_brainrot.png',
+        src: '/media/projects/roblox/images/garden_vs_brainrot.webp',
         alt: 'Roblox garden vs brainrot game',
       },
       {
-        src: '/media/projects/bloxingbad/images/map-reference.png',
+        src: '/media/projects/bloxingbad/images/map-reference.webp',
         alt: 'Bloxingbad map reference',
       },
     ],
@@ -51,8 +51,8 @@ const experienceData: ExperienceEntry[] = [
     ],
     tech: ['Python', 'Node.js', 'Telegram Bot API', 'Discord API'],
     gallery: [
-      { src: '/images/demonstration/kanban-demo.png', alt: 'Kanban workflow automation demo' },
-      { src: '/images/demonstration/me-coding-demo.png', alt: 'Coding session demo' },
+      { src: '/images/demonstration/kanban-demo.webp', alt: 'Kanban workflow automation demo' },
+      { src: '/images/demonstration/me-coding-demo.webp', alt: 'Coding session demo' },
     ],
   },
   {
@@ -68,11 +68,11 @@ const experienceData: ExperienceEntry[] = [
     tech: ['Node.js', 'Express', 'REST'],
     gallery: [
       {
-        src: '/images/demonstration/jetbrains-ai-use-demo.png',
+        src: '/images/demonstration/jetbrains-ai-use-demo.webp',
         alt: 'IDE workflow demo',
       },
-      { src: '/media/projects/bloxingbad/images/code-structure.png', alt: 'Code structure' },
-      { src: '/media/projects/bloxingbad/images/jira-integration.png', alt: 'Jira integration' },
+      { src: '/media/projects/bloxingbad/images/code-structure.webp', alt: 'Code structure' },
+      { src: '/media/projects/bloxingbad/images/jira-integration.webp', alt: 'Jira integration' },
     ],
   },
   {
@@ -89,10 +89,10 @@ const experienceData: ExperienceEntry[] = [
     link: '/projects/nexagon',
     linkText: 'see nexagon',
     gallery: [
-      { src: '/media/projects/nexagon/images/nexagon_monitor.png', alt: 'Nexagon server monitor' },
-      { src: '/media/projects/nexagon/images/nexagon_createServer.png', alt: 'Add server flow' },
-      { src: '/media/projects/nexagon/images/nexagon_rcon.png', alt: 'RCON console' },
-      { src: '/media/projects/nexagon/images/nexagon_result.png', alt: 'Nexagon live tracking result' },
+      { src: '/media/projects/nexagon/images/nexagon_monitor.webp', alt: 'Nexagon server monitor' },
+      { src: '/media/projects/nexagon/images/nexagon_createServer.webp', alt: 'Add server flow' },
+      { src: '/media/projects/nexagon/images/nexagon_rcon.webp', alt: 'RCON console' },
+      { src: '/media/projects/nexagon/images/nexagon_result.webp', alt: 'Nexagon live tracking result' },
     ],
   },
 ];

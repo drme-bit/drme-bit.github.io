@@ -26,12 +26,12 @@ export default createProject({
   tech: ['Luau', 'Cmdr', 'Roact', 'Promise', 'TopbarPlus', 'ByteNet', 'DataStore2'],
   status: 'PAUSED',
   logo: null,
-  image: '/media/projects/bloxingbad/images/code-structure.png',
+  image: '/media/projects/bloxingbad/images/code-structure.webp',
   images: [
-    '/media/projects/bloxingbad/images/code-structure.png',
-    '/media/projects/bloxingbad/images/jira-integration.png',
-    '/media/projects/bloxingbad/images/map-ideas.png',
-    '/media/projects/bloxingbad/images/map-reference.png',
+    '/media/projects/bloxingbad/images/code-structure.webp',
+    '/media/projects/bloxingbad/images/jira-integration.webp',
+    '/media/projects/bloxingbad/images/map-ideas.webp',
+    '/media/projects/bloxingbad/images/map-reference.webp',
   ],
   video: null,
   stages: [

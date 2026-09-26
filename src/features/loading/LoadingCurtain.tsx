@@ -4,8 +4,8 @@ import { useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { profile } from '@/entities/profile';
-import { LogoMark } from '@/shared/ui/atoms/LogoMark/LogoMark';
-import { Halo } from '@/shared/ui/atoms/Halo/Halo';
+import { LogoMark } from '@/shared/ui/LogoMark/LogoMark';
+import { Halo } from '@/shared/ui/Halo/Halo';
 import styles from './LoadingCurtain.module.scss';
 
 const SESSION_KEY = 'drme-loaded';

@@ -1,16 +1,20 @@
 'use client';
 
 import { TransitionLink } from '@/features/transitions';
-import { FiMenu } from '@/shared/ui/atoms/Icon';
+import { usePathname } from 'next/navigation';
+import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
+import { Menu } from '@/shared/ui/Icon';
+import { useChat } from '@/app/providers/ChatProvider';
+import CompanionCube from '@/widgets/mascot/CompanionCube';
 import { GLOBAL_NAV } from '@/shared/config/navConfig';
 import type { NavGroup, NavRouteLink, NavLeaf } from '@/shared/config/navTypes';
-import { IconButton, Separator } from '@/shared/ui/atoms';
+import { IconButton, Separator } from '@/shared/ui';
 import {
   Sheet,
   SheetClose,
   SheetContent,
   SheetTrigger,
-} from '@/shared/ui/organisms/Sheet/Sheet';
+} from '@/shared/ui/Sheet/Sheet';
 
 function leafHref(leaf: NavLeaf): string {
   if (leaf.type === 'route') return leaf.href;
@@ -25,6 +29,8 @@ const iconClass = 'size-4 shrink-0 text-accent';
 export function MobileNav() {
   const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
   const routes = GLOBAL_NAV.filter((item): item is NavRouteLink => item.type === 'route');
+  const pathname = usePathname();
+  const { setOpen: setChatOpen } = useChat();
 
   return (
     <Sheet>
@@ -34,7 +40,7 @@ export function MobileNav() {
           aria-label="Open menu"
           className="text-muted-foreground hover:bg-secondary hover:text-foreground lg:hidden"
         >
-          <FiMenu className="size-4" />
+          <Menu className="size-4" />
         </IconButton>
       </SheetTrigger>
       <SheetContent
@@ -58,6 +64,19 @@ export function MobileNav() {
         </div>
 
         <div className="flex flex-1 flex-col gap-3 overflow-y-auto overscroll-contain p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+          <SheetClose asChild>
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className={linkClass}
+            >
+              <CompanionCube size={16} />
+              <span>Ask AI</span>
+            </button>
+          </SheetClose>
+
+          <Separator className="my-1" />
+
           {groups.map((group) => (
             <div key={group.id} className="flex flex-col gap-1">
               <span className="px-2 pb-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/60">
@@ -68,13 +87,20 @@ export function MobileNav() {
                   const href = leafHref(child);
                   const ChildIcon = child.icon;
                   return (
-                    <li key={child.id}>
+                      <li key={child.id}>
                       <SheetClose asChild>
                         <a
                           href={href}
                           className={linkClass}
-                          onClick={() => {
-                            window.location.href = href;
+                          onClick={(e) => {
+                            if (child.type === 'section' && pathname === '/') {
+                              // Same-page jump through Lenis instead of the
+                              // browser's abrupt hash jump.
+                              e.preventDefault();
+                              scrollToTarget(`#${child.targetId}`);
+                            } else {
+                              window.location.href = href;
+                            }
                           }}
                         >
                           {ChildIcon && <ChildIcon className={iconClass} />}

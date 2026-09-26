@@ -1,8 +1,8 @@
 'use client';
 
 import { useActivity } from '@/app/providers/ActivityProvider';
-import TypingTest from '@/shared/ui/molecules/TypingTest/TypingTest';
-import styles from './Stats.module.scss';
+import { TransitionLink } from '@/features/transitions';
+import TypingTest from '@/shared/ui/TypingTest/TypingTest';
 
 /*  Achievement definitions  */
 
@@ -49,6 +49,18 @@ function getPercent(personal: number, global: number): string {
   return pct >= 1 ? pct.toFixed(1) : pct.toFixed(2);
 }
 
+function SectionCard({ tag, extra, children }: { tag: string; extra?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 max-[700px]:p-4">
+      <p className="m-0 mb-4 flex items-center gap-2 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-[var(--text-ghost)]">
+        {tag}
+        {extra}
+      </p>
+      {children}
+    </section>
+  );
+}
+
 /*  Contribution Bar ─ */
 
 function ContributionBar({ label, personal, global: globalVal }: { label: string; personal: number; global: number }) {
@@ -56,15 +68,18 @@ function ContributionBar({ label, personal, global: globalVal }: { label: string
   const share = getPercent(personal, globalVal);
 
   return (
-    <div className={styles.contrib}>
-      <div className={styles.contribHead}>
-        <span className={styles.contribLabel}>{label}</span>
-        <span className={styles.contribShare}>{share}%</span>
+    <div>
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="font-mono text-[0.66rem] text-[var(--text-dim)]">{label}</span>
+        <span className="font-mono text-[0.66rem] text-[var(--accent-secondary)]">{share}%</span>
       </div>
-      <div className={styles.contribBar}>
-        <div className={styles.contribFill} style={{ width: `${Math.max(pct, 0.5)}%` }} />
+      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--glass)]">
+        <div
+          className="h-full rounded-full bg-[var(--accent-secondary)] transition-[width] duration-500"
+          style={{ width: `${Math.max(pct, 0.5)}%` }}
+        />
       </div>
-      <div className={styles.contribValues}>
+      <div className="mt-1 flex justify-between gap-3 font-mono text-[0.6rem] text-[var(--text-ghost)]">
         <span>you: {personal.toLocaleString()}</span>
         <span>global: {globalVal.toLocaleString()}</span>
       </div>
@@ -80,126 +95,109 @@ export default function StatsPage() {
   const unlocked = mounted ? ACHIEVEMENTS.filter((a) => a.check(personal)) : [];
 
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        {/* Hero */}
-        <header className={styles.hero}>
-          <h1 className={styles.heroTitle}>
-            site stats<span className={styles.heroDot}>.</span>
-          </h1>
-          <p className={styles.heroDesc}>your activity &amp; contribution</p>
-        </header>
+    <div className="mx-auto w-full max-w-[880px] animate-rise px-5 pb-20 pt-28 max-[700px]:pt-24">
+      <header>
+        <p className="m-0 font-mono text-[0.62rem] tracking-[0.1em] text-[var(--text-ghost)]">
+          <TransitionLink href="/">home</TransitionLink>
+          <span aria-hidden="true"> / </span>
+          <span className="text-[var(--text-dim)]">stats</span>
+        </p>
+        <h1 className="m-0 mt-3 font-display text-[clamp(2.4rem,6vw,3.6rem)] font-bold leading-none tracking-[var(--tracking-section)] text-foreground">
+          site stats<span aria-hidden="true" className="text-[var(--accent-secondary)]">.</span>
+        </h1>
+        <p className="m-0 mt-3 max-w-[52ch] text-[0.9rem] leading-[1.65] text-muted-foreground">
+          your activity &amp; contribution
+        </p>
+      </header>
 
-        {/* Global Overview */}
-        <div className={styles.card}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionTag}>global</span>
+      <div className="mt-10 flex flex-col gap-4">
+        <SectionCard tag="global">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              [global.totalClicks.toLocaleString(), 'total clicks'],
+              [global.totalVisitors.toLocaleString(), 'visitors'],
+              [global.totalSkillsChecked.toLocaleString(), 'skills explored'],
+              [global.totalProjectsViewed.toLocaleString(), 'projects viewed'],
+            ].map(([value, label]) => (
+              <div key={label as string} className="rounded-[var(--radius-sm)] border border-[var(--border)] px-3 py-3">
+                <span className="block font-display text-[1.3rem] font-semibold text-foreground">{value}</span>
+                <span className="mt-0.5 block font-mono text-[0.6rem] uppercase tracking-[0.1em] text-[var(--text-ghost)]">
+                  {label}
+                </span>
+              </div>
+            ))}
           </div>
-          <div className={styles.grid4}>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{global.totalClicks.toLocaleString()}</span>
-              <span className={styles.statLabel}>total clicks</span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{global.totalVisitors.toLocaleString()}</span>
-              <span className={styles.statLabel}>visitors</span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{global.totalSkillsChecked.toLocaleString()}</span>
-              <span className={styles.statLabel}>skills explored</span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{global.totalProjectsViewed.toLocaleString()}</span>
-              <span className={styles.statLabel}>projects viewed</span>
-            </div>
-          </div>
-        </div>
+        </SectionCard>
 
-        {/* Your Stats */}
-        <div className={styles.card}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionTag}>personal</span>
+        <SectionCard tag="personal">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {[
+              [personal.clicks.toLocaleString(), 'clicks', `${getPercent(personal.clicks, global.totalClicks)}% of global`],
+              [String(personal.skillsChecked), 'skills checked', `${getPercent(personal.skillsChecked, global.totalSkillsChecked)}% of global`],
+              [String(personal.projectsViewed), 'projects viewed', `${getPercent(personal.projectsViewed, global.totalProjectsViewed)}% of global`],
+              [String(personal.sectionsRevealed), 'sections revealed', `${getPercent(personal.sectionsRevealed, global.totalSectionsRevealed)}% of global`],
+              [mounted ? formatTime(personal.timeOnSite) : '0s', 'time on site', 'this session'],
+            ].map(([value, label, sub]) => (
+              <div key={label as string} className="rounded-[var(--radius-sm)] border border-[var(--border)] px-3 py-3">
+                <span className="block font-display text-[1.3rem] font-semibold text-foreground">{value}</span>
+                <span className="mt-0.5 block font-mono text-[0.6rem] uppercase tracking-[0.1em] text-[var(--text-ghost)]">
+                  {label}
+                </span>
+                <span className="mt-1 block font-mono text-[0.6rem] text-[var(--accent-secondary)]">{sub}</span>
+              </div>
+            ))}
           </div>
-          <div className={styles.grid3}>
-            <div className={styles.statPanel}>
-              <span className={styles.statPanelValue}>{personal.clicks.toLocaleString()}</span>
-              <span className={styles.statPanelLabel}>clicks</span>
-              <span className={styles.statPanelPct}>{getPercent(personal.clicks, global.totalClicks)}% of global</span>
-            </div>
-            <div className={styles.statPanel}>
-              <span className={styles.statPanelValue}>{personal.skillsChecked}</span>
-              <span className={styles.statPanelLabel}>skills checked</span>
-              <span className={styles.statPanelPct}>{getPercent(personal.skillsChecked, global.totalSkillsChecked)}% of global</span>
-            </div>
-            <div className={styles.statPanel}>
-              <span className={styles.statPanelValue}>{personal.projectsViewed}</span>
-              <span className={styles.statPanelLabel}>projects viewed</span>
-              <span className={styles.statPanelPct}>{getPercent(personal.projectsViewed, global.totalProjectsViewed)}% of global</span>
-            </div>
-            <div className={styles.statPanel}>
-              <span className={styles.statPanelValue}>{personal.sectionsRevealed}</span>
-              <span className={styles.statPanelLabel}>sections revealed</span>
-              <span className={styles.statPanelPct}>{getPercent(personal.sectionsRevealed, global.totalSectionsRevealed)}% of global</span>
-            </div>
-            <div className={styles.statPanel}>
-              <span className={styles.statPanelValue}>{mounted ? formatTime(personal.timeOnSite) : '0s'}</span>
-              <span className={styles.statPanelLabel}>time on site</span>
-              <span className={styles.statPanelPct}>this session</span>
-            </div>
-          </div>
-        </div>
+        </SectionCard>
 
-        {/* Contribution */}
-        <div className={styles.card}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionTag}>contribution</span>
-          </div>
-          <div className={styles.contribList}>
+        <SectionCard tag="contribution">
+          <div className="flex flex-col gap-4">
             <ContributionBar label="clicks" personal={personal.clicks} global={global.totalClicks} />
             <ContributionBar label="skills explored" personal={personal.skillsChecked} global={global.totalSkillsChecked} />
             <ContributionBar label="projects viewed" personal={personal.projectsViewed} global={global.totalProjectsViewed} />
             <ContributionBar label="sections revealed" personal={personal.sectionsRevealed} global={global.totalSectionsRevealed} />
           </div>
-        </div>
+        </SectionCard>
 
-        {/* Achievements */}
-        <div className={styles.card}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionTag}>
-              achievements <span className={styles.achCount}>{unlocked.length}/{ACHIEVEMENTS.length}</span>
+        <SectionCard
+          tag="achievements"
+          extra={
+            <span className="ml-auto text-[var(--text-dim)]">
+              {unlocked.length}/{ACHIEVEMENTS.length}
             </span>
-          </div>
-          <div className={styles.achGrid}>
+          }
+        >
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {ACHIEVEMENTS.map((ach) => {
               const isUnlocked = ach.check(personal);
               return (
                 <div
                   key={ach.id}
-                  className={`${styles.achCard}${isUnlocked ? ` ${styles['achCard--on']}` : ''}`}
                   title={`${ach.title}: ${ach.description}`}
+                  className={`rounded-[var(--radius-sm)] border px-3 py-2.5 transition-colors ${
+                    isUnlocked
+                      ? 'border-[var(--accent-secondary)]/40 bg-[var(--accent-secondary)]/[0.07]'
+                      : 'border-[var(--border)] opacity-55'
+                  }`}
                 >
-                  <span className={styles.achTitle}>{ach.title}</span>
-                  <span className={styles.achDesc}>{ach.description}</span>
+                  <span className={`block text-[0.8rem] font-semibold ${isUnlocked ? 'text-foreground' : 'text-[var(--text-dim)]'}`}>
+                    {ach.title}
+                  </span>
+                  <span className="mt-0.5 block font-mono text-[0.6rem] text-[var(--text-ghost)]">
+                    {ach.description}
+                  </span>
                 </div>
               );
             })}
           </div>
-        </div>
+        </SectionCard>
 
-        {/* Typing Test */}
-        <div className={styles.card}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionTag}>typing test</span>
-          </div>
+        <SectionCard tag="typing test">
           <TypingTest />
-        </div>
+        </SectionCard>
 
-        {/* Footer */}
-        <footer className={styles.footer}>
-          <span className={styles.footerText}>
-            stats reset on browser data clear &middot; global stats persist via firebase
-          </span>
-        </footer>
+        <p className="m-0 text-center font-mono text-[0.62rem] text-[var(--text-ghost)]">
+          stats reset on browser data clear &middot; global stats persist via firebase
+        </p>
       </div>
     </div>
   );

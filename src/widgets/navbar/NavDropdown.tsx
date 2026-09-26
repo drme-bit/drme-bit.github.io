@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import Image from 'next/image';
 import { motion } from 'motion/react';
-import { FiArrowRight, FiGrid } from '@/shared/ui/atoms/Icon';
+import { ArrowRight } from '@/shared/ui/Icon';
 import { cn } from '@/shared/lib/cn';
-import { Kbd, PanelSurface } from '@/shared/ui/atoms';
 import type { NavGroup, NavLeaf, NavRouteLink } from '@/shared/config/navTypes';
 
 interface NavDropdownProps {
@@ -26,11 +26,11 @@ function leafHref(leaf: NavLeaf): string {
   return '#';
 }
 
-interface Action {
-  label: string;
-  run: () => void;
-}
-
+/*
+ * Linear/Vercel command surface: monochrome 16px glyphs, no tiles,
+ * no color accents. Featured rows carry a second description line,
+ * plain links are single-line. Tiny captions carry the hierarchy.
+ */
 export function NavDropdown({
   groups,
   activeGroupId,
@@ -43,46 +43,43 @@ export function NavDropdown({
 }: NavDropdownProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [focusIndex, setFocusIndex] = useState(0);
+  const [prevGroupId, setPrevGroupId] = useState(activeGroupId);
   const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  /* Reset keyboard focus when a different group opens (render-phase
+     adjustment: no cascading effect render). */
+  if (prevGroupId !== activeGroupId) {
+    setPrevGroupId(activeGroupId);
+    setFocusIndex(0);
+  }
 
   const activeGroup = useMemo(
     () => groups.find((g) => g.id === activeGroupId) ?? null,
     [groups, activeGroupId],
   );
 
-  const actions = useMemo(() => {
-    const list: Action[] = (activeGroup?.children ?? []).map((c) => ({
-      label: c.label,
-      run: () => {
-        onNavigateLeaf(c);
-        onCloseImmediate();
-      },
-    }));
-    const href = activeGroup?.href;
-    if (href) {
-      list.push({
-        label: `view all ${activeGroup.label}`,
-        run: () => {
-          onCloseImmediate();
-          router.push(href);
-        },
-      });
-    }
-    return list;
-  }, [activeGroup, onNavigateLeaf, onCloseImmediate, router]);
+  const featured = useMemo(() => activeGroup?.children.filter((c) => c.featured) ?? [], [activeGroup]);
+  const links = useMemo(() => activeGroup?.children.filter((c) => !c.featured) ?? [], [activeGroup]);
+  const rows = useMemo(() => [...featured, ...links], [featured, links]);
 
+  /* Span the full center pill; follow scroll/resize while open. */
   useEffect(() => {
-    setFocusIndex(0);
-
     const nav = document.querySelector<HTMLElement>('nav[aria-label="Navigation"]');
     if (!nav) return;
 
     const compute = () => {
-      const r = nav.getBoundingClientRect();
       const gutter = 8;
-      const width = Math.max(340, Math.min(r.width, window.innerWidth - gutter * 2, 760));
-      const left = Math.max(gutter, Math.min(r.left, window.innerWidth - width - gutter));
-      setRect({ top: r.bottom + 12, left, width });
+      const pill = document.querySelector<HTMLElement>('[data-nav-pill]');
+      const pillRect = pill?.getBoundingClientRect();
+      // Panel stretches across the whole pill, clamped to the viewport.
+      const width = pillRect
+        ? Math.min(pillRect.width, window.innerWidth - gutter * 2)
+        : Math.min(nav.getBoundingClientRect().width, window.innerWidth - gutter * 2, 460);
+      const left = pillRect
+        ? Math.max(gutter, Math.min(pillRect.left, window.innerWidth - width - gutter))
+        : gutter;
+      const top = (pillRect ?? nav.getBoundingClientRect()).bottom + 8;
+      setRect({ top, left, width });
     };
     compute();
 
@@ -94,8 +91,7 @@ export function NavDropdown({
     };
   }, [activeGroupId]);
 
-  /*  Click outside closes  */
-
+  /* Click outside closes. */
   useEffect(() => {
     if (!activeGroupId) return;
     const onDown = (e: MouseEvent) => {
@@ -106,8 +102,12 @@ export function NavDropdown({
     return () => document.removeEventListener('mousedown', onDown);
   }, [activeGroupId, onCloseImmediate]);
 
-  /*  Keyboard: ↑↓ cycle actions, ↵ run, esc close  */
+  const runLeaf = (leaf: NavLeaf) => {
+    onNavigateLeaf(leaf);
+    onCloseImmediate();
+  };
 
+  /* Keyboard: ↑↓ cycle, ↵ run, esc close. */
   useEffect(() => {
     if (!activeGroupId || !panelRef.current) return;
     const onKey = (e: KeyboardEvent) => {
@@ -119,25 +119,111 @@ export function NavDropdown({
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
         const dir = e.key === 'ArrowDown' ? 1 : -1;
-        const next = (focusIndex + dir + actions.length) % Math.max(actions.length, 1);
-        setFocusIndex(next);
+        setFocusIndex((i) => (i + dir + rows.length) % Math.max(rows.length, 1));
       }
       if (e.key === 'Enter') {
         e.preventDefault();
-        actions[focusIndex]?.run();
+        const leaf = rows[focusIndex];
+        if (leaf) runLeaf(leaf);
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [activeGroupId, focusIndex, actions, onCloseImmediate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeGroupId, focusIndex, rows, onCloseImmediate]);
 
   useEffect(() => {
     panelRef.current
-      ?.querySelector<HTMLElement>(`[data-drop-index="0"]`)
+      ?.querySelector<HTMLElement>('[data-drop-index="0"]')
       ?.focus({ preventScroll: true });
   }, [activeGroupId]);
 
   if (!activeGroupId || !activeGroup || !rect) return null;
+
+  const rowClass = (focused: boolean, active = false) =>
+    cn(
+      'flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left outline-none transition-colors duration-100',
+      active || focused
+        ? 'bg-secondary text-foreground'
+        : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground focus-visible:bg-secondary focus-visible:text-foreground',
+    );
+
+  const renderFeatured = (child: NavLeaf, dropIndex: number) => {
+    return (
+      <a
+        key={child.id}
+        href={leafHref(child)}
+        role="menuitem"
+        data-drop-index={dropIndex}
+        onMouseEnter={() => setFocusIndex(dropIndex)}
+        onClick={(e) => {
+          e.preventDefault();
+          runLeaf(child);
+        }}
+        className={rowClass(dropIndex === focusIndex)}
+      >
+        {child.image ? (
+          <span className="relative block h-[72px] w-[112px] shrink-0 self-start overflow-hidden rounded-md border border-border" aria-hidden="true">
+            <Image
+              src={child.image}
+              alt=""
+              width={224}
+              height={144}
+              sizes="224px"
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          </span>
+        ) : child.tint ? (
+          <span
+            aria-hidden="true"
+            style={{
+              backgroundColor: `color-mix(in srgb, ${child.tint} 13%, transparent)`,
+              borderColor: `color-mix(in srgb, ${child.tint} 30%, transparent)`,
+            }}
+            className="flex h-[72px] w-[112px] shrink-0 items-center justify-center self-start overflow-hidden rounded-md border"
+          >
+            <span
+              className="font-mono text-[13px] font-semibold tracking-tight"
+              style={{ color: child.tint }}
+            >
+              {child.glyph ?? child.label.slice(0, 2).toUpperCase()}
+            </span>
+          </span>
+        ) : null}
+        <span className="min-w-0 flex-1 self-center">
+          <span className="block truncate text-[13px] text-foreground">{child.label}</span>
+          {child.description && (
+            <span className="mt-px line-clamp-2 block text-[12px] leading-snug text-muted-foreground">
+              {child.description}
+            </span>
+          )}
+        </span>
+      </a>
+    );
+  };
+
+  const renderLink = (child: NavLeaf, dropIndex: number) => {
+    const Icon = child.icon;
+    const isActiveChild = child.type === 'route' && child.id === activeRouteId;
+    return (
+      <a
+        key={child.id}
+        href={leafHref(child)}
+        role="menuitem"
+        data-drop-index={dropIndex}
+        onMouseEnter={() => setFocusIndex(dropIndex)}
+        onClick={(e) => {
+          e.preventDefault();
+          runLeaf(child);
+        }}
+        className={rowClass(dropIndex === focusIndex, isActiveChild)}
+      >
+        {Icon && <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
+        <span className="min-w-0 flex-1 truncate text-[13px]">{child.label}</span>
+      </a>
+    );
+  };
 
   return createPortal(
     <div
@@ -146,116 +232,60 @@ export function NavDropdown({
     >
       <motion.div
         ref={panelRef}
-        className="pointer-events-auto"
-        initial={{ opacity: 0, y: -8, scale: 0.99 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+        className="pointer-events-auto overflow-hidden rounded-lg border border-border bg-popover shadow-lg shadow-black/10"
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.14, ease: 'easeOut' }}
         onClick={(e) => e.stopPropagation()}
         onMouseEnter={onCancelClose}
         onMouseLeave={onClose}
+        role="menu"
+        aria-label={activeGroup.label}
       >
-        <PanelSurface className="p-1.5">
-          <div className="flex items-baseline justify-between gap-4 px-3 pt-1.5 pb-1">
-            <div className="flex min-w-0 items-baseline gap-2.5">
-              <span className="truncate font-mono text-[11px] font-semibold tracking-[0.18em] text-foreground uppercase">
-                {activeGroup.label}
-              </span>
-              {activeGroup.description && (
-                <span className="truncate text-xs text-muted-foreground/60">
-                  {activeGroup.description}
-                </span>
-              )}
-            </div>
-            <span className="shrink-0 font-mono text-[10px] tracking-[0.08em] text-muted-foreground/50">
-              {String(activeGroup.children.length).padStart(2, '0')}
-            </span>
-          </div>
-
-          <div className="mx-3 h-px bg-border/60" />
-
-          <div className="grid grid-cols-1 gap-0.5 p-1 pt-1.5 sm:grid-cols-2 xl:grid-cols-4">
-            {activeGroup.children.map((child, i) => {
-              const Icon = child.icon ?? FiGrid;
-              const isActiveChild = child.type === 'route' && child.id === activeRouteId;
-              return (
-                <a
-                  key={child.id}
-                  href={leafHref(child)}
-                  className={cn(
-                    'group flex flex-col gap-1 rounded-lg p-2 pl-2.5 outline-none transition-colors',
-                    isActiveChild
-                      ? 'bg-secondary'
-                      : i === focusIndex
-                        ? 'bg-secondary/80'
-                        : 'hover:bg-secondary/60 focus-visible:bg-secondary/80',
-                  )}
-                  data-drop-index={i}
-                  style={
-                    {
-                      '--i': i,
-                      animationDelay: `${i * 22}ms`,
-                    } as React.CSSProperties
-                  }
-                  onClick={(e) => {
-                    e.preventDefault();
-                    actions[i]?.run();
-                  }}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground transition-colors group-hover:bg-secondary group-hover:text-foreground">
-                      <Icon className="size-3.5" />
-                    </span>
-                    <span
-                      className={cn(
-                        'truncate text-[13px] font-medium text-foreground/90 transition-colors group-hover:text-foreground',
-                      )}
-                    >
-                      {child.label}
-                    </span>
-                    <span
-                      className={cn(
-                        'size-1.5 shrink-0 rounded-full transition-colors',
-                        isActiveChild ? 'bg-foreground/60' : 'bg-transparent',
-                      )}
-                    />
-                  </span>
-                  {child.description && (
-                    <span className="ml-8 truncate text-[11px] leading-tight text-muted-foreground/55">
-                      {child.description}
-                    </span>
-                  )}
-                </a>
-              );
-            })}
-          </div>
-
-          <div className="mx-3 h-px bg-border/60" />
-
-          <div className="flex items-center justify-between gap-4 px-3 pt-2 pb-1.5">
-            <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60">
-              <Kbd>↑</Kbd>
-              <Kbd>↓</Kbd>
-              navigate
-              <span className="hidden items-center gap-1 sm:flex">
-                <Kbd>↵</Kbd>open
-              </span>
-            </span>
-            {activeGroup.href && (
-              <a
-                href={activeGroup.href}
-                data-drop-index={actions.length - 1}
-                onClick={(e) => {
-                  e.preventDefault();
-                  actions[actions.length - 1]?.run();
-                }}
-                className="group -mx-2 flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 font-mono text-[12px] font-medium text-muted-foreground transition-colors outline-none hover:bg-secondary/60 hover:text-foreground focus-visible:bg-secondary/80"
+        <div role="none" className="max-h-[min(380px,56vh)] overflow-y-auto overscroll-contain p-1.5">
+          <p className="m-0 px-2.5 pb-1 pt-1.5 text-[11px] font-medium text-muted-foreground/70">
+            {activeGroup.label}
+          </p>
+          <div
+            role="none"
+            className={cn(
+              featured.length > 0 && links.length > 0 && 'grid grid-cols-[1.25fr_1fr] gap-1',
+            )}
+          >
+            {featured.length > 0 && (
+              <div role="none" className="flex min-w-0 flex-col gap-0.5">
+                {featured.map((child) => renderFeatured(child, rows.indexOf(child)))}
+              </div>
+            )}
+            {links.length > 0 && (
+              <div
+                role="none"
+                className={cn(
+                  'flex min-w-0 flex-col gap-0.5',
+                  featured.length > 0 && 'border-l border-border pl-1',
+                )}
               >
-                view all {activeGroup.label}
-                <FiArrowRight className="size-3.5 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5" />
-              </a>
+                {links.map((child) => renderLink(child, rows.indexOf(child)))}
+              </div>
             )}
           </div>
-        </PanelSurface>
+          {activeGroup.href && (
+            <a
+              href={activeGroup.href}
+              onClick={(e) => {
+                e.preventDefault();
+                onCloseImmediate();
+                router.push(activeGroup.href as string);
+              }}
+              className="mt-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left outline-none transition-colors duration-100 text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+            >
+              <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate text-[13px]">
+                View all {activeGroup.label.toLowerCase()}
+              </span>
+            </a>
+          )}
+        </div>
       </motion.div>
     </div>,
     document.body,
