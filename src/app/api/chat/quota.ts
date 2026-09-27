@@ -1,7 +1,7 @@
 /*  Per-visitor question quota for /api/chat: LIMIT questions per rolling
-    WINDOW, keyed by client IP. In-memory (resets on cold start) — the
-    browser keeps a localStorage mirror for instant UX, the server is
-    authoritative. Pure logic lives here so it stays unit-testable.  */
+    WINDOW, keyed by client IP. In-memory and process-local (resets on cold
+    start / differs across instances), so this is best-effort protection.
+    Pure logic lives here so it stays unit-testable.  */
 
 export const CHAT_QUOTA_LIMIT = 10;
 export const CHAT_QUOTA_WINDOW_MS = 24 * 60 * 60 * 1000;

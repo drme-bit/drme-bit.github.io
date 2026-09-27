@@ -89,9 +89,7 @@ export function useActivity() {
 /*  Provider  */
 
 export function ActivityProvider({ children }: { children: React.ReactNode }) {
-  const [personal, setPersonal] = useState<PersonalStats>(() =>
-    typeof window === 'undefined' ? EMPTY : loadPersonal(),
-  );
+  const [personal, setPersonal] = useState<PersonalStats>(EMPTY);
   const [global, setGlobal] = useState<GlobalStats>(EMPTY_GLOBAL);
   // Mounted flag without a setState-in-effect: false during SSR, true on the client.
   const mounted = useSyncExternalStore(
@@ -106,6 +104,11 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     startTime.current = Date.now();
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    setPersonal(loadPersonal());
+  }, [mounted]);
 
   // Listen to global stats
   useEffect(() => {

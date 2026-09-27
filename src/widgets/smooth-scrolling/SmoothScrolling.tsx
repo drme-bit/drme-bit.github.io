@@ -49,8 +49,10 @@ function SmoothScrolling({ children }: SmoothScrollingProps) {
         | PerformanceNavigationTiming
         | undefined;
       if (nav?.type === 'reload') {
+        const previousScrollRestoration = history.scrollRestoration;
         history.scrollRestoration = 'manual';
         window.scrollTo(0, 0);
+        history.scrollRestoration = previousScrollRestoration;
       }
     } catch {
       /* private mode etc. — default behavior stays */

@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'Dr.ME — Full-Stack Developer Portfolio',
     description: 'Terminal-inspired portfolio showcasing projects, skills, and blog posts.',
-    url: 'https://drme-bit.github.io',
+    url: 'https://drme.me',
     siteName: 'Dr.ME Portfolio',
   },
   twitter: {

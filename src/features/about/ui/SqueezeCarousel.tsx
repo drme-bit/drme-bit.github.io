@@ -44,6 +44,12 @@ export function SqueezeCarousel() {
               aria-expanded={selected}
               aria-label={`${h.title}${selected ? ' (current)' : ''}`}
               onClick={() => setActive(i)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActive(i);
+                }
+              }}
               onMouseEnter={() => {
                 setActive(i);
               }}
