@@ -14,11 +14,6 @@ interface Bucket {
 const buckets = new Map<string, Bucket>();
 
 export function getClientIp(req: Request): string {
-  const fwd = req.headers.get('x-forwarded-for');
-  if (fwd) {
-    const first = fwd.split(',')[0].trim();
-    if (first) return first;
-  }
   return req.headers.get('x-real-ip')?.trim() || 'anon';
 }
 
