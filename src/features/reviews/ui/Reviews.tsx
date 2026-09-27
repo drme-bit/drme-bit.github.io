@@ -45,9 +45,9 @@ function Tile({
   active: boolean;
   onHover: (id: string) => void;
 }) {
-  const size = index % 3 === 1 ? 'h-[178px] w-[168px] max-[640px]:h-[118px] max-[640px]:w-[110px]'
-    : index % 3 === 2 ? 'h-[168px] w-[158px] max-[640px]:h-[111px] max-[640px]:w-[103px]'
-      : 'h-[158px] w-[148px] max-[640px]:h-[104px] max-[640px]:w-[96px]';
+  const size = index % 3 === 1 ? 'h-[178px] w-[168px] max-[640px]:h-auto max-[640px]:w-full max-[640px]:aspect-square'
+    : index % 3 === 2 ? 'h-[168px] w-[158px] max-[640px]:h-auto max-[640px]:w-full max-[640px]:aspect-square'
+      : 'h-[158px] w-[148px] max-[640px]:h-auto max-[640px]:w-full max-[640px]:aspect-square';
 
   const portrait =
     e.image && (/^(https?:|data:|\/)/.test(e.image) ? e.image : `/${e.image}`);
@@ -193,19 +193,19 @@ export default function Reviews() {
             inView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
           }`}
         >
-          {/*  Photo grid ─ 3 offset columns  */}
-          <div className="flex items-start gap-3 pb-2 max-[1100px]:w-full max-[1100px]:overflow-x-auto" role="listbox" aria-label="People">
-            <div className="flex flex-col gap-3">
+          {/*  Photo grid ─ offset columns on desktop, even grid on phones  */}
+          <div className="flex items-start gap-3 pb-2 max-[1100px]:w-full max-[640px]:grid max-[640px]:grid-cols-4 max-[640px]:gap-2 max-[640px]:pb-0" role="listbox" aria-label="People">
+            <div className="flex flex-col gap-3 max-[640px]:contents">
               {ENDORSEMENTS.map((e, i) => (i % 3 === 0 ? (
                 <Tile key={e.id} e={e} index={i} active={e.id === activeId} onHover={setActiveId} />
               ) : null))}
             </div>
-            <div className="flex flex-col gap-3 max-[1100px]:mt-8 mt-13">
+            <div className="flex flex-col gap-3 max-[1100px]:mt-8 mt-13 max-[640px]:contents">
               {ENDORSEMENTS.map((e, i) => (i % 3 === 1 ? (
                 <Tile key={e.id} e={e} index={i} active={e.id === activeId} onHover={setActiveId} />
               ) : null))}
             </div>
-            <div className="flex flex-col gap-3 max-[1100px]:mt-4 mt-6">
+            <div className="flex flex-col gap-3 max-[1100px]:mt-4 mt-6 max-[640px]:contents">
               {ENDORSEMENTS.map((e, i) => (i % 3 === 2 ? (
                 <Tile key={e.id} e={e} index={i} active={e.id === activeId} onHover={setActiveId} />
               ) : null))}

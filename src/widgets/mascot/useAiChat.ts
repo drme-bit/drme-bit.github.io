@@ -18,6 +18,19 @@ export interface ChatQuota {
   resetHours: number;
 }
 
+/*  Must mirror the server allowlist in app/api/chat/route.ts — the server
+    re-validates, this is only for the picker UI.  */
+
+export const CHAT_MODELS = [
+  { id: 'inclusionai/ling-3.0-flash-sante-free', label: 'Ling Flash' },
+  { id: 'poolside/laguna-s-2.1-free', label: 'Laguna' },
+  { id: 'openai/gpt-5-nano', label: 'GPT-5 nano' },
+] as const;
+
+export type ChatModelId = (typeof CHAT_MODELS)[number]['id'];
+
+const MODEL_KEY = 'drme-chat-model';
+
 let nextId = 1;
 
 const QUOTA_KEY = 'drme-chat-quota';
@@ -88,14 +101,33 @@ export function useAiChat() {
     resetAt: 0,
     resetHours: 24,
   });
+  const [model, setModelState] = useState<ChatModelId>(CHAT_MODELS[0].id);
   const abortRef = useRef<AbortController | null>(null);
   const messagesRef = useRef<AiChatMessage[]>([]);
+  const modelRef = useRef<ChatModelId>(CHAT_MODELS[0].id);
 
-  // Mount-only sync of the localStorage mirror (static default above keeps
-  // SSR and first client render identical).
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-only sync of persisted state
     setQuota(toQuota(readStored(Date.now())));
+    try {
+      const saved = localStorage.getItem(MODEL_KEY);
+      if (saved && CHAT_MODELS.some((m) => m.id === saved)) {
+        modelRef.current = saved as ChatModelId;
+        setModelState(modelRef.current);
+      }
+    } catch {
+      /* private mode — default model stays */
+    }
+  }, []);
+
+  const setModel = useCallback((id: ChatModelId) => {
+    modelRef.current = id;
+    setModelState(id);
+    try {
+      localStorage.setItem(MODEL_KEY, id);
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   const push = useCallback((msg: Omit<AiChatMessage, 'id'>) => {
@@ -127,6 +159,7 @@ export function useAiChat() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             messages: messagesRef.current.map(({ role, content: c }) => ({ role, content: c })),
+            model: modelRef.current,
           }),
           signal: abortRef.current.signal,
         });
@@ -170,5 +203,5 @@ export function useAiChat() {
     setMessages([]);
   }, []);
 
-  return { messages, sending, offline, quota, send, clear };
+  return { messages, sending, offline, quota, model, setModel, send, clear };
 }

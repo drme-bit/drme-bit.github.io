@@ -142,7 +142,7 @@ function Terminals({ heroRef }: TerminalsProps) {
         <div
           key={term.title}
           ref={(el) => { termRefs.current[i] = el; }}
-          className="absolute overflow-hidden rounded-[var(--radius-sm)] border border-[var(--terminal-border)] bg-[var(--terminal-bg)] opacity-[0.03] backdrop-blur-[2px]"
+          className={`absolute overflow-hidden rounded-[var(--radius-sm)] border border-[var(--terminal-border)] bg-[var(--terminal-bg)] opacity-[0.03] backdrop-blur-[2px] ${i > 1 ? 'max-md:hidden' : ''}`}
           style={{ left: `${term.x}%`, top: `${term.y}%`, width: term.w, height: term.h }}
         >
           <div className="flex items-center gap-2 border-b border-[var(--terminal-bar-border)] bg-[var(--terminal-bar)] px-3 py-[7px]">
@@ -194,7 +194,7 @@ function Avatar({ avatarRef }: { avatarRef: React.RefObject<HTMLDivElement | nul
           width={96}
           height={96}
           unoptimized
-          className="h-[clamp(68px,8vw,96px)] w-[clamp(68px,8vw,96px)] rounded-full border-[1.75px] border-[var(--accent-muted)] object-cover grayscale-[0.15] transition-[filter,border-color,transform] duration-300 hover:rotate-[360deg] hover:border-[var(--accent)] hover:grayscale-0 hover:duration-1000 max-md:h-12 max-md:w-12"
+          className="h-[clamp(68px,8vw,96px)] w-[clamp(68px,8vw,96px)] rounded-full border-[1.75px] border-[var(--accent-muted)] object-cover grayscale-[0.15] transition-[filter,border-color,transform] duration-300 hover:rotate-[360deg] hover:border-[var(--accent)] hover:grayscale-0 hover:duration-1000 max-md:h-[60px] max-md:w-[60px]"
           onLoad={() => setLoaded(true)}
         />
       </a>
@@ -210,7 +210,7 @@ const heroIconMap = {
 
 function ResumeRow({ stats, resumeRef }: { stats: GithubStats | null; resumeRef: React.RefObject<HTMLDivElement | null> }) {
   return (
-    <div ref={resumeRef} className="mb-3 flex flex-wrap items-center justify-center gap-3">
+    <div ref={resumeRef} className="mb-3 flex flex-wrap items-center justify-center gap-3 max-md:mb-2 max-md:gap-2">
       <TransitionLink
         href="/resume"
         className={RESUME_BUTTON}
@@ -287,8 +287,8 @@ const TOOL_COLORS: Record<string, string> = {
 };
 
 const PHOTO_SPOTS = [
-  'top-[9%] left-[4%] w-52',
-  'top-[7%] right-[5%] w-48',
+  'top-[9%] left-[4%] w-52 max-md:w-28',
+  'top-[7%] right-[5%] w-48 max-md:w-28',
   'bottom-[15%] left-[5%] w-44',
   'bottom-[13%] right-[6%] w-52',
   'top-[37%] left-[2%] w-36',
@@ -308,7 +308,7 @@ function FloatingBackdrop() {
         <FloatingElement
           key={photo.src}
           depth={PHOTO_DEPTHS[i % PHOTO_DEPTHS.length]}
-          className={`${PHOTO_SPOTS[i % PHOTO_SPOTS.length]} ${i > 3 ? 'max-lg:hidden' : ''}`}
+          className={`${PHOTO_SPOTS[i % PHOTO_SPOTS.length]} ${i > 3 ? 'max-lg:hidden' : ''} ${i > 1 ? 'max-md:hidden' : ''}`}
         >
           <Image
             src={photo.src}
@@ -324,7 +324,7 @@ function FloatingBackdrop() {
         <FloatingElement
           key={label}
           depth={TOOL_DEPTHS[i % TOOL_DEPTHS.length]}
-          className={`${TOOL_SPOTS[i % TOOL_SPOTS.length]} ${i > 3 ? 'max-md:hidden' : ''}`}
+          className={`${TOOL_SPOTS[i % TOOL_SPOTS.length]} ${i > 3 ? 'max-lg:hidden' : ''} ${i > 1 ? 'max-md:hidden' : ''}`}
         >
           <span className="block opacity-90 transition-all duration-200 hover:scale-110 hover:opacity-100">
             {tool.icon({ size: 30, color: TOOL_COLORS[label] })}
@@ -448,10 +448,10 @@ export default function Hero() {
         <Terminals heroRef={sectionRef} />
         <FloatingBackdrop />
 
-        <div className="pointer-events-auto relative z-10 flex flex-col items-center px-[5vw] text-center max-md:pt-[12vh]">
+        <div className="pointer-events-auto relative z-10 flex flex-col items-center px-[5vw] text-center max-md:pt-[7vh]">
           <Avatar avatarRef={avatarRef} />
 
-          <h1 ref={nameRef} className="mb-[0.4rem] mt-[1.2rem] flex flex-col leading-none">
+          <h1 ref={nameRef} className="mb-[0.4rem] mt-[1.2rem] flex flex-col leading-none max-md:mb-2 max-md:mt-3">
             <span className="animate-name-shimmer bg-[linear-gradient(135deg,var(--text)_0%,var(--accent)_40%,var(--accent-secondary)_100%)] bg-[length:200%_200%] bg-clip-text font-display text-[clamp(2.2rem,5.5vw,4.5rem)] font-bold tracking-[-0.04em] text-transparent max-md:text-[clamp(1.6rem,9vw,2.4rem)]">
               {profile.firstName}
             </span>
@@ -460,14 +460,14 @@ export default function Hero() {
             </span>
           </h1>
 
-          <div ref={roleRef} className="mb-4 h-[1.4em] font-mono text-[clamp(0.7rem,1vw,0.85rem)] tracking-[0.06em] text-[var(--text-dim)] max-md:text-[0.8rem]">
+          <div ref={roleRef} className="mb-4 h-[1.4em] font-mono text-[clamp(0.7rem,1vw,0.85rem)] tracking-[0.06em] text-[var(--text-dim)] max-md:mb-3 max-md:text-[0.72rem]">
             <FlipBoard words={TYPEWRITER_STRINGS} />
           </div>
 
           <ResumeRow stats={stats} resumeRef={resumeRef} />
 
-          <p ref={taglineRef} className="m-0 font-mono text-[0.78rem] lowercase tracking-[0.08em] text-[var(--text-secondary)]">
-            {profile.location} · available for work · replies in &lt; 24h
+          <p ref={taglineRef} className="m-0 max-w-[30ch] font-mono text-[0.78rem] lowercase leading-relaxed tracking-[0.08em] text-[var(--text-secondary)] max-md:text-[0.66rem]">
+            {profile.location} · available · replies &lt; 24h
           </p>
         </div>
 

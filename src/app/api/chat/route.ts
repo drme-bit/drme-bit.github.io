@@ -2,10 +2,33 @@ import { NextResponse } from 'next/server';
 import { checkChatQuota, getClientIp, CHAT_QUOTA_LIMIT } from './quota';
 
 /*  Portfolio AI chat via Vercel AI Gateway (OpenAI-compatible endpoint).
+    Free allowlist only — zero-price catalog models, no credits needed.
     Server-only: the API key never reaches the browser.
-    Requires AI_GATEWAY_API_KEY in env. Optional AI_MODEL override.  */
+    Requires AI_GATEWAY_API_KEY in env.  */
 
 export const runtime = 'nodejs';
+
+/*  Curated free models only (vercel.com/ai-gateway/models?freeTier=true,
+    verified against the live /v1/models catalog) — the client hint is
+    validated, never trusted.  */
+
+const CHAT_MODELS = [
+  'inclusionai/ling-3.0-flash-sante-free',
+  'poolside/laguna-s-2.1-free',
+  'openai/gpt-5-nano',
+] as const;
+export type ChatModel = (typeof CHAT_MODELS)[number];
+export const DEFAULT_CHAT_MODEL: ChatModel = 'inclusionai/ling-3.0-flash-sante-free';
+
+function pickModel(raw: unknown): ChatModel {
+  if (typeof raw === 'string' && (CHAT_MODELS as readonly string[]).includes(raw)) {
+    return raw as ChatModel;
+  }
+  if (process.env.AI_MODEL && (CHAT_MODELS as readonly string[]).includes(process.env.AI_MODEL)) {
+    return process.env.AI_MODEL as ChatModel;
+  }
+  return DEFAULT_CHAT_MODEL;
+}
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -50,7 +73,7 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { messages?: ChatMessage[] } = {};
+  let body: { messages?: ChatMessage[]; model?: unknown } = {};
   try {
     body = await req.json();
   } catch {
@@ -68,14 +91,14 @@ export async function POST(req: Request) {
   }
 
   try {
-    const res = await fetch('https://ai-gateway.vercel.app/v1/chat/completions', {
+    const res = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: process.env.AI_MODEL ?? 'openai/gpt-4o-mini',
+        model: pickModel(body.model),
         messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...clean],
         max_tokens: 500,
         temperature: 0.7,

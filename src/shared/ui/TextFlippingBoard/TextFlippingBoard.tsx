@@ -36,7 +36,7 @@ const ACCENT_COLORS: AccentColor[] = [
 ];
 
 const CELL_TEXT_STYLE: React.CSSProperties = {
-  fontSize: 'clamp(8px, 3vw, 40px)',
+  fontSize: 'clamp(10px, 4vw, 40px)',
   lineHeight: 1,
 };
 

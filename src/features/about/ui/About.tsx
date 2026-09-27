@@ -99,6 +99,7 @@ export default function About() {
                   href="/projects/gmod-roblox"
                   preview="/media/projects/project-gmod/images/pgm_overview.webp"
                   caption="GMod × Roblox — live ops"
+                  desc="Anime, trading economies and horror titles with 2,000+ daily players across live experiences."
                 >
                   Roblox experiences
                 </HoverPreviewLink>{' '}
@@ -107,6 +108,7 @@ export default function About() {
                   href="/projects/nexagon"
                   preview="/media/projects/nexagon/images/nexagon_main.webp"
                   caption="Nexagon — server monitoring"
+                  desc="Real-time game server monitoring platform built with Rust, React and WebGPU."
                 >
                   Nexagon
                 </HoverPreviewLink>
@@ -115,6 +117,7 @@ export default function About() {
                   href="/blog"
                   preview="/images/perspective.webp"
                   caption="Notes on building"
+                  desc="Short technical notes on architecture, backends and shipping software."
                 >
                   write about the process
                 </HoverPreviewLink>{' '}

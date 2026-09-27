@@ -9,63 +9,68 @@ const KNOWLEDGE: KnowledgeEntry[] = [
     keywords: ['what is this', 'what is this site', 'what is this website', 'this site', 'about this site', 'tell me about this', 'portfolio', ''],
     priority: 1,
     answer:
-      "This is Vyacheslav Tkachik's personal site — built with React, Three.js, R3F, and SCSS. It features a 3D skills globe, terminal-style hero, scrolling timeline, and a Companion Cube mascot.",
+      "This is Vyacheslav Tkachyk's personal site — built with Next.js, React, Tailwind, GSAP and Lenis. It features a live 3D terrain background, a scroll-driven PROJECTS portal, an experience timeline, and an AI chat behind the Ask button.",
   },
   {
-    keywords: ['who made', 'who built', 'who created', 'creator', 'author', 'vyacheslav', 'tkachik', 'your name', 'developer', 'about you'],
+    keywords: ['who made', 'who built', 'who created', 'creator', 'author', 'vyacheslav', 'tkachyk', 'tkachik', 'your name', 'developer', 'about you'],
     priority: 2,
     answer:
-      "Vyacheslav Tkachik, also known as drme-bit. Full-stack developer into web tech, game servers, and 3D visuals. Born in 2006. This site is his playground.",
+      "Vyacheslav Tkachyk, also known as drme-bit. Full-stack developer into web tech, game servers, and 3D visuals. This site is his playground.",
   },
   {
     keywords: ['skills', 'technologies', 'tech stack', 'what can you do', 'languages', 'stack', 'know', 'proficient', 'experienced with'],
     answer:
-      "Vyacheslav works with React, TypeScript, Three.js, R3F, SCSS, Rust, WebGPU, Luau, roblox-ts, MySQL, Python, and C/C++/C#. The 3D globe on this site knows the main ones.",
+      "Vyacheslav works with React, TypeScript, JavaScript, Node.js, Three.js, R3F, Rust, Python, Go, Java, C/C++/C#, SCSS, PostgreSQL, Redis, Docker, Git, Luau, Linux, WebGPU and OpenGL.",
   },
   {
     keywords: ['projects', 'work', 'what have you built', 'what did you make', 'showcase', 'portfolio projects'],
     answer:
-      "Two featured projects: 1) drme-bit.github.io — this very portfolio with 3D globe and terminal UI. 2) Nexagon — game server monitoring dashboard built with Rust, React, and WebGPU. He also does freelance development — Roblox experiences, bots, backend APIs, and custom full-stack solutions.",
+      "Three featured projects: 1) Nexagon — game server monitoring platform built with Rust, React and WebGPU (also his diploma thesis). 2) BloxingBad — PvP combat systems on Roblox. 3) GMod × Roblox — a Garry's Mod-style sandbox toybox. He also does freelance — Roblox experiences, bots, backend APIs, and custom full-stack solutions.",
   },
   {
     keywords: ['experience', 'job', 'work history', 'career', 'background', 'professional', 'employment'],
     answer:
-      "Timeline highlights: Freelance development since 2021 — Roblox experiences, bots, and backend systems. Nexagon diploma projects (2026) — a game server monitoring platform for his bachelor's in Software Engineering. Also built banking app backends and various automation tools.",
+      "Timeline highlights: freelance development since 2021 — Roblox experiences with 2,000+ daily players, Discord/Telegram bots, and backend systems. A banking app simulation backend (REST accounts, transactions, transfers) as a team project. Nexagon (2026) as his bachelor's thesis in Software Engineering.",
   },
   {
     keywords: ['contact', 'email', 'reach', 'get in touch', 'social', 'hire', 'message'],
     answer:
-      "You can reach Vyacheslav via email at vacheslavtkachik@gmail.com, or check out his GitHub at github.com/drme-bit. There's also a contact form in the contacts section of this site. He's open to freelance and collaboration.",
+      "You can reach Vyacheslav via email at vacheslavtkachik@gmail.com, on LinkedIn, or on his Discord server — all linked in the contacts section of this site, which also has a contact form. He's open to freelance and collaboration.",
   },
   {
-    keywords: ['education', 'study', 'studying', 'university', 'college', 'degree', 'bachelor', 'learn'],
+    keywords: ['education', 'study', 'studying', 'university', 'college', 'degree', 'bachelor', 'learn', 'diploma'],
     answer:
-      "Vyacheslav earned his Bachelor's in Software Engineering in 2026. His diploma projects was Nexagon — a game server monitoring tool built with Rust, React, and much more.",
+      "Vyacheslav earned a Professional Junior Bachelor's degree in Software Engineering in 2026. His diploma project was Nexagon — a game server monitoring platform built with Rust, React and WebGPU.",
   },
   {
     keywords: ['location', 'where are you', 'based', 'live', 'country', 'timezone'],
     answer:
-      "Currently based in Ukraine. Working remotely as a freelance developer. The terminal hero section on this site shows the location too.",
+      "Based in Odesa, Ukraine (GMT+3), working remotely as a freelance developer.",
   },
   {
-    keywords: ['globe', '3d globe', 'skills globe', 'sphere', '3d skills'],
+    keywords: ['globe', '3d globe', 'skills globe', 'sphere', '3d skills', 'terrain', 'background'],
     answer:
-      "That's the interactive 3D skills globe in the skills section! Built with Three.js and react-three-fiber. It shows tech skills as orbiting nodes with connecting lines. Click a skill to highlight it. The globe even has a subtle float animation and pulse rings. I'm a bit jealous of it, honestly.",
+      "The old skills globe is gone — the background is now a live 3D terrain rendered with Three.js and react-three-fiber, with drifting noise, a starfield, and beacons. It even pauses itself while the PROJECTS portal covers the screen.",
   },
   {
-    keywords: ['timeline', 'experience timeline', 'scroll timeline', 'head dot', 'golden dot'],
+    keywords: ['timeline', 'experience timeline', 'scroll timeline', 'beam', 'rail'],
     answer:
-      "The timeline in the Experience section has a sticky golden head dot that travels down as you scroll — like Git HEAD. Entries light up when the dot reaches them. On mobile the line shifts to the left. Pretty slick.",
+      "The Experience section is a scroll-driven timeline: a glowing beam fills as you scroll, sticky year titles ride along, and a times rail on the right tracks where you are. Click any period to jump to it.",
   },
   {
-    keywords: ['terminal', 'hero', 'terminal section', 'whoami', 'crt', 'scanlines'],
+    keywords: ['terminal', 'hero', 'whoami', 'crt', 'scanlines'],
     answer:
-      "The hero section features a terminal with CRT scanlines, a live clock, ambient particles floating upward, and a glowing pulse animation. There's a $ whoami greeting, location, and a resume button that downloads his CV. It sets the whole hacker aesthetic.",
+      "The hero section is terminal-inspired: avatar, shimmer name, a flipping role board, resume button, live GitHub stats, floating project photos, and social links. It sets the whole hacker aesthetic.",
   },
   {
     keywords: ['companion cube', 'mascot', 'who are you', 'what are you', 'cube'],
     answer:
-      "I'm a Companion Cube — a legendary artifact. My job is to sit here, look cute with my heart-shaped face, and make sarcastic comments. Click me to chat! I can answer questions about this site or just entertain you with random tech facts.",
+      "I'm a Companion Cube — a legendary artifact. My job is to answer questions about this site. Hit the Ask button in the navbar to open this chat — no floating cube anymore, I moved in here.",
+  },
+  {
+    keywords: ['chat', 'ask', 'ai assistant', 'how to open', 'talk to you'],
+    answer:
+      "This chat! Open it with the Ask button in the navbar (top right). You get about 10 questions per day, and you can pick the model in the chat header. I answer from the site knowledge plus an AI backend when it's configured.",
   },
   {
     keywords: ['aperture', 'portal', 'glados', 'cake', 'aperture science'],
@@ -76,22 +81,22 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['design', 'theme', 'dark mode', 'style', 'aesthetic', 'color scheme', 'ui', 'ux'],
     answer:
-      "The site uses a dark terminal-inspired design system with monospace fonts, accent cyan (#5ec8d8), and subtle borders. It features sticky-scroll sections, a dot-grid overlay, and custom cursor trails. The overall vibe is 'hacker-chic meets Aperture Science.'",
+      "The site uses a dark terminal-inspired design system with Geist fonts, accent sky (#7dd3fc), hairline borders and 6px radii, following Vercel/Linear/Geist language. It features sticky-scroll sections, a dot-grid overlay, and a custom arrow cursor.",
   },
   {
     keywords: ['animations', 'effects', 'particles', 'three.js', 'webgl', '3d', 'r3f', 'react-three'],
     answer:
-      "Heavy use of Three.js via react-three-fiber: the 3D skills globe with wireframe, particles, connecting lines, and float animation. Also ambient canvas particles in the hero, CRT scanlines, custom cursor trails, and FLIP modal animations in the projects section. All with rAF-based scroll updates for smoothness on mobile.",
+      "Heavy use of Three.js via react-three-fiber: the live 3D terrain with drifting noise, starfield and beacons. Plus GSAP scroll choreography, a scroll-driven SVG camera flight into the PROJECTS section, Lenis smooth scrolling, and FLIP animations. All budgeted per-frame for Safari.",
   },
   {
-    keywords: ['search', 'search bar', 'magnifying glass', 'search this site'],
+    keywords: ['search', 'search bar', 'magnifying glass', 'search this site', 'command', 'palette'],
     answer:
-      "That search bar in the top right? Yeah, it doesn't actually search anything. It's just there to look cool. Try clicking it — I'll pop up and mock you for it. I told you it doesn't work!",
+      "The search in the navbar is a real command palette — hit it or press Cmd/Ctrl+K, type a section, page or skill, and jump straight there. It also scrolls its own list while the page stays put.",
   },
   {
     keywords: ['navigation', 'menu', 'drawer', 'sections', 'how to navigate'],
     answer:
-      "Use the Navbar at the top or the Drawer menu (hamburger icon) to jump between sections: Hero, About, Skills, Experience, Projects, Contacts. Each section has a terminal-style header with a number like [01], [02], etc.",
+      "Use the navbar pill at the top — groups open dropdowns with featured cards — or the menu sheet on mobile. Sections on the home page: About, Experience, Projects, Blog, Reviews, Contacts.",
   },
   {
     keywords: ['status', 'available', 'freelance', 'open to work', 'hiring', 'resume'],
@@ -101,7 +106,7 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['github', 'source code', 'repository', 'repo', 'open source'],
     answer:
-      "The source code for this portfolio is on GitHub at github.com/drme-bit/drme-bit.github.io. Other projects like Nexagon also have repos linked in the projects cards.",
+      "The source code for this portfolio is on GitHub at github.com/drme-bit/drme-bit.github.io. Project repos are linked on the project pages.",
   },
 ];
 

@@ -7,7 +7,8 @@ import { useChat } from '@/app/providers/ChatProvider';
 import { MAQ } from '@/entities/mascot';
 import { CHAT_QUOTA_LIMIT } from '@/app/api/chat/quota';
 import CompanionCube from './CompanionCube';
-import { useAiChat } from './useAiChat';
+import { useAiChat, CHAT_MODELS } from './useAiChat';
+import type { ChatModelId } from './useAiChat';
 
 /*  Geist-style chat: user messages are inverted pills, assistant replies
     are plain rows (no bubbles), composer sends with an arrow button.  */
@@ -16,7 +17,7 @@ export default function Mascot() {
   const { open, setOpen } = useChat();
   const [draft, setDraft] = useState('');
   const [showJump, setShowJump] = useState(false);
-  const { messages, sending, offline, quota, send, clear } = useAiChat();
+  const { messages, sending, offline, quota, model, setModel, send, clear } = useAiChat();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const stickRef = useRef(true);
@@ -102,6 +103,19 @@ export default function Mascot() {
               {statusText}
             </span>
           </div>
+          <select
+            value={model}
+            onChange={(e) => setModel(e.target.value as ChatModelId)}
+            aria-label="AI model"
+            tabIndex={open ? undefined : -1}
+            className="h-7 max-w-[104px] shrink-0 cursor-pointer truncate rounded-[var(--radius-sm)] border border-[var(--border)] bg-transparent px-1.5 font-mono text-[11px] text-[var(--text-dim)] outline-none transition-colors hover:border-[var(--border-hover)] hover:text-[var(--text)] [&>option]:bg-[var(--bg-elevated)]"
+          >
+            {CHAT_MODELS.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
+            ))}
+          </select>
           <button
             type="button"
             onClick={clear}

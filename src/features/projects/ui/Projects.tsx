@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { gsap } from 'gsap';
@@ -117,47 +117,47 @@ function useMarquee(
   return { onEnter, onLeave, pausedRef };
 }
 
-/*  Projects List Component  */
+/*  Projects List Component — IO reveal (not ScrollTrigger opacity):
+    ST-driven opacity can strand cards at 0 on mobile Safari when the
+    toolbar resizes mid-measure. IO classes can't get stuck.  */
 
-export function ProjectsList() {
-  const listRef = useRef<HTMLDivElement>(null);
+function Reveal({ children, className }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
 
-  useGSAP(() => {
-    const list = listRef.current;
-    if (!list) return;
-
-    const ctx = gsap.context(() => {
-      const cards = Array.from(list.querySelectorAll('.pr-card'));
-      cards.forEach((card) => {
-        const gallery = card.querySelector('.pr-gallery');
-        const content = card.querySelector('.pr-content');
-
-        gsap.fromTo(
-          [gallery, content],
-          { opacity: 0, y: 30 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 80%',
-              toggleActions: 'play none none none',
-            },
-          },
-        );
-      });
-    }, listRef);
-
-    return () => ctx.revert();
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.08 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
+  return (
+    <div
+      ref={ref}
+      className={`transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        visible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+      } ${className ?? ''}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function ProjectsList() {
   const allProjects = projects.all;
 
   return (
-    <div ref={listRef} className="relative flex flex-col will-change-[transform,filter,opacity]">
+    <div className="relative flex flex-col will-change-[transform,filter,opacity]">
       {allProjects.map((project, i) => {
         const meta = STATUS_META[project.status] || STATUS_META.ACTIVE;
         const images =
@@ -166,7 +166,9 @@ export function ProjectsList() {
 
         return (
           <div key={project.id}>
-            <ProjectCardItem project={project} index={i} meta={meta} images={images} />
+            <Reveal>
+              <ProjectCardItem project={project} index={i} meta={meta} images={images} />
+            </Reveal>
             {!isLast && <CardSeparator />}
           </div>
         );
