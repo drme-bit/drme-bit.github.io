@@ -1,5 +1,4 @@
 const IS_DEV = process.env.NODE_ENV === 'development';
-const NOOP = () => {};
 
 const STYLES = {
   log: 'color:#7289da;font-weight:700',
@@ -62,4 +61,6 @@ export function groupEnd(): void {
   console.groupEnd();
 }
 
-export default { log, info, success, warn, error, debug, group, groupEnd };
+const logger = { log, info, success, warn, error, debug, group, groupEnd };
+
+export default logger;

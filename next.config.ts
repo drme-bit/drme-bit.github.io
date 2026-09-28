@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     loadPaths: [path.resolve('./src')],
   },
   images: {
-    qualities: [75, 85, 90],
+    qualities: [75, 80, 85, 90],
   },
   experimental: {
     optimizePackageImports: ['react-icons', 'lucide-react', 'motion'],

@@ -4,8 +4,8 @@ import {
   SiPostgresql, SiRedis, SiGit, SiDocker,
   SiOpengl, SiLinux,
   FiCode, FiCpu,
-} from '@/shared/ui/atoms/Icon';
-import { DiJava } from '@/shared/ui/atoms/Icon';
+} from '@/shared/ui/Icon';
+import { DiJava } from '@/shared/ui/Icon';
 import type { IconType } from 'react-icons';
 import type { SkillData } from './skill-graph';
 
@@ -112,7 +112,7 @@ export const SKILLS_DATA: SkillData[] = [
   },
   {
     name: 'C#',
-    group: 'frontend',
+    group: 'backend',
     category: 'language',
     level: 3,
     difficulty: 3,

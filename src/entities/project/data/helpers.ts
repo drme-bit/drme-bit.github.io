@@ -8,7 +8,7 @@ export const PRESENTATION = {
   compact: { cls: 'pp-page--compact', eyebrow: 'snapshot', hint: 'compressed and data-heavy' },
 };
 
-export function createProject(overrides: Record<string, any>) {
+export function createProject(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     id: '',
     title: '',

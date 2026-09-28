@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useMemo, useEffect, useState } from 'react';
+import { useRef, useMemo, useEffect, useState, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useTheme } from '@/app/providers/ThemeProvider';
@@ -59,7 +59,7 @@ function Starfield() {
   const matRef = useRef<THREE.PointsMaterial>(null);
   const { colors } = useTheme();
 
-  const geometry = useMemo(() => {
+  const [geometry] = useState(() => {
     const count = 700;
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
@@ -73,7 +73,7 @@ function Starfield() {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     return geo;
-  }, []);
+  });
 
   useFrame(({ mouse }) => {
     if (!ref.current) return;
@@ -97,6 +97,35 @@ function Starfield() {
   );
 }
 
+interface TerrainGeo {
+  pointsGeo: THREE.BufferGeometry;
+  wireGeo: THREE.BufferGeometry;
+  heightField: Float32Array;
+  maxWireSegments: number;
+}
+
+function createTerrainGeo(): TerrainGeo {
+  const pGeo = new THREE.BufferGeometry();
+  const pos = new Float32Array(TOTAL_POINTS * 3);
+  const col = new Float32Array(TOTAL_POINTS * 3);
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  pGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+
+  const maxSegs = GRID_X * GRID_Z * 4;
+  const wGeo = new THREE.BufferGeometry();
+  const wPos = new Float32Array(maxSegs * 6);
+  const wAttr = new THREE.BufferAttribute(wPos, 3);
+  wAttr.setUsage(THREE.DynamicDrawUsage);
+  wGeo.setAttribute('position', wAttr);
+
+  return {
+    pointsGeo: pGeo,
+    wireGeo: wGeo,
+    heightField: new Float32Array(TOTAL_POINTS),
+    maxWireSegments: maxSegs,
+  };
+}
+
 function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
   const pointsRef = useRef<THREE.Points>(null);
   const wireRef = useRef<THREE.LineSegments>(null);
@@ -108,41 +137,24 @@ function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
   const scrollSmoothed = useRef(0);
   const noiseOffset = useRef(0);
   const amplitude = useRef(0.9);
-  const frameCount = useRef(0);
+  const lastRecompute = useRef(0);
 
   const { theme, colors } = useTheme();
   const terrain = useTerrain();
 
-  const { pointsGeo, wireGeo, heightField, maxWireSegments } = useMemo(() => {
-    const pGeo = new THREE.BufferGeometry();
-    const pos = new Float32Array(TOTAL_POINTS * 3);
-    const col = new Float32Array(TOTAL_POINTS * 3);
-    pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    pGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const [geos] = useState(createTerrainGeo);
+  // Mutable three.js objects live in a ref: mutating ref contents is allowed,
+  // mutating useState values is not. `geos` itself is only read (JSX, deps).
+  const geosRef = useRef(geos);
 
-    const maxSegs = GRID_X * GRID_Z * 4;
-    const wGeo = new THREE.BufferGeometry();
-    const wPos = new Float32Array(maxSegs * 6);
-    const wAttr = new THREE.BufferAttribute(wPos, 3);
-    wAttr.setUsage(THREE.DynamicDrawUsage);
-    wGeo.setAttribute('position', wAttr);
-
-    return {
-      pointsGeo: pGeo,
-      wireGeo: wGeo,
-      heightField: new Float32Array(TOTAL_POINTS),
-      maxWireSegments: maxSegs,
-    };
-  }, []);
-
-  function recompute(offset: number, amp: number) {
+  const recompute = useCallback((offset: number, amp: number, isLight: boolean) => {
+    const { pointsGeo, wireGeo, heightField, maxWireSegments } = geosRef.current;
     const posAttr = pointsGeo.attributes.position as THREE.BufferAttribute;
     const colAttr = pointsGeo.attributes.color as THREE.BufferAttribute;
     const positions = posAttr.array as Float32Array;
     const pointColors = colAttr.array as Float32Array;
 
     let idx = 0;
-    const isLight = theme === 'light';
 
     for (let zi = 0; zi < GRID_Z; zi++) {
       const z = zi * SPACING - HALF_Z;
@@ -203,11 +215,11 @@ function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
 
     wireGeo.setDrawRange(0, segCount * 2);
     wirePosAttr.needsUpdate = true;
-  }
+  }, []);
 
   useEffect(() => {
-    recompute(0, amplitude.current);
-  }, [theme]);
+    recompute(0, amplitude.current, theme === 'light');
+  }, [theme, recompute]);
 
   useFrame(() => {
     if (terrain.paused) return;
@@ -220,16 +232,19 @@ function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
     amplitude.current = (0.7 + scrollSmoothed.current * 1.1 + breathing) * terrain.amplitude;
     noiseOffset.current += (0.0015 + scrollSmoothed.current * 0.01) * terrain.speed;
 
-    frameCount.current++;
-    if (frameCount.current % 2 === 0) {
-      recompute(noiseOffset.current, amplitude.current);
+    // Time-gated: full terrain rebuild at ~5Hz is plenty for drifting
+    // noise, and keeps CPU spikes away from scroll-driven animation.
+    const now = performance.now();
+    if (now - lastRecompute.current > 200) {
+      lastRecompute.current = now;
+      recompute(noiseOffset.current, amplitude.current, theme === 'light');
     }
     if (wireMatRef.current) wireMatRef.current.color.set(colors.accent);
   });
 
   return (
     <group>
-      <points ref={pointsRef} geometry={pointsGeo} frustumCulled={false}>
+      <points ref={pointsRef} geometry={geos.pointsGeo} frustumCulled={false}>
         <pointsMaterial
           ref={pointsMatRef}
           vertexColors
@@ -239,7 +254,7 @@ function Terrain({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
           sizeAttenuation
         />
       </points>
-      <lineSegments ref={wireRef} geometry={wireGeo} frustumCulled={false}>
+      <lineSegments ref={wireRef} geometry={geos.wireGeo} frustumCulled={false}>
         <lineBasicMaterial
           ref={wireMatRef}
           color={colors.accent}
@@ -311,6 +326,8 @@ function Beacons() {
   );
 }
 
+const _camTarget = new THREE.Vector3();
+
 function IsoCamera({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
   const { camera, gl } = useThree();
   const angle = useRef(0.78);
@@ -361,26 +378,43 @@ function IsoCamera({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
     const camY = 16 - (16 - isoY) * t;
     const camZ = -4 + (isoZ + 4) * t;
 
-    camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.05);
+    camera.position.lerp(_camTarget.set(camX, camY, camZ), 0.05);
     camera.lookAt(0, 0.3 * t, -4);
   });
 
   return null;
 }
 
-function useLowPowerMode() {
-  const [low, setLow] = useState(true);
+function PixelRatioManager({ lowPower }: { lowPower: boolean }) {
+  const gl = useThree((s) => s.gl);
 
   useEffect(() => {
-    const isMobile = window.innerWidth <= 768;
-    const isLowMem =
-      typeof navigator !== 'undefined' &&
-      (navigator as Navigator & { deviceMemory?: number }).deviceMemory !== undefined &&
-      (navigator as Navigator & { deviceMemory?: number }).deviceMemory! < 4;
+    const apply = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const area = window.innerWidth * window.innerHeight;
+      // Keep framebuffer pixels bounded: past ~3.5M CSS px the ratio falls
+      // smoothly, so fullscreen/4K stops rasterizing 10M+ pixels per frame.
+      // The terrain is points/lines — it stays crisp well below DPR.
+      const budget = Math.sqrt(3_500_000 / Math.max(area, 1));
+      gl.setPixelRatio(Math.min(dpr, lowPower ? 1 : 1.25, Math.max(budget, 0.65)));
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    return () => window.removeEventListener('resize', apply);
+  }, [gl, lowPower]);
 
+  return null;
+}
+
+function useLowPowerMode() {
+  const [low] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    const isMobile = window.innerWidth <= 768;
+    const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+    const isLowMem = mem !== undefined && mem < 4;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setLow(isMobile || isLowMem || prefersReduced);
-  }, []);
+    return isMobile || isLowMem || prefersReduced;
+  });
 
   return low;
 }
@@ -388,13 +422,21 @@ function useLowPowerMode() {
 function FogUpdater() {
   const { scene } = useThree();
   const { theme, colors } = useTheme();
+  const fogRef = useRef<THREE.Fog | null>(null);
+  if (fogRef.current === null) {
+    fogRef.current = new THREE.Fog('#080808', _isMobile ? 10 : 14, _isMobile ? 28 : 34);
+  }
+  const lastColor = useRef<string | null>(null);
 
+  // eslint-disable-next-line react-hooks/immutability -- R3F scene graph is external mutable state
   useFrame(() => {
     const fogColor = theme === 'light' ? colors.bg : '#080808';
     if (!scene.fog) {
-      scene.fog = new THREE.Fog(fogColor, _isMobile ? 10 : 14, _isMobile ? 28 : 34);
-    } else if (scene.fog.color.getStyle() !== fogColor) {
-      scene.fog.color.set(fogColor);
+      // eslint-disable-next-line react-hooks/immutability -- R3F scene graph is external mutable state
+      scene.fog = fogRef.current;
+    } else if (lastColor.current !== fogColor) {
+      lastColor.current = fogColor;
+      fogRef.current!.color.set(fogColor);
     }
   });
 
@@ -405,6 +447,16 @@ export default function Scene() {
   const lowPower = useLowPowerMode();
   const { colors } = useTheme();
   const scrollT = useScrollProgress();
+  // Paused while an opaque takeover (projects portal) covers the viewport.
+  const [bgPaused, setBgPaused] = useState(false);
+
+  useEffect(() => {
+    const onPause = (e: Event): void => {
+      setBgPaused((e as CustomEvent<boolean>).detail);
+    };
+    window.addEventListener('bg-pause', onPause);
+    return () => window.removeEventListener('bg-pause', onPause);
+  }, []);
 
   return (
     <Canvas
@@ -416,12 +468,9 @@ export default function Scene() {
         powerPreference: 'high-performance',
         stencil: false,
         depth: true,
-        preserveDrawingBuffer: true,
+        preserveDrawingBuffer: false,
       }}
-      frameloop="always"
-      onCreated={({ gl }) => {
-        gl.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 1.5));
-      }}
+      frameloop={bgPaused ? 'never' : 'always'}
       style={{
         position: 'fixed',
         inset: 0,
@@ -430,6 +479,7 @@ export default function Scene() {
         pointerEvents: 'auto',
       }}
     >
+      <PixelRatioManager lowPower={lowPower} />
       <FogUpdater />
       <IsoCamera scrollT={scrollT} />
       <Terrain scrollT={scrollT} />

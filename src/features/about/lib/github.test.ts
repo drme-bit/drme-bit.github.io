@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { contributionLevel, buildHeatmap, buildHeatmapData, HEATMAP_WEEKS } from './github';
-import type { HeatmapLevel } from './github';
 
 describe('contributionLevel', () => {
   it('maps zero counts to empty', () => {

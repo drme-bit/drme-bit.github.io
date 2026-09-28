@@ -1,111 +1,37 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import CodeBlock from '@/shared/ui/molecules/CodeBlock/CodeBlock';
-import styles from './PostContent.module.scss';
-
-function Section({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.1 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`${styles['section']}${visible ? ` ${styles['is-visible']}` : ''}`}
-      style={{ transitionDelay: `${delay}s` }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function ComparisonCard({ title, items, variant }: { title: string; items: string[]; variant: 'before' | 'after' }) {
-  return (
-    <div className={`${styles['compare-card']} ${styles[`compare-card--${variant}`]}`}>
-      <div className={styles['compare-card-header']}>
-        <span className={styles['compare-card-badge']}>
-          {variant === 'before' ? '✗ cobe' : '✓ three-globe'}
-        </span>
-        <span className={styles['compare-card-title']}>{title}</span>
-      </div>
-      <ul className={styles['compare-card-list']}>
-        {items.map((item, i) => (
-          <li key={i} className={styles['compare-card-item']}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+import CodeBlock from '@/shared/ui/CodeBlock/CodeBlock';
+import {
+  Article,
+  Section,
+  H2,
+  P,
+  Grid2,
+  CompareCard,
+} from '../ui/Article';
 
 export default function PostContent() {
   return (
-    <div className={styles.page}>
-      {/* Hero */}
-      <header className={styles.hero}>
-        <div className={styles['hero-globe']}>
-          <div className={styles['hero-globe-ring']} />
-          <div className={styles['hero-globe-ring']} />
-          <div className={styles['hero-globe-ring']} />
-          <div className={styles['hero-globe-core']} />
-        </div>
-        <div className={styles['hero-content']}>
-          <div className={styles['hero-badge']}>Frontend</div>
-          <h1 className={styles['hero-title']}>
-            Why I Replaced{' '}
-            <span className={styles['hero-strike']}>cobe</span>{' '}
-            with{' '}
-            <span className={styles['hero-accent']}>three-globe</span>
-          </h1>
-          <p className={styles['hero-desc']}>
-            cobe looked great in demos but fell apart in production.
-            Here is what went wrong and why three-globe was the right call.
-          </p>
-          <div className={styles['hero-meta']}>
-            <span>Jul 19, 2026</span>
-            <span className={styles['hero-sep']}>/</span>
-            <span>6 min read</span>
-          </div>
-        </div>
-      </header>
-
-      {/* The original choice */}
+    <Article>
       <Section>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>01</span>
-            The original choice
-          </h2>
-          <p className={styles['body-text']}>
+        <div className="flex flex-col gap-4">
+          <H2 index="01">The original choice</H2>
+          <P>
             cobe is a beautiful library. The demo on their homepage is hypnotic — a glowing
             globe with smooth rotation and a minimal API. It ships as a single canvas element,
             takes a few config options, and just works. For a portfolio site, it seemed like the
             perfect choice: small bundle, zero dependencies, and it looks impressive with almost
             no effort. I integrated it into the Skills section and for about a week everything
             was fine.
-          </p>
+          </P>
         </div>
       </Section>
 
-      {/* Where cobe fell apart — comparison */}
-      <Section delay={0.05}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>02</span>
-            Where cobe fell apart
-          </h2>
-          <div className={styles['compare-grid']}>
-            <ComparisonCard
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2 index="02">Where cobe fell apart</H2>
+          <Grid2>
+            <CompareCard
               title="Marker Projection"
               variant="before"
               items={[
@@ -115,7 +41,7 @@ export default function PostContent() {
                 'Fragile, breaks on resize',
               ]}
             />
-            <ComparisonCard
+            <CompareCard
               title="Mobile Performance"
               variant="before"
               items={[
@@ -125,7 +51,7 @@ export default function PostContent() {
                 'No detail reduction for mobile',
               ]}
             />
-            <ComparisonCard
+            <CompareCard
               title="Feature Ceiling"
               variant="before"
               items={[
@@ -135,22 +61,18 @@ export default function PostContent() {
                 'Dead end for interactivity',
               ]}
             />
-          </div>
+          </Grid2>
         </div>
       </Section>
 
-      {/* Why three-globe won */}
-      <Section delay={0.05}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>03</span>
-            Why three-globe won
-          </h2>
-          <p className={styles['body-text']}>
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2 index="03">Why three-globe won</H2>
+          <P>
             three-globe is built on Three.js and integrates with React Three Fiber. This means
             a full 3D scene with proper depth, lighting, and camera controls. Marker projection
             becomes trivial with Vector3.project().
-          </p>
+          </P>
           <CodeBlock
             lang="typescript"
             code={`// Screen-space projection in three-globe
@@ -159,8 +81,8 @@ pos.project(camera);
 const x = (pos.x + 1) / 2 * window.innerWidth;
 const y = (-pos.y + 1) / 2 * window.innerHeight;`}
           />
-          <div className={styles['compare-grid']}>
-            <ComparisonCard
+          <Grid2>
+            <CompareCard
               title="Performance"
               variant="after"
               items={[
@@ -170,7 +92,7 @@ const y = (-pos.y + 1) / 2 * window.innerHeight;`}
                 '50+ interactive markers at 60fps',
               ]}
             />
-            <ComparisonCard
+            <CompareCard
               title="Features"
               variant="after"
               items={[
@@ -180,57 +102,52 @@ const y = (-pos.y + 1) / 2 * window.innerHeight;`}
                 'HTML labels via Vector3.projects()',
               ]}
             />
-          </div>
+          </Grid2>
         </div>
       </Section>
 
-      {/* Migration */}
-      <Section delay={0.05}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>04</span>
-            The migration in practice
-          </h2>
-          <p className={styles['body-text']}>
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2 index="04">The migration in practice</H2>
+          <P>
             The migration took about two days. The hardest part was rebuilding the marker
             overlay system — computing screen positions from lat/lng in the R3F render loop,
             then positioning absolutely-positioned DOM elements over the canvas. I wrote a
             GlobeManager class that handles filter, search, select, and disabled states as
             pure state updates, keeping the R3F component clean.
-          </p>
-          <div className={styles['timeline']}>
+          </P>
+          <div className="flex flex-col rounded-[var(--radius-md)] border border-[var(--border)]">
             {[
               { day: 'Day 1', task: 'Rebuild marker overlay system with Vector3.projects()' },
               { day: 'Day 1', task: 'Implement GlobeManager class for state management' },
               { day: 'Day 2', task: 'Add arcs, polygon highlights, and custom marker shapes' },
               { day: 'Day 2', task: 'Mobile optimization and performance tuning' },
-            ].map((item, i) => (
-              <div key={i} className={styles['timeline-item']}>
-                <span className={styles['timeline-day']}>{item.day}</span>
-                <span className={styles['timeline-task']}>{item.task}</span>
+            ].map((item, i, arr) => (
+              <div
+                key={i}
+                className={`flex items-baseline gap-3 px-3.5 py-2.5 ${i > 0 ? 'border-t border-[var(--border)]' : ''} ${i === 0 ? 'rounded-t-[var(--radius-md)]' : ''} ${i === arr.length - 1 ? 'rounded-b-[var(--radius-md)]' : ''}`}
+              >
+                <span className="shrink-0 font-mono text-[0.64rem] text-[var(--accent-secondary)]">{item.day}</span>
+                <span className="text-[0.82rem] text-[var(--text-secondary)]">{item.task}</span>
               </div>
             ))}
           </div>
         </div>
       </Section>
 
-      {/* When to use cobe */}
-      <Section delay={0.05}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>05</span>
-            When to still use cobe
-          </h2>
-          <p className={styles['body-text']}>
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2 index="05">When to still use cobe</H2>
+          <P>
             cobe is not a bad library. If you need a quick, decorative globe with zero
             interactivity — a hero background, a loading screen, a visual accent — cobe is
             still the fastest path to a good-looking result. The API is simpler, the bundle is
             smaller, and you do not need to understand Three.js at all. But the moment you need
             custom markers, screen-space projection, mobile optimization, or any feature beyond
             &quot;glowing spinning sphere,&quot; you will hit a wall.
-          </p>
+          </P>
         </div>
       </Section>
-    </div>
+    </Article>
   );
 }

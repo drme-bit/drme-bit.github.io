@@ -1,209 +1,140 @@
 'use client';
 
-import { useRef } from 'react';
-import { useLenis } from 'lenis/react';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { TransitionLink } from '@/features/transitions';
+import { scrollToTop } from '@/widgets/smooth-scrolling/lenisStore';
 import {
-  FiHeart,
-  FiMail,
   FiGithub,
   FiTwitter,
   FiLinkedin,
   FiArrowUp,
   SiDiscord,
-  FiExternalLink,
-} from '@/shared/ui/atoms/Icon';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+} from '@/shared/ui/Icon';
 import {
   footerNavLinks,
   footerSocialLinks,
-  supportLink,
   brandName,
-  brandTagline,
-  email,
-  kofiUrl,
-  kofiImage,
   currentYear,
 } from './lib/data';
-import styles from './PremiumFooter.module.scss';
 
-gsap.registerPlugin(ScrollTrigger);
+/*  Minimal status-bar footer (Linear/Railway/Supabase language):
+    one quiet row — wordmark, sitemap, status, bare icons, top.
+    No surfaces, no CTA, icons without boxes.  */
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SOCIAL_ICONS: Record<string, typeof FiGithub> = {
+  GitHub: FiGithub,
+  'Twitter/X': FiTwitter,
+  Twitter: FiTwitter,
+  LinkedIn: FiLinkedin,
+  Discord: SiDiscord,
+};
 
 export function PremiumFooter() {
   const footerRef = useRef<HTMLElement>(null);
-  const lenis = useLenis();
 
-  useGSAP(
-    () => {
-      const footer = footerRef.current;
-      if (!footer || prefersReducedMotion()) return;
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
 
-      const ctx = gsap.context(() => {
-        const rows = footer.querySelectorAll(`.${styles.footerRow}`);
-        if (rows.length) {
-          gsap.fromTo(
-            rows,
-            { opacity: 0, y: 20 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.6,
-              stagger: 0.08,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: footer,
-                start: 'top 85%',
-                toggleActions: 'play none none reverse',
-              },
-            },
-          );
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        // One-shot: re-hiding on scroll-back makes the bar flicker at
+        // the threshold and replay the rise mid-scroll.
+        if (entry.isIntersecting) {
+          footer.classList.add('is-revealed');
+          io.disconnect();
         }
-
-        const icons = footer.querySelectorAll(`.${styles.socialIcon}`);
-        if (icons.length) {
-          gsap.fromTo(
-            icons,
-            { opacity: 0, scale: 0.8, rotation: -8 },
-            {
-              opacity: 1,
-              scale: 1,
-              rotation: 0,
-              duration: 0.4,
-              stagger: 0.04,
-              ease: 'back.out(1.3)',
-              scrollTrigger: {
-                trigger: footer,
-                start: 'top 80%',
-                toggleActions: 'play none none reverse',
-              },
-            },
-          );
-        }
-      }, footerRef);
-
-      return () => ctx.revert();
-    },
-    { scope: footerRef },
-  );
-
-  function handleBackToTop() {
-    if (lenis) {
-      lenis.scrollTo(0, { duration: 1.2 });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
+      },
+      { threshold: 0.08 },
+    );
+    io.observe(footer);
+    return () => io.disconnect();
+  }, []);
 
   return (
-    <footer ref={footerRef} id="footer" className={styles.footer} role="contentinfo">
-      <div className={styles.footerBg} aria-hidden="true" />
-      <div className={styles.footerInner}>
-        <div className={`${styles.footerTop} ${styles.footerRow}`}>
-          <div className={styles.footerBrand}>
-            <span className={styles.footerLogo}>
-              <span className={styles.logoDot} aria-hidden="true" />
-              {brandName}
-            </span>
-            <p className={styles.footerTagline}>{brandTagline}</p>
+    <footer
+      ref={footerRef}
+      id="footer"
+      role="contentinfo"
+      className="relative z-[0] border-t border-[var(--border)] bg-[var(--bg)]"
+    >
+      <div className="footer-inner mx-auto flex w-full max-w-[1400px] flex-wrap items-center gap-x-6 gap-y-3 px-[4vw] py-5 max-[700px]:px-5">
+        <Link
+          href="/"
+          aria-label="Back to home"
+          className="font-mono text-[13px] font-semibold lowercase tracking-[0.14em] text-foreground no-underline transition-opacity hover:opacity-80"
+        >
+          drme<span className="text-accent">_</span>
+        </Link>
+        <span className="font-mono text-[11px] tracking-[0.06em] text-[var(--text-dim)]">
+          © {currentYear} {brandName}
+        </span>
+
+        <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          {footerNavLinks.map((link) => (
+            <TransitionLink
+              key={link.label}
+              href={link.href}
+              className="text-[12.5px] text-[var(--text-secondary)] no-underline transition-colors duration-200 hover:text-foreground"
+            >
+              {link.label}
+            </TransitionLink>
+          ))}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-4 max-[700px]:ml-0">
+          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.04em] text-[var(--text-dim)]">
+            <span className="size-1.5 rounded-full bg-[var(--accent-success)]" aria-hidden="true" />
+            <OdesaClock />
+          </span>
+
+          <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
+
+          <div className="flex items-center gap-3.5">
+            {footerSocialLinks.map((link) => {
+              const Icon = SOCIAL_ICONS[link.label] ?? FiGithub;
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target={link.external ? '_blank' : undefined}
+                  rel={link.external ? 'noopener noreferrer' : undefined}
+                  aria-label={link.label}
+                  className="text-[var(--text-dim)] transition-colors duration-200 hover:text-foreground"
+                >
+                  <Icon size={15} aria-hidden="true" />
+                </a>
+              );
+            })}
           </div>
 
-          <div className={styles.footerContact}>
-            <a
-              href={`mailto:${email}`}
-              className={styles.contactLink}
-              aria-label="Email me"
-            >
-              <FiMail aria-hidden="true" size={16} />
-              <span>{email}</span>
-              <FiExternalLink aria-hidden="true" size={12} />
-            </a>
-          </div>
-        </div>
-
-        <div className={`${styles.footerDivide} ${styles.footerRow}`} aria-hidden="true" />
-
-        <div className={`${styles.footerBottom} ${styles.footerRow}`}>
-          <nav className={styles.footerNav} aria-label="Footer navigation">
-            <div className={styles.navColumn}>
-              <span className={styles.navTitle}>Navigate</span>
-              <ul className={styles.navList}>
-                {footerNavLinks.map((link) => (
-                  <li key={link.label}>
-                    <TransitionLink className={styles.navLink} href={link.href}>
-                      {link.label}
-                    </TransitionLink>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className={styles.navColumn}>
-              <span className={styles.navTitle}>Connect</span>
-              <ul className={styles.socialList} role="list">
-                {footerSocialLinks.map((link) => (
-                  <li key={link.label} className={styles.socialItem}>
-                    <a
-                      href={link.href}
-                      target={link.external ? '_blank' : undefined}
-                      rel={link.external ? 'noopener noreferrer' : undefined}
-                      className={styles.socialLink}
-                      aria-label={link.label}
-                      title={link.label}
-                    >
-                      <span className={styles.socialIcon} aria-hidden="true">
-                        {link.label === 'GitHub' && <FiGithub size={16} />}
-                        {link.label === 'Twitter/X' && <FiTwitter size={16} />}
-                        {link.label === 'LinkedIn' && <FiLinkedin size={16} />}
-                        {link.label === 'Discord' && <SiDiscord size={16} />}
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </nav>
-
-          <div className={styles.footerSupport}>
-            <a
-              href={kofiUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.kofiBtn}
-              aria-label="Support on Ko-fi"
-            >
-              <img
-                src={kofiImage}
-                alt=""
-                className={styles.kofiImg}
-                loading="lazy"
-                aria-hidden="true"
-              />
-              <span>{supportLink.label}</span>
-              <FiExternalLink aria-hidden="true" size={12} />
-            </a>
-            <p className={styles.copyright}>
-              <FiHeart aria-hidden="true" className={styles.heart} size={10} />
-              {currentYear} {brandName}. Built with curiosity.
-            </p>
-            <button
-              type="button"
-              className={styles.backToTop}
-              onClick={handleBackToTop}
-              aria-label="Back to top"
-            >
-              <FiArrowUp aria-hidden="true" size={14} />
-              <span>top</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={scrollToTop}
+            aria-label="Back to top"
+            className="cursor-pointer text-[var(--text-dim)] transition-all duration-200 hover:-translate-y-px hover:text-foreground"
+          >
+            <FiArrowUp aria-hidden="true" size={15} />
+          </button>
         </div>
       </div>
     </footer>
   );
+}
+
+function OdesaClock() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const time = now.toLocaleTimeString('en-GB', {
+    timeZone: 'Europe/Kyiv',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return <span>Odesa — {time}</span>;
 }
 
 export default PremiumFooter;

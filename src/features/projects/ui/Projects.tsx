@@ -1,19 +1,41 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { FiArrowRight, FiExternalLink, FiGithub } from '@/shared/ui/atoms/Icon';
-import { ICON_MAP } from '@/features/skills/lib/registry';
+import { FiArrowRight, FiExternalLink, FiGithub } from '@/shared/ui/Icon';
 import { projects } from '../lib/registry';
 import { STATUS_META } from '../lib/constants';
+import type { Project } from '../lib/project-repository';
+import type { StatusMeta } from '../lib/constants';
 import ProjectsHero from './ProjectsHero';
 import { Blog } from '@/features/blog/ui/Blog';
-import styles from './Projects.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
+
+/*  Status badge variants (card overlays are dark) ─ */
+
+const BADGE_TW: Record<string, string> = {
+  ACTIVE: 'border-[rgba(52,211,153,0.3)] bg-[rgba(52,211,153,0.12)] text-[var(--accent-success)]',
+  PAUSED: 'border-[rgba(125,211,252,0.3)] bg-[rgba(125,211,252,0.12)] text-[var(--accent-secondary)]',
+  DEPRECATED: 'border-white/[0.08] bg-white/[0.04] text-white/40',
+};
+
+/*  Between-card hairline with accent node ─ */
+
+function CardSeparator() {
+  return (
+    <div
+      aria-hidden="true"
+      className="relative mx-[6vw] h-px opacity-60 [background-image:linear-gradient(to_right,transparent_0%,var(--border)_20%,color-mix(in_srgb,var(--accent-secondary)_20%,transparent)_50%,var(--border)_80%,transparent_100%)]"
+    >
+      <span className="absolute left-1/2 top-1/2 size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--accent-secondary)] shadow-[0_0_12px_var(--accent-secondary-glow)]" />
+    </div>
+  );
+}
 
 /*  JS Marquee (smooth slowdown on hover) ─ */
 
@@ -29,61 +51,60 @@ function useMarquee(
   const lastTimeRef = useRef(0);
   const pausedRef = useRef(false);
   const initializedRef = useRef(false);
+  // Cached track half-width: scrollWidth forces layout, so measure only
+  // on resize — never inside the frame loop.
+  const halfRef = useRef(0);
   const baseSpeed = 80;
 
-  const tick = useCallback(() => {
-    if (pausedRef.current) {
-      rafRef.current = requestAnimationFrame(tick);
-      return;
-    }
-
-    const now = performance.now();
-    const dt = lastTimeRef.current ? (now - lastTimeRef.current) / 1000 : 0;
-    lastTimeRef.current = now;
-
-    speedRef.current += (targetSpeedRef.current - speedRef.current) * Math.min(dt * 3, 1);
-
-    const track = trackRef.current;
-    if (!track || setCount <= 0) {
-      rafRef.current = requestAnimationFrame(tick);
-      return;
-    }
-
-    const half = track.scrollWidth / 2;
-    if (half <= 0) {
-      rafRef.current = requestAnimationFrame(tick);
-      return;
-    }
-
-    if (!initializedRef.current) {
-      if (isReversed) {
-        offsetRef.current = -half;
-      }
-      initializedRef.current = true;
-    }
-
-    const dir = isReversed ? 1 : -1;
-    offsetRef.current += dir * baseSpeed * speedRef.current * dt;
-
-    if (isReversed) {
-      if (offsetRef.current >= 0) {
-        offsetRef.current -= half;
-      }
-    } else {
-      if (Math.abs(offsetRef.current) >= half) {
-        offsetRef.current += half;
-      }
-    }
-
-    track.style.transform = `translateX(${offsetRef.current}px)`;
-    rafRef.current = requestAnimationFrame(tick);
-  }, [isReversed, trackRef, setCount]);
+  useEffect(() => {
+    const measure = () => {
+      const track = trackRef.current;
+      halfRef.current = track ? track.scrollWidth / 2 : 0;
+    };
+    measure();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    if (trackRef.current && ro) ro.observe(trackRef.current);
+    return () => ro?.disconnect();
+  }, [trackRef, setCount]);
 
   useEffect(() => {
+    const loop = () => {
+      if (!pausedRef.current) {
+        const now = performance.now();
+        const dt = lastTimeRef.current ? (now - lastTimeRef.current) / 1000 : 0;
+        lastTimeRef.current = now;
+
+        speedRef.current += (targetSpeedRef.current - speedRef.current) * Math.min(dt * 3, 1);
+
+        const track = trackRef.current;
+        if (track && setCount > 0) {
+          const half = halfRef.current;
+          if (half > 0) {
+            if (!initializedRef.current) {
+              if (isReversed) offsetRef.current = -half;
+              initializedRef.current = true;
+            }
+
+            const dir = isReversed ? 1 : -1;
+            offsetRef.current += dir * baseSpeed * speedRef.current * dt;
+
+            if (isReversed) {
+              if (offsetRef.current >= 0) offsetRef.current -= half;
+            } else if (Math.abs(offsetRef.current) >= half) {
+              offsetRef.current += half;
+            }
+
+            track.style.transform = `translateX(${offsetRef.current}px)`;
+          }
+        }
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+
     lastTimeRef.current = 0;
-    rafRef.current = requestAnimationFrame(tick);
+    rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [tick]);
+  }, [trackRef, isReversed, setCount]);
 
   const onEnter = useCallback(() => {
     targetSpeedRef.current = 0.15;
@@ -96,60 +117,59 @@ function useMarquee(
   return { onEnter, onLeave, pausedRef };
 }
 
-/*  Projects List Component  */
+/*  Projects List Component — IO reveal (not ScrollTrigger opacity):
+    ST-driven opacity can strand cards at 0 on mobile Safari when the
+    toolbar resizes mid-measure. IO classes can't get stuck.  */
 
-export function ProjectsList() {
-  const listRef = useRef<HTMLDivElement>(null);
+function Reveal({ children, className }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
 
-  useGSAP(() => {
-    const list = listRef.current;
-    if (!list) return;
-
-    const ctx = gsap.context(() => {
-      const cards = Array.from(list.querySelectorAll(`.${styles.projectCard}`));
-      cards.forEach((card) => {
-        const gallery = card.querySelector(`.${styles.cardGallery}`);
-        const content = card.querySelector(`.${styles.cardContent}`);
-
-        gsap.fromTo(
-          [gallery, content],
-          { opacity: 0, y: 30 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          },
-        );
-      });
-    }, listRef);
-
-    return () => ctx.revert();
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.08 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
+  return (
+    <div
+      ref={ref}
+      className={`transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        visible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+      } ${className ?? ''}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function ProjectsList() {
   const allProjects = projects.all;
 
   return (
-    <div ref={listRef} className={styles.projectList}>
+    <div className="relative flex flex-col will-change-[transform,filter,opacity]">
       {allProjects.map((project, i) => {
         const meta = STATUS_META[project.status] || STATUS_META.ACTIVE;
-        const images = project.images?.length > 0 ? project.images : project.image ? [project.image] : [];
+        const images =
+          project.images?.length > 0 ? project.images : project.image ? [project.image] : [];
         const isLast = i === allProjects.length - 1;
 
         return (
           <div key={project.id}>
-            <ProjectCardItem
-              project={project}
-              index={i}
-              meta={meta}
-              images={images}
-            />
+            <Reveal>
+              <ProjectCardItem project={project} index={i} meta={meta} images={images} />
+            </Reveal>
+            {!isLast && <CardSeparator />}
           </div>
         );
       })}
@@ -165,9 +185,9 @@ function ProjectCardItem({
   meta,
   images,
 }: {
-  project: any;
+  project: Project;
   index: number;
-  meta: any;
+  meta: StatusMeta;
   images: string[];
 }) {
   const router = useRouter();
@@ -184,8 +204,8 @@ function ProjectCardItem({
     e.currentTarget.style.setProperty('--mouse-y', `${y}%`);
   };
 
-  // Quadruple (even count) ensures seamless loop at midpoint
-  const marqueeImages = [...images, ...images, ...images, ...images];
+  // Doubled (even count) for a seamless loop at the midpoint.
+  const marqueeImages = [...images, ...images];
 
   useGSAP(() => {
     const card = cardRef.current;
@@ -204,83 +224,126 @@ function ProjectCardItem({
   return (
     <div
       ref={cardRef}
-      className={`${styles.projectCard} ${isReversed ? styles.isReversed : ''}`}
+      data-cursor="view"
+      data-cursor-label="Open"
+      className="pr-card group/card relative w-full min-h-[520px] cursor-default overflow-hidden max-[700px]:min-h-[420px]"
       onMouseMove={handleMouseMove}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
-      <div className={styles.cardGallery}>
-        <div ref={trackRef} className={styles.galleryTrack}>
+      <div className="pr-gallery absolute inset-0 z-0">
+        <div
+          ref={trackRef}
+          className="flex h-full w-max gap-3 will-change-transform"
+        >
           {marqueeImages.map((src, i) => (
-            <div key={`slide-${index}-${i}`} className={styles.gallerySlide}>
-              <img
+            <div
+              key={`slide-${index}-${i}`}
+              className="group/slide relative h-full w-[42vw] min-w-[280px] shrink-0 overflow-hidden rounded-[2px] max-[700px]:w-[65vw] max-[700px]:min-w-[220px]"
+            >
+              <Image
                 src={src}
-                alt=""
-                className={styles.galleryImg}
-                loading={i < 4 ? 'eager' : 'lazy'}
+                alt={`${project.title} preview`}
+                fill
+                sizes="(max-width: 700px) 65vw, 42vw"
+                className="object-cover transition-transform duration-[0.8s] ease-[var(--ease-out)] group-hover/slide:scale-[1.04]"
+                priority={index === 0 && i < images.length}
                 draggable={false}
               />
             </div>
           ))}
         </div>
-        <div className={styles.cardOverlay} />
+        <div className="pointer-events-none absolute inset-0 z-[1] [background-image:linear-gradient(to_bottom,rgba(10,10,10,0.5)_0%,rgba(10,10,10,0.25)_35%,rgba(10,10,10,0.4)_65%,rgba(10,10,10,0.75)_100%)]" />
       </div>
 
-      <div className={styles.cardContent}>
-        <div className={styles.cardHeader}>
-          <span className={`${styles.cardBadge} ${styles[meta.cls] || ''}`}>
-            <meta.icon size={11} className={styles.badgeIcon} />
+      <div
+        className={`pr-content relative z-[2] flex min-h-[520px] flex-col justify-end gap-3 p-[2.5rem_6vw] transition-transform duration-500 ease-[var(--ease-out)] max-[700px]:min-h-[420px] max-[700px]:gap-[0.6rem] max-[700px]:p-[2rem_1.25rem] ${
+          isReversed ? 'items-end text-right group-hover/card:-translate-y-1' : 'items-start group-hover/card:-translate-y-1'
+        }`}
+      >
+        <div className={`flex items-center gap-4 ${isReversed ? 'flex-row-reverse' : ''}`}>
+          <span
+            className={`inline-flex items-center gap-[0.4rem] rounded-[var(--radius-sm)] border px-[0.7rem] py-[0.3rem] font-mono text-[0.6rem] uppercase tracking-[0.1em] backdrop-blur-lg ${
+              BADGE_TW[project.status] || BADGE_TW.ACTIVE
+            }`}
+          >
+            <meta.icon size={11} className="shrink-0 text-[0.8em] opacity-80" />
             {meta.label}
           </span>
-          <span className={styles.cardId}>./project_{String(index + 1).padStart(3, '0')}</span>
+          <span className="font-mono text-[0.55rem] tracking-[0.12em] text-white/35">
+            ./project_{String(index + 1).padStart(3, '0')}
+          </span>
         </div>
 
-        <h3 className={styles.cardTitle}>{project.title}</h3>
-        <p className={styles.cardDesc}>{project.desc}</p>
+        <h3
+          className={`m-0 max-w-[700px] font-display text-[clamp(1.8rem,4vw,3rem)] font-bold leading-[1.1] text-white max-[700px]:text-[clamp(1.4rem,6vw,2rem)] ${
+            isReversed ? 'ml-auto' : ''
+          }`}
+        >
+          {project.title}
+        </h3>
+        <p className="m-0 max-w-[560px] font-sans text-[clamp(0.82rem,1vw,0.92rem)] leading-[1.7] text-white/70 max-[700px]:max-w-full max-[700px]:text-[0.8rem]">
+          {project.desc}
+        </p>
 
-        <div className={styles.cardTech}>
-          {project.techSkills.slice(0, 6).map((t: any) => {
+        <div className={`flex flex-wrap gap-[0.4rem] ${isReversed ? 'justify-end' : ''}`}>
+          {project.techSkills.slice(0, 6).map((t) => {
             const Icon = t.icon;
             return (
-              <span key={t.name} className={styles.techTag}>
-                {Icon && <Icon className={styles.techIcon} />}
+              <span
+                key={t.name}
+                className="inline-flex items-center gap-[0.3rem] rounded-[var(--radius-sm)] border border-white/10 bg-black/35 px-[0.6rem] py-[0.25rem] font-mono text-[0.6rem] tracking-[0.03em] text-white/75 backdrop-blur-lg"
+              >
+                {Icon && <Icon className="text-[0.7em] opacity-70" />}
                 {t.name}
               </span>
             );
           })}
           {project.techSkills.length > 6 && (
-            <span className={styles.techMore}>+{project.techSkills.length - 6}</span>
+            <span className="px-1 py-[0.25rem] font-mono text-[0.5rem] text-white/35">
+              +{project.techSkills.length - 6}
+            </span>
           )}
         </div>
 
         {project.features && project.features.length > 0 && (
-          <div className={styles.cardFeatures}>
-            {project.features.slice(0, 3).map((f: string, i: number) => (
-              <span key={i} className={styles.feature}>
-                <span className={styles.featureDot} />
+          <div className={`flex flex-col gap-[0.35rem] ${isReversed ? 'items-end' : ''}`}>
+            {project.features.slice(0, 3).map((f, i) => (
+              <span
+                key={i}
+                className={`flex items-center gap-2 font-sans text-[0.72rem] leading-[1.4] text-white/60 ${
+                  isReversed ? 'flex-row-reverse' : ''
+                }`}
+              >
+                <span className="size-1 shrink-0 rounded-full bg-[var(--accent-secondary)] opacity-60" />
                 {f}
               </span>
             ))}
           </div>
         )}
 
-        <div className={styles.cardActions}>
+        <div
+          className={`mt-1 flex w-full max-w-[560px] items-center justify-between gap-4 border-t border-white/[0.08] pt-3 ${
+            isReversed ? 'ml-auto flex-row-reverse' : ''
+          }`}
+        >
           <button
-            className={styles.cardCta}
+            type="button"
+            className="group/cta inline-flex cursor-pointer items-center gap-[0.6rem] rounded-[var(--radius-sm)] border border-white/10 bg-white/[0.08] px-[1.2rem] py-[0.6rem] font-mono text-[0.75rem] font-medium text-white backdrop-blur-md transition-[border-color,background-color,color] duration-300 ease-[var(--ease-out)] hover:border-[rgba(125,211,252,0.35)] hover:bg-[rgba(125,211,252,0.15)] hover:text-[var(--accent-secondary)]"
             onClick={() => router.push(`/projects/${project.id}`)}
           >
             <span>cat details.md</span>
-            <FiArrowRight className={styles.ctaIcon} />
+            <FiArrowRight className="text-[0.9em] transition-transform duration-300 ease-[var(--ease-out)] group-hover/cta:translate-x-[3px]" />
           </button>
 
-          <div className={styles.cardLinks}>
+          <div className="flex gap-2">
             {project.repo && (
               <a
                 href={project.repo}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.cardLink}
                 aria-label="Repository"
+                className="flex size-[34px] items-center justify-center rounded-[var(--radius-sm)] border border-white/10 text-white/50 backdrop-blur transition-[border-color,background-color,color] duration-300 ease-[var(--ease-out)] hover:border-[rgba(125,211,252,0.3)] hover:bg-[rgba(125,211,252,0.1)] hover:text-white"
                 onClick={(e) => e.stopPropagation()}
               >
                 <FiGithub />
@@ -291,8 +354,8 @@ function ProjectCardItem({
                 href={project.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.cardLink}
                 aria-label="Live demo"
+                className="flex size-[34px] items-center justify-center rounded-[var(--radius-sm)] border border-white/10 text-white/50 backdrop-blur transition-[border-color,background-color,color] duration-300 ease-[var(--ease-out)] hover:border-[rgba(125,211,252,0.3)] hover:bg-[rgba(125,211,252,0.1)] hover:text-white"
                 onClick={(e) => e.stopPropagation()}
               >
                 <FiExternalLink />
@@ -301,6 +364,11 @@ function ProjectCardItem({
           </div>
         </div>
       </div>
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-px [background-image:linear-gradient(to_right,transparent_0%,rgba(125,211,252,0.4)_50%,transparent_100%)]"
+      />
     </div>
   );
 }
@@ -315,10 +383,9 @@ export function Projects() {
 
   useGSAP(() => {
     const container = containerRef.current;
-    const hero = heroRef.current;
     const listWrapper = listWrapperRef.current;
     const blog = blogRef.current;
-    if (!container || !hero || !listWrapper || !blog) return;
+    if (!container || !listWrapper || !blog) return;
 
     const ctx = gsap.context(() => {
       // 1. ProjectList slides up from behind Hero (which is sticky)
@@ -338,11 +405,11 @@ export function Projects() {
         },
       );
 
-      // 2. As Blog approaches and overlaps, ProjectList gets blur/grayscale/scale
-      // Opacity only fades when Blog fully covers it
+      // 2. As Blog approaches and overlaps, ProjectList recedes.
+      // Compositor-only (scale/opacity): animating CSS filters here would
+      // repaint the whole list every scroll frame.
       gsap.to(listWrapper, {
-        filter: 'blur(8px) grayscale(100%)',
-        scale: 0.95,
+        scale: 0.96,
         ease: 'none',
         scrollTrigger: {
           trigger: blog,
@@ -385,12 +452,18 @@ export function Projects() {
   }, []);
 
   return (
-    <div ref={containerRef} className={styles.projectsWrapper}>
-      <div ref={heroRef} className={styles.heroSection}>
-        <ProjectsHero />
+    <div ref={containerRef} className="relative min-h-[300vh] w-full">
+      <div
+        ref={heroRef}
+        className="sticky top-0 z-[1] h-[100vh] w-full will-change-transform"
+      >
+        <ProjectsHero triggerRef={containerRef} />
       </div>
 
-      <div ref={listWrapperRef} className={styles.listWrapper}>
+      <div
+        ref={listWrapperRef}
+        className="relative z-[2] w-full overflow-hidden border-x-0 border-b-0 border-t border-t-[var(--border)] bg-background will-change-[transform,opacity]"
+      >
         <ProjectsList />
       </div>
 

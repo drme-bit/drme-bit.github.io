@@ -8,8 +8,8 @@ describe('findAnswer', () => {
   });
 
   it('answers site-intent questions', () => {
-    expect(findAnswer('what is this site?')).toContain("Vyacheslav Tkachik's personal site");
-    expect(findAnswer('tell me about the skills globe')).toContain('3D skills globe');
+    expect(findAnswer('what is this site?')).toContain("Vyacheslav Tkachyk's personal site");
+    expect(findAnswer('tell me about the skills globe')).toContain('live 3D terrain');
     expect(findAnswer('how do I contact you?')).toContain('vacheslavtkachik@gmail.com');
   });
 
@@ -23,6 +23,6 @@ describe('findAnswer', () => {
   });
 
   it('is case-insensitive', () => {
-    expect(findAnswer('WHAT IS THIS SITE?')).toContain("Vyacheslav Tkachik's personal site");
+    expect(findAnswer('WHAT IS THIS SITE?')).toContain("Vyacheslav Tkachyk's personal site");
   });
 });

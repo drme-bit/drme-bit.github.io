@@ -1,253 +1,170 @@
 'use client';
 
-//react
-import { useEffect, useRef } from 'react';
-import type { CSSProperties } from 'react';
-//gsap
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
-//other
-import SectionTitle from '@/shared/ui/molecules/SectionTitle/SectionTitle';
-import styles from './Experience.module.scss';
-import { experienceData, ExperienceEntry } from '@/entities/experience';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { Timeline } from '@/components/ui/timeline';
+import { Check } from '@/shared/ui/Icon';
+import { experienceData } from '@/entities/experience';
+import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 
-gsap.registerPlugin(ScrollTrigger);
+/*  Experience section — shadcn-style Timeline (components/ui) fed by
+    experienceData, plus a sticky times rail on the right.  */
 
-const CHIP_COLORS = ['var(--accent)', 'var(--accent-secondary)', 'var(--accent-tertiary)'];
+const pad = (n: number) => String(n).padStart(2, '0');
 
 export default function Experience() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const zoomWrapperRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const tailRef = useRef<HTMLSpanElement>(null);
-  const headRef = useRef<HTMLSpanElement>(null);
-  const entryRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const zoomZoneRef = useRef<HTMLDivElement>(null);
+  const [activeI, setActiveI] = useState(0);
 
-  useGSAP(() => {
-    const section = sectionRef.current;
-    const zoomWrapper = zoomWrapperRef.current;
-    const timeline = timelineRef.current;
-    const tail = tailRef.current;
-    const head = headRef.current;
-    const zoomZone = zoomZoneRef.current;
-    if (!section || !zoomWrapper || !timeline || !tail || !head || !zoomZone) return;
-
-    const ctx = gsap.context(() => {
-      const updateTransformOrigin = () => {
-        const headRect = head.getBoundingClientRect();
-        const wrapperRect = zoomWrapper.getBoundingClientRect();
-
-        const x =
-          ((headRect.left + headRect.width / 2 - wrapperRect.left) / wrapperRect.width) * 100;
-        const y =
-          ((headRect.top + headRect.height / 2 - wrapperRect.top) / wrapperRect.height) * 100;
-
-        zoomWrapper.style.transformOrigin = `${x}% ${y}%`;
-      };
-
-      updateTransformOrigin();
-
-      gsap.set(tail, { height: '0%' });
-      gsap.set(head, { top: '0%' });
-
-      ScrollTrigger.create({
-        trigger: timeline,
-        start: 'top 70%',
-        end: 'bottom 50%',
-        scrub: 0.1,
-        onUpdate: (self) => {
-          const p = self.progress;
-          tail.style.height = `${p * 100}%`;
-          head.style.top = `${p * 100}%`;
-
-          const headRect = head.getBoundingClientRect();
-
-          entryRefs.current.forEach((entryEl) => {
-            if (!entryEl) return;
-            const dot = entryEl.querySelector(`.${styles['tl-dot']}`) as HTMLElement;
-            if (!dot) return;
-
-            const dotRect = dot.getBoundingClientRect();
-
-            if (headRect.top + headRect.height / 2 >= dotRect.top) {
-              entryEl.classList.add(styles['is-visible']);
-            } else {
-              entryEl.classList.remove(styles['is-visible']);
-            }
-          });
-        },
-      });
-
-      ScrollTrigger.refresh();
-
-      const iWidth = window.innerWidth;
-      const iHeight = window.innerHeight * 1.5;
-      const iRatio = iWidth / iHeight;
-      const isMobile = window.innerWidth < 768;
-
-      // On mobile, limit zoom to prevent viewport zoom issues
-      const maxScale = isMobile ? 2.5 : 6;
-      const headWidth = isMobile ? iWidth * 1.3 : iWidth;
-      const headHeight = isMobile ? iHeight * 0.8 : iHeight;
-
-      const zoomTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: zoomZone,
-          start: 'top 70%',
-          end: 'bottom top',
-          scrub: 0.3,
-          invalidateOnRefresh: true,
-          onUpdate: () => {
-            updateTransformOrigin();
-          },
-        },
-      });
-
-      const lineWrapper = section.querySelector(`.${styles['timeline-line-wrapper']}`);
-
-      if (lineWrapper) {
-        zoomTl.to(lineWrapper, { zIndex: 99998, duration: 0 }, 0);
-      }
-
-      zoomTl
-        .to(
-          zoomWrapper,
-          {
-            scale: 1.5,
-            ease: 'power2.in',
-          },
-          '+=1.5',
-        )
-        .to(
-          zoomWrapper,
-          {
-            scale: maxScale,
-            ease: 'power2.out',
-          },
-          0,
-        )
-        .to(
-          head,
-          {
-            width: headWidth,
-            height: headHeight,
-            zIndex: 99999,
-            borderRadius: '0px',
-            ease: 'power2.inOut',
-          },
-          '> -0.4',
-        );
-    }, {scope: section, invalidateOnRefresh: true});
-
-    const timer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      ctx.revert();
-    };
-  }, []);
-
-  // Prevent zoom on mobile during experience section scroll
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    const rows = experienceData
+      .map((_, i) => document.getElementById(`timeline-entry-${i}`))
+      .filter((el): el is HTMLElement => el !== null);
+    if (rows.length === 0) return;
 
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    };
-
-    const handleGestureStart = (e: Event) => {
-      e.preventDefault();
-    };
-
-    section.addEventListener('touchmove', handleTouchMove, { passive: false });
-    section.addEventListener('gesturestart', handleGestureStart, { passive: false });
-
-    return () => {
-      section.removeEventListener('touchmove', handleTouchMove);
-      section.removeEventListener('gesturestart', handleGestureStart);
-    };
+    const io = new IntersectionObserver(
+      (list) => {
+        list.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.id.replace('timeline-entry-', ''));
+            if (Number.isFinite(idx)) setActiveI(idx);
+          }
+        });
+      },
+      { rootMargin: '-42% 0px -52% 0px', threshold: 0 },
+    );
+    rows.forEach((el) => io.observe(el));
+    return () => io.disconnect();
   }, []);
 
   return (
     <section
       id="experience"
-      ref={sectionRef}
-      className={`${styles.section} ${styles['section--experience']}`}
-      style={{ touchAction: 'pan-y' }}
+      className="relative isolate flex min-h-screen flex-col justify-center pb-0 pt-[6rem] max-[700px]:min-h-0"
     >
-      <div ref={zoomWrapperRef} className={styles['zoom-wrapper']}>
-        <SectionTitle title="experience" accent=" & background" />
-
-        <div className={styles['section-inner']}>
-          <div className={`${styles['timeline-line-wrapper']} tl-head-wrapper`}>
-            <span ref={tailRef} className={styles['tl-tail']} />
-            <span ref={headRef} className={styles['tl-head']} />
-          </div>
-
-          <div className={styles.timeline} ref={timelineRef}>
-            {experienceData.map((e: ExperienceEntry, i: number) => (
-              <div
-                key={i}
-                ref={(el) => {
-                  entryRefs.current[i] = el;
-                }}
-                className={`${styles['timeline-entry']} ${i % 2 === 0 ? styles['tl-left'] : styles['tl-right']}`}
-              >
-                <span className={styles['tl-dot']} />
-                <div className={styles['tl-body']}>
-                  <div className={styles['tl-body-bar']}>
-                    <span className={styles['tl-body-dots']}>
-                      <i className={styles['tl-dot-r']} />
-                      <i className={styles['tl-dot-y']} />
-                      <i className={styles['tl-dot-g']} />
-                    </span>
-                    <span className={styles['tl-body-path']}>~/exp/{String(i + 1).padStart(2, '0')}</span>
-                  </div>
-                  <div className={styles['tl-body-content']}>
-                    <span className={styles['tl-period']}>[ {e.period} ]</span>
-                    <span className={styles['tl-role']}>{e.role}</span>
-                    <span className={styles['tl-org']}>{e.org}</span>
-                    <p className={styles['tl-desc']}>{e.desc}</p>
-                    {e.tech && e.tech.length > 0 && (
-                      <div className={styles['tl-tech']}>
-                        {e.tech.map((t, ti) => (
-                          <span
-                            key={t}
-                            className={styles['tl-tech-chip']}
-                            style={{ '--chip-color': CHIP_COLORS[ti % CHIP_COLORS.length] } as CSSProperties}
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {e.link && (
-                      <a
-                        href={e.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles['tl-link']}
+      <div className="relative mx-auto grid w-full max-w-[1650px] grid-cols-[minmax(0,1fr)_200px] gap-x-8 px-[4vw] max-[1100px]:grid-cols-1">
+        <div className="min-w-0">
+          <Timeline
+            data={experienceData.map((e) => ({
+              title: e.period,
+            content: (
+              <div>
+                <p className="mb-1 text-[15px] font-semibold text-neutral-900 md:text-base dark:text-neutral-100">
+                  {e.role}
+                </p>
+                <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-500">
+                  {e.org}
+                </p>
+                <p className="mb-6 max-w-[62ch] text-[13px] font-normal leading-[1.75] text-neutral-600 md:text-sm dark:text-neutral-400">
+                  {e.desc}
+                </p>
+                {e.highlights && e.highlights.length > 0 && (
+                  <ul className="m-0 mb-6 flex list-none flex-col gap-2 p-0">
+                    {e.highlights.map((h) => (
+                      <li
+                        key={h}
+                        className="flex items-start gap-2.5 text-[13px] leading-[1.6] text-neutral-700 md:text-sm dark:text-neutral-300"
                       >
-                        {e.linkText ?? 'view project'}
-                        <span className={styles['tl-link-arrow']}>→</span>
-                      </a>
-                    )}
-                  </div>
+                        <Check
+                          size={14}
+                          aria-hidden="true"
+                          className="mt-0.5 shrink-0 text-[var(--accent-secondary)]"
+                        />
+                        <span>{h}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              {e.tech && e.tech.length > 0 && (
+                <div className="mb-8 flex flex-wrap gap-1.5">
+                  {e.tech.map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-md border border-neutral-200 px-2 py-0.5 font-mono text-[11px] text-neutral-600 dark:border-neutral-800 dark:text-neutral-400"
+                    >
+                      {t}
+                    </span>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
+                  {e.gallery && e.gallery.length > 0 && (
+                    <div className="grid grid-cols-2 gap-4">
+                      {e.gallery.map((g) => (
+                        <Image
+                          key={g.src}
+                          src={g.src}
+                          alt={g.alt}
+                          width={500}
+                          height={500}
+                          sizes="(max-width: 768px) 44vw, 360px"
+                          loading="lazy"
+                          className="h-20 w-full rounded-lg object-cover shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset] md:h-44 lg:h-60"
+                        />
+                      ))}
+                    </div>
+                  )}
+              {e.link && (
+                <a
+                  href={e.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-medium text-neutral-900 underline decoration-neutral-300 underline-offset-4 transition-colors hover:decoration-neutral-500 md:text-sm dark:text-neutral-100 dark:decoration-neutral-700 dark:hover:decoration-neutral-400"
+                >
+                  {e.linkText ?? 'view project'} →
+                </a>
+              )}
+                </div>
+              ),
+            }))}
+          />
         </div>
-      </div>
 
-      <div ref={zoomZoneRef} className={styles['zoom-zone']} />
+        {/* ── Sticky times rail ── */}
+        <aside className="max-[1100px]:hidden">
+          <nav
+            aria-label="Experience periods"
+            className="sticky top-40 flex flex-col"
+          >
+            <span className="mb-4 font-mono text-[0.55rem] uppercase tracking-[0.15em] text-[var(--text-ghost)]">
+              timeline
+            </span>
+            <div className="flex flex-col">
+              {experienceData.map((e, i) => {
+                const active = activeI === i;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => scrollToTarget(`#timeline-entry-${i}`)}
+                    className={`group flex w-full cursor-pointer items-baseline gap-3 border-l-2 py-2.5 pl-4 text-left transition-all duration-200 ${
+                      active
+                        ? 'border-[var(--accent-secondary)]'
+                        : 'border-[var(--border)] opacity-50 hover:border-[var(--border-hover)] hover:opacity-100'
+                    }`}
+                  >
+                    <span
+                      className={`font-mono text-[0.55rem] tracking-[0.12em] transition-colors duration-200 ${
+                        active ? 'text-[var(--accent-secondary)]' : 'text-[var(--text-ghost)]'
+                      }`}
+                    >
+                      {pad(i + 1)}
+                    </span>
+                    <span
+                      className={`font-display text-[0.95rem] font-semibold leading-tight transition-colors duration-200 ${
+                        active ? 'text-[var(--accent-secondary)]' : 'text-[var(--text-dim)]'
+                      }`}
+                    >
+                      {e.period}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <span className="mt-4 font-mono text-[0.6rem] tracking-[0.1em] text-[var(--text-ghost)]">
+              {pad(activeI + 1)} / {pad(experienceData.length)}
+            </span>
+          </nav>
+        </aside>
+      </div>
     </section>
   );
 }

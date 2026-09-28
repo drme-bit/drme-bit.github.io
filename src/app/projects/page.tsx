@@ -1,128 +1,112 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { TransitionLink } from '@/features/transitions';
-import { FiArrowRight, FiGithub } from '@/shared/ui/atoms/Icon';
+import { FiArrowLeft, FiArrowRight, FiGithub } from '@/shared/ui/Icon';
 import { projects } from '@/features/projects/lib/registry';
 import { STATUS_META } from '@/features/projects/lib/constants';
-import { ICON_MAP } from '@/features/skills/lib/registry';
+import { ICON_MAP } from '@/entities/skill';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { Project } from '@/features/projects/lib/project-repository';
-import styles from './ProjectsList.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
 
-function StatusBadge({ status }: { status: string }) {
-  const meta = STATUS_META[status] || STATUS_META.ACTIVE;
-  return (
-    <span className={`${styles.badge} ${styles[meta.cls] || ''}`}>
-      <meta.icon size={10} />
-      {meta.label}
-    </span>
-  );
-}
+const STATUS_DOT: Record<string, string> = {
+  ACTIVE: 'bg-[var(--accent-success)]',
+  PAUSED: 'bg-[var(--accent-secondary)]',
+  DEPRECATED: 'bg-white/25',
+};
 
-function TechChip({ name }: { name: string }) {
-  const Icon = ICON_MAP[name];
-  return (
-    <span className={styles.techChip}>
-      {Icon && <Icon className={styles.techIcon} />}
-      {name}
-    </span>
-  );
-}
-
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+function ProjectRow({ project, index }: { project: Project; index: number }) {
   const router = useRouter();
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const el = cardRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    el.style.setProperty('--mouse-x', `${((e.clientX - rect.left) / rect.width) * 100}%`);
-    el.style.setProperty('--mouse-y', `${((e.clientY - rect.top) / rect.height) * 100}%`);
-  }, []);
+  const meta = STATUS_META[project.status] || STATUS_META.ACTIVE;
 
   return (
-    <div
-      ref={cardRef}
-      className={styles.card}
-      onMouseMove={handleMouseMove}
+    <article
       onClick={() => router.push(`/projects/${project.id}`)}
+      className="pj-row group flex cursor-pointer items-baseline gap-5 border-b border-[var(--border)] py-6 transition-colors duration-200 first:border-t hover:bg-[var(--glass)] max-[700px]:gap-3"
     >
-      <div className={styles.cardGlow} />
+      <span className="w-8 shrink-0 font-mono text-[0.62rem] text-[var(--text-ghost)] max-[700px]:hidden">
+        {String(index + 1).padStart(2, '0')}
+      </span>
 
-      <div className={styles.cardHeader}>
-        <span className={styles.cardIndex}>{String(index + 1).padStart(2, '0')}</span>
-        <StatusBadge status={project.status} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="inline-flex items-center gap-1.5 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--text-dim)]">
+            <span
+              aria-hidden="true"
+              className={`size-1.5 rounded-full ${STATUS_DOT[project.status] || STATUS_DOT.ACTIVE}`}
+            />
+            {meta.label}
+          </span>
+        </div>
+        <h2 className="m-0 mt-1.5 font-display text-[1.25rem] font-semibold leading-snug tracking-[var(--tracking-tight)] text-foreground transition-transform duration-200 group-hover:translate-x-1">
+          {project.title}
+        </h2>
+        <p className="m-0 mt-1 line-clamp-2 max-w-[68ch] text-[0.84rem] leading-[1.6] text-muted-foreground">
+          {project.desc}
+        </p>
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          <span className="inline-flex flex-wrap gap-x-3 gap-y-1">
+            {project.techNames.slice(0, 5).map((t) => {
+              const Icon = ICON_MAP[t];
+              return (
+                <span
+                  key={t}
+                  className="inline-flex items-center gap-1 font-mono text-[0.62rem] text-[var(--text-ghost)]"
+                >
+                  {Icon && <Icon aria-hidden="true" className="text-[0.85em] opacity-70" />}
+                  {t}
+                </span>
+              );
+            })}
+            {project.techNames.length > 5 && (
+              <span className="font-mono text-[0.62rem] text-[var(--text-ghost)]">
+                +{project.techNames.length - 5}
+              </span>
+            )}
+          </span>
+          {project.repo && (
+            <a
+              href={project.repo}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${project.title} repository`}
+              onClick={(e) => e.stopPropagation()}
+              className="ml-auto inline-flex text-[var(--text-ghost)] transition-colors hover:text-foreground"
+            >
+              <FiGithub size={14} aria-hidden="true" />
+            </a>
+          )}
+        </div>
       </div>
 
-      <h2 className={styles.cardTitle}>{project.title}</h2>
-
-      <p className={styles.cardDesc}>{project.desc}</p>
-
-      <div className={styles.cardTech}>
-        {project.techNames.slice(0, 5).map((t) => (
-          <TechChip key={t} name={t} />
-        ))}
-        {project.techNames.length > 5 && (
-          <span className={styles.techMore}>+{project.techNames.length - 5}</span>
-        )}
-      </div>
-
-      <div className={styles.cardFooter}>
-        <span className={styles.cardLink}>
-          view project <FiArrowRight size={11} className={styles.cardArrow} />
-        </span>
-        {project.repo && (
-          <a
-            href={project.repo}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.cardRepo}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <FiGithub size={13} />
-          </a>
-        )}
-      </div>
-    </div>
+      <FiArrowRight
+        size={14}
+        aria-hidden="true"
+        className="shrink-0 self-center text-[var(--text-ghost)] opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100 group-hover:text-foreground"
+      />
+    </article>
   );
 }
 
 export default function ProjectsList() {
-  const [mounted, setMounted] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    requestAnimationFrame(() => setMounted(true));
   }, []);
 
   useGSAP(
     () => {
-      const title = titleRef.current;
-      const subtitle = subtitleRef.current;
-      const stats = statsRef.current;
-
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-
-      if (title) tl.fromTo(title, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8 }, 0.1);
-      if (subtitle) tl.fromTo(subtitle, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 0.25);
-      if (stats) tl.fromTo(stats, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 0.35);
-
       if (!gridRef.current) return;
-      const cards = gridRef.current.querySelectorAll(`.${styles.card}`);
-      if (cards.length) {
+      const rows = gridRef.current.querySelectorAll('.pj-row');
+      if (rows.length) {
         gsap.fromTo(
-          cards,
+          rows,
           { opacity: 0, y: 24 },
           {
             opacity: 1,
@@ -146,55 +130,51 @@ export default function ProjectsList() {
   const stats = projects.stats;
 
   return (
-    <div className={`${styles.page}${mounted ? ` ${styles['is-mounted']}` : ''}`}>
-      <header className={styles.hero}>
-        <div className={styles.heroGrid} />
-
-        <div className={styles.heroContent}>
-          <nav className={styles.heroBreadcrumb}>
-            <TransitionLink href="/">home</TransitionLink>
-            <span className={styles.bcSep}>/</span>
-            <span className={styles.bcCurrent}>projects</span>
-          </nav>
-
-          <h1 ref={titleRef} className={styles.heroTitle}>
-            pr<span className={styles.heroAccent}>o</span>jects<span className={styles.heroDot}>.</span>
-          </h1>
-
-          <p ref={subtitleRef} className={styles.heroDesc}>
-            what i&apos;ve built
-          </p>
-
-          <div ref={statsRef} className={styles.heroStats}>
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>{stats.total}</span>
-              <span className={styles.statLabel}>total</span>
+    <div className="mx-auto w-full max-w-[880px] animate-rise px-5 pb-20 pt-28 max-[700px]:pt-24">
+      <header>
+        <p className="m-0 font-mono text-[0.62rem] tracking-[0.1em] text-[var(--text-ghost)]">
+          <TransitionLink href="/">home</TransitionLink>
+          <span aria-hidden="true"> / </span>
+          <span className="text-[var(--text-dim)]">projects</span>
+        </p>
+        <h1 className="m-0 mt-3 font-display text-[clamp(2.4rem,6vw,3.6rem)] font-bold leading-none tracking-[var(--tracking-section)] text-foreground">
+          projects
+        </h1>
+        <p className="m-0 mt-3 max-w-[52ch] text-[0.9rem] leading-[1.65] text-muted-foreground">
+          what i&apos;ve built
+        </p>
+        <dl className="m-0 mt-6 flex flex-wrap gap-x-6 gap-y-2">
+          {[
+            ['total', stats.total],
+            ['active', stats.active],
+            ['paused', stats.paused],
+            ['archived', stats.deprecated],
+          ].map(([label, value]) => (
+            <div key={label} className="flex items-baseline gap-2">
+              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.12em] text-[var(--text-ghost)]">
+                {label}
+              </dt>
+              <dd className="m-0 font-display text-[1.1rem] font-semibold text-foreground">
+                {value}
+              </dd>
             </div>
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>{stats.active}</span>
-              <span className={styles.statLabel}>active</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>{stats.paused}</span>
-              <span className={styles.statLabel}>paused</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>{stats.deprecated}</span>
-              <span className={styles.statLabel}>archived</span>
-            </div>
-          </div>
-        </div>
+          ))}
+        </dl>
       </header>
 
-      <main ref={gridRef} className={styles.grid}>
+      <main ref={gridRef} className="mt-8">
         {allProjects.map((project, i) => (
-          <ProjectCard key={project.id} project={project} index={i} />
+          <ProjectRow key={project.id} project={project} index={i} />
         ))}
       </main>
 
-      <footer className={styles.footer}>
-        <TransitionLink href="/" className={styles.footerHome}>
-          <span className={styles.footerArrow}>&larr;</span> back to home
+      <footer className="mt-12">
+        <TransitionLink
+          href="/"
+          className="inline-flex items-center gap-2 font-mono text-[0.7rem] text-[var(--text-dim)] transition-colors hover:text-foreground"
+        >
+          <FiArrowLeft size={14} aria-hidden="true" />
+          <span>back to home</span>
         </TransitionLink>
       </footer>
     </div>
