@@ -9,7 +9,7 @@ describe('findAnswer', () => {
 
   it('answers site-intent questions', () => {
     expect(findAnswer('what is this site?')).toContain("Vyacheslav Tkachyk's personal site");
-    expect(findAnswer('tell me about the skills globe')).toContain('live 3D terrain');
+    expect(findAnswer('tell me about the skills globe')).toContain('Terrain geometry and the cursor-warp grid have been removed');
     expect(findAnswer('how do I contact you?')).toContain('vacheslavtkachik@gmail.com');
   });
 

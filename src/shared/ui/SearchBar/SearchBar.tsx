@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import type { NavIcon } from '@/shared/config/navTypes';
-import { Lens, ArrowRight } from '@/shared/ui/Icon';
+import { FiSearch, ArrowRight } from '@/shared/ui/Icon';
 import { cn } from '@/shared/lib/cn';
 import {
   IconButton,
@@ -159,10 +159,12 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
         onClick={toggle}
         className={cn(
           'group hidden h-8 w-44 items-center gap-2 rounded-[var(--radius-sm)] border bg-secondary/40 px-2.5 transition-colors duration-150 outline-none focus-visible:border-[color-mix(in_srgb,currentColor_25%,transparent)] hover:bg-secondary/70 md:flex',
-          open ? 'border-[color-mix(in_srgb,currentColor_25%,transparent)] text-foreground' : 'border-border/70',
+          open
+            ? 'border-[color-mix(in_srgb,currentColor_25%,transparent)] text-foreground'
+            : 'border-border/70',
         )}
       >
-        <Lens className="size-3.5 shrink-0 text-muted-foreground transition-colors duration-150 group-hover:text-foreground" />
+        <FiSearch className="size-3.5 shrink-0 text-muted-foreground transition-colors duration-150 group-hover:text-foreground" />
         <span className="min-w-0 flex-1 truncate text-left text-[13px] text-muted-foreground">
           Search…
         </span>
@@ -179,7 +181,7 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
           open && 'bg-secondary text-foreground',
         )}
       >
-        <Lens className="size-4" />
+        <FiSearch className="size-4" />
       </IconButton>
 
       {open &&
@@ -191,7 +193,7 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
           >
             <Command aria-label="Search">
               <CommandInputRow>
-                <Lens className="size-3.5 shrink-0 text-muted-foreground" />
+                <FiSearch className="size-3.5 shrink-0 text-muted-foreground" />
                 <CommandInput
                   ref={inputRef}
                   type="text"
@@ -214,7 +216,7 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
               <CommandList ref={listRef}>
                 {results.length === 0 && (
                   <CommandEmpty>
-                    <Lens className="size-4 text-muted-foreground/50" />
+                    <FiSearch className="size-4 text-muted-foreground/50" />
                     <span>
                       No results for &quot;
                       {query.trim()}
@@ -225,11 +227,9 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
 
                 {grouped.map((section) => (
                   <div key={section.label ?? '__ungrouped'}>
-                    {section.label && (
-                      <CommandGroupLabel>{section.label}</CommandGroupLabel>
-                    )}
+                    {section.label && <CommandGroupLabel>{section.label}</CommandGroupLabel>}
                     {section.items.map(({ item, index: i }) => {
-                      const Icon = item.icon ?? Lens;
+                      const Icon = item.icon ?? FiSearch;
                       return (
                         <CommandItem
                           key={item.id}
@@ -239,9 +239,7 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
                           onClick={() => run(item)}
                         >
                           <Icon className="size-4 shrink-0 text-muted-foreground" />
-                          <span className="min-w-0 flex-1 truncate font-medium">
-                            {item.label}
-                          </span>
+                          <span className="min-w-0 flex-1 truncate font-medium">{item.label}</span>
                           {item.hint && (
                             <span className="hidden max-w-[220px] shrink-0 truncate text-xs text-muted-foreground/60 sm:inline">
                               {item.hint}

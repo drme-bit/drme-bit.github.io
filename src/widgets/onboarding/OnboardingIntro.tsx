@@ -1,228 +1,393 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
-import { LogoMark } from '@/shared/ui/LogoMark/LogoMark';
-import { Halo } from '@/shared/ui/Halo/Halo';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { LOADED_EVENT } from '@/features/loading';
+import { LogoMark } from '@/shared/ui/LogoMark/LogoMark';
+import { BookOpen, FiArrowRight, FiFolder, FiUser, FiX } from '@/shared/ui/Icon';
 
 const ONBOARDING_KEY = 'drme-onboarded';
 const LOADED_FLAG = 'drme-loaded';
 
-function isOnboarded(): boolean {
-  if (typeof window === 'undefined') return true;
-  try {
-    return window.localStorage.getItem(ONBOARDING_KEY) !== null;
-  } catch {
-    return false;
-  }
-}
-
-function hasLoadedBefore(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    return window.sessionStorage.getItem(LOADED_FLAG) !== null;
-  } catch {
-    return false;
-  }
-}
-
-interface Step {
-  index: string;
-  title: string;
-  hint: string;
-}
-
-const STEPS: Step[] = [
-  { index: '01', title: 'explore skills', hint: 'interactive 3d globe · 23 nodes' },
-  { index: '02', title: 'read the source', hint: 'projects · blog · experiments' },
-  { index: '03', title: 'meet the author', hint: 'about · résumé · socials' },
-  { index: '04', title: 'say hello', hint: 'replies within 24h' },
+const destinations = [
+  { href: '/projects', label: 'Projects', detail: 'Three builds, full stories', icon: FiFolder },
+  { href: '/blog', label: 'Writing', detail: 'Notes from the process', icon: BookOpen },
+  { href: '/resume', label: 'About me', detail: 'Experience and résumé', icon: FiUser },
 ];
 
-/*  OnboardingIntro — first-run welcome overlay shown after the loading curtain.  */
+function readFlag(kind: 'local' | 'session', key: string) {
+  try {
+    const storage = kind === 'local' ? window.localStorage : window.sessionStorage;
+    return storage.getItem(key) !== null;
+  } catch {
+    return false;
+  }
+}
 
 export function OnboardingIntro() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const pathRef = useRef<SVGPathElement>(null);
-  /*  Initial visibility is computed once, during first render, so no
-      synchronous setState is needed inside an effect below.  */
-  const [dismissed] = useState<boolean>(isOnboarded);
-  const [visible, setVisible] = useState<boolean>(() => !dismissed && hasLoadedBefore());
+  const [visible, setVisible] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
-  /*  Subscribe for the loader finishing; the callback owns the setState.  */
-  useEffect(() => {
-    if (dismissed || visible) return;
-    const show = () => setVisible(true);
-    window.addEventListener(LOADED_EVENT, show);
-    return () => window.removeEventListener(LOADED_EVENT, show);
-  }, [dismissed, visible]);
-
-  useGSAP(
-    () => {
-      if (!visible || !cardRef.current) return;
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      if (reduced) {
-        const targets = wrapRef.current?.querySelectorAll('[data-ob-animate]');
-        if (targets) gsap.set(targets, { opacity: 1 });
-        return;
-      }
-
-      const path = pathRef.current;
-      if (path) {
-        const len = path.getTotalLength();
-        gsap.set(path, {
-          strokeDasharray: len,
-          strokeDashoffset: len,
-          fillOpacity: 0,
-          strokeOpacity: 1,
-        });
-      }
-
-      const tl = gsap.timeline();
-      tl.fromTo(
-        '[data-ob="card"]',
-        { opacity: 0, scale: 0.96, y: 14 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'power3.out' },
-      )
-        .fromTo(
-          '[data-ob="halo"]',
-          { opacity: 0, rotate: -50 },
-          { opacity: 1, rotate: 0, duration: 0.9, ease: 'power2.out' },
-          0.15,
-        )
-        .to(path, { strokeDashoffset: 0, duration: 1.1, ease: 'power2.inOut' }, 0.25)
-        .to(path, { fillOpacity: 1, strokeOpacity: 0.15, duration: 0.4, ease: 'power1.out' }, 1.25)
-        .fromTo(
-          '[data-ob="heading"]',
-          { opacity: 0, y: 12 },
-          { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' },
-          0.55,
-        )
-        .fromTo(
-          '[data-ob="step"]',
-          { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out', stagger: 0.09 },
-          0.8,
-        )
-        .fromTo(
-          '[data-ob="actions"]',
-          { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' },
-          1.25,
-        )
-        .fromTo(
-          '[data-ob="foot"]',
-          { opacity: 0 },
-          { opacity: 1, duration: 0.35, ease: 'power1.out' },
-          1.35,
-        );
-    },
-    { scope: wrapRef, dependencies: [visible] },
-  );
-
-  const close = () => {
-    localStorage.setItem(ONBOARDING_KEY, '1');
-    const card = cardRef.current;
-    if (card) {
-      gsap.to(card, {
-        opacity: 0,
-        scale: 0.92,
-        y: 18,
-        duration: 0.35,
-        ease: 'power3.in',
-        onComplete: () => setVisible(false),
-      });
-    } else {
-      setVisible(false);
+  const dismiss = useCallback(() => {
+    try {
+      localStorage.setItem(ONBOARDING_KEY, '1');
+    } catch {
+      // The welcome can still be dismissed when storage is unavailable.
     }
-  };
+    setVisible(false);
+    requestAnimationFrame(() => returnFocusRef.current?.focus());
+  }, []);
+
+  useEffect(() => {
+    const showIfFirstVisit = () => {
+      if (readFlag('local', ONBOARDING_KEY)) return;
+      returnFocusRef.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      setVisible(true);
+    };
+
+    if (
+      document.documentElement.dataset.portfolioLoaded === 'true' ||
+      readFlag('session', LOADED_FLAG)
+    ) {
+      showIfFirstVisit();
+    }
+    window.addEventListener(LOADED_EVENT, showIfFirstVisit);
+    return () => window.removeEventListener(LOADED_EVENT, showIfFirstVisit);
+  }, []);
 
   useEffect(() => {
     if (!visible) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === 'Escape') close();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const dialog = dialogRef.current;
+    const firstControl = dialog?.querySelector<HTMLElement>('button, a[href]');
+    firstControl?.focus({ preventScroll: true });
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        dismiss();
+        return;
+      }
+      if (event.key !== 'Tab' || !dialog) return;
+      const controls = Array.from(
+        dialog.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]'),
+      );
+      const first = controls[0];
+      const last = controls.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [visible]);
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [dismiss, visible]);
 
   if (!visible) return null;
 
   return (
-    <div ref={wrapRef} className="fixed inset-0 z-[1200] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Welcome to Dr.ME">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={close} aria-hidden="true" />
+    <div
+      className="onboarding-overlay"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) dismiss();
+      }}
+    >
       <div
-        ref={cardRef}
-        data-ob="card"
-        className="relative w-full max-w-[440px] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)] p-6 shadow-[var(--shadow-lg)] max-[700px]:p-5"
+        ref={dialogRef}
+        className="onboarding-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
       >
-        <div className="relative mx-auto flex size-20 items-center justify-center" data-ob="halo">
-          <span className="absolute inset-0" aria-hidden="true">
-            <Halo />
-          </span>
-          <LogoMark
-            className="relative size-12 text-[var(--text)]"
-            pathClassName="fill-transparent stroke-[var(--text)]"
-            pathRef={pathRef}
-          />
+        <button
+          type="button"
+          className="onboarding-close"
+          aria-label="Close welcome"
+          onClick={dismiss}
+        >
+          <FiX size={16} />
+        </button>
+
+        <div className="onboarding-brand">
+          <LogoMark className="onboarding-mark" />
+          <span>drme-bit</span>
+          <span className="onboarding-location">Odesa, Ukraine</span>
         </div>
 
-        <header data-ob="heading" data-ob-animate className="mt-4 text-center">
-          <span className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-[var(--text-ghost)]">
-            [ first run ]
-          </span>
-          <h2 className="m-0 mt-2 font-display text-[clamp(1.5rem,5vw,1.9rem)] font-semibold leading-tight tracking-[var(--tracking-tight)] text-foreground">
-            this is a <span className="text-[var(--accent-secondary)]">live portfolio</span>
-          </h2>
-          <p className="m-0 mx-auto mt-2 max-w-[38ch] text-[0.82rem] leading-[1.65] text-muted-foreground">
-            Hi — I&apos;m Vyacheslav (drme-bit), a full-stack developer from Odesa.
-            This site is built like a terminal: spin the 3D skills globe, open
-            projects &amp; the blog, then say hello. Everything here responds —
-            that&apos;s the whole point.
+        <div className="onboarding-copy">
+          <p className="onboarding-kicker">A portfolio you can move through</p>
+          <h1 id="onboarding-title">Hi, I&apos;m Vyacheslav.</h1>
+          <p className="onboarding-description">
+            Full-stack developer building software, game systems and the tools around them. This
+            portfolio is interactive, so take a look around.
           </p>
-        </header>
+        </div>
 
-        <div className="mt-5 flex flex-col rounded-[var(--radius-sm)] border border-[var(--border)]">
-          {STEPS.map((step, i) => (
-            <div
-              key={step.index}
-              data-ob="step"
-              data-ob-animate
-              className={`flex items-baseline gap-3 px-3.5 py-2.5 ${i > 0 ? 'border-t border-[var(--border)]' : ''}`}
-            >
-              <span className="font-mono text-[0.62rem] text-[var(--text-ghost)]">{step.index}</span>
-              <span className="text-[0.82rem] font-medium text-foreground">{step.title}</span>
-              <span className="ml-auto truncate font-mono text-[0.62rem] text-[var(--text-ghost)]">
-                {step.hint}
+        <nav className="onboarding-destinations" aria-label="Explore the portfolio">
+          {destinations.map(({ href, label, detail, icon: Icon }) => (
+            <Link key={href} href={href} className="onboarding-destination" onClick={dismiss}>
+              <Icon size={16} aria-hidden="true" />
+              <span className="onboarding-destination-copy">
+                <span>{label}</span>
+                <span>{detail}</span>
               </span>
-            </div>
+              <FiArrowRight className="onboarding-destination-arrow" size={15} aria-hidden="true" />
+            </Link>
           ))}
-        </div>
+        </nav>
 
-        <div data-ob="actions" data-ob-animate className="mt-5 flex flex-col items-center gap-2">
-          <button
-            type="button"
-            onClick={close}
-            className="group inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--text)] px-4 py-2.5 text-[0.85rem] font-medium text-[var(--bg)] transition-opacity hover:opacity-90"
-          >
-            enter the site
-            <span aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+        <div className="onboarding-footer">
+          <span>Scroll, explore, ask the guide.</span>
+          <button type="button" onClick={dismiss}>
+            Start exploring <FiArrowRight size={15} aria-hidden="true" />
           </button>
-          <span className="font-mono text-[0.6rem] text-[var(--text-ghost)]">
-            press [enter] · click outside to skip
-          </span>
-        </div>
-
-        <div data-ob="foot" data-ob-animate className="mt-4 flex items-center justify-center gap-2 border-t border-[var(--border)] pt-3 font-mono text-[0.6rem] text-[var(--text-ghost)]">
-          <span>drme-bit · odesa, ukraine</span>
-          <span aria-hidden="true" className="size-1 rounded-full bg-[var(--border-hover)]" />
-          <span>built with react, three.js &amp; too much coffee</span>
         </div>
       </div>
+
+      <style jsx>{`
+        .onboarding-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 1200;
+          display: grid;
+          place-items: center;
+          padding: 24px;
+          background: rgb(0 0 0 / 64%);
+          backdrop-filter: blur(8px);
+          animation: ob-fade 180ms ease-out both;
+        }
+        .onboarding-dialog {
+          position: relative;
+          width: min(100%, 520px);
+          padding: 28px;
+          color: var(--text);
+          background: var(--bg-elevated);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          box-shadow: 0 24px 80px rgb(0 0 0 / 32%);
+          animation: ob-enter 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        }
+        .onboarding-close {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          display: grid;
+          width: 32px;
+          height: 32px;
+          place-items: center;
+          color: var(--text-secondary);
+          background: transparent;
+          border: 1px solid transparent;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        .onboarding-close:hover {
+          color: var(--text);
+          background: var(--bg);
+          border-color: var(--border);
+        }
+        .onboarding-close:focus-visible,
+        .onboarding-destination:focus-visible,
+        .onboarding-footer button:focus-visible {
+          outline: 2px solid var(--accent-secondary);
+          outline-offset: 2px;
+        }
+        .onboarding-brand {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          font-size: 13px;
+          font-weight: 600;
+        }
+        .onboarding-mark {
+          width: 22px;
+          height: 22px;
+          color: var(--text);
+        }
+        .onboarding-location {
+          margin-left: auto;
+          padding-right: 38px;
+          color: var(--text-ghost);
+          font-size: 12px;
+          font-weight: 400;
+        }
+        .onboarding-copy {
+          margin-top: 34px;
+        }
+        .onboarding-kicker {
+          margin: 0 0 10px;
+          color: var(--accent-secondary);
+          font-size: 12px;
+        }
+        .onboarding-copy h1 {
+          margin: 0;
+          font-size: clamp(28px, 7vw, 36px);
+          line-height: 1.1;
+          font-weight: 600;
+        }
+        .onboarding-description {
+          max-width: 42ch;
+          margin: 12px 0 0;
+          color: var(--text-secondary);
+          font-size: 14px;
+          line-height: 1.65;
+        }
+        .onboarding-destinations {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 28px;
+        }
+        .onboarding-destination {
+          display: flex;
+          min-width: 0;
+          min-height: 90px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 11px;
+          padding: 12px;
+          color: var(--text-secondary);
+          text-decoration: none;
+          background: var(--bg);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          transition:
+            border-color 140ms ease,
+            color 140ms ease,
+            transform 140ms ease;
+        }
+        .onboarding-destination:hover {
+          color: var(--text);
+          border-color: var(--border-hover);
+          transform: translateY(-2px);
+        }
+        .onboarding-destination-copy {
+          display: grid;
+          gap: 3px;
+        }
+        .onboarding-destination-copy span:first-child {
+          color: var(--text);
+          font-size: 13px;
+          font-weight: 550;
+        }
+        .onboarding-destination-copy span:last-child {
+          color: var(--text-ghost);
+          font-size: 11px;
+          line-height: 1.35;
+        }
+        .onboarding-destination-arrow {
+          display: none;
+        }
+        .onboarding-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-top: 24px;
+          padding-top: 18px;
+          border-top: 1px solid var(--border);
+        }
+        .onboarding-footer > span {
+          color: var(--text-ghost);
+          font-size: 12px;
+        }
+        .onboarding-footer button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          min-height: 36px;
+          padding: 0 12px;
+          color: var(--bg);
+          font: inherit;
+          font-size: 13px;
+          font-weight: 550;
+          background: var(--text);
+          border: 0;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        .onboarding-footer button:hover {
+          opacity: 0.88;
+        }
+        @keyframes ob-fade {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes ob-enter {
+          from {
+            opacity: 0;
+            transform: translateY(8px) scale(0.99);
+          }
+          to {
+            opacity: 1;
+            transform: none;
+          }
+        }
+        @media (max-width: 520px) {
+          .onboarding-overlay {
+            padding: 14px;
+          }
+          .onboarding-dialog {
+            padding: 22px 18px 18px;
+          }
+          .onboarding-copy {
+            margin-top: 26px;
+          }
+          .onboarding-destinations {
+            grid-template-columns: 1fr;
+            gap: 6px;
+            margin-top: 22px;
+          }
+          .onboarding-destination {
+            min-height: 54px;
+            flex-direction: row;
+            align-items: center;
+            gap: 11px;
+            padding: 9px 11px;
+          }
+          .onboarding-destination-copy {
+            gap: 2px;
+          }
+          .onboarding-destination-arrow {
+            display: block;
+            margin-left: auto;
+          }
+          .onboarding-footer {
+            align-items: flex-start;
+            flex-direction: column;
+            margin-top: 18px;
+            padding-top: 14px;
+          }
+          .onboarding-location {
+            padding-right: 38px;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .onboarding-overlay,
+          .onboarding-dialog {
+            animation: none;
+          }
+          .onboarding-destination {
+            transition: none;
+          }
+        }
+      `}</style>
     </div>
   );
 }

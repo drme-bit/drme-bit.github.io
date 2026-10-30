@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/shared/config/firebase';
 import type { ContactFormData } from '../model/contacts';
+import { profile } from '@/entities/profile';
 
 interface UseContactFormReturn {
   isSubmitting: boolean;
@@ -21,14 +20,12 @@ export function useContactForm(): UseContactFormReturn {
     setError(null);
 
     try {
-      await addDoc(collection(db, 'messages'), {
-        ...data,
-        createdAt: serverTimestamp(),
-        read: false,
-      });
+      const subject = `Portfolio message — ${data.subject}`;
+      const body = [`Name: ${data.name}`, `Email: ${data.email}`, '', data.message].join('\n');
+      window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       setIsSuccess(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message');
+    } catch {
+      setError('Could not open your email app. Please use the email link instead.');
     } finally {
       setIsSubmitting(false);
     }

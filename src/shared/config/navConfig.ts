@@ -120,13 +120,6 @@ export const GLOBAL_NAV: NavItem[] = [
         href: '/projects',
         icon: ArrowRight,
       },
-      {
-        id: 'home-stats',
-        type: 'route',
-        label: 'Stats & Activity',
-        href: '/stats',
-        icon: ChartActivity,
-      },
     ],
   },
   {

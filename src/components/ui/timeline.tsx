@@ -35,37 +35,37 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 
   return (
     <div
-      className="w-full bg-transparent font-sans md:px-10"
+      className="w-full bg-transparent font-sans"
       ref={containerRef}
     >
-      <div className="mx-auto max-w-7xl px-4 py-20 md:px-8 lg:px-10">
-        <h2 className="mb-4 max-w-4xl text-lg text-black md:text-4xl dark:text-white">
+      <div className="mx-auto w-full max-w-none px-4 pb-8 pt-12 md:px-0 md:pb-10 md:pt-14">
+        <h2 className="mb-4 max-w-4xl text-3xl font-semibold tracking-[-0.04em] text-[var(--text)] md:text-5xl">
           Experience &amp; background
         </h2>
-        <p className="max-w-sm text-sm text-neutral-700 md:text-base dark:text-neutral-300">
+        <p className="max-w-[48ch] text-sm leading-6 text-[var(--text-secondary)] md:text-base">
           Roles, teams and shipped work — freelance, game servers and
           full-stack apps.
         </p>
       </div>
 
-      <div ref={ref} className="relative mx-auto max-w-7xl pb-20">
+      <div ref={ref} className="relative mx-auto w-full max-w-none pb-20">
         {data.map((item, index) => (
           <div
             key={index}
             id={`timeline-entry-${index}`}
-            className="flex scroll-mt-36 justify-start pt-10 md:gap-10 md:pt-40"
+            className="flex scroll-mt-28 justify-start pt-5 md:scroll-mt-36 md:gap-10 md:pt-16"
           >
-            <div className="sticky top-40 z-40 flex max-w-xs flex-col items-center self-start md:w-full md:flex-row lg:max-w-sm">
-              <div className="absolute left-3 flex h-10 w-10 items-center justify-center rounded-full bg-white md:left-3 dark:bg-black">
-                <div className="h-4 w-4 rounded-full border border-neutral-300 bg-neutral-200 p-2 md:left-3 dark:border-neutral-700 dark:bg-neutral-800" />
+            <div className="sticky top-40 z-40 flex max-w-xs flex-col items-center self-start md:w-[30%] md:shrink-0 md:flex-row md:max-w-none">
+              <div className="absolute left-0 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg)] md:left-0">
+                <div className="h-3 w-3 rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] md:left-3" />
               </div>
-              <h3 className="hidden text-xl font-bold text-neutral-500 md:block md:pl-20 md:text-5xl dark:text-neutral-500 ">
+              <h3 className="hidden text-xl font-semibold tracking-[-0.045em] text-[var(--text-dim)] md:block md:pl-20 md:text-4xl">
                 {item.title}
               </h3>
             </div>
 
-            <div className="relative w-full pr-4 pl-20 md:pl-4">
-              <h3 className="mb-4 block text-left text-2xl font-bold text-neutral-500 md:hidden dark:text-neutral-500">
+            <div className="relative w-full min-w-0 pr-2 pl-14 sm:pr-3 sm:pl-16 md:flex-1 md:pr-4 md:pl-4">
+              <h3 className="mb-3 block text-left text-xl font-semibold tracking-[-0.04em] text-[var(--text-dim)] sm:mb-4 sm:text-2xl md:hidden">
                 {item.title}
               </h3>
               {item.content}{" "}
@@ -76,14 +76,14 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
           style={{
             height: height + "px",
           }}
-          className="absolute top-0 left-8 w-[2px] overflow-hidden bg-neutral-200 [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] md:left-8 dark:bg-neutral-700 "
+          className="absolute top-0 left-5 w-px overflow-hidden bg-[var(--border)] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] md:left-5"
         >
           <motion.div
             style={{
               height: heightTransform,
               opacity: opacityTransform,
             }}
-            className="absolute inset-x-0 top-0 w-[2px] rounded-full bg-[var(--accent-secondary)]"
+            className="absolute inset-x-0 top-0 w-px rounded-full bg-[var(--accent)]"
           />
         </div>
       </div>

@@ -4,8 +4,7 @@ import { useEffect } from 'react';
 import GlyphPortal from '@/shared/ui/GlyphPortal/GlyphPortal';
 
 /* Scroll-driven camera through live type — the hand-off into Projects.
-   Solid violet zone (paper, field, landing and hero all #150d31):
-   percentage gradients render per-box and always show a seam.
+   Keep the transition on the same paper surface as the rest of the site.
 
    Styling is Tailwind arbitrary (no SCSS module): the `!` suffixes win
    over GlyphPortal's unlayered <style> internals, which beat layered
@@ -47,17 +46,17 @@ export function ProjectsPortal() {
       fontFamily="var(--font-display), 'Arial Black', sans-serif"
       fontWeight={800}
       enterLabel="View work"
-      className="font-[family-name:var(--font-sans)]! [&_[data-gp-content]]:bg-[#150d31]! [&_[data-gp-content]]:min-h-[30vh]! [&_[data-gp-content]]:py-[clamp(1.5rem,4vh,3rem)]! [&_[data-gp-pin]]:will-change-transform"
+      className="font-[family-name:var(--font-sans)]! [&_[data-gp-content]]:bg-[var(--bg-surface)]! [&_[data-gp-content]]:min-h-[30vh]! [&_[data-gp-content]]:py-[clamp(1.5rem,4vh,3rem)]! [&_[data-gp-pin]]:will-change-transform"
       style={{
         '--gp-paper': 'var(--bg)',
         '--gp-ink': 'var(--text)',
-        '--gp-field': '#150d31',
-        '--gp-foreground': '#f0eeeb',
+        '--gp-field': 'var(--bg-surface)',
+        '--gp-foreground': 'var(--text)',
       }}
       background={
         <div
           aria-hidden="true"
-          style={{ position: 'absolute', inset: 0, background: '#150d31' }}
+          style={{ position: 'absolute', inset: 0, background: 'var(--bg-surface)' }}
         />
       }
       front={

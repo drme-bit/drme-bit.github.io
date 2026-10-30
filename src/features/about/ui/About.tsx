@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { FiMapPin, FiDownload, FiMail } from '@/shared/ui/Icon';
+import { FiMapPin, FiMail } from '@/shared/ui/Icon';
 import { profile } from '@/entities/profile';
 import { TextFlippingBoard } from '@/shared/ui/TextFlippingBoard/TextFlippingBoard';
 import { TransitionLink } from '@/features/transitions';
@@ -11,32 +11,30 @@ import { loadActivity } from '../lib/github';
 import type { CommitInfo, HeatmapData } from '../lib/github';
 import { SqueezeCarousel } from './SqueezeCarousel';
 import { PrinciplesComparison } from './PrinciplesComparison';
-import { AboutMarquee } from './AboutMarquee';
 import { HoverPreviewLink } from './HoverPreviewLink';
 
 const reveal = (inView: boolean) =>
   `transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-    inView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+    inView ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
   }`;
 
 const STATUS_LINES = ['AVAILABLE FOR WORK', 'REPLY WITHIN 24H', 'ODESA · GMT+3'];
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
+function SectionHeading({ id, title, detail }: { id: string; title: string; detail: string }) {
   return (
-    <p className="m-0 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-ghost)]">
-      {children}
-    </p>
+    <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-[var(--border)] pt-5">
+      <h3 id={id} className="m-0 font-display text-[clamp(1.35rem,2.5vw,1.8rem)] font-medium tracking-[var(--tracking-tight)] text-[var(--text)]">
+        {title}
+      </h3>
+      <p className="m-0 max-w-[42ch] text-[0.85rem] leading-[1.6] text-[var(--text-dim)]">
+        {detail}
+      </p>
+    </div>
   );
 }
 
-function SectionLabel({ index, children }: { index: string; children: React.ReactNode }) {
-  return (
-    <h3 className="mt-10 flex items-baseline gap-3 border-t border-[var(--border)] pt-7 text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-dim)]">
-      <span className="text-[var(--accent-secondary)]">{index}</span>
-      {children}
-    </h3>
-  );
-}
+const inlineLinkClass =
+  'font-medium text-[var(--text)] underline decoration-[color-mix(in_srgb,var(--text)_30%,transparent)] underline-offset-[3px] transition-colors hover:decoration-[var(--accent-secondary)] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-secondary)]';
 
 export default function About() {
   const [headRef, headIn] = useInView<HTMLDivElement>({ threshold: 0.15 });
@@ -57,12 +55,8 @@ export default function About() {
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const id = setInterval(() => {
-      setStatusIdx((i) => (i + 1) % STATUS_LINES.length);
-    }, 9000);
-    return () => {
-      clearInterval(id);
-    };
+    const id = setInterval(() => setStatusIdx((i) => (i + 1) % STATUS_LINES.length), 9000);
+    return () => clearInterval(id);
   }, []);
 
   const boardText = snapshot
@@ -74,177 +68,118 @@ export default function About() {
       id="about"
       className="relative flex w-full flex-col items-center overflow-x-clip border-t border-[var(--border)] py-20 md:py-28"
     >
-      <div className="relative z-[1] mx-auto flex w-full max-w-[1360px] flex-col gap-12 px-5 md:gap-16 md:px-8">
-        {/* ── Hero: name + billboard ── */}
-        <div ref={headRef} className={`flex flex-col gap-8 ${reveal(headIn)}`}>
-          <div className="flex flex-col gap-4">
-            <Eyebrow>{'// about'}</Eyebrow>
-            <h2 className="m-0 font-display text-[clamp(2.8rem,7vw,4.8rem)] font-semibold leading-[1.02] tracking-[var(--tracking-section)] text-[var(--text)]">
-              {profile.name}
+      <div className="relative z-[1] mx-auto flex w-full max-w-[1240px] flex-col gap-16 px-5 md:gap-20 md:px-8">
+        <div ref={headRef} className={`grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.58fr)] lg:gap-20 ${reveal(headIn)}`}>
+          <div className="flex min-w-0 flex-col items-start">
+            <p className="mb-4 text-[0.82rem] font-medium text-[var(--text-dim)]">A bit about me</p>
+            <h2 className="m-0 max-w-[12ch] font-display text-[clamp(3rem,7vw,6.25rem)] font-semibold leading-[0.94] tracking-[-0.075em] text-[var(--text)]">
+              How I build
             </h2>
-            <p className="m-0 max-w-[38ch] font-display text-[clamp(1.05rem,2vw,1.35rem)] font-medium leading-[1.4] tracking-[var(--tracking-tight)] text-[var(--text-secondary)]">
+            <p className="mt-6 max-w-[42ch] font-display text-[clamp(1.2rem,2vw,1.55rem)] leading-[1.5] tracking-[var(--tracking-tight)] text-[var(--text-secondary)]">
               {profile.brandTagline}
             </p>
-          </div>
-
-          <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-12">
-            <div className="flex min-w-0 flex-col gap-6">
-              <p className="m-0 max-w-[26ch] font-display text-[clamp(1.4rem,2.8vw,2rem)] font-medium leading-[1.35] tracking-[var(--tracking-tight)] text-[var(--text)]">
-                Full-stack developer from Odesa with ~5 years of hands-on experience — clean
-                architecture, measurable performance, software that actually ships.
-              </p>
-              <p className="m-0 max-w-[52ch] text-[1rem] leading-[1.75] text-[var(--text-secondary)]">
-                I learn fastest by building — from{' '}
-                <HoverPreviewLink
-                  href="/projects/gmod-roblox"
-                  preview="/media/projects/project-gmod/images/pgm_overview.webp"
-                  caption="GMod × Roblox — live ops"
-                  desc="Anime, trading economies and horror titles with 2,000+ daily players across live experiences."
-                >
-                  Roblox experiences
-                </HoverPreviewLink>{' '}
-                and moderation bots to full-stack apps like{' '}
-                <HoverPreviewLink
-                  href="/projects/nexagon"
-                  preview="/media/projects/nexagon/images/nexagon_main.webp"
-                  caption="Nexagon — server monitoring"
-                  desc="Real-time game server monitoring platform built with Rust, React and WebGPU."
-                >
-                  Nexagon
-                </HoverPreviewLink>
-                . I{' '}
-                <HoverPreviewLink
-                  href="/blog"
-                  preview="/images/perspective.webp"
-                  caption="Notes on building"
-                  desc="Short technical notes on architecture, backends and shipping software."
-                >
-                  write about the process
-                </HoverPreviewLink>{' '}
-                along the way.
-              </p>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-3 text-[0.8rem] text-[var(--text-dim)]">
-                <span className="inline-flex items-center gap-1.5 font-medium text-[var(--text-secondary)]">
-                  <span
-                    className="h-[7px] w-[7px] animate-status-pulse rounded-full bg-[var(--accent-success)]"
-                    aria-hidden="true"
-                  />
-                  Available for work
-                </span>
-                <span className="text-[var(--text-ghost)]" aria-hidden="true">
-                  ·
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <FiMapPin size={13} aria-hidden="true" />
-                  {profile.location}
-                </span>
-                <span className="text-[var(--text-ghost)]" aria-hidden="true">
-                  ·
-                </span>
-                <a
-                  href={`mailto:${profile.email}`}
-                  className="vercel-link vercel-link--blue inline-flex items-center gap-1.5 font-medium text-[var(--text-secondary)]"
-                >
-                  <FiMail size={13} aria-hidden="true" />
-                  <span>{profile.email}</span>
-                  <span className="vercel-link-arrow" aria-hidden="true">
-                    ↗
-                  </span>
-                </a>
-              </div>
-              <div>
-                <TransitionLink
-                  href="/resume"
-                  className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--accent-secondary)] px-5 py-2.5 text-[0.78rem] font-semibold text-[#02120f] no-underline shadow-[0_4px_20px_-4px_var(--accent-secondary-glow)] transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110"
-                >
-                  <FiDownload size={15} aria-hidden="true" />
-                  <span>Download résumé</span>
-                  <span aria-hidden="true">→</span>
-                </TransitionLink>
-              </div>
+            <p className="mt-5 max-w-[58ch] text-[0.98rem] leading-[1.8] text-[var(--text-secondary)]">
+              I’m a full-stack developer from Odesa with around five years of experience. I learn by
+              building: from{' '}
+              <HoverPreviewLink
+                href="/projects/gmod-roblox"
+                preview="/media/projects/project-gmod/images/pgm_overview.webp"
+                caption="GMod × Roblox · live operations"
+                desc="Live game systems, moderation tools, and experiences built for active player communities."
+              >
+                live game systems
+              </HoverPreviewLink>{' '}
+              to products like{' '}
+              <HoverPreviewLink
+                href="/projects/nexagon"
+                preview="/media/projects/nexagon/images/nexagon_main.webp"
+                caption="Nexagon · server monitoring"
+                desc="A real-time game server monitoring platform built with Rust, React, and WebGPU."
+              >
+                Nexagon
+              </HoverPreviewLink>
+              . I also share practical notes on{' '}
+              <HoverPreviewLink
+                href="/blog"
+                preview="/images/perspective.webp"
+                caption="Notes on building"
+                desc="Short notes on architecture, backends, design decisions, and shipping software."
+              >
+                what I learn along the way
+              </HoverPreviewLink>
+              .
+            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.82rem] text-[var(--text-dim)]">
+              <span className="inline-flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-success)]" aria-hidden="true" />
+                Available for work
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <FiMapPin size={14} aria-hidden="true" />
+                {profile.location}
+              </span>
+              <a href={`mailto:${profile.email}`} className={`${inlineLinkClass} inline-flex items-center gap-1.5`}>
+                <FiMail size={14} aria-hidden="true" />
+                {profile.email}
+              </a>
             </div>
-
-            <figure className="m-0 min-w-0 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-md)] max-lg:max-w-[420px]">
-              <div className="relative aspect-[4/5] overflow-hidden">
-                <Image
-                  src="/images/17969af76asf9y986ad9fy.webp"
-                  alt={profile.name}
-                  fill
-                  sizes="(max-width: 1024px) 90vw, 400px"
-                  quality={85}
-                  className="animate-kenburns object-cover object-[center_20%] contrast-[1.02] grayscale-[0.25] transition-[filter] duration-500 hover:grayscale-0"
-                />
-              </div>
-            </figure>
+            <TransitionLink href="/resume" className={`${inlineLinkClass} mt-5 text-[0.84rem]`}>
+              Résumé
+            </TransitionLink>
           </div>
+
+          <figure className="group m-0 min-w-0 overflow-hidden rounded-lg border border-[var(--border)] max-lg:max-w-[520px]">
+            <div className="relative aspect-[4/4.5] overflow-hidden">
+              <Image
+                src="/images/17969af76asf9y986ad9fy.webp"
+                alt={profile.name}
+                fill
+                sizes="(max-width: 1024px) 90vw, 520px"
+                quality={85}
+                className="object-cover object-[center_20%] contrast-[1.02] transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+              />
+            </div>
+          </figure>
         </div>
 
-        {/* ── Body ── */}
-        <div ref={bodyRef} className={`flex flex-col ${reveal(bodyIn)}`}>
-          {/* ── Field notes: game quotes, inline between text ── */}
-          <figure className="m-0 mt-12 flex flex-col gap-2 border-l-2 border-[var(--accent-secondary)] pl-6">
-            <blockquote className="m-0 font-display text-[clamp(1.5rem,3.2vw,2.2rem)] font-medium leading-[1.3] tracking-[var(--tracking-tight)] text-[var(--text)]">
-              “I&apos;d ask you to think outside the box on this, but it&apos;s obvious your box is
-              broken. And has schizophrenia.”
-            </blockquote>
-            <figcaption className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-dim)]">
-              — Lab Rat
-            </figcaption>
-          </figure>
+        <figure className="relative left-1/2 m-0 w-screen -translate-x-1/2 border-y border-[var(--border)] py-8 md:py-10">
+          <figcaption className="mx-auto mb-4 flex w-full max-w-[1240px] flex-wrap items-baseline justify-between gap-2 px-5 text-[0.8rem] text-[var(--text-dim)] md:px-8">
+            <span>Recent work, at a glance</span>
+            <span>Live GitHub activity</span>
+          </figcaption>
+          <TextFlippingBoard
+            text={boardText}
+            boardRows={4}
+            className="w-full max-w-none rounded-none border-0 bg-transparent p-0 shadow-none dark:bg-transparent dark:shadow-none"
+          />
+        </figure>
 
-          <SectionLabel index="01">How I ship</SectionLabel>
-          <SqueezeCarousel />
-
-          <SectionLabel index="02">Principles</SectionLabel>
-          <PrinciplesComparison />
-
-          {/* ── Field notes: game quotes, inline between text ── */}
-          <figure className="m-0 mt-10 flex flex-col gap-2 border-l-2 border-[var(--accent-secondary)] pl-6">
-            <blockquote className="m-0 font-display text-[clamp(1.5rem,3.2vw,2.2rem)] font-medium leading-[1.3] tracking-[var(--tracking-tight)] text-[var(--text)]">
-              “Recent studies have shown that approximately 40% of authors are manic depressive. The
-              rest of us just drink.”
-            </blockquote>
-            <figcaption className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-dim)]">
-              — Through the Wall
-            </figcaption>
-          </figure>
-
-          {/* ── Flipboard: full-bleed, no chrome, live stat rows ── */}
-          <div className="relative left-1/2 w-[100vw] -translate-x-1/2 py-6">
-            <TextFlippingBoard
-              text={boardText}
-              boardRows={4}
-              className="w-full max-w-none rounded-none border-0 bg-transparent p-0 shadow-none md:rounded-none md:p-0 dark:bg-transparent dark:shadow-none"
+        <div ref={bodyRef} className={`flex flex-col gap-14 md:gap-16 ${reveal(bodyIn)}`}>
+          <section aria-labelledby="about-practice-heading">
+            <SectionHeading
+              id="about-practice-heading"
+              title="How I work"
+              detail="A few parts of the process that shape what I build and how I ship it."
             />
-          </div>
+            <SqueezeCarousel />
+          </section>
 
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-5 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card-bg)] p-6 shadow-[var(--shadow-sm)] md:p-7">
-            <p className="m-0 font-display text-[clamp(1.3rem,2.6vw,1.75rem)] font-semibold tracking-[var(--tracking-section)] text-[var(--text)]">
-              Have a project in mind?
-            </p>
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-[var(--text)] px-6 py-3.5 text-[0.74rem] font-semibold text-[var(--bg)] no-underline transition-all duration-200 hover:-translate-y-px hover:opacity-90"
-            >
-              <span>Get in touch</span>
-              <span aria-hidden="true">→</span>
+          <section aria-labelledby="about-principles-heading">
+            <SectionHeading
+              id="about-principles-heading"
+              title="What guides me"
+              detail="Simple habits that keep projects useful, maintainable, and moving forward."
+            />
+            <PrinciplesComparison />
+          </section>
+
+          <p className="m-0 border-t border-[var(--border)] pt-5 text-[0.9rem] leading-[1.7] text-[var(--text-secondary)]">
+            Have a project in mind?{' '}
+            <a href="#contact" className={inlineLinkClass}>
+              Tell me about it.
             </a>
-          </div>
-
-          <p className="m-0 mt-2 flex flex-wrap gap-x-2.5 gap-y-2 text-[0.68rem] text-[var(--text-ghost)]">
-            <span className="font-semibold uppercase tracking-[0.12em]">Colophon</span>
-            <span aria-hidden="true">·</span>
-            <span>Set in Geist</span>
-            <span aria-hidden="true">·</span>
-            <span>Built with Next.js, React Three Fiber and GSAP</span>
-            <span aria-hidden="true">·</span>
-            <span>Departure board by Aceternity</span>
           </p>
         </div>
-      </div>
-
-      <div className="sticky bottom-0 z-[1000]">
-        <AboutMarquee />
       </div>
     </section>
   );

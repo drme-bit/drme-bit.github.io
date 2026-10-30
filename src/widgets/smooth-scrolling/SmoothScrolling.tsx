@@ -40,6 +40,20 @@ function SmoothScrolling({ children }: SmoothScrollingProps) {
     // don't let them nudge pinned/scrubbed triggers.
     ScrollTrigger.config({ ignoreMobileResize: true });
 
+    // Ignore address-bar height changes on phones, but refresh pinned sections
+    // when the actual layout width changes (for example, on rotation).
+    let previousWidth = window.innerWidth;
+    let viewportRefreshTimer: ReturnType<typeof setTimeout> | undefined;
+    const refreshOnWidthChange = () => {
+      const nextWidth = window.innerWidth;
+      if (nextWidth === previousWidth) return;
+      previousWidth = nextWidth;
+      clearTimeout(viewportRefreshTimer);
+      viewportRefreshTimer = setTimeout(() => ScrollTrigger.refresh(), 160);
+    };
+    window.addEventListener('resize', refreshOnWidthChange, { passive: true });
+    window.addEventListener('orientationchange', refreshOnWidthChange, { passive: true });
+
     // Fresh reload always starts at the top. Safari restores the previous
     // scroll position on reload — waking up mid-portal shows the flight's
     // end state (zoom done, violet field) before anything was scrolled,
@@ -73,6 +87,9 @@ function SmoothScrolling({ children }: SmoothScrollingProps) {
 
     return () => {
       clearTimeout(timer);
+      clearTimeout(viewportRefreshTimer);
+      window.removeEventListener('resize', refreshOnWidthChange);
+      window.removeEventListener('orientationchange', refreshOnWidthChange);
     };
   }, []);
 

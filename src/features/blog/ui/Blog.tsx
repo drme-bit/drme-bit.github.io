@@ -106,8 +106,8 @@ export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useR
         <section id="blog" ref={sectionRef} className={styles.section}>
           <div className={styles.header}>
             <span className={styles.headerTag}>02 / 03</span>
-            <h2 className={styles.headerTitle}>BLOG</h2>
-            <p className={styles.headerSub}>thoughts & writeups</p>
+            <h2 className={styles.headerTitle}>Notes from the build</h2>
+            <p className={styles.headerSub}>Things I learned while shipping software.</p>
           </div>
 
           <div className={styles['blog-grid']}>
@@ -121,7 +121,7 @@ export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useR
 
           <div className={styles['blog-footer']}>
             <button className={styles['blog-view-all']} onClick={() => router.push('/blog')}>
-              <span>view all posts</span>
+              <span>Browse all notes</span>
               <FiArrowRight size={13} />
             </button>
           </div>

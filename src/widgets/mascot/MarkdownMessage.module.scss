@@ -1,0 +1,78 @@
+.markdown {
+  min-width: 0;
+  color: inherit;
+}
+.markdown > :first-child {
+  margin-top: 0;
+}
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown blockquote,
+.markdown pre {
+  margin: 0 0 0.75rem;
+}
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  margin: 0 0 0.6rem;
+  color: var(--text);
+  font-weight: 600;
+  line-height: 1.25;
+}
+.markdown h1 {
+  font-size: 1.05rem;
+}
+.markdown h2 {
+  font-size: 0.96rem;
+}
+.markdown h3 {
+  font-size: 0.88rem;
+}
+.markdown ul,
+.markdown ol {
+  padding-left: 1.2rem;
+}
+.markdown li + li {
+  margin-top: 0.3rem;
+}
+.markdown blockquote {
+  border-left: 2px solid var(--border-hover);
+  padding-left: 0.75rem;
+  color: var(--text-secondary);
+}
+.markdown code {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-surface);
+  padding: 0.12rem 0.3rem;
+  color: var(--accent-secondary);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.86em;
+}
+.markdown pre {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #050505;
+  padding: 0.75rem;
+}
+.markdown pre code {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  white-space: pre;
+}
+.markdown a {
+  color: var(--accent-secondary);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent-secondary) 40%, transparent);
+  text-underline-offset: 3px;
+}
+.markdown a:hover {
+  text-decoration-color: currentColor;
+}

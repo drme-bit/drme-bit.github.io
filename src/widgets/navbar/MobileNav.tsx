@@ -5,10 +5,12 @@ import { usePathname } from 'next/navigation';
 import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 import { Menu } from '@/shared/ui/Icon';
 import { useChat } from '@/app/providers/ChatProvider';
-import CompanionCube from '@/widgets/mascot/CompanionCube';
+import GuideCat from '@/widgets/mascot/GuideCat';
 import { GLOBAL_NAV } from '@/shared/config/navConfig';
 import type { NavGroup, NavRouteLink, NavLeaf } from '@/shared/config/navTypes';
 import { IconButton, Separator } from '@/shared/ui';
+import { FiAtSign, FiGithub, FiLinkedin, SiDiscord } from '@/shared/ui/Icon';
+import { profile, socialLinks } from '@/entities/profile';
 import {
   Sheet,
   SheetClose,
@@ -23,8 +25,9 @@ function leafHref(leaf: NavLeaf): string {
 }
 
 const linkClass =
-  'flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground';
+  'flex min-h-10 items-center gap-2.5 rounded-md px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-foreground';
 const iconClass = 'size-4 shrink-0 text-accent';
+const socialIcons = { github: FiGithub, linkedin: FiLinkedin, discord: SiDiscord } as const;
 
 export function MobileNav() {
   const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
@@ -44,14 +47,15 @@ export function MobileNav() {
         </IconButton>
       </SheetTrigger>
       <SheetContent
-        className="!w-[85%] !max-w-[320px] gap-0 border-l border-border bg-background p-0"
+        className="!w-[86%] !max-w-[360px] gap-0 border-l border-border bg-background p-0 shadow-2xl"
         showClose={false}
         side="right"
       >
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
-            menu
-          </span>
+        <div className="flex items-center justify-between border-b border-border px-4 py-4">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[13px] font-medium text-foreground">Portfolio</span>
+            <span className="text-[11px] text-muted-foreground">Pages and sections</span>
+          </div>
           <SheetClose asChild>
             <IconButton
               size="icon-sm"
@@ -70,7 +74,7 @@ export function MobileNav() {
               onClick={() => setChatOpen(true)}
               className={linkClass}
             >
-              <CompanionCube size={16} />
+              <GuideCat size={16} />
               <span>Ask AI</span>
             </button>
           </SheetClose>
@@ -127,6 +131,39 @@ export function MobileNav() {
               </SheetClose>
             );
           })}
+
+          <div className="mt-auto pt-2">
+            <Separator className="my-1" />
+            <div className="flex items-center justify-between px-2 pt-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground/65">
+                Elsewhere
+              </span>
+              <nav aria-label="Social links" className="flex items-center gap-1">
+                {socialLinks.map((link) => {
+                  const Icon = socialIcons[link.id];
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={link.label}
+                      className="flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--geist-focus)]"
+                    >
+                      <Icon className="size-4" />
+                    </a>
+                  );
+                })}
+                <a
+                  href={`mailto:${profile.email}`}
+                  aria-label="Email"
+                  className="flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--geist-focus)]"
+                >
+                  <FiAtSign className="size-4" />
+                </a>
+              </nav>
+            </div>
+          </div>
         </div>
       </SheetContent>
     </Sheet>

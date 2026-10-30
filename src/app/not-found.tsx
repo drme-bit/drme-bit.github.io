@@ -1,64 +1,76 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { TransitionLink } from '@/features/transitions';
-import { FiHome, FiArrowLeft, FiTerminal } from '@/shared/ui/Icon';
+import { BookOpen, FiArrowLeft, FiArrowRight, FiFolder } from '@/shared/ui/Icon';
+import { SignalCable } from '@/widgets/not-found/SignalCable';
 import styles from './NotFound.module.scss';
 
 export default function NotFound() {
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   return (
-    <div className={styles['not-found-page']}>
-      <div className={styles['nf-terminal']}>
-        <div className={styles['nf-terminal-bar']}>
-          <span className={`${styles['nf-terminal-dot']} ${styles['nf-terminal-dot--red']}`} />
-          <span className={`${styles['nf-terminal-dot']} ${styles['nf-terminal-dot--yellow']}`} />
-          <span className={`${styles['nf-terminal-dot']} ${styles['nf-terminal-dot--green']}`} />
-          <span className={styles['nf-terminal-title']}>bash</span>
-        </div>
-        <div className={styles['nf-terminal-body']}>
-          <div className={styles['nf-line']}>
-            <span className={styles['nf-prompt']}>$</span>
-            <span className={styles['nf-command']}>curl {typeof window !== 'undefined' ? window.location.pathname : '/'}</span>
-          </div>
-          <div className={`${styles['nf-line']} ${styles['nf-output']} ${styles['nf-error']}`}>
-            <FiTerminal size={14} />
-            <span>curl: (404) The resource you requested could not be found</span>
-          </div>
-          <div className={styles['nf-line']}>
-            <span className={styles['nf-prompt']}>$</span>
-            <span className={styles['nf-cursor']}>|</span>
-          </div>
-        </div>
+    <main className={styles.page}>
+      <div className={styles.topline}>
+        <span>
+          drme-bit <span aria-hidden="true">/</span> route error
+        </span>
+        <span className={styles.status}>
+          <span className={styles.statusDot} aria-hidden="true" /> 404
+        </span>
       </div>
 
-      <div className={styles['nf-content']}>
-        <h1 className={styles['nf-code']}>404</h1>
-        <p className={styles['nf-message']}>Page not found</p>
-        <p className={styles['nf-desc']}>
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
-        </p>
-
-        <div className={styles['nf-actions']}>
-          <TransitionLink href="/" className={`${styles['nf-btn']} ${styles['nf-btn--primary']}`}>
-            <FiHome size={14} />
-            <span>cd ~</span>
-          </TransitionLink>
-          <button
-            onClick={() => router.back()}
-            className={`${styles['nf-btn']} ${styles['nf-btn--secondary']}`}
-          >
-            <FiArrowLeft size={14} />
-            <span>cd -</span>
-          </button>
+      <section className={styles.hero} aria-labelledby="not-found-title">
+        <SignalCable />
+        <div className={styles.message}>
+          <span className={styles.eyebrow}>
+            Connection lost <span>404</span>
+          </span>
+          <h1 id="not-found-title">No signal here.</h1>
+          <p>This page isn&apos;t connected. It may have moved, or the link may be out of date.</p>
+          <code className={styles.path} title={pathname ?? undefined}>
+            {pathname || '/'}
+          </code>
+          <div className={styles.actions}>
+            <TransitionLink href="/" className={styles.primaryAction}>
+              Back to home <FiArrowRight size={16} aria-hidden="true" />
+            </TransitionLink>
+            <button type="button" onClick={() => router.back()} className={styles.backAction}>
+              <FiArrowLeft size={15} aria-hidden="true" /> Go back
+            </button>
+          </div>
         </div>
+      </section>
+
+      <nav className={styles.recovery} aria-label="Useful pages">
+        <span className={styles.recoveryLabel}>Find your way around</span>
+        <TransitionLink href="/projects">
+          <FiFolder size={16} aria-hidden="true" />
+          <span>Projects</span>
+          <FiArrowRight size={15} aria-hidden="true" />
+        </TransitionLink>
+        <TransitionLink href="/blog">
+          <BookOpen size={16} aria-hidden="true" />
+          <span>Writing</span>
+          <FiArrowRight size={15} aria-hidden="true" />
+        </TransitionLink>
+        <TransitionLink href="/resume">
+          <span className={styles.resumeGlyph}>CV</span>
+          <span>Résumé</span>
+          <FiArrowRight size={15} aria-hidden="true" />
+        </TransitionLink>
+      </nav>
+
+      <div className={styles.footer}>
+        <span>There&apos;s plenty to explore.</span>
+        <span>{pathname || '/'}</span>
       </div>
-    </div>
+    </main>
   );
 }
