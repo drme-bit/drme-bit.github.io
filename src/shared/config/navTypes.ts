@@ -1,8 +1,8 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, SVGProps } from 'react';
 
 /*  Nav icons come from lucide-react: any component taking size/className.  */
 
-export type NavIcon = ComponentType<{ size?: number | string; className?: string }>;
+export type NavIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number | string }>;
 
 /*  Nav item types  */
 

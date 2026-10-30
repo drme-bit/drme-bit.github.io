@@ -48,7 +48,7 @@ function pickWords(count: number, seed?: number): string[] {
 /*  Component ── */
 
 export default function TypingTest() {
-  const [mounted] = useState(() => typeof window !== 'undefined');
+  const [mounted, setMounted] = useState(false);
   const [words, setWords] = useState(() => pickWords(50));
   const [typed, setTyped] = useState('');
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -66,6 +66,10 @@ export default function TypingTest() {
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const saveBest = useCallback((wpm: number, accuracy: number, time: number) => {
     if (!best || wpm > best.wpm) {
