@@ -16,6 +16,13 @@ export interface AiChatMessage {
   interrupted?: boolean;
 }
 
+export interface LocalChatSession {
+  id: string;
+  title: string;
+  updatedAt: number;
+  messages: AiChatMessage[];
+}
+
 export interface ChatQuota {
   remaining: number;
   blocked: boolean;
@@ -43,6 +50,8 @@ export const THINKING_STEPS = [
 ] as const;
 
 const MODEL_KEY = 'drme-chat-model';
+const SESSIONS_KEY = 'drme-chat-sessions-v1';
+const MAX_SESSIONS = 20;
 
 let nextId = 1;
 
@@ -85,6 +94,84 @@ function persist(stored: StoredQuota): void {
   }
 }
 
+function sessionTitle(messages: AiChatMessage[]): string {
+  const firstQuestion = messages.find((message) => message.role === 'user')?.content.trim();
+  if (!firstQuestion) return 'New chat';
+  return firstQuestion.length > 48 ? `${firstQuestion.slice(0, 47).trimEnd()}…` : firstQuestion;
+}
+
+function readSessions(): { sessions: LocalChatSession[]; activeId: string | null } {
+  try {
+    const raw = localStorage.getItem(SESSIONS_KEY);
+    if (!raw) return { sessions: [], activeId: null };
+    const parsed = JSON.parse(raw) as { sessions?: unknown; activeId?: unknown };
+    if (!Array.isArray(parsed.sessions)) return { sessions: [], activeId: null };
+    const sessions = parsed.sessions
+      .filter((value): value is LocalChatSession => Boolean(
+        value && typeof value === 'object' &&
+        typeof (value as LocalChatSession).id === 'string' &&
+        Array.isArray((value as LocalChatSession).messages),
+      ))
+      .map((session) => ({
+        id: session.id,
+        title: typeof session.title === 'string' ? session.title : 'Saved chat',
+        updatedAt: typeof session.updatedAt === 'number' ? session.updatedAt : Date.now(),
+        messages: session.messages
+          .filter((message) => message && (message.role === 'user' || message.role === 'assistant') && typeof message.content === 'string')
+          .slice(-100)
+          .map((message, index) => ({ ...message, id: Number.isFinite(message.id) ? message.id : index + 1, streaming: false })),
+      }))
+      .filter((session) => session.messages.length > 0)
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .slice(0, MAX_SESSIONS);
+    const activeId = typeof parsed.activeId === 'string' && sessions.some((session) => session.id === parsed.activeId)
+      ? parsed.activeId
+      : sessions[0]?.id ?? null;
+    return { sessions, activeId };
+  } catch {
+    return { sessions: [], activeId: null };
+  }
+}
+
+function writeSessions(sessions: LocalChatSession[], activeId: string | null): void {
+  try {
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify({ sessions: sessions.slice(0, MAX_SESSIONS), activeId }));
+  } catch {
+    /* Private mode or storage quota: the current conversation remains usable. */
+  }
+}
+
+function createSessionId(): string {
+  const cryptoApi = typeof globalThis.crypto === 'undefined' ? undefined : globalThis.crypto;
+
+  if (typeof cryptoApi?.randomUUID === 'function') {
+    return cryptoApi.randomUUID();
+  }
+
+  if (cryptoApi) {
+    const bytes = new Uint8Array(16);
+    cryptoApi.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+
+  return `${Date.now()}`;
+}
+
+function upsertSession(sessions: LocalChatSession[], id: string, messages: AiChatMessage[]): LocalChatSession[] {
+  const existing = sessions.find((session) => session.id === id);
+  if (!existing && messages.length === 0) return sessions;
+  const session: LocalChatSession = {
+    id,
+    title: sessionTitle(messages),
+    updatedAt: Date.now(),
+    messages: messages.filter((message) => message.content.length > 0).slice(-100).map((message) => ({ ...message, streaming: false })),
+  };
+  return [session, ...sessions.filter((item) => item.id !== id)].slice(0, MAX_SESSIONS);
+}
+
 function quotaNotice(reset: number, now: number): string {
   const hours = Math.max(1, Math.ceil((reset - now) / 3600000));
   return (
@@ -102,11 +189,14 @@ function toQuota(stored: StoredQuota): ChatQuota {
   };
 }
 
-/*  Chat state machine: talks to /api/chat, falls back to the local
-    mock brain when the gateway isn't configured (offline mode).  */
+/*  Chat state machine: talks to /api/chat. Local replies are available only
+    when CHAT_LOCAL_FALLBACK is explicitly enabled by the server. */
 
 export function useAiChat() {
   const [messages, setMessages] = useState<AiChatMessage[]>([]);
+  const [sessions, setSessions] = useState<LocalChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [historyReady, setHistoryReady] = useState(false);
   const [sending, setSending] = useState(false);
   const [thinkingStep, setThinkingStep] = useState(0);
   const [offline, setOffline] = useState(false);
@@ -119,6 +209,8 @@ export function useAiChat() {
   const [model, setModelState] = useState<ChatModelId>(CHAT_MODELS[0].id);
   const abortRef = useRef<AbortController | null>(null);
   const messagesRef = useRef<AiChatMessage[]>([]);
+  const sessionsRef = useRef<LocalChatSession[]>([]);
+  const activeSessionRef = useRef<string | null>(null);
   const modelRef = useRef<ChatModelId>(CHAT_MODELS[0].id);
 
   useEffect(
@@ -127,6 +219,32 @@ export function useAiChat() {
     },
     [],
   );
+
+  useEffect(() => {
+    const saved = readSessions();
+    const activeSession = saved.sessions.find((session) => session.id === saved.activeId);
+    sessionsRef.current = saved.sessions;
+    activeSessionRef.current = activeSession?.id ?? null;
+    messagesRef.current = activeSession?.messages ?? [];
+    nextId = Math.max(1, ...saved.sessions.flatMap((session) => session.messages.map((message) => message.id + 1)));
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate local chat history after mount
+    setSessions(saved.sessions);
+    setActiveSessionId(activeSession?.id ?? null);
+    setMessages(messagesRef.current);
+    setHistoryReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!historyReady) return;
+    const timer = window.setTimeout(() => {
+      const id = activeSessionRef.current;
+      const next = id ? upsertSession(sessionsRef.current, id, messagesRef.current) : sessionsRef.current;
+      sessionsRef.current = next;
+      setSessions(next);
+      writeSessions(next, id);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [messages, activeSessionId, historyReady]);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
@@ -174,14 +292,70 @@ export function useAiChat() {
     }
   }, []);
 
+  const ensureActiveSession = useCallback(() => {
+    if (activeSessionRef.current) return activeSessionRef.current;
+    const id = createSessionId();
+    activeSessionRef.current = id;
+    setActiveSessionId(id);
+    return id;
+  }, []);
+
+  const startNewSession = useCallback(() => {
+    stop();
+    const previousId = activeSessionRef.current;
+    const previous = previousId
+      ? upsertSession(sessionsRef.current, previousId, messagesRef.current)
+      : sessionsRef.current;
+    sessionsRef.current = previous;
+    activeSessionRef.current = null;
+    messagesRef.current = [];
+    setSessions(previous);
+    setActiveSessionId(null);
+    setMessages([]);
+    writeSessions(previous, null);
+  }, [stop]);
+
+  const switchSession = useCallback((id: string) => {
+    const selected = sessionsRef.current.find((session) => session.id === id);
+    if (!selected || activeSessionRef.current === id) return;
+    stop();
+    const previousId = activeSessionRef.current;
+    const saved = previousId
+      ? upsertSession(sessionsRef.current, previousId, messagesRef.current)
+      : sessionsRef.current;
+    sessionsRef.current = saved;
+    activeSessionRef.current = id;
+    messagesRef.current = selected.messages;
+    setSessions(saved);
+    setActiveSessionId(id);
+    setMessages(selected.messages);
+    writeSessions(saved, id);
+  }, [stop]);
+
+  const deleteSession = useCallback((id: string) => {
+    const remaining = sessionsRef.current.filter((session) => session.id !== id);
+    sessionsRef.current = remaining;
+    if (activeSessionRef.current === id) {
+      stop();
+      activeSessionRef.current = null;
+      messagesRef.current = [];
+      setActiveSessionId(null);
+      setMessages([]);
+    }
+    setSessions(remaining);
+    writeSessions(remaining, activeSessionRef.current);
+  }, [stop]);
+
   const push = useCallback((msg: Omit<AiChatMessage, 'id'>) => {
+    ensureActiveSession();
     const full = { ...msg, id: nextId++ };
     messagesRef.current = [...messagesRef.current, full];
     setMessages(messagesRef.current);
-  }, []);
+  }, [ensureActiveSession]);
 
   const pushStreaming = useCallback(async (msg: Omit<AiChatMessage, 'id'>, signal: AbortSignal) => {
     if (signal.aborted) return;
+    ensureActiveSession();
     const full = {
       ...msg,
       id: nextId++,
@@ -208,7 +382,7 @@ export function useAiChat() {
       message.id === full.id ? full : message,
     );
     setMessages([...messagesRef.current]);
-  }, []);
+  }, [ensureActiveSession]);
 
   const send = useCallback(
     async (raw: string) => {
@@ -260,8 +434,8 @@ export function useAiChat() {
             },
             controller.signal,
           );
-        } else if (res.status === 503) {
-          // Gateway not configured → local mock brain, flagged as offline.
+        } else if (res.status === 503 && data?.code === 'LOCAL_CHAT_FALLBACK') {
+          // Local responses are opt-in via CHAT_LOCAL_FALLBACK=true.
           setOffline(true);
           await pushStreaming(
             {
@@ -287,13 +461,13 @@ export function useAiChat() {
         }
       } catch (e) {
         if (!controller.signal.aborted && (e as Error)?.name !== 'AbortError') {
-          setOffline(true);
+          setOffline(false);
           await pushStreaming(
             {
               role: 'assistant',
-              content: pickResponse(content),
-              offline: true,
-              sources: getRelatedSources(content),
+              content: e instanceof Error
+                ? `I couldn't reach the AI Gateway: ${e.message}. Please try again.`
+                : 'I could not reach the AI Gateway. Please try again.',
             },
             controller.signal,
           );
@@ -309,11 +483,7 @@ export function useAiChat() {
     [push, pushStreaming],
   );
 
-  const clear = useCallback(() => {
-    stop();
-    messagesRef.current = [];
-    setMessages([]);
-  }, [stop]);
+  const clear = startNewSession;
 
   return {
     messages,
@@ -324,6 +494,10 @@ export function useAiChat() {
     quota,
     model,
     setModel,
+    sessions,
+    activeSessionId,
+    switchSession,
+    deleteSession,
     send,
     stop,
     clear,

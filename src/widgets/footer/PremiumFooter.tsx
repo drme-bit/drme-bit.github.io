@@ -62,7 +62,7 @@ export function PremiumFooter() {
     <footer
       id="footer"
       role="contentinfo"
-      className="fixed inset-x-0 bottom-0 z-0 min-h-[340px] overflow-hidden bg-[var(--bg)] max-[700px]:min-h-[300px]"
+      className="fixed inset-x-0 bottom-0 z-0 min-h-[340px] overflow-hidden bg-[var(--bg)] max-[700px]:min-h-[300px] xl:inset-x-auto xl:left-0 xl:right-[var(--workspace-reserved-right)]"
     >
       <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden whitespace-nowrap font-display text-[clamp(9rem,28vw,26rem)] font-semibold leading-none tracking-[-0.105em] text-[var(--text)] opacity-[0.05]">
         drme

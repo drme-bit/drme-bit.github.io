@@ -177,7 +177,7 @@ export default function Navbar() {
       data-section={active.sectionId || undefined}
       data-scrolled={scrolled}
       className={`fixed top-2 left-1 right-1 z-[999] w-auto rounded-[14px] bg-background px-[clamp(1rem,2.2vw,2rem)] transition-[right,background-color] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:left-2 ${
-        chatOpen ? 'xl:right-[424px]' : 'xl:right-[56px]'
+        chatOpen ? 'xl:right-[var(--workspace-reserved-right)]' : 'xl:right-[56px]'
       }`}
       aria-label="Navigation"
     >
