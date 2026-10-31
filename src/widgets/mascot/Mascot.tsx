@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
 import Link from 'next/link';
 import {
   Code2,
@@ -16,6 +16,8 @@ import {
   MessageCircle,
   Settings2,
   CheckCheck,
+  History,
+  MessageSquarePlus,
 } from 'lucide-react';
 import { Trash, ArrowDown, ArrowUpRight, ArrowUp, Warning, FiGithub, FiLinkedin, FiAtSign, SiDiscord } from '@/shared/ui/Icon';
 import { useChat } from '@/app/providers/ChatProvider';
@@ -39,18 +41,32 @@ import { Separator } from '@/shared/ui';
     are plain rows (no bubbles), composer sends with an arrow button.  */
 
 export default function Mascot() {
-  const { open, setOpen, panel, openPanel } = useChat();
+  const { open, setOpen, panel, panelWidth, setPanelWidth, openPanel } = useChat();
   const [readIds, setReadIds] = useState<number[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [showJump, setShowJump] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
-  const { messages, sending, thinkingLabel, offline, quota, send, stop, clear } = useAiChat();
+  const {
+    messages,
+    sending,
+    thinkingLabel,
+    offline,
+    quota,
+    sessions,
+    activeSessionId,
+    switchSession,
+    deleteSession,
+    send,
+    stop,
+    clear,
+  } = useAiChat();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const stickRef = useRef(true);
   const dockRef = useRef<HTMLButtonElement>(null);
+  const historyRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1279px)');
@@ -283,7 +299,7 @@ export default function Mascot() {
   const quotaPercent = Math.round((quota.remaining / CHAT_QUOTA_LIMIT) * 100);
   const panelTitle =
     panel === 'chat'
-      ? 'Portfolio guide'
+      ? sessions.find((session) => session.id === activeSessionId)?.title || 'Portfolio guide'
       : panel === 'notifications'
         ? 'Notifications'
         : panel === 'explore'
@@ -444,7 +460,40 @@ export default function Mascot() {
         inert={!open}
         data-open={open}
         className={styles.sidebar}
+        style={{ '--chat-panel-width': `${panelWidth}px` } as CSSProperties}
       >
+        <div
+          role="separator"
+          aria-label="Resize sidebar"
+          aria-orientation="vertical"
+          aria-valuemin={360}
+          aria-valuemax={640}
+          aria-valuenow={panelWidth}
+          tabIndex={open && !isMobileViewport ? 0 : -1}
+          className={styles.resizeHandle}
+          onPointerDown={(event) => {
+            event.preventDefault();
+            event.currentTarget.setPointerCapture(event.pointerId);
+            event.currentTarget.dataset.dragging = 'true';
+          }}
+          onPointerMove={(event) => {
+            if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+            setPanelWidth(window.innerWidth - 56 - event.clientX);
+          }}
+          onPointerUp={(event) => {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+            delete event.currentTarget.dataset.dragging;
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowLeft') {
+              event.preventDefault();
+              setPanelWidth(panelWidth + 16);
+            } else if (event.key === 'ArrowRight') {
+              event.preventDefault();
+              setPanelWidth(panelWidth - 16);
+            }
+          }}
+        />
         <header className={styles.sidebarHeader}>
           <GuideCompanion
             mood={
@@ -471,17 +520,70 @@ export default function Mascot() {
             )}
           </div>
           <div className={styles.headerActions}>
+            <details
+              ref={historyRef}
+              className={styles.historyMenu}
+              style={panel !== 'chat' ? { display: 'none' } : undefined}
+            >
+              <summary
+                aria-label="Chat history"
+                title="Saved chats"
+                tabIndex={open ? undefined : -1}
+                className={styles.headerAction}
+              >
+                <History size={14} />
+              </summary>
+              <div className={styles.historyPopover}>
+                <div className={styles.historyHeading}>
+                  <span>Saved chats</span>
+                  <span>{sessions.length}</span>
+                </div>
+                {sessions.length === 0 ? (
+                  <p className={styles.historyEmpty}>Your conversations will appear here.</p>
+                ) : (
+                  <ul className={styles.historyList}>
+                    {sessions.map((session) => (
+                      <li key={session.id} className={styles.historyRow}>
+                        <button
+                          type="button"
+                          data-active={session.id === activeSessionId}
+                          className={styles.historySelect}
+                          onClick={() => {
+                            switchSession(session.id);
+                            if (historyRef.current) historyRef.current.open = false;
+                          }}
+                        >
+                          <span>{session.title}</span>
+                          <time dateTime={new Date(session.updatedAt).toISOString()}>
+                            {new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(session.updatedAt)}
+                          </time>
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Delete ${session.title}`}
+                          title="Delete chat"
+                          className={styles.historyDelete}
+                          onClick={() => deleteSession(session.id)}
+                        >
+                          <Trash size={13} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </details>
             <button
               type="button"
               onClick={clear}
               style={panel !== 'chat' ? { display: 'none' } : undefined}
-              aria-label="Clear chat"
+              aria-label="Start a new chat"
               aria-keyshortcuts="Control Shift Backspace"
-              title="Clear chat · Ctrl+Shift+Backspace"
+              title="New chat · Ctrl+Shift+Backspace"
               tabIndex={open ? undefined : -1}
               className={styles.headerAction}
             >
-              <Trash size={14} />
+              <MessageSquarePlus size={15} />
             </button>
             <Separator
               orientation="vertical"
@@ -598,7 +700,7 @@ export default function Mascot() {
             ref={listRef}
             onScroll={onListScroll}
             data-lenis-prevent
-            className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain p-4"
+            className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain p-5"
           >
             {quota.blocked && (
               <div
@@ -670,14 +772,16 @@ export default function Mascot() {
             {messages.map((m) =>
               m.role === 'user' ? (
                 <div key={m.id} className="animate-msg-in flex flex-col items-end">
-                  <div className="max-w-[85%] rounded-[14px] rounded-br-[5px] bg-[var(--text)] px-3.5 py-2.5 text-[0.82rem] leading-[1.55] whitespace-pre-wrap text-[var(--bg)]">
+                  <div className="max-w-[82%] rounded-[14px] rounded-br-[5px] bg-[var(--text)] px-4 py-3 text-[0.84rem] leading-[1.6] whitespace-pre-wrap text-[var(--bg)]">
                     <MarkdownMessage content={m.content} />
                   </div>
                 </div>
               ) : (
-                <div key={m.id} className="animate-msg-in flex items-start gap-2.5 py-0.5">
-                  <GuideCat size={24} />
-                  <div className="min-w-0 flex-1 pt-px text-[0.84rem] leading-[1.65] text-[var(--text)]">
+                <div key={m.id} className="animate-msg-in flex items-start gap-3 py-1">
+                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)]">
+                    <GuideCat size={21} />
+                  </span>
+                  <div className="min-w-0 flex-1 pt-px text-[0.875rem] leading-[1.72] text-[var(--text)]">
                     <MarkdownMessage content={m.content} />
                     {m.interrupted && (
                       <p className="mt-2 text-xs text-[var(--text-secondary)]">Response stopped</p>
@@ -690,7 +794,7 @@ export default function Mascot() {
                     {!m.streaming && m.sources && m.sources.length > 0 && (
                       <nav
                         aria-label="Related portfolio content"
-                        className="mt-3 grid gap-1.5 whitespace-normal"
+                        className="mt-4 grid gap-2 whitespace-normal"
                       >
                         <span className="text-[0.62rem] font-medium text-[var(--text-dim)]">
                           Related portfolio content
@@ -705,7 +809,7 @@ export default function Mascot() {
                                 : source.href;
                               handlePortfolioLink(event, href);
                             }}
-                            className="group flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[var(--border)] px-2.5 py-2 text-left no-underline outline-none transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--glass-hover)] focus-visible:border-[var(--geist-focus)]"
+                          className="group flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-elevated)]/35 px-3 py-2.5 text-left no-underline outline-none transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--glass-hover)] focus-visible:border-[var(--geist-focus)]"
                           >
                             <span className="min-w-0">
                               <span className="block text-[0.72rem] font-medium text-[var(--text)]">
@@ -755,7 +859,7 @@ export default function Mascot() {
                 e.preventDefault();
                 submit(draft);
               }}
-              className="flex items-center gap-2 rounded-[var(--radius-sm)] border border-[color-mix(in_srgb,currentColor_18%,transparent)] bg-transparent py-1.5 pr-1.5 pl-3 transition-colors focus-within:border-[color-mix(in_srgb,currentColor_38%,transparent)]"
+              className="flex min-h-12 items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--border-hover)] bg-transparent py-1.5 pr-1.5 pl-3.5 transition-colors focus-within:border-[var(--text-secondary)]"
             >
               <textarea
                 ref={inputRef}

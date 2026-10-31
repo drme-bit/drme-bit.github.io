@@ -3,7 +3,9 @@
     start / differs across instances), so this is best-effort protection.
     Pure logic lives here so it stays unit-testable.  */
 
-export const CHAT_QUOTA_LIMIT = 10;
+// Generous for real visitors while keeping a per-IP ceiling on paid Gateway
+// calls. Vercel's API-key budget remains the hard dollar cap for the account.
+export const CHAT_QUOTA_LIMIT = 30;
 export const CHAT_QUOTA_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 interface Bucket {

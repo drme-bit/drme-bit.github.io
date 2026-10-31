@@ -2,6 +2,7 @@
 
 //React
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import {
   FiArrowDown,
@@ -19,6 +20,7 @@ import useGithubStats from '@/shared/hooks/useGithubStats';
 import { TYPEWRITER_STRINGS } from '@/entities/hero';
 import { profile } from '@/entities/profile';
 import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
+import { useChat } from '@/app/providers/ChatProvider';
 
 gsap.registerPlugin(CustomEase);
 gsap.registerPlugin(ScrollTrigger);
@@ -124,6 +126,8 @@ function ResumeRow({
 
 export default function Hero() {
   const [show, setShow] = useState(false);
+  const { open: isChatOpen, panelWidth } = useChat();
+  const reservedRight = isChatOpen ? panelWidth + 72 : 56;
   const stats = useGithubStats(profile.githubUsername);
   const sectionRef = useRef<HTMLElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
@@ -147,7 +151,7 @@ export default function Hero() {
         invalidateOnRefresh: true,
       });
     },
-    { scope: sectionRef },
+    { scope: sectionRef, dependencies: [show] },
   );
 
   useGSAP(
@@ -220,15 +224,16 @@ export default function Hero() {
     scrollToTarget('#about');
   }, []);
 
-  return (
+  const hero = (
     <section
       id="hero"
       ref={sectionRef}
-      className="pointer-events-none fixed inset-0 z-0 flex h-screen w-full flex-col items-center justify-center overflow-hidden"
+      style={{ '--workspace-reserved-right': `${reservedRight}px` } as React.CSSProperties}
+      className="pointer-events-none fixed inset-0 z-0 flex h-screen w-full flex-col items-center justify-center overflow-hidden xl:right-[var(--workspace-reserved-right)] xl:w-auto"
     >
       <div
         ref={overlayRef}
-        className="pointer-events-none fixed inset-0 z-[1] flex flex-col items-center justify-center will-change-[opacity]"
+        className="pointer-events-none fixed inset-0 z-[1] flex flex-col items-center justify-center will-change-[opacity] xl:right-[var(--workspace-reserved-right)]"
       >
         <div className="pointer-events-auto relative z-10 grid w-full max-w-[1180px] grid-cols-[1fr_0.95fr] items-center gap-[clamp(2rem,7vw,7rem)] px-[6vw] max-md:grid-cols-1 max-md:gap-1 max-md:px-6 max-md:pt-[5vh]">
           <div className="flex flex-col items-start text-left max-md:order-2 max-md:items-center max-md:text-center">
@@ -284,7 +289,7 @@ export default function Hero() {
 
         <button
           ref={scrollRef}
-          className="pointer-events-auto fixed bottom-8 left-1/2 flex -translate-x-1/2 cursor-pointer flex-col items-center gap-1.5 border-none bg-none p-1.5 text-[var(--text-dim)] transition-colors duration-300 hover:text-[var(--text-secondary)] max-md:bottom-[1.2rem] max-md:p-2.5"
+          className="pointer-events-auto fixed bottom-8 left-1/2 flex -translate-x-1/2 cursor-pointer flex-col items-center gap-1.5 border-none bg-none p-1.5 text-[var(--text-dim)] transition-colors duration-300 hover:text-[var(--text-secondary)] max-md:bottom-[1.2rem] max-md:p-2.5 xl:left-[calc((100vw-var(--workspace-reserved-right))/2)]"
           onClick={scrollDown}
           aria-label="Scroll down"
         >
@@ -293,4 +298,6 @@ export default function Hero() {
       </div>
     </section>
   );
+
+  return show ? createPortal(hero, document.body) : null;
 }

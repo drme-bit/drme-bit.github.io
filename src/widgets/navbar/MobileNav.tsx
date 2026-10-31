@@ -47,14 +47,14 @@ export function MobileNav() {
         </IconButton>
       </SheetTrigger>
       <SheetContent
-        className="!w-[86%] !max-w-[360px] gap-0 border-l border-border bg-background p-0 shadow-2xl"
+        className="!top-[64px] !right-2 !bottom-2 !left-auto !h-auto !w-[min(360px,calc(100vw-16px))] !max-w-none gap-0 rounded-xl border border-border bg-background p-0 shadow-2xl"
         showClose={false}
         side="right"
       >
-        <div className="flex items-center justify-between border-b border-border px-4 py-4">
+        <div className="flex min-h-[58px] items-center justify-between border-b border-border px-4 py-3">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[13px] font-medium text-foreground">Portfolio</span>
-            <span className="text-[11px] text-muted-foreground">Pages and sections</span>
+            <span className="text-[13px] font-medium tracking-[-0.01em] text-foreground">drme_</span>
+            <span className="text-[11px] text-muted-foreground">Navigate the portfolio</span>
           </div>
           <SheetClose asChild>
             <IconButton
