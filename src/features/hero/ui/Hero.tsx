@@ -10,7 +10,6 @@ import {
 } from '@/shared/ui/Icon';
 //GSAP
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CustomEase } from 'gsap/CustomEase';
 import { useGSAP } from '@gsap/react';
 //Other
@@ -23,7 +22,6 @@ import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 import { useChat } from '@/app/providers/ChatProvider';
 
 gsap.registerPlugin(CustomEase);
-gsap.registerPlugin(ScrollTrigger);
 
 /*  Types  */
 
@@ -126,6 +124,7 @@ function ResumeRow({
 
 export default function Hero() {
   const [show, setShow] = useState(false);
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const { open: isChatOpen, panelWidth } = useChat();
   const reservedRight = isChatOpen ? panelWidth + 72 : 56;
   const stats = useGithubStats(profile.githubUsername);
@@ -137,22 +136,6 @@ export default function Hero() {
   const resumeRef = useRef<HTMLDivElement | null>(null);
   const taglineRef = useRef<HTMLParagraphElement | null>(null);
   const scrollRef = useRef<HTMLButtonElement | null>(null);
-
-  useGSAP(
-    () => {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: 0.5,
-        pin: true,
-        pinSpacing: false,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-      });
-    },
-    { scope: sectionRef, dependencies: [show] },
-  );
 
   useGSAP(
     () => {
@@ -198,27 +181,45 @@ export default function Hero() {
           '-=0.2',
         );
 
-      gsap.to(overlayRef.current, {
-        opacity: 0,
-        scale: 0.95,
-        filter: 'blur(10px)',
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      });
     },
     { scope: sectionRef, dependencies: [show] },
   );
 
   useEffect(() => {
-    const t = setTimeout(() => setShow(true), 150);
+    const t = setTimeout(() => {
+      setPortalTarget(document.body);
+      setShow(true);
+    }, 0);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (!show) return;
+
+    const updateVisibility = () => {
+      const overlay = overlayRef.current;
+      const about = document.getElementById('about');
+      if (!overlay || !about) return;
+
+      const aboutTop = about.getBoundingClientRect().top;
+      const fadeStart = window.innerHeight * 0.9;
+      const fadeEnd = window.innerHeight * 0.65;
+      const progress = Math.min(1, Math.max(0, (fadeStart - aboutTop) / (fadeStart - fadeEnd)));
+
+      overlay.style.opacity = String(1 - progress);
+      overlay.style.visibility = progress >= 1 ? 'hidden' : 'visible';
+      overlay.style.transform = `scale(${1 - progress * 0.05})`;
+      overlay.style.filter = `blur(${progress * 10}px)`;
+    };
+
+    updateVisibility();
+    window.addEventListener('scroll', updateVisibility, { passive: true });
+    window.addEventListener('resize', updateVisibility);
+    return () => {
+      window.removeEventListener('scroll', updateVisibility);
+      window.removeEventListener('resize', updateVisibility);
+    };
+  }, [show]);
 
   const scrollDown = useCallback(() => {
     scrollToTarget('#about');
@@ -229,7 +230,7 @@ export default function Hero() {
       id="hero"
       ref={sectionRef}
       style={{ '--workspace-reserved-right': `${reservedRight}px` } as React.CSSProperties}
-      className="pointer-events-none fixed inset-0 z-0 flex h-screen w-full flex-col items-center justify-center overflow-hidden xl:right-[var(--workspace-reserved-right)] xl:w-auto"
+      className="pointer-events-none fixed inset-0 z-20 flex h-screen w-full flex-col items-center justify-center overflow-hidden xl:right-[var(--workspace-reserved-right)] xl:w-auto"
     >
       <div
         ref={overlayRef}
@@ -299,5 +300,10 @@ export default function Hero() {
     </section>
   );
 
-  return show ? createPortal(hero, document.body) : null;
+  return (
+    <>
+      <div aria-hidden="true" className="h-svh w-full" />
+      {portalTarget ? createPortal(hero, portalTarget) : null}
+    </>
+  );
 }
