@@ -142,13 +142,15 @@ function writeSessions(sessions: LocalChatSession[], activeId: string | null): v
 }
 
 function createSessionId(): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID();
+  const cryptoApi = typeof globalThis.crypto === 'undefined' ? undefined : globalThis.crypto;
+
+  if (typeof cryptoApi?.randomUUID === 'function') {
+    return cryptoApi.randomUUID();
   }
 
-  if (typeof crypto !== 'undefined' && 'getRandomValues' in crypto) {
+  if (cryptoApi) {
     const bytes = new Uint8Array(16);
-    crypto.getRandomValues(bytes);
+    cryptoApi.getRandomValues(bytes);
     bytes[6] = (bytes[6] & 0x0f) | 0x40;
     bytes[8] = (bytes[8] & 0x3f) | 0x80;
     const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
