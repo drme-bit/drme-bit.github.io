@@ -4,36 +4,28 @@ import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { NavLeaf, useNav } from '@/app/providers/NavProvider';
 import { useActivity } from '@/app/providers/ActivityProvider';
-import useLockOrientation from '@/shared/hooks/useLockOrientation';
 import Hero from '@/features/hero/ui/Hero';
 import About from '@/features/about/ui/About';
 import Experience from '@/features/experience/ui/Experience';
 import { Projects } from '@/features/projects/ui/Projects';
+import { ProjectsPortal } from '@/features/projects/ui/ProjectsPortal';
 import Reviews from '@/features/reviews/ui/Reviews';
 import Contacts from '@/features/contacts/ui/Contacts';
 import PremiumFooter from '@/widgets/footer/PremiumFooter';
-import ScrollProgressBar from '@/shared/ui/molecules/ScrollProgressBar/ScrollProgressBar';
 import { OnboardingIntro } from '@/widgets/onboarding/OnboardingIntro';
+import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 
 const Scene = dynamic(() => import('@/widgets/scene/Scene'), { ssr: true });
-const Skills = dynamic(() => import('@/features/skills/ui/Skills'), { ssr: false });
-const Cursor = dynamic(() => import('@/shared/ui/organisms/Cursor/Cursor'), { ssr: false });
-const SoundEffects = dynamic(() => import('@/shared/ui/organisms/SoundEffects/SoundEffects'), {
-  ssr: false,
-});
 
 function MainInner() {
   const { setPageConfig, setActiveSection } = useNav();
   const { incrementSectionsRevealed } = useActivity();
   const revealedSections = useRef(new Set<string>());
 
-  useLockOrientation();
-
   // Configure nav for home page
   useEffect(() => {
     const contextItems: NavLeaf[] = [
       { id: 'about', label: 'about', type: 'section', targetId: 'about' },
-      { id: 'skills', label: 'skills', type: 'section', targetId: 'skills' },
       { id: 'experience', label: 'experience', type: 'section', targetId: 'experience' },
       { id: 'projects', label: 'projects', type: 'section', targetId: 'projects' },
       { id: 'blog', label: 'blog', type: 'section', targetId: 'blog' },
@@ -42,8 +34,7 @@ function MainInner() {
     ];
 
     const onSectionClick = (sectionId: string) => {
-      const el = document.getElementById(sectionId);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      scrollToTarget(`#${sectionId}`);
     };
 
     setPageConfig({
@@ -75,36 +66,35 @@ function MainInner() {
     return () => {
       observers.forEach((obs) => obs?.disconnect());
     };
-  }, [setPageConfig, setActiveSection]);
+  }, [setPageConfig, setActiveSection, incrementSectionsRevealed]);
 
   return (
     <>
-      <Cursor />
-      <ScrollProgressBar />
+      <main className="relative z-10 pb-[340px] max-[700px]:pb-[300px]">
       <OnboardingIntro />
 
       <Scene />
 
       <Hero />
+
       <About />
-      <Skills />
       <Experience />
+
+      <ProjectsPortal />
 
       <div id="projects" className="projects-wrapper">
         <Projects />
       </div>
 
-      <div id="reviews-contacts" className="reviews-contacts-wrapper">
-        <Reviews />
-        <Contacts />
-      </div>
+      <Reviews />
+      <Contacts />
+        <span id="footer-reveal-trigger" aria-hidden="true" className="pointer-events-none absolute bottom-[340px] h-px w-px max-[700px]:bottom-[300px]" />
+      </main>
       <PremiumFooter />
     </>
   );
 }
 
 export default function MainPage() {
-  return (
-    <MainInner />
-  );
+  return <MainInner />;
 }

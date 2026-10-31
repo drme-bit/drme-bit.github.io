@@ -2,6 +2,10 @@
 @use '../shared/styles/mixins' as *;
 @use '../shared/styles/animations' as *;
 
+// App is dark by default; `.light` on <html>/<body> opts out.
+// Maps Tailwind's `dark:` variant to "no .light anywhere above".
+@custom-variant dark (&:where(:root:not(.light), :root:not(.light) *));
+
 // ═══════════════════════════════════════════════════════════
 // ACCORDION ANIMATIONS (Radix UI)
 // ═══════════════════════════════════════════════════════════
@@ -11,13 +15,24 @@
   --color-foreground: var(--text);
   --color-muted-foreground: var(--text-dim);
   --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-popover: var(--bg-elevated);
   --color-popover-foreground: var(--text);
+  --color-card: var(--bg-elevated);
   --color-primary: var(--accent-secondary);
   --color-primary-foreground: var(--bg);
   --color-secondary: var(--bg-elevated);
   --color-secondary-foreground: var(--text);
+  --color-muted: var(--accent-muted);
+  --color-accent: var(--accent-secondary);
+  --color-accent-foreground: var(--bg);
+  --color-ring: var(--border-hover);
+  --color-input: var(--border);
   --color-destructive: var(--accent-danger);
   --color-destructive-foreground: var(--bg);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-geist-sans);
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -39,6 +54,125 @@
         scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1))
         rotate(var(--tw-exit-rotate, 0));
       filter: blur(var(--tw-exit-blur, 0));
+    }
+  }
+
+  --animate-rise: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  --animate-marquee: marquee 30s linear infinite;
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  --animate-dock-in: dock-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  @keyframes dock-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  --animate-name-shimmer: name-shimmer 5s ease-in-out infinite;
+  @keyframes name-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  --animate-tools-scroll: tools-scroll 25s linear infinite;
+  @keyframes tools-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  --animate-avatar-glow: avatar-glow 4s ease-in-out infinite;
+  @keyframes avatar-glow {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.08); }
+  }
+
+  --animate-kenburns: kenburns 24s ease-in-out infinite alternate;
+  @keyframes kenburns {
+    from { transform: scale(1.04); }
+    to { transform: scale(1.13); }
+  }
+
+  --animate-graph-draw: graph-draw 0.5s ease-out both;
+  @keyframes graph-draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  --animate-graph-pop: graph-pop 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  @keyframes graph-pop {
+    from { opacity: 0; transform: scale(0); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  --animate-status-pulse: status-pulse 2.4s ease-out infinite;
+  @keyframes status-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-success) 50%, transparent);
+    }
+    70% {
+      box-shadow: 0 0 0 7px transparent;
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+
+  --animate-msg-in: msg-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  @keyframes msg-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  --animate-typing-dot: typing-dot 1.2s ease-in-out infinite;
+  @keyframes typing-dot {
+    0%, 60%, 100% {
+      opacity: 0.25;
+      transform: translateY(0) scale(0.9);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-3px) scale(1);
+    }
+  }
+
+  --animate-scroll-bounce: scroll-bounce 2s ease-in-out infinite;
+  @keyframes scroll-bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  --animate-scroll-arrow: scroll-arrow 2s ease-in-out infinite;
+  @keyframes scroll-arrow {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
     }
   }
 }
@@ -115,6 +249,11 @@
 // ═══════════════════════════════════════════════════════════
 
 :root {
+  // ── Vercel discipline: ink-only primary, one link blue, mesh gradient hero-only ─
+  --geist-radius: 6px;
+  --link: #0070f3;
+  --link-hover: #0070f3;
+
   // ── Colors ─
   --bg: #0a0a0a;
   --bg-elevated: #111111;
@@ -162,11 +301,36 @@
   --overlay-bg: rgba(0, 0, 0, 0.5);
   --panel-bg: rgba(10, 10, 10, 0.95);
 
-  // ── Shadows
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 40px rgba(125, 211, 252, 0.06);
+  // ── Shadows — stacked hairline + offsets, no heavy drops (Vercel) ─
+  --shadow-sm: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 4px 8px rgba(0, 0, 0, 0.32), 0 2px 4px rgba(0, 0, 0, 0.24);
+  --shadow-lg: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 12px 24px rgba(0, 0, 0, 0.32), 0 4px 8px rgba(0, 0, 0, 0.24);
+  --shadow-glow: 0 0 0 1px rgba(125, 211, 252, 0.18);
+  // Border-only glow: ring on the border, never a wash over the card
+  --border-glow: 0 0 0 1px var(--border-hover), 0 0 16px -4px var(--accent-secondary-glow);
+
+  // ── Typography — Geist, 400/500/600 max, tight tracking ─
+  --font-display: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), 'SF Mono', monospace;
+  --tracking-hero: -0.05em;   // ≈ -2.4px @ 48px
+  --tracking-section: -0.04em; // ≈ -1.28px @ 32px
+  --tracking-tight: -0.02em;
+
+  // ── Radii — app surfaces squared (6px), marketing pills stay 100px ──
+  --radius-xs: 4px;
+  --radius-sm: var(--geist-radius);
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+
+  // ── Geist foundations — status + focus alias the theme palette so every
+  // theme (dark/light/nord/…) stays consistent automatically. ──
+  --geist-success: var(--accent-success);
+  --geist-error: var(--accent-danger);
+  --geist-warning: #f5a524;
+  --geist-focus: #0070f3;
+  --geist-marketing-gray: #888;
 
   // ── Terminal ──
   --terminal-bg: rgba(18, 18, 18, 0.88);
@@ -193,11 +357,6 @@
   --card-bg: rgba(26, 26, 26, 0.85);
   --card-border: rgba(255, 255, 255, 0.06);
 
-  // ── Typography
-  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-
   // ── Spacing
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -206,14 +365,6 @@
   --space-xl: 2rem;
   --space-2xl: 3rem;
   --space-3xl: 4rem;
-
-  // ── Radii ──
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
 
   // ── Timing ─
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -234,76 +385,96 @@
 
 // ── Light theme ─
 :is(html.light, body.light) {
-  --bg: #f5f3f0;
-  --bg-elevated: #eae7e3;
-  --bg-surface: #ffffff;
-  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg: #ffffff;
+  --bg-elevated: #f8f9fb;
+  --bg-surface: #f1f3f5;
+  --bg-hover: rgba(24, 28, 34, 0.04);
 
-  --text: #0e0e0e;
-  --text-secondary: rgb(26 26 26 / 0.63);
-  --text-dim: rgb(26 26 26 / 0.35);
-  --text-ghost: rgb(26 26 26 / 0.17);
+  --text: #17191d;
+  --text-secondary: #555b64;
+  --text-dim: #737983;
+  --text-ghost: #a3a8b0;
 
-  --accent: #2d2a26;
-  --accent-muted: rgba(45, 42, 38, 0.08);
-  --accent-glow: rgba(45, 42, 38, 0.04);
+  --accent: #17191d;
+  --accent-muted: rgba(23, 25, 29, 0.06);
+  --accent-glow: rgba(23, 25, 29, 0.035);
 
-  --accent-secondary: #0284c7;
-  --accent-secondary-glow: rgba(2, 132, 199, 0.08);
-  --accent-tertiary: #7c3aed;
-  --accent-warm: #d97706;
-  --accent-cool: #0891b2;
+  --accent-secondary: #2563eb;
+  --accent-secondary-glow: rgba(37, 99, 235, 0.08);
+  --accent-tertiary: #525f76;
+  --accent-warm: #b7791f;
+  --accent-cool: #2563eb;
   --accent-success: #059669;
-  --accent-danger: #dc2626;
+  --accent-danger: #d14343;
 
-  --gradient-primary: linear-gradient(135deg, #0284c7, #7c3aed);
-  --gradient-warm: linear-gradient(135deg, #d97706, #ea580c);
-  --gradient-cool: linear-gradient(135deg, #0891b2, #0284c7);
-  --gradient-text: linear-gradient(135deg, #2d2a26, #0284c7);
+  --gradient-primary: linear-gradient(135deg, #2563eb, #526fba);
+  --gradient-warm: linear-gradient(135deg, #b7791f, #c45c43);
+  --gradient-cool: linear-gradient(135deg, #2563eb, #4b75cf);
+  --gradient-text: linear-gradient(135deg, #17191d, #526fba);
 
-  --border: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(0, 0, 0, 0.15);
-  --glass: rgba(0, 0, 0, 0.02);
-  --glass-hover: rgba(0, 0, 0, 0.04);
-  --glass-strong: rgba(0, 0, 0, 0.03);
+  --border: #e5e8ec;
+  --border-hover: #cdd2d9;
+  --glass: rgba(24, 28, 34, 0.02);
+  --glass-hover: rgba(24, 28, 34, 0.045);
+  --glass-strong: rgba(24, 28, 34, 0.035);
 
   // ── Nav section glass tints ─
-  --nav-glass-about: rgba(2, 132, 199, 0.10);
-  --nav-glass-skills: rgba(124, 58, 237, 0.10);
-  --nav-glass-experience: rgba(217, 119, 6, 0.10);
-  --nav-glass-projects: rgba(2, 132, 199, 0.14);
+  --nav-glass-about: rgba(37, 99, 235, 0.07);
+  --nav-glass-skills: rgba(82, 95, 118, 0.07);
+  --nav-glass-experience: rgba(183, 121, 31, 0.07);
+  --nav-glass-projects: rgba(37, 99, 235, 0.09);
 
   --overlay-bg: rgba(0, 0, 0, 0.3);
-  --panel-bg: rgba(245, 243, 240, 0.98);
+  --panel-bg: rgba(255, 255, 255, 0.98);
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 40px rgba(2, 132, 199, 0.06);
+  --shadow-sm: 0 1px 2px rgba(18, 24, 32, 0.035);
+  --shadow-md: 0 4px 14px rgba(18, 24, 32, 0.055);
+  --shadow-lg: 0 12px 30px rgba(18, 24, 32, 0.075);
+  --shadow-glow: 0 0 0 1px rgba(37, 99, 235, 0.12);
 
-  --terminal-bg: rgba(245, 243, 240, 0.92);
-  --terminal-border: rgba(0, 0, 0, 0.08);
-  --terminal-bar: rgba(0, 0, 0, 0.03);
-  --terminal-bar-border: rgba(0, 0, 0, 0.06);
-  --terminal-title: rgba(26, 26, 26, 0.4);
-  --terminal-text: rgba(26, 26, 26, 0.5);
+  --terminal-bg: rgba(255, 255, 255, 0.96);
+  --terminal-border: rgba(23, 25, 29, 0.1);
+  --terminal-bar: rgba(23, 25, 29, 0.035);
+  --terminal-bar-border: rgba(23, 25, 29, 0.07);
+  --terminal-title: rgba(23, 25, 29, 0.52);
+  --terminal-text: rgba(23, 25, 29, 0.65);
   --terminal-prompt-arrow: #059669;
   --terminal-prompt-path: #0284c7;
-  --terminal-prompt-branch: rgba(124, 58, 237, 0.6);
-  --terminal-cmd: #0284c7;
-  --terminal-output: rgba(26, 26, 26, 0.5);
-  --terminal-success: rgba(5, 150, 105, 0.7);
-  --terminal-success-bright: rgba(5, 150, 105, 0.8);
-  --terminal-success-muted: rgba(5, 150, 105, 0.6);
+  --terminal-prompt-branch: rgba(82, 95, 118, 0.8);
+  --terminal-cmd: #2563eb;
+  --terminal-output: rgba(23, 25, 29, 0.62);
+  --terminal-success: rgba(5, 150, 105, 0.8);
+  --terminal-success-bright: rgba(5, 150, 105, 0.9);
+  --terminal-success-muted: rgba(5, 150, 105, 0.7);
 
   --dot-r: #ff5f57;
   --dot-y: #febc2e;
   --dot-g: #28c840;
 
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-border: rgba(0, 0, 0, 0.06);
+  --card-bg: #ffffff;
+  --card-border: #e5e8ec;
+
+  --geist-warning: #88550b;
+  --geist-focus: #2563eb;
 
   color-scheme: light;
+}
+
+body.light::after {
+  display: none;
+}
+
+:is(html.light, body.light) {
+  .section--about,
+  .section--skills,
+  .section--projects,
+  .section--experience {
+    background: transparent;
+  }
+
+  #experience::after {
+    display: none;
+  }
 }
 
 // ── Cattpuchin theme
@@ -624,6 +795,8 @@
 
 * {
   box-sizing: border-box;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -639,14 +812,14 @@ html {
 body {
   padding: 0;
   margin: 0;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
   padding-bottom: env(safe-area-inset-bottom);
 
   // ── Dot grid overlay
@@ -675,6 +848,14 @@ body {
   outline-offset: 2px;
 }
 
+// Chat + command palette carry their own focus language (tints, rings).
+// The global accent outline reads there as an off-theme square, and even
+// a neutral ring clashes — so no outline at all inside both surfaces.
+#chat :focus-visible,
+[role='dialog'] :focus-visible {
+  outline: none;
+}
+
 // ═══════════════════════════════════════════════════════════
 // SCROLLBAR
 // ═══════════════════════════════════════════════════════════
@@ -700,7 +881,9 @@ body {
   position: fixed !important;
   inset: 0;
   width: 100%;
-  height: 100dvh;
+  // lvh (not dvh): stable canvas when the iOS toolbar shows/hides.
+  height: 100vh;
+  height: 100lvh;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -711,7 +894,7 @@ body {
   body.custom-cursor-active {
     cursor: none;
 
-    a, button, [role="button"], input, textarea, select, label {
+    a, button, [role="button"], label {
       cursor: none;
     }
   }
@@ -755,6 +938,70 @@ body {
 
 .glass-card {
   @include glass-card;
+}
+
+// ── Vercel type scale — sentence case, tight tracking, 600 max ──
+.display-hero {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: var(--tracking-hero);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.display-section {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: var(--tracking-section);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+// ── Flat surface: 1px hairline + stacked shadow, border-only glow ──
+.surface-flat {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.surface-flat:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.border-glow {
+  box-shadow: var(--border-glow);
+}
+
+// ── Vercel link: gray → ink + arrow nudge, blue only inline ──
+.vercel-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  text-underline-offset: 4px;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.vercel-link:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border-hover);
+}
+
+.vercel-link--blue {
+  color: inherit;
+}
+
+.vercel-link--blue:hover {
+  color: var(--link);
+  text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent);
+}
+
+.vercel-link .vercel-link-arrow {
+  display: inline-block;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.vercel-link:hover .vercel-link-arrow {
+  transform: translate(2px, -2px);
 }
 
 // ── Reveal animation (global) ──
@@ -846,6 +1093,8 @@ html.no-blur {
 
 @utility bg-muted\/20 { background: color-mix(in srgb, var(--text-dim) 4%, transparent); }
 @utility bg-muted\/30 { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+@utility animate-flip-in { animation: flip-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@utility animate-flip-out { animation: flip-out 0.18s ease-in both; }
 @utility fill-border\/50 { fill: color-mix(in srgb, var(--border) 50%, transparent); }
 @utility stroke-border { stroke: var(--border); }
 @utility stroke-border\/50 { stroke: color-mix(in srgb, var(--border) 50%, transparent); }
@@ -857,9 +1106,21 @@ html.no-blur {
 @utility ring-ring { --tw-ring-color: rgba(255, 255, 255, 0.15); }
 @utility ring-offset-background { --tw-ring-offset-color: var(--bg); }
 
+// ── Safari compat ────────────────────────────────────────────
+// Tailwind v4 emits `background-clip: text` without the -webkit- prefix,
+// which Safari <18 needs — without it clipped text renders invisible.
+.bg-clip-text {
+  -webkit-background-clip: text;
+}
+
 
 .projects-wrapper {
   position: relative;
+  // Continue the portal's `--gp-field` surface behind the incoming Projects header.
+  background: var(--bg-surface);
+  /* No negative overlap: the portal dive sits between Experience and
+     Projects, so the hero must not be pulled up over it. */
+  margin-top: 0;
 }
 
 .projects-wrapper .tl-head-wrapper {
@@ -868,29 +1129,32 @@ html.no-blur {
   background: var(--bg);
 }
 
-.reviews-contacts-wrapper {
-  position: relative;
-  background: var(--bg);
-}
-
-/* Reviews is sticky at top, gets pinned */
-.reviews-contacts-wrapper #reviews {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  height: 100vh;
-}
-
-/* Contacts wrapper slides over pinned Reviews, revealing footer */
-.reviews-contacts-wrapper #contact {
-  position: relative;
-  z-index: 10;
-}
-
-/* Footer wrapper positioned after contact in flow, animated via GSAP */
-.reviews-contacts-wrapper .footer-wrapper {
+.footer-wrapper {
   position: relative;
   z-index: 5;
   width: 100%;
+}
+
+/* The fixed footer is revealed progressively by scroll progress. */
+#footer {
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #footer {
+    transform: none !important;
+  }
+}
+
+/* ── Split-flap board ── */
+
+@keyframes flip-in {
+  from { opacity: 0; transform: rotateX(-80deg) translateY(6px); }
+  to { opacity: 1; transform: rotateX(0) translateY(0); }
+}
+
+@keyframes flip-out {
+  from { opacity: 1; transform: rotateX(0); }
+  to { opacity: 0; transform: rotateX(70deg) translateY(-4px); }
 }
 

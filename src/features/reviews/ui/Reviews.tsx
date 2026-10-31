@@ -1,384 +1,170 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
-import { signInWithPopup, onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { gsap } from 'gsap';
-import { useGSAP } from '@gsap/react';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { db, auth, googleProvider } from '@/shared/config/firebase';
-import { useModal } from '@/app/providers/ModalProvider';
-import { PiCheckCircle, PiSignOut, PiStarFill, PiUser } from '@/shared/ui/atoms/Icon';
-import styles from './Reviews.module.scss';
-import ReviewsHero from './ReviewsHero';
-import ReviewsForm from './ReviewsForm';
+import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useInView } from '@/shared/hooks/useInView';
+import { ENDORSEMENTS } from '@/entities/review';
+import type { Endorsement } from '@/entities/review';
 
-gsap.registerPlugin(ScrollTrigger);
-
-/* Types */
-
-interface Review {
-  id: string;
-  name?: string;
-  email?: string;
-  photoURL?: string;
-  role?: string;
-  header?: string;
-  text: string;
-  rating?: number;
-  approved?: boolean;
-  createdAt?: Date | null;
+function portraitPath(endorsement: Endorsement) {
+  if (!endorsement.image) return null;
+  return /^(https?:|data:|\/)/.test(endorsement.image)
+    ? endorsement.image
+    : `/${endorsement.image}`;
 }
 
-const RATING_OPTIONS = [5, 4, 3, 2, 1] as const;
-
-function formatDate(d?: Date | null): string | null {
-  if (!d || Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+function initialsOf(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase();
 }
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function QuoteCard({ endorsement, index }: { endorsement: Endorsement; index: number }) {
+  const image = portraitPath(endorsement);
 
-/* Reviews */
+  return (
+    <article className="group relative isolate flex min-h-[340px] flex-col overflow-hidden rounded-[10px] p-7 md:min-h-[410px] md:p-9 lg:p-10">
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 -z-10 ${index === 0 ? 'bg-[color-mix(in_srgb,var(--accent-secondary)_16%,var(--bg-surface))]' : 'bg-[color-mix(in_srgb,var(--accent-warm)_17%,var(--bg-surface))]'}`}
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-2 -top-[0.24em] -z-10 select-none font-display text-[clamp(16rem,30vw,30rem)] font-medium leading-none tracking-[-0.12em] text-[color-mix(in_srgb,var(--text)_4%,transparent)] transition-transform duration-700 ease-out group-hover:scale-[1.035] motion-reduce:transition-none"
+      >
+        ”
+      </span>
+
+      <blockquote className="m-0 max-w-[27ch] font-display text-[clamp(1.7rem,3.5vw,3.15rem)] font-medium leading-[1.08] tracking-[-0.055em] text-[var(--text)]">
+        “{endorsement.text}”
+      </blockquote>
+
+      <div className="mt-auto flex items-center gap-3 pt-10">
+        <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--bg-elevated)] text-[0.75rem] font-medium text-[var(--text-secondary)]">
+          {image ? (
+            <Image src={image} alt="" fill sizes="44px" className="object-cover" />
+          ) : (
+            initialsOf(endorsement.name)
+          )}
+        </span>
+        <span className="min-w-0 border-l border-[color-mix(in_srgb,var(--text)_16%,transparent)] pl-3">
+          <span className="block truncate text-[0.9rem] font-semibold text-[var(--text)]">
+            {endorsement.name}
+          </span>
+          <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--text-secondary)]">
+            {endorsement.role}
+          </span>
+        </span>
+      </div>
+    </article>
+  );
+}
 
 export default function Reviews() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
-  const firstRender = useRef(true);
-
-  const [user, setUser] = useState<User | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [hasReviewed, setHasReviewed] = useState(false);
-  const [ratingFilter, setRatingFilter] = useState(0);
-
-  const { openModal } = useModal();
-
-  /* Auth & Firestore Subscriptions */
-  useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
-    return () => unsubAuth();
-  }, []);
+  const [pairStart, setPairStart] = useState(0);
+  const [isInteracting, setIsInteracting] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const [contentRef, contentInView] = useInView<HTMLDivElement>({ threshold: 0.08 });
+  const count = ENDORSEMENTS.length;
+  const slideCount = Math.ceil(count / 2);
+  const visible = count > 1
+    ? [ENDORSEMENTS[pairStart], ENDORSEMENTS[(pairStart + 1) % count]]
+    : ENDORSEMENTS.slice(0, 1);
 
   useEffect(() => {
-    const q = query(collection(db, 'reviews'), where('approved', '==', true));
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        const items: Review[] = snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            ...data,
-            createdAt: data.createdAt?.toDate?.() ?? null,
-          } as Review;
-        });
-        items.sort((a, b) => (b.createdAt?.getTime?.() ?? 0) - (a.createdAt?.getTime?.() ?? 0));
-        setReviews(items);
-        setLoading(false);
-      },
-      () => setLoading(false),
-    );
-    return () => unsub();
-  }, []);
+    if (!contentInView || isInteracting || count < 3 || prefersReducedMotion) return;
 
-  /* Block duplicate submissions: any review (approved or not) for this uid. */
-  useEffect(() => {
-    if (!user) {
-      setHasReviewed(false);
-      return;
-    }
-    const uid = user.uid;
-    let cancelled = false;
-    async function check() {
-      try {
-        const q = query(collection(db, 'reviews'), where('uid', '==', uid));
-        const snap = await getDocs(q);
-        if (!cancelled) setHasReviewed(!snap.empty);
-      } catch {
-        if (!cancelled) setHasReviewed(false);
-      }
-    }
-    check();
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
+    const timer = window.setInterval(() => {
+      setPairStart((current) => ((Math.floor(current / 2) + 1) % slideCount) * 2);
+    }, 7000);
+    return () => window.clearInterval(timer);
+  }, [contentInView, count, isInteracting, prefersReducedMotion, slideCount]);
 
-  /* Derived stats */
-  const counts = useMemo(() => {
-    const c = [0, 0, 0, 0, 0];
-    for (const r of reviews) {
-      const rating = Math.min(5, Math.max(1, Math.floor(r.rating ?? 0)));
-      c[rating - 1] += 1;
-    }
-    return c;
-  }, [reviews]);
+  if (count === 0) return null;
 
-  const average = reviews.length
-    ? reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / reviews.length
-    : 0;
 
-  const filters: { value: number; label: string; count: number }[] = useMemo(() => {
-    const withCount = RATING_OPTIONS.map((value) => ({
-      value,
-      label: String(value) + ' ★',
-      count: counts[value - 1],
-    })).filter((f) => f.count > 0);
-    return [{ value: 0, label: 'All', count: reviews.length }, ...withCount];
-  }, [counts, reviews.length]);
-
-  const visible =
-    ratingFilter === 0 ? reviews : reviews.filter((r) => Math.floor(r.rating ?? 0) === ratingFilter);
-
-  async function handleSignIn() {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  async function handleSignOut() {
-    try {
-      await signOut(auth);
-      setHasReviewed(false);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  /* GSAP Scroll Animations */
-  useGSAP(
-    () => {
-      const section = sectionRef.current;
-      const hero = heroRef.current;
-      const grid = gridRef.current;
-      if (!section) return;
-
-      if (hero && !prefersReducedMotion()) {
-        gsap.fromTo(
-          hero,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: hero,
-              start: 'top 85%',
-              toggleActions: 'play none none reverse',
-            },
-          },
-        );
-      }
-
-      if (grid && !prefersReducedMotion()) {
-        const cards = Array.from(grid.querySelectorAll(`.${styles['review-card']}`));
-        if (cards.length > 0) {
-          gsap.fromTo(
-            cards,
-            { opacity: 0, y: 30, scale: 0.95 },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.6,
-              stagger: 0.08,
-              ease: 'power2.out',
-              scrollTrigger: {
-                trigger: grid,
-                start: 'top 80%',
-                once: true,
-              },
-            },
-          );
-        }
-      }
-    },
-    { scope: sectionRef },
-  );
-
-  /* Re-animate the grid when the rating filter changes */
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
-    const grid = gridRef.current;
-    if (!grid || prefersReducedMotion()) return;
-    const cards = Array.from(grid.querySelectorAll(`.${styles['review-card']}`));
-    if (cards.length === 0) return;
-    gsap.fromTo(
-      cards,
-      { opacity: 0, y: 26, scale: 0.97 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05, ease: 'power2.out' },
-    );
-  }, [ratingFilter]);
-
-  /* GSAP: Reviews sticky, Contact slides over */
-  useEffect(() => {
-    const section = sectionRef.current;
-    const contact = document.getElementById('contact');
-    if (!section || !contact) return;
-
-    const ctx = gsap.context(() => {
-      gsap.to(section, {
-        filter: 'blur(6px)',
-        opacity: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: contact,
-          start: 'top 88%',
-          end: 'top top',
-          scrub: true,
-        },
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  function openReviewModal() {
-    if (!user) {
-      handleSignIn();
-      return;
-    }
-    openModal({
-      className: 'modal-panel--reviews',
-      content: (
-        <div className={styles['review-modal-body']}>
-          <div className={styles['review-modal-bar']}>
-            <span className={styles['review-modal-title']}>// leave a review</span>
-            <button type="button" className={styles['signout-link']} onClick={handleSignOut}>
-              <PiSignOut size={12} />
-              <span>sign out</span>
-            </button>
-          </div>
-          {hasReviewed ? (
-            <div className={styles['form-success']}>
-              <PiCheckCircle size={40} />
-              <p>You have already left a review.</p>
-            </div>
-          ) : (
-            <ReviewsForm user={user} onSignOut={handleSignOut} onSubmitted={() => setHasReviewed(true)} />
-          )}
-        </div>
-      ),
-    });
-  }
-
-  /* Render */
   return (
     <section
       id="reviews"
-      ref={sectionRef}
-      className={`${styles.section} ${styles['section--reviews']}`}
+      onMouseEnter={() => setIsInteracting(true)}
+      onMouseLeave={() => setIsInteracting(false)}
+      onFocusCapture={() => setIsInteracting(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setIsInteracting(false);
+        }
+      }}
+      className="relative border-t border-[var(--border)] bg-[var(--bg)]"
     >
-      <div className={styles['reviews-bg-grid']} aria-hidden="true" />
-
-      <div ref={heroRef} className={styles['reviews-hero-wrap']} style={{ position: 'relative', zIndex: 1 }}>
-        <ReviewsHero onOpenModal={openReviewModal} average={average} count={reviews.length} />
-      </div>
-
-      {!loading && reviews.length > 0 && (
-        <div className={styles['reviews-toolbar']} style={{ position: 'relative', zIndex: 1 }}>
-          <span className={styles['reviews-toolbar-label']}>filter by rating</span>
-          <div className={styles['reviews-filter']} role="group" aria-label="Filter reviews by rating">
-            {filters.map((f) => (
-              <button
-                key={f.value}
-                type="button"
-                className={`${styles['reviews-filter-btn']} ${ratingFilter === f.value ? styles['reviews-filter-btn--active'] : ''}`}
-                aria-pressed={ratingFilter === f.value}
-                onClick={() => setRatingFilter(f.value)}
-              >
-                <span>{f.label}</span>
-                <span className={styles['reviews-filter-count']}>{f.count}</span>
-              </button>
-            ))}
+      <div className="mx-auto w-full max-w-[1500px] px-5 py-20 md:px-8 md:py-28">
+        <header className="mb-9 md:mb-12">
+          <div>
+            <p className="m-0 mb-3 text-[0.82rem] font-medium text-[var(--text-dim)]">
+              From people I’ve worked with
+            </p>
+            <h2 className="m-0 font-display text-[clamp(2.8rem,7vw,5.5rem)] font-semibold leading-[0.96] tracking-[-0.075em] text-[var(--text)]">
+              Kind words
+            </h2>
           </div>
+        </header>
+
+        <div
+          ref={contentRef}
+          onPointerDown={(event) => {
+            touchStartX.current = event.pointerType === 'touch' ? event.clientX : null;
+          }}
+          onPointerUp={(event) => {
+            const startX = touchStartX.current;
+            touchStartX.current = null;
+            if (startX === null || Math.abs(event.clientX - startX) < 56) return;
+            setPairStart((current) => {
+              const currentSlide = Math.floor(current / 2);
+              const direction = event.clientX < startX ? 1 : -1;
+              return ((currentSlide + direction + slideCount) % slideCount) * 2;
+            });
+          }}
+          onPointerCancel={() => {
+            touchStartX.current = null;
+          }}
+          className={`touch-pan-y transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${contentInView ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
+        >
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={pairStart}
+              initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 28 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: prefersReducedMotion ? 0 : -28 }}
+              transition={{ duration: prefersReducedMotion ? 0.15 : 0.46, ease: [0.22, 1, 0.36, 1] }}
+              className="grid grid-cols-1 gap-2 md:grid-cols-[1.45fr_1fr]"
+            >
+              {visible.map((endorsement, index) => (
+                <QuoteCard key={endorsement.id} endorsement={endorsement} index={index} />
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
-      )}
 
-      <div ref={gridRef} className={styles['reviews-grid']} style={{ position: 'relative', zIndex: 1 }}>
-        {loading &&
-          Array.from({ length: 6 }, (_, i) => (
-            <div key={`skel-${i}`} className={`${styles['review-card']} ${styles['review-card--skeleton']}`}>
-              <div className={styles['review-card-skeleton']}>
-                <div className={styles['skeleton-line']} style={{ width: '55%' }} />
-                <div className={styles['skeleton-line']} style={{ width: '92%' }} />
-                <div className={styles['skeleton-line']} style={{ width: '70%' }} />
-                <div className={styles['skeleton-line']} style={{ width: '40%' }} />
-                <div className={styles['skeleton-author']}>
-                  <span className={styles['skeleton-avatar']} />
-                  <div className={styles['skeleton-author-lines']}>
-                    <div className={styles['skeleton-line']} style={{ width: '80%' }} />
-                    <div className={styles['skeleton-line']} style={{ width: '55%' }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-
-        {!loading && reviews.length === 0 && (
-          <div className={styles['reviews-empty']}>
-            <span className={styles['reviews-empty-mark']}>//</span>
-            <p>no reviews yet — be the first to leave one.</p>
-            <button type="button" className={styles['reviews-cta']} onClick={openReviewModal}>
-              <PiUser size={13} />
-              leave a review
-            </button>
-          </div>
-        )}
-
-        {!loading &&
-          visible.map((review, i) => (
-            <article key={review.id} className={styles['review-card']}>
-              {review.header && (
-                <div className={styles['review-card-header']}>
-                  <span className={styles['review-card-header-dot']} />
-                  {review.header}
-                </div>
-              )}
-              <p className={styles['review-card-text']}>{review.text}</p>
-              <div className={styles['review-card-footer']}>
-                <div className={styles['review-card-author']}>
-                  {review.photoURL ? (
-                    <img src={review.photoURL} alt="" className={styles['review-card-avatar']} />
-                  ) : (
-                    <div className={styles['review-card-avatar--fallback']}>
-                      <PiUser size={12} />
-                    </div>
-                  )}
-                  <div className={styles['review-card-info']}>
-                    <span className={styles['review-card-name']}>{review.name}</span>
-                    {review.role && <span className={styles['review-card-role']}>{review.role}</span>}
-                    <span className={styles['review-card-date']}>
-                      {formatDate(review.createdAt) ?? 'verified'}
-                    </span>
-                  </div>
-                </div>
-                <div className={styles['review-card-side']}>
-                  {review.rating ? (
-                    <div className={styles['review-card-stars']}>
-                      {Array.from({ length: 5 }, (_, s) => (
-                        <PiStarFill
-                          key={s}
-                          size={11}
-                          className={s < review.rating! ? styles['star-filled'] : styles['star-empty']}
-                        />
-                      ))}
-                    </div>
-                  ) : null}
-                  <span className={styles['review-card-index']}>{String(i + 1).padStart(2, '0')}</span>
-                </div>
-              </div>
-            </article>
-          ))}
+        <footer className="mt-7 flex items-center justify-between gap-4 text-[0.82rem] text-[var(--text-dim)] md:mt-9">
+          <span>Thoughtful work leaves a good impression.</span>
+          <nav aria-label="Recommendations" className="flex items-center gap-1.5">
+            {Array.from({ length: slideCount }, (_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => setPairStart(index * 2)}
+                aria-label={`Show recommendation set ${index + 1}`}
+                aria-current={Math.floor(pairStart / 2) === index ? 'page' : undefined}
+                className={`h-1.5 rounded-full transition-[width,background-color] duration-300 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--geist-focus)] ${Math.floor(pairStart / 2) === index ? 'w-6 bg-[var(--text-secondary)]' : 'w-1.5 bg-[var(--border-hover)] hover:bg-[var(--text-dim)]'}`}
+              />
+            ))}
+          </nav>
+        </footer>
       </div>
     </section>
   );

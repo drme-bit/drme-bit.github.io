@@ -1,116 +1,71 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import CodeBlock from '@/shared/ui/molecules/CodeBlock/CodeBlock';
-import styles from './PostContent.module.scss';
+import CodeBlock from '@/shared/ui/CodeBlock/CodeBlock';
+import {
+  Article,
+  Section,
+  H2,
+  P,
+  Grid2,
+  MiniCard,
+} from '../ui/Article';
 
-function Section({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.1 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`${styles['section']}${visible ? ` ${styles['is-visible']}` : ''}`}
-      style={{ transitionDelay: `${delay}s` }}
-    >
-      {children}
-    </div>
-  );
-}
+const NODES = [
+  { label: 'Client', sub: 'React / Next.js', hot: false },
+  { label: 'API Route', sub: 'Next.js Edge', hot: true },
+  { label: 'Middleware', sub: 'Auth / Rate Limit', hot: false },
+  { label: 'Firestore', sub: 'Admin SDK', hot: false },
+];
 
 export default function PostContent() {
   return (
-    <div className={styles.page}>
-      {/* Hero */}
-      <header className={styles.hero}>
-        <div className={styles['hero-glow']} />
-        <div className={styles['hero-content']}>
-          <div className={styles['hero-badge']}>Backend</div>
-          <h1 className={styles['hero-title']}>
-            Integrating a<br />
-            <span className={styles['hero-accent']}>Node.js Backend</span>
-          </h1>
-          <p className={styles['hero-desc']}>
-            Moving beyond static sites — adding a server layer for auth, rate limiting, and
-            write operations that actually matter.
-          </p>
-          <div className={styles['hero-meta']}>
-            <span>Jul 20, 2026</span>
-            <span className={styles['hero-sep']}>/</span>
-            <span>5 min read</span>
-          </div>
-        </div>
-      </header>
-
-      {/* Architecture diagram */}
+    <Article>
       <Section>
-        <div className={styles['arch']}>
-          <h2 className={styles['section-title']}>Architecture Overview</h2>
-          <div className={styles['arch-flow']}>
-            <div className={styles['arch-node']}>
-              <span className={styles['arch-node-label']}>Client</span>
-              <span className={styles['arch-node-sub']}>React / Next.js</span>
-            </div>
-            <div className={styles['arch-arrow']}>→</div>
-            <div className={`${styles['arch-node']} ${styles['arch-node--primary']}`}>
-              <span className={styles['arch-node-label']}>API Route</span>
-              <span className={styles['arch-node-sub']}>Next.js Edge</span>
-            </div>
-            <div className={styles['arch-arrow']}>→</div>
-            <div className={styles['arch-node']}>
-              <span className={styles['arch-node-label']}>Middleware</span>
-              <span className={styles['arch-node-sub']}>Auth / Rate Limit</span>
-            </div>
-            <div className={styles['arch-arrow']}>→</div>
-            <div className={`${styles['arch-node']} ${styles['arch-node--warm']}`}>
-              <span className={styles['arch-node-label']}>Firestore</span>
-              <span className={styles['arch-node-sub']}>Admin SDK</span>
-            </div>
+        <div className="flex flex-col gap-4">
+          <H2>Architecture overview</H2>
+          <div className="flex flex-wrap items-stretch gap-2">
+            {NODES.map((n, i) => (
+              <div key={n.label} className="flex min-w-0 flex-1 items-stretch gap-2">
+                <div
+                  className={`flex min-w-[120px] flex-1 flex-col gap-0.5 rounded-[var(--radius-md)] border px-3.5 py-3 ${
+                    n.hot
+                      ? 'border-[var(--accent-secondary)]/40 bg-[var(--accent-secondary)]/[0.07]'
+                      : 'border-[var(--border)] bg-[var(--glass)]'
+                  }`}
+                >
+                  <span className="font-mono text-[0.72rem] font-medium text-foreground">{n.label}</span>
+                  <span className="font-mono text-[0.62rem] text-[var(--text-ghost)]">{n.sub}</span>
+                </div>
+                {i < NODES.length - 1 && (
+                  <span aria-hidden="true" className="self-center text-[var(--text-ghost)]">→</span>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </Section>
 
-      {/* Why a backend */}
-      <Section delay={0.05}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>#</span>
-            Why a backend at all
-          </h2>
-          <p className={styles['body-text']}>
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2>Why a backend at all</H2>
+          <P>
             A portfolio site does not need a backend. But this one has features that benefit
             from server-side logic: the reviews system writes to Firestore, the contact form
             needs validation, and I wanted rate limiting to prevent abuse. Next.js App Router
             makes this trivial — API routes live inside the same project, deploy to the same
             Vercel function, and share types with the frontend.
-          </p>
+          </P>
         </div>
       </Section>
 
-      {/* API Routes */}
-      <Section delay={0.1}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>#</span>
-            Next.js API Routes
-          </h2>
-          <p className={styles['body-text']}>
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2>Next.js API Routes</H2>
+          <P>
             Each API route is a standard Next.js Route Handler. The server has full access
             to environment variables, Firebase Admin, and any Node.js API — no CORS, no
             separate deployment, no cold starts on a different region.
-          </p>
+          </P>
           <CodeBlock
             lang="typescript"
             code={`// app/api/reviews/route.ts
@@ -139,19 +94,15 @@ export async function POST(req: Request) {
         </div>
       </Section>
 
-      {/* Firebase Admin */}
-      <Section delay={0.1}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>#</span>
-            Firebase Admin for server-side writes
-          </h2>
-          <p className={styles['body-text']}>
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2>Firebase Admin for server-side writes</H2>
+          <P>
             The client-side Firebase SDK works fine for reads and auth, but server-side writes
             need Firebase Admin. It bypasses security rules (since the server is trusted) and
             gives access to admin-only operations like querying across all users or writing to
             protected collections.
-          </p>
+          </P>
           <CodeBlock
             lang="typescript"
             code={`// lib/firebase-admin.ts
@@ -173,44 +124,33 @@ export const db = getFirestore();`}
         </div>
       </Section>
 
-      {/* Rate Limiting */}
-      <Section delay={0.1}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>#</span>
-            Rate limiting without Redis
-          </h2>
-          <p className={styles['body-text']}>
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2>Rate limiting without Redis</H2>
+          <P>
             For a portfolio site, full Redis-backed rate limiting is overkill. A simpler
             approach using Vercel KV or in-memory maps:
-          </p>
-          <div className={styles['feature-grid']}>
+          </P>
+          <Grid2>
             {[
-              { label: 'Vercel KV (Upstash)', desc: 'Serverless Redis, 30k requests/day free tier' },
-              { label: 'In-memory Map', desc: 'Fine for single-region, resets on cold start' },
-              { label: 'IP or User-based', desc: 'Depending on auth state' },
-              { label: 'Sliding window', desc: 'Smooth rate curves, no burst spikes' },
+              { title: 'Vercel KV (Upstash)', desc: 'Serverless Redis, 30k requests/day free tier' },
+              { title: 'In-memory Map', desc: 'Fine for single-region, resets on cold start' },
+              { title: 'IP or User-based', desc: 'Depending on auth state' },
+              { title: 'Sliding window', desc: 'Smooth rate curves, no burst spikes' },
             ].map((f) => (
-              <div key={f.label} className={styles['feature-card']}>
-                <span className={styles['feature-card-label']}>{f.label}</span>
-                <span className={styles['feature-card-desc']}>{f.desc}</span>
-              </div>
+              <MiniCard key={f.title} title={f.title} desc={f.desc} />
             ))}
-          </div>
+          </Grid2>
         </div>
       </Section>
 
-      {/* Middleware */}
-      <Section delay={0.1}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>#</span>
-            Middleware for auth checks
-          </h2>
-          <p className={styles['body-text']}>
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2>Middleware for auth checks</H2>
+          <P>
             Next.js middleware runs before the route handler. Perfect for validating Firebase
             tokens on protected API routes without duplicating auth logic in every handler.
-          </p>
+          </P>
           <CodeBlock
             lang="typescript"
             code={`// middleware.ts
@@ -244,21 +184,17 @@ export async function middleware(req: Request) {
         </div>
       </Section>
 
-      {/* Conclusion */}
-      <Section delay={0.1}>
-        <div className={styles['content-block']}>
-          <h2 className={styles['section-title']}>
-            <span className={styles['section-prompt']}>#</span>
-            When server-side matters
-          </h2>
-          <p className={styles['body-text']}>
+      <Section>
+        <div className="flex flex-col gap-4">
+          <H2>When server-side matters</H2>
+          <P>
             Most portfolio features work fine as static content. But anything involving user
             data, write operations, or sensitive logic benefits from a server layer. The reviews
             system is the perfect example: client-side auth for the UI, server-side writes for
             data integrity, and middleware for consistent auth checks across all protected routes.
-          </p>
+          </P>
         </div>
       </Section>
-    </div>
+    </Article>
   );
 }

@@ -8,13 +8,8 @@ export default function useTypewriter(strings: string[], speed = 50, hold = 2000
   const charRef = useRef(0);
 
   useEffect(() => {
-    charRef.current = 0;
-    setText('');
-    setPhase('type');
-  }, [idx]);
-
-  useEffect(() => {
-    const s = strings[idx];
+    if (strings.length === 0) return;
+    const s = strings[idx % strings.length];
     if (phase === 'type') {
       if (charRef.current >= s.length) {
         const t = setTimeout(() => setPhase('hold'), hold);
@@ -32,8 +27,13 @@ export default function useTypewriter(strings: string[], speed = 50, hold = 2000
     }
     if (phase === 'erase') {
       if (charRef.current <= 0) {
-        setIdx((i) => (i + 1) % strings.length);
-        return;
+        const t = setTimeout(() => {
+          charRef.current = 0;
+          setText('');
+          setPhase('type');
+          setIdx((i) => (i + 1) % strings.length);
+        }, speed / 2);
+        return () => clearTimeout(t);
       }
       const t = setTimeout(() => {
         charRef.current--;

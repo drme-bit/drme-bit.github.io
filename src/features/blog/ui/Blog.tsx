@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { blog } from '@/features/blog/lib';
 import type { BlogPost } from '@/features/blog/lib';
-import { FiArrowRight, FiClock } from '@/shared/ui/atoms/Icon';
+import { FiArrowRight, FiClock } from '@/shared/ui/Icon';
 import styles from './Blog.module.scss';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -40,6 +40,8 @@ function PostCard({ post, index }: { post: BlogPost; index: number }) {
   return (
     <article
       ref={ref}
+      data-cursor="view"
+      data-cursor-label="Read"
       className={`${styles['blog-card']}${post.featured ? ` ${styles['blog-card--featured']}` : ''}`}
       onClick={() => router.push(`/blog/${post.slug}`)}
     >
@@ -90,7 +92,8 @@ function PostCard({ post, index }: { post: BlogPost; index: number }) {
 
 export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useRouter> }>(
   function Blog({ router: routerProp }, ref) {
-    const router = routerProp || useRouter();
+    const defaultRouter = useRouter();
+    const router = routerProp ?? defaultRouter;
     const wrapperRef = useRef<HTMLDivElement>(null);
     const sectionRef = useRef<HTMLDivElement>(null);
     const featured = blog.featured;
@@ -103,8 +106,8 @@ export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useR
         <section id="blog" ref={sectionRef} className={styles.section}>
           <div className={styles.header}>
             <span className={styles.headerTag}>02 / 03</span>
-            <h2 className={styles.headerTitle}>BLOG</h2>
-            <p className={styles.headerSub}>thoughts & writeups</p>
+            <h2 className={styles.headerTitle}>Notes from the build</h2>
+            <p className={styles.headerSub}>Things I learned while shipping software.</p>
           </div>
 
           <div className={styles['blog-grid']}>
@@ -118,7 +121,7 @@ export const Blog = forwardRef<HTMLDivElement, { router?: ReturnType<typeof useR
 
           <div className={styles['blog-footer']}>
             <button className={styles['blog-view-all']} onClick={() => router.push('/blog')}>
-              <span>view all posts</span>
+              <span>Browse all notes</span>
               <FiArrowRight size={13} />
             </button>
           </div>

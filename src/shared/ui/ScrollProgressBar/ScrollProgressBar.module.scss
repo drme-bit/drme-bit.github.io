@@ -1,0 +1,50 @@
+.scrollProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progressLabel {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 11px;
+
+  > span:last-child {
+    margin-left: auto;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-geist-mono), monospace;
+    font-size: 10px;
+  }
+}
+
+.track {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.scrollProgressFill {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--text);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 100ms linear;
+}
+
+:global([dir='rtl']) .scrollProgressFill {
+  transform-origin: right center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollProgressFill {
+    transition: none;
+  }
+}

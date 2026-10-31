@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { memo, useId, useState } from 'react';
 import { useTheme } from '@/app/providers/ThemeProvider';
 
 const SPARKLE_POSITIONS = [
@@ -23,7 +23,7 @@ interface CompanionCubeProps {
   shake?: boolean;
 }
 
-export default function CompanionCube({ size = 36, onClick, anger = 0, shake = false }: CompanionCubeProps) {
+function CompanionCube({ size = 36, onClick, anger = 0, shake: _shake = false }: CompanionCubeProps) {
   const uid = useId().replace(/:/g, '_');
   const { theme } = useTheme();
   const isLight = theme === 'light';
@@ -121,13 +121,6 @@ export default function CompanionCube({ size = 36, onClick, anger = 0, shake = f
             <stop offset="0%" stopColor={lightGray} />
             <stop offset="100%" stopColor={darkGray} />
           </linearGradient>
-          <filter id={`glow-${uid}`}>
-            <feGaussianBlur stdDeviation="1.5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
 
         {/* Main cube body */}
@@ -156,7 +149,7 @@ export default function CompanionCube({ size = 36, onClick, anger = 0, shake = f
         ))}
 
         {/* Central heart */}
-        <g className="companion-heart" filter={`url(#glow-${uid})`}>
+        <g className="companion-heart">
           <path
             d="M30 42
                C30 42 16 32 16 24
@@ -207,3 +200,6 @@ export default function CompanionCube({ size = 36, onClick, anger = 0, shake = f
     </div>
   );
 }
+
+// Memoized: parent re-renders on every typed character, the cube must not.
+export default memo(CompanionCube);

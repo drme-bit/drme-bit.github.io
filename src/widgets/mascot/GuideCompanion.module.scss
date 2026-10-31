@@ -1,0 +1,107 @@
+.companion {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg-elevated);
+  cursor: pointer;
+  &:focus-visible {
+    outline: 2px solid var(--geist-focus);
+    outline-offset: 3px;
+  }
+  &:hover .figure {
+    transform: rotate(-8deg) translateY(-2px);
+  }
+  &:hover .greeting,
+  &:focus-visible .greeting {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.figure,
+.wave {
+  display: flex;
+  transform-origin: 50% 85%;
+  transition: transform 180ms ease;
+}
+.wave {
+  animation: wave 650ms ease;
+}
+.indicator {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+.companion[data-mood='listening'] .figure {
+  transform: rotate(-8deg);
+}
+.companion[data-mood='thinking'] .figure {
+  animation: ponder 2.4s ease-in-out infinite;
+}
+.companion[data-mood='thinking'] .indicator {
+  background: var(--accent-secondary);
+}
+.companion[data-mood='replying'] .figure {
+  animation: talk 750ms ease-in-out infinite;
+}
+.companion[data-mood='ready'] .indicator {
+  background: var(--accent-success);
+}
+.greeting {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 10px);
+  z-index: 30;
+  width: max-content;
+  max-width: 210px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-3px);
+  transition:
+    opacity 150ms,
+    transform 150ms;
+}
+@keyframes wave {
+  25%,
+  65% {
+    transform: rotate(-14deg);
+  }
+  45%,
+  85% {
+    transform: rotate(10deg) translateY(-2px);
+  }
+}
+@keyframes ponder {
+  50% {
+    transform: rotate(8deg) translateY(-2px);
+  }
+}
+@keyframes talk {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .companion *,
+  .companion:hover .figure {
+    animation: none !important;
+    transition: none;
+    transform: none;
+  }
+}
