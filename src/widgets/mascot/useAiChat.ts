@@ -34,7 +34,8 @@ export interface ChatQuota {
     re-validates, this is only for the picker UI.  */
 
 export const CHAT_MODELS = [
-  { id: 'inclusionai/ling-3.0-flash-sante-free', label: 'Ling Flash' },
+  { id: 'inclusionai/ling-3.0-flash-sante', label: 'Ling Flash Sante' },
+  { id: 'inclusionai/ling-3.1-flash-1019', label: 'Ling 3.1 Flash 1019' },
   { id: 'poolside/laguna-s-2.1-free', label: 'Laguna' },
   { id: 'openai/gpt-5-nano', label: 'GPT-5 nano' },
 ] as const;

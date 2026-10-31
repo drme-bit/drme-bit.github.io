@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkChatQuota, getClientIp, CHAT_QUOTA_LIMIT } from './quota';
 
 /*  Portfolio AI chat via Vercel AI Gateway (OpenAI-compatible endpoint).
-    Free allowlist only — zero-price catalog models, no credits needed.
+    Allowed models are curated in the client picker and validated here.
     Server-only: the API key never reaches the browser.
     Requires AI_GATEWAY_API_KEY in env.  */
 
@@ -13,12 +13,13 @@ export const runtime = 'nodejs';
     validated, never trusted.  */
 
 const CHAT_MODELS = [
-  'inclusionai/ling-3.0-flash-sante-free',
+  'inclusionai/ling-3.0-flash-sante',
+  'inclusionai/ling-3.1-flash-1019',
   'poolside/laguna-s-2.1-free',
   'openai/gpt-5-nano',
 ] as const;
 export type ChatModel = (typeof CHAT_MODELS)[number];
-export const DEFAULT_CHAT_MODEL: ChatModel = 'inclusionai/ling-3.0-flash-sante-free';
+export const DEFAULT_CHAT_MODEL: ChatModel = 'inclusionai/ling-3.0-flash-sante';
 
 function pickModel(raw: unknown): ChatModel {
   if (process.env.AI_MODEL && (CHAT_MODELS as readonly string[]).includes(process.env.AI_MODEL)) {
