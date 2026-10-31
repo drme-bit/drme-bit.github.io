@@ -5,13 +5,29 @@
 
 export interface MaqItem {
   q: string;
+  label: string;
+  hint: string;
 }
 
 export const MAQ: MaqItem[] = [
-  { q: 'What stack do you use?' },
-  { q: 'Tell me about your projects' },
-  { q: 'Are you open to freelance?' },
-  { q: 'How can I contact you?' },
-  { q: 'What is this site about?' },
-  { q: 'Where are you based?' },
+  {
+    q: 'Which projects best show backend and systems work?',
+    label: 'Show backend and systems work',
+    hint: 'Projects',
+  },
+  {
+    q: 'Tell me about Nexagon and the technical decisions behind it.',
+    label: 'Explain Nexagon',
+    hint: 'Rust, React and WebGPU',
+  },
+  {
+    q: 'What experience is most relevant for a product team?',
+    label: 'Find relevant experience',
+    hint: 'Timeline',
+  },
+  {
+    q: 'Is Vyacheslav available for freelance or full-time work?',
+    label: 'Ask about availability',
+    hint: 'Contact',
+  },
 ];

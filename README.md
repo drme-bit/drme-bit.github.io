@@ -16,7 +16,7 @@ npm run start     # production server
 
 - **Next.js 15** + **App Router** — file-based routing, static generation, RSC
 - **React 19** — concurrent features, Server Components
-- **Three.js / R3F** — 3D terrain scene with scroll-driven camera
+- **Three.js / R3F** — subtle ambient starfield with gentle pointer parallax on dark themes
 - **cobe** — interactive globe with skill markers and arcs
 - **SCSS Modules** — design tokens, BEM naming, kebab-case bracket notation
 - **Firebase** — Firestore reviews, Google auth

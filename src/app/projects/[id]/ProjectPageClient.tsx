@@ -15,6 +15,7 @@ import type { Project } from '@/features/projects/lib/project-repository';
 import { NavLeaf, useNav } from '@/app/providers/NavProvider';
 import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 import { useActivity } from '@/app/providers/ActivityProvider';
+import CodeBlock from '@/shared/ui/CodeBlock/CodeBlock';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -376,6 +377,18 @@ export default function ProjectPageClient({ params: _params }: { params: Promise
   if (project?.repo) {
     links.push({ label: 'Source Code', url: project.repo });
   }
+  const projectSnapshot = project
+    ? JSON.stringify(
+        {
+          id: project.id,
+          status: project.status.toLowerCase(),
+          stack: project.techNames,
+          sections: contentSections.map(({ id }) => id),
+        },
+        null,
+        2,
+      )
+    : '';
 
   // Configure GlobalNav — set once per projects
   useEffect(() => {
@@ -453,9 +466,6 @@ export default function ProjectPageClient({ params: _params }: { params: Promise
 
   return (
     <div className="-mt-11 w-full animate-rise pb-20">
-      {/* Hero — sticky, pulled under the navbar, content slides over.
-          -top-11 (not top-0): the border rests above the viewport, so no
-          gap can ever open between navbar and hero, resting or stuck. */}
       <header ref={heroRef} className="sticky -top-11 z-[1] flex h-[78vh] min-h-[520px] items-end overflow-hidden border-b border-[var(--border)] will-change-transform">
         {(project.video || project.image) && (
           <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
@@ -498,10 +508,7 @@ export default function ProjectPageClient({ params: _params }: { params: Promise
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
             <span className="inline-flex items-center gap-1.5 font-mono text-[0.64rem] uppercase tracking-[0.12em] text-[var(--text-secondary)]">
-              <span
-                aria-hidden="true"
-                className={`size-1.5 rounded-full ${STATUS_DOT[project.status] || STATUS_DOT.ACTIVE}`}
-              />
+              <span aria-hidden="true" className={`size-1.5 rounded-full ${STATUS_DOT[project.status] || STATUS_DOT.ACTIVE}`} />
               {meta!.label}
             </span>
             <span className="font-mono text-[0.64rem] tracking-[0.1em] text-[var(--text-ghost)]">
@@ -509,18 +516,8 @@ export default function ProjectPageClient({ params: _params }: { params: Promise
             </span>
             <span className="flex gap-2 max-[700px]:w-full">
               {links.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-sm)] bg-[var(--text)] px-3 py-1.5 font-mono text-[0.68rem] font-medium text-[var(--bg)] no-underline transition-opacity hover:opacity-85"
-                >
-                  {link.label === 'Source Code' ? (
-                    <FiGithub size={13} aria-hidden="true" />
-                  ) : (
-                    <External size={13} aria-hidden="true" />
-                  )}
+                <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-sm)] bg-[var(--text)] px-3 py-1.5 font-mono text-[0.68rem] font-medium text-[var(--bg)] no-underline transition-opacity hover:opacity-85">
+                  {link.label === 'Source Code' ? <FiGithub size={13} aria-hidden="true" /> : <External size={13} aria-hidden="true" />}
                   {link.label}
                 </a>
               ))}
@@ -533,7 +530,7 @@ export default function ProjectPageClient({ params: _params }: { params: Promise
           NOTE: no items-start here — the aside must stretch full height,
           otherwise its sticky rail has zero travel range. */}
       <div className="relative z-[2] -mt-6 rounded-t-[24px] border-t border-[var(--border)] bg-[var(--bg)]">
-      <div className="mx-auto grid w-full max-w-[1200px] gap-10 px-5 pt-10 [grid-template-columns:minmax(0,1fr)_320px] max-[1024px]:grid-cols-1 max-[700px]:px-4">
+      <div className="mx-auto grid w-full max-w-[1320px] gap-12 px-[clamp(1rem,5vw,5rem)] pt-12 [grid-template-columns:minmax(0,1fr)_250px] max-[1024px]:grid-cols-1 max-[700px]:px-4">
         <main className="flex min-w-0 flex-col gap-12">
           {contentSections.map((section, index) => (
             <section key={section.id} id={`section-${section.id}`} className="scroll-mt-24">
@@ -582,18 +579,17 @@ export default function ProjectPageClient({ params: _params }: { params: Promise
           </nav>
         </main>
 
-        {/* Right sidebar — 320px sticky rail with its own scroll
-            for short viewports. */}
+        {/* Project companion rail follows the quieter article TOC pattern. */}
         <aside className="max-[1024px]:hidden">
-          <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col gap-3 overflow-y-auto overscroll-contain pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col gap-6 overflow-y-auto overscroll-contain pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <nav
               aria-label="On this page"
-              className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)] p-3"
+              className="flex flex-col"
             >
-              <p className="m-0 px-2 pb-1.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-[var(--text-ghost)]">
-                on this page
+              <p className="m-0 px-2 pb-2 text-[13px] font-medium text-foreground">
+                On this page
               </p>
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-col gap-px">
                 {contentSections.map((s, i) => {
                   const isActive = active.sectionId === s.id;
                   return (
@@ -602,10 +598,10 @@ export default function ProjectPageClient({ params: _params }: { params: Promise
                       type="button"
                       onClick={() => scrollToTarget(`#section-${s.id}`)}
                       aria-current={isActive || undefined}
-                      className={`flex w-full cursor-pointer items-baseline gap-2.5 rounded-[var(--radius-sm)] px-2 py-1.5 text-left transition-colors ${
+                      className={`flex w-full cursor-pointer items-baseline gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors ${
                         isActive
-                          ? 'bg-[var(--glass-hover)] text-foreground'
-                          : 'text-[var(--text-dim)] hover:bg-[var(--glass)] hover:text-foreground'
+                          ? 'bg-secondary text-foreground'
+                          : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
                       }`}
                     >
                       <span
@@ -620,31 +616,28 @@ export default function ProjectPageClient({ params: _params }: { params: Promise
               </div>
             </nav>
 
-            <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)] p-4">
-              <p className="m-0 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-[var(--text-ghost)]">
-                status
-              </p>
-              <p className="m-0 mt-2.5 inline-flex items-center gap-1.5 font-mono text-[0.68rem] uppercase tracking-[0.1em] text-[var(--text-secondary)]">
+            <div className="border-t border-[var(--border)] pt-4">
+              <p className="m-0 inline-flex items-center gap-1.5 text-[13px] font-medium text-foreground">
                 <span
                   aria-hidden="true"
                   className={`size-1.5 rounded-full ${STATUS_DOT[project.status] || STATUS_DOT.ACTIVE}`}
                 />
                 {meta!.label}
               </p>
-              <p className="m-0 mt-1.5 font-mono text-[0.64rem] text-[var(--text-ghost)]">
+              <p className="m-0 mt-1 text-xs text-muted-foreground">
                 {String(currentIndex + 1).padStart(2, '0')} / {String(allProjects.length).padStart(2, '0')} projects
               </p>
             </div>
 
-            <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)] p-4">
-              <p className="m-0 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-[var(--text-ghost)]">
-                stack · {project.techNames.length}
+            <div>
+              <p className="m-0 px-2 pb-2 text-[13px] font-medium text-foreground">
+                Built with
               </p>
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 px-2">
                 {project.techNames.map((t) => (
                   <span
                     key={t}
-                    className="rounded-[var(--radius-sm)] border border-[var(--border)] px-2 py-1 font-mono text-[0.62rem] text-[var(--text-dim)]"
+                    className="rounded-full bg-secondary px-2 py-1 text-[11px] text-muted-foreground"
                   >
                     {t}
                   </span>
@@ -652,15 +645,31 @@ export default function ProjectPageClient({ params: _params }: { params: Promise
               </div>
             </div>
 
+            <details className="group border-t border-[var(--border)] pt-4">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-2 text-[13px] font-medium text-foreground outline-none marker:hidden hover:text-[var(--accent-secondary)] focus-visible:ring-2 focus-visible:ring-[var(--geist-focus)] [&::-webkit-details-marker]:hidden">
+                <span className="inline-flex items-center gap-2">
+                  <Code size={14} aria-hidden="true" />
+                  Project snapshot
+                </span>
+                <span className="font-mono text-[10px] text-muted-foreground">JSON</span>
+              </summary>
+              <p className="m-0 px-2 pt-2 text-xs leading-relaxed text-muted-foreground">
+                A compact view of the project data and sections shown here.
+              </p>
+              <div className="[&>div]:my-3 [&_pre]:max-h-56 [&_pre]:overflow-auto [&_pre]:p-3 [&_code]:text-[10px]">
+                <CodeBlock code={projectSnapshot} lang="json" />
+              </div>
+            </details>
+
             {links.length > 0 && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col border-t border-[var(--border)] pt-3">
                 {links.map((link) => (
                   <a
                     key={link.label}
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 font-mono text-[0.68rem] text-[var(--text-secondary)] no-underline transition-colors hover:border-[var(--border-hover)] hover:text-foreground"
+                    className="inline-flex min-h-9 items-center gap-2 rounded-md px-2 text-[13px] text-muted-foreground no-underline transition-colors hover:bg-secondary/60 hover:text-foreground"
                   >
                     {link.label === 'Source Code' ? (
                       <FiGithub size={13} aria-hidden="true" />

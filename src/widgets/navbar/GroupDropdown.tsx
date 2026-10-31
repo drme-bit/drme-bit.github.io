@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'motion/react';
 import { ChevronDown } from '@/shared/ui/Icon';
 import type { NavGroup } from '@/shared/config/navTypes';
 import { cn } from '@/shared/lib/cn';
@@ -25,10 +24,10 @@ export function GroupDropdown({
     <li className="relative flex">
       <button
         className={cn(
-          'relative flex cursor-pointer items-center gap-1.5 px-2.5 py-1 text-[13px] font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring',
+          'relative flex h-8 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-[12px] font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring',
           isOpen || isActive
-            ? 'text-foreground'
-            : 'text-muted-foreground hover:text-foreground',
+            ? 'text-foreground after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-px after:bg-foreground'
+            : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground',
         )}
         onClick={() => {
           if (isOpen) onCancelClose();
@@ -59,13 +58,6 @@ export function GroupDropdown({
             isOpen && 'rotate-180',
           )}
         />
-        {(isActive || isOpen) && (
-          <motion.span
-            layoutId="navUnderline"
-            className="absolute inset-x-2 -bottom-[9px] h-[2px] rounded-full bg-foreground"
-            transition={{ type: 'spring', stiffness: 500, damping: 40, mass: 0.5 }}
-          />
-        )}
       </button>
     </li>
   );

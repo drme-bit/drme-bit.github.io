@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { pickResponse } from '@/entities/mascot';
+import { getRelatedSources } from '@/entities/knowledge';
+import type { KnowledgeSource } from '@/entities/knowledge';
 import { CHAT_QUOTA_LIMIT, CHAT_QUOTA_WINDOW_MS } from '@/app/api/chat/quota';
 
 export interface AiChatMessage {
@@ -9,6 +11,9 @@ export interface AiChatMessage {
   role: 'user' | 'assistant';
   content: string;
   offline?: boolean;
+  sources?: KnowledgeSource[];
+  streaming?: boolean;
+  interrupted?: boolean;
 }
 
 export interface ChatQuota {
@@ -29,11 +34,20 @@ export const CHAT_MODELS = [
 
 export type ChatModelId = (typeof CHAT_MODELS)[number]['id'];
 
+export const THINKING_STEPS = [
+  'Thinking it through...',
+  'Connecting the dots...',
+  'A little more thought, a little less fluff...',
+  'Letting the answer take shape...',
+  'Still here. Good answers take a moment...',
+] as const;
+
 const MODEL_KEY = 'drme-chat-model';
 
 let nextId = 1;
 
-const QUOTA_KEY = 'drme-chat-quota';
+// Bumped so local manual testing starts from a fresh quota after the UX change.
+const QUOTA_KEY = 'drme-chat-quota-v2';
 
 interface StoredQuota {
   used: number;
@@ -74,8 +88,8 @@ function persist(stored: StoredQuota): void {
 function quotaNotice(reset: number, now: number): string {
   const hours = Math.max(1, Math.ceil((reset - now) / 3600000));
   return (
-    `Daily quota reached — ${CHAT_QUOTA_LIMIT} questions per day so everyone gets a turn. ` +
-    `Back in ~${hours}h, or reach Vyacheslav directly via the contact section on this site.`
+    `You have reached today's chat limit of ${CHAT_QUOTA_LIMIT} questions. ` +
+    `New questions will be available in about ${hours}h, or you can reach Vyacheslav via the contact section.`
   );
 }
 
@@ -94,6 +108,7 @@ function toQuota(stored: StoredQuota): ChatQuota {
 export function useAiChat() {
   const [messages, setMessages] = useState<AiChatMessage[]>([]);
   const [sending, setSending] = useState(false);
+  const [thinkingStep, setThinkingStep] = useState(0);
   const [offline, setOffline] = useState(false);
   const [quota, setQuota] = useState<ChatQuota>({
     remaining: CHAT_QUOTA_LIMIT,
@@ -105,6 +120,35 @@ export function useAiChat() {
   const abortRef = useRef<AbortController | null>(null);
   const messagesRef = useRef<AiChatMessage[]>([]);
   const modelRef = useRef<ChatModelId>(CHAT_MODELS[0].id);
+
+  useEffect(
+    () => () => {
+      abortRef.current?.abort();
+    },
+    [],
+  );
+
+  const stop = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    messagesRef.current = messagesRef.current
+      .filter((message) => !message.streaming || message.content.length > 0)
+      .map((message) =>
+        message.streaming ? { ...message, streaming: false, interrupted: true } : message,
+      );
+    setMessages([...messagesRef.current]);
+    setSending(false);
+  }, []);
+
+  useEffect(() => {
+    if (!sending) return;
+
+    const timer = window.setInterval(() => {
+      setThinkingStep((current) => (current + 1) % THINKING_STEPS.length);
+    }, 2800);
+
+    return () => window.clearInterval(timer);
+  }, [sending]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-only sync of persisted state
@@ -136,6 +180,36 @@ export function useAiChat() {
     setMessages(messagesRef.current);
   }, []);
 
+  const pushStreaming = useCallback(async (msg: Omit<AiChatMessage, 'id'>, signal: AbortSignal) => {
+    if (signal.aborted) return;
+    const full = {
+      ...msg,
+      id: nextId++,
+      content: '',
+      streaming: true,
+    };
+    messagesRef.current = [...messagesRef.current, full];
+    setMessages([...messagesRef.current]);
+
+    const chunkSize = Math.max(3, Math.ceil(msg.content.length / 34));
+    for (let end = chunkSize; end < msg.content.length; end += chunkSize) {
+      await new Promise((resolve) => window.setTimeout(resolve, 28));
+      if (signal.aborted) return;
+      full.content = msg.content.slice(0, end);
+      messagesRef.current = messagesRef.current.map((message) =>
+        message.id === full.id ? full : message,
+      );
+      setMessages([...messagesRef.current]);
+    }
+
+    full.content = msg.content;
+    full.streaming = false;
+    messagesRef.current = messagesRef.current.map((message) =>
+      message.id === full.id ? full : message,
+    );
+    setMessages([...messagesRef.current]);
+  }, []);
+
   const send = useCallback(
     async (raw: string) => {
       const content = raw.trim().slice(0, 2000);
@@ -149,7 +223,9 @@ export function useAiChat() {
         return;
       }
 
-      abortRef.current = new AbortController();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      setThinkingStep(0);
       setSending(true);
       push({ role: 'user', content });
 
@@ -161,7 +237,7 @@ export function useAiChat() {
             messages: messagesRef.current.map(({ role, content: c }) => ({ role, content: c })),
             model: modelRef.current,
           }),
-          signal: abortRef.current.signal,
+          signal: controller.signal,
         });
         const remainingHeader = Number(res.headers.get('X-Chat-Remaining'));
         const resetHeader = Number(res.headers.get('X-Chat-Reset'));
@@ -175,33 +251,81 @@ export function useAiChat() {
           setQuota(toQuota(synced));
         }
         const data = await res.json().catch(() => ({}));
+        if (controller.signal.aborted) return;
         if (res.status === 429) {
-          push({ role: 'assistant', content: String(data?.error ?? 'Daily quota reached. Try again tomorrow.') });
+          await pushStreaming(
+            {
+              role: 'assistant',
+              content: String(data?.error ?? 'Daily quota reached. Try again tomorrow.'),
+            },
+            controller.signal,
+          );
         } else if (res.status === 503) {
           // Gateway not configured → local mock brain, flagged as offline.
           setOffline(true);
-          push({ role: 'assistant', content: pickResponse(content), offline: true });
+          await pushStreaming(
+            {
+              role: 'assistant',
+              content: pickResponse(content),
+              offline: true,
+              sources: getRelatedSources(content),
+            },
+            controller.signal,
+          );
         } else if (!res.ok || typeof data?.reply !== 'string') {
           throw new Error(data?.error ?? 'Request failed');
         } else {
-          push({ role: 'assistant', content: data.reply });
+          setOffline(false);
+          await pushStreaming(
+            {
+              role: 'assistant',
+              content: data.reply,
+              sources: getRelatedSources(content),
+            },
+            controller.signal,
+          );
         }
       } catch (e) {
-        if ((e as Error)?.name !== 'AbortError') {
-          push({ role: 'assistant', content: 'Something glitched. Try again in a moment.' });
+        if (!controller.signal.aborted && (e as Error)?.name !== 'AbortError') {
+          setOffline(true);
+          await pushStreaming(
+            {
+              role: 'assistant',
+              content: pickResponse(content),
+              offline: true,
+              sources: getRelatedSources(content),
+            },
+            controller.signal,
+          );
         }
       } finally {
-        abortRef.current = null;
-        setSending(false);
+        // A cancelled request must not reset a newer request's state.
+        if (abortRef.current === controller) {
+          abortRef.current = null;
+          setSending(false);
+        }
       }
     },
-    [push],
+    [push, pushStreaming],
   );
 
   const clear = useCallback(() => {
+    stop();
     messagesRef.current = [];
     setMessages([]);
-  }, []);
+  }, [stop]);
 
-  return { messages, sending, offline, quota, model, setModel, send, clear };
+  return {
+    messages,
+    sending,
+    thinkingStep,
+    thinkingLabel: THINKING_STEPS[thinkingStep],
+    offline,
+    quota,
+    model,
+    setModel,
+    send,
+    stop,
+    clear,
+  };
 }

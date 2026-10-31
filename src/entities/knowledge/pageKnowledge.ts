@@ -9,7 +9,7 @@ const KNOWLEDGE: KnowledgeEntry[] = [
     keywords: ['what is this', 'what is this site', 'what is this website', 'this site', 'about this site', 'tell me about this', 'portfolio', ''],
     priority: 1,
     answer:
-      "This is Vyacheslav Tkachyk's personal site — built with Next.js, React, Tailwind, GSAP and Lenis. It features a live 3D terrain background, a scroll-driven PROJECTS portal, an experience timeline, and an AI chat behind the Ask button.",
+      "This is Vyacheslav Tkachyk's personal site — built with Next.js, React, Tailwind, GSAP and Lenis. It features a subtle pointer-reactive starfield on dark themes, a scroll-driven PROJECTS portal, an experience timeline, and an AI chat in the sidebar.",
   },
   {
     keywords: ['who made', 'who built', 'who created', 'creator', 'author', 'vyacheslav', 'tkachyk', 'tkachik', 'your name', 'developer', 'about you'],
@@ -50,7 +50,7 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['globe', '3d globe', 'skills globe', 'sphere', '3d skills', 'terrain', 'background'],
     answer:
-      "The old skills globe is gone — the background is now a live 3D terrain rendered with Three.js and react-three-fiber, with drifting noise, a starfield, and beacons. It even pauses itself while the PROJECTS portal covers the screen.",
+      "Terrain geometry and the cursor-warp grid have been removed. Dark themes retain a restrained starfield that shifts subtly with pointer movement.",
   },
   {
     keywords: ['timeline', 'experience timeline', 'scroll timeline', 'beam', 'rail'],
@@ -63,9 +63,9 @@ const KNOWLEDGE: KnowledgeEntry[] = [
       "The hero section is terminal-inspired: avatar, shimmer name, a flipping role board, resume button, live GitHub stats, floating project photos, and social links. It sets the whole hacker aesthetic.",
   },
   {
-    keywords: ['companion cube', 'mascot', 'who are you', 'what are you', 'cube'],
+    keywords: ['mascot', 'cat', 'who are you', 'what are you', 'assistant'],
     answer:
-      "I'm a Companion Cube — a legendary artifact. My job is to answer questions about this site. Hit the Ask button in the navbar to open this chat — no floating cube anymore, I moved in here.",
+      "I'm the portfolio guide: a small black cat here to help you explore Vyacheslav's work. Use the Ask button in the navbar for short answers with links to the relevant projects and sections.",
   },
   {
     keywords: ['chat', 'ask', 'ai assistant', 'how to open', 'talk to you'],
@@ -73,10 +73,9 @@ const KNOWLEDGE: KnowledgeEntry[] = [
       "This chat! Open it with the Ask button in the navbar (top right). You get about 10 questions per day, and you can pick the model in the chat header. I answer from the site knowledge plus an AI backend when it's configured.",
   },
   {
-    keywords: ['aperture', 'portal', 'glados', 'cake', 'aperture science'],
-    priority: 3,
+    keywords: ['guide', 'help', 'how to use'],
     answer:
-      "Ah, a person of culture! I'm a Companion Cube from Aperture Science — legendary artifact, heart-shaped face, full of sarcasm. The cake is a lie, but the design is real.",
+      "Ask about a project, relevant experience, availability, or a technical topic. Every answer includes links so you can verify the context directly on the portfolio.",
   },
   {
     keywords: ['design', 'theme', 'dark mode', 'style', 'aesthetic', 'color scheme', 'ui', 'ux'],
@@ -86,7 +85,7 @@ const KNOWLEDGE: KnowledgeEntry[] = [
   {
     keywords: ['animations', 'effects', 'particles', 'three.js', 'webgl', '3d', 'r3f', 'react-three'],
     answer:
-      "Heavy use of Three.js via react-three-fiber: the live 3D terrain with drifting noise, starfield and beacons. Plus GSAP scroll choreography, a scroll-driven SVG camera flight into the PROJECTS section, Lenis smooth scrolling, and FLIP animations. All budgeted per-frame for Safari.",
+      "Three.js via react-three-fiber powers a restrained 3D starfield on dark themes that gently follows pointer movement. The site also uses GSAP scroll choreography, a scroll-driven SVG camera flight into the PROJECTS section, Lenis smooth scrolling, and FLIP animations.",
   },
   {
     keywords: ['search', 'search bar', 'magnifying glass', 'search this site', 'command', 'palette'],

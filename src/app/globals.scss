@@ -385,78 +385,96 @@
 
 // ── Light theme ─
 :is(html.light, body.light) {
-  --bg: #f5f3f0;
-  --bg-elevated: #eae7e3;
-  --bg-surface: #ffffff;
-  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg: #ffffff;
+  --bg-elevated: #f8f9fb;
+  --bg-surface: #f1f3f5;
+  --bg-hover: rgba(24, 28, 34, 0.04);
 
-  --text: #0e0e0e;
-  --text-secondary: rgb(26 26 26 / 0.63);
-  --text-dim: rgb(26 26 26 / 0.35);
-  --text-ghost: rgb(26 26 26 / 0.17);
+  --text: #17191d;
+  --text-secondary: #555b64;
+  --text-dim: #737983;
+  --text-ghost: #a3a8b0;
 
-  --accent: #2d2a26;
-  --accent-muted: rgba(45, 42, 38, 0.08);
-  --accent-glow: rgba(45, 42, 38, 0.04);
+  --accent: #17191d;
+  --accent-muted: rgba(23, 25, 29, 0.06);
+  --accent-glow: rgba(23, 25, 29, 0.035);
 
-  --accent-secondary: #0284c7;
-  --accent-secondary-glow: rgba(2, 132, 199, 0.08);
-  --accent-tertiary: #7c3aed;
-  --accent-warm: #d97706;
-  --accent-cool: #0891b2;
+  --accent-secondary: #2563eb;
+  --accent-secondary-glow: rgba(37, 99, 235, 0.08);
+  --accent-tertiary: #525f76;
+  --accent-warm: #b7791f;
+  --accent-cool: #2563eb;
   --accent-success: #059669;
-  --accent-danger: #dc2626;
+  --accent-danger: #d14343;
 
-  --gradient-primary: linear-gradient(135deg, #0284c7, #7c3aed);
-  --gradient-warm: linear-gradient(135deg, #d97706, #ea580c);
-  --gradient-cool: linear-gradient(135deg, #0891b2, #0284c7);
-  --gradient-text: linear-gradient(135deg, #2d2a26, #0284c7);
+  --gradient-primary: linear-gradient(135deg, #2563eb, #526fba);
+  --gradient-warm: linear-gradient(135deg, #b7791f, #c45c43);
+  --gradient-cool: linear-gradient(135deg, #2563eb, #4b75cf);
+  --gradient-text: linear-gradient(135deg, #17191d, #526fba);
 
-  --border: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(0, 0, 0, 0.15);
-  --glass: rgba(0, 0, 0, 0.02);
-  --glass-hover: rgba(0, 0, 0, 0.04);
-  --glass-strong: rgba(0, 0, 0, 0.03);
+  --border: #e5e8ec;
+  --border-hover: #cdd2d9;
+  --glass: rgba(24, 28, 34, 0.02);
+  --glass-hover: rgba(24, 28, 34, 0.045);
+  --glass-strong: rgba(24, 28, 34, 0.035);
 
   // ── Nav section glass tints ─
-  --nav-glass-about: rgba(2, 132, 199, 0.10);
-  --nav-glass-skills: rgba(124, 58, 237, 0.10);
-  --nav-glass-experience: rgba(217, 119, 6, 0.10);
-  --nav-glass-projects: rgba(2, 132, 199, 0.14);
+  --nav-glass-about: rgba(37, 99, 235, 0.07);
+  --nav-glass-skills: rgba(82, 95, 118, 0.07);
+  --nav-glass-experience: rgba(183, 121, 31, 0.07);
+  --nav-glass-projects: rgba(37, 99, 235, 0.09);
 
   --overlay-bg: rgba(0, 0, 0, 0.3);
-  --panel-bg: rgba(245, 243, 240, 0.98);
+  --panel-bg: rgba(255, 255, 255, 0.98);
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 40px rgba(2, 132, 199, 0.06);
+  --shadow-sm: 0 1px 2px rgba(18, 24, 32, 0.035);
+  --shadow-md: 0 4px 14px rgba(18, 24, 32, 0.055);
+  --shadow-lg: 0 12px 30px rgba(18, 24, 32, 0.075);
+  --shadow-glow: 0 0 0 1px rgba(37, 99, 235, 0.12);
 
-  --terminal-bg: rgba(245, 243, 240, 0.92);
-  --terminal-border: rgba(0, 0, 0, 0.08);
-  --terminal-bar: rgba(0, 0, 0, 0.03);
-  --terminal-bar-border: rgba(0, 0, 0, 0.06);
-  --terminal-title: rgba(26, 26, 26, 0.4);
-  --terminal-text: rgba(26, 26, 26, 0.5);
+  --terminal-bg: rgba(255, 255, 255, 0.96);
+  --terminal-border: rgba(23, 25, 29, 0.1);
+  --terminal-bar: rgba(23, 25, 29, 0.035);
+  --terminal-bar-border: rgba(23, 25, 29, 0.07);
+  --terminal-title: rgba(23, 25, 29, 0.52);
+  --terminal-text: rgba(23, 25, 29, 0.65);
   --terminal-prompt-arrow: #059669;
   --terminal-prompt-path: #0284c7;
-  --terminal-prompt-branch: rgba(124, 58, 237, 0.6);
-  --terminal-cmd: #0284c7;
-  --terminal-output: rgba(26, 26, 26, 0.5);
-  --terminal-success: rgba(5, 150, 105, 0.7);
-  --terminal-success-bright: rgba(5, 150, 105, 0.8);
-  --terminal-success-muted: rgba(5, 150, 105, 0.6);
+  --terminal-prompt-branch: rgba(82, 95, 118, 0.8);
+  --terminal-cmd: #2563eb;
+  --terminal-output: rgba(23, 25, 29, 0.62);
+  --terminal-success: rgba(5, 150, 105, 0.8);
+  --terminal-success-bright: rgba(5, 150, 105, 0.9);
+  --terminal-success-muted: rgba(5, 150, 105, 0.7);
 
   --dot-r: #ff5f57;
   --dot-y: #febc2e;
   --dot-g: #28c840;
 
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-border: rgba(0, 0, 0, 0.06);
+  --card-bg: #ffffff;
+  --card-border: #e5e8ec;
 
-  --geist-warning: #97570d;
+  --geist-warning: #88550b;
+  --geist-focus: #2563eb;
 
   color-scheme: light;
+}
+
+body.light::after {
+  display: none;
+}
+
+:is(html.light, body.light) {
+  .section--about,
+  .section--skills,
+  .section--projects,
+  .section--experience {
+    background: transparent;
+  }
+
+  #experience::after {
+    display: none;
+  }
 }
 
 // ── Cattpuchin theme
@@ -1098,6 +1116,8 @@ html.no-blur {
 
 .projects-wrapper {
   position: relative;
+  // Continue the portal's `--gp-field` surface behind the incoming Projects header.
+  background: var(--bg-surface);
   /* No negative overlap: the portal dive sits between Experience and
      Projects, so the hero must not be pulled up over it. */
   margin-top: 0;
@@ -1115,55 +1135,15 @@ html.no-blur {
   width: 100%;
 }
 
-/* Footer entrance: hidden until scrolled into view, inner slides up.
-   Plain IO state — no positioning tricks, works in every environment. */
+/* The fixed footer is revealed progressively by scroll progress. */
 #footer {
-  opacity: 0;
-  visibility: hidden;
-}
-
-#footer.is-revealed {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.45s ease;
-}
-
-#footer .footer-inner {
-  transform: translateY(24px);
-}
-
-#footer.is-revealed .footer-inner {
-  transform: none;
-  transition: transform 0.5s var(--ease-out);
+  will-change: opacity, transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #footer,
-  #footer.is-revealed {
-    opacity: 1;
-    visibility: visible;
+  #footer {
+    transform: none !important;
   }
-
-  #footer .footer-inner,
-  #footer.is-revealed .footer-inner {
-    transform: none;
-  }
-}
-
-/* Experience bleeds violet into its tail so the portal field doesn't
-   start with a hard cut: dark Scene → violet wash → violet field. */
-#experience {
-  position: relative;
-}
-
-#experience::after {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: 38vh;
-  background: linear-gradient(to bottom, transparent, rgba(21, 13, 49, 0.65));
-  pointer-events: none;
 }
 
 /* ── Split-flap board ── */

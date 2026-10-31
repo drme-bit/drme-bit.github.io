@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNav } from '@/app/providers/NavProvider';
+import { useChat } from '@/app/providers/ChatProvider';
 import { GLOBAL_NAV } from '@/shared/config/navConfig';
 import type { NavGroup, NavRouteLink, NavLeaf } from '@/shared/config/navTypes';
-import { cn } from '@/shared/lib/cn';
 import { Separator } from '@/shared/ui';
 
 import { ExpandableTab } from './ExpandableTab';
@@ -14,11 +14,7 @@ import { GroupDropdown } from './GroupDropdown';
 import { MobileNav } from './MobileNav';
 import { NavDropdown } from './NavDropdown';
 import SearchBar, { type SearchItem } from '@/shared/ui/SearchBar/SearchBar';
-import ChangeTheme from '@/shared/ui/ChangeTheme/ChangeTheme';
-import { useChat } from '@/app/providers/ChatProvider';
-import { PresenceStack } from '@/features/presence';
 import { scrollToTarget, scrollToTop } from '@/widgets/smooth-scrolling/lenisStore';
-import CompanionCube from '@/widgets/mascot/CompanionCube';
 
 function LogoMark() {
   return (
@@ -46,7 +42,7 @@ export default function Navbar() {
   const ref = useRef<HTMLElement>(null);
 
   const { pageConfig, setPageConfig, active, setActiveSection } = useNav();
-  const { open: chatOpen, toggle: toggleChat } = useChat();
+  const { open: chatOpen } = useChat();
 
   const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
   const routes = GLOBAL_NAV.filter((item): item is NavRouteLink => item.type === 'route');
@@ -55,9 +51,9 @@ export default function Navbar() {
     if (item.href === '/') {
       scrollToTop();
     } else {
-      window.location.href = item.href;
+      router.push(item.href);
     }
-  }, []);
+  }, [router]);
 
   const handleGroupOpen = useCallback((groupId: string) => {
     clearTimeout(closeGroupIdTimer.current!);
@@ -109,7 +105,7 @@ export default function Navbar() {
           scrollToTarget(`#${leaf.targetId}`);
           setActiveSection(leaf.id);
         } else {
-          window.location.href = `/#${leaf.targetId}`;
+          router.push(`/#${leaf.targetId}`);
         }
       } else if (leaf.type === 'route') {
         router.push(leaf.href);
@@ -152,13 +148,13 @@ export default function Navbar() {
           scrollToTarget(`#${item.sectionId}`);
           setActiveSection(item.sectionId);
         } else {
-          window.location.href = `/#${item.sectionId}`;
+          router.push(`/#${item.sectionId}`);
         }
       } else if (item.href) {
-        window.location.href = item.href;
+        router.push(item.href);
       }
     },
-    [pathname, setActiveSection],
+    [pathname, router, setActiveSection],
   );
 
   const dropdownPanel = (
@@ -172,7 +168,6 @@ export default function Navbar() {
       onCloseImmediate={closeGroupImmediate}
       onCancelClose={cancelGroupClose}
       onNavigateLeaf={handleLeafNavigate}
-      router={router}
     />
   );
 
@@ -180,19 +175,22 @@ export default function Navbar() {
     <nav
       ref={ref}
       data-section={active.sectionId || undefined}
-      className="sticky top-0 z-[999] w-full px-4 transition-colors duration-300 sm:px-6"
+      data-scrolled={scrolled}
+      className={`fixed top-2 left-1 right-1 z-[999] w-auto rounded-[14px] bg-background px-[clamp(1rem,2.2vw,2rem)] transition-[right,background-color] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:left-2 ${
+        chatOpen ? 'xl:right-[424px]' : 'xl:right-[56px]'
+      }`}
       aria-label="Navigation"
     >
-      <div className="grid h-11 w-full grid-cols-[1fr_auto_1fr] items-center gap-3">
+      <div className="grid h-[54px] w-full grid-cols-[1fr_auto_1fr] items-center gap-4 max-[640px]:grid-cols-[auto_1fr_auto]">
         {/* Left edge: logo */}
         <div className="flex min-w-0 items-center justify-self-start">
           <Link
             href="/"
-            className="flex shrink-0 items-center gap-2.5 text-foreground transition-opacity hover:opacity-80"
+            className="group flex shrink-0 items-center gap-2.5 text-foreground no-underline transition-opacity hover:opacity-75"
             aria-label="Home"
           >
             <LogoMark />
-            <span className="hidden font-mono text-[13px] font-semibold lowercase tracking-[0.14em] sm:inline">
+            <span className="hidden font-mono text-[12px] font-semibold lowercase tracking-[0.12em] sm:inline">
               drme<span className="text-accent">_</span>
             </span>
           </Link>
@@ -200,14 +198,12 @@ export default function Navbar() {
 
         {/* Center: nav pill + command palette trigger.
             The pill is always present (no pop-in): only its tint deepens. */}
-        <div data-nav-pill className="flex min-w-0 items-center justify-center gap-2 justify-self-center">
+        <div
+          data-nav-pill
+          className="flex min-w-0 items-center justify-center gap-2.5 justify-self-center"
+        >
           <ul
-            className={cn(
-              'hidden items-center gap-0.5 px-1.5 py-1 transition-colors duration-300 lg:flex',
-              scrolled
-                ? 'rounded-lg border border-border/60 bg-secondary/40 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.5)] backdrop-blur-md'
-                : 'rounded-lg border border-border/40 bg-secondary/20',
-            )}
+          className="hidden items-center gap-0.5 lg:flex"
           >
             {groups.map((group) => {
               const groupActive = active.routeId === group.id;
@@ -238,33 +234,13 @@ export default function Navbar() {
             })}
           </ul>
 
-          <Separator orientation="vertical" className="hidden h-5 lg:block" />
+          <Separator orientation="vertical" className="mx-1 hidden h-5 lg:block" />
           <SearchBar items={searchItems} onSelect={handleSearchSelect} />
         </div>
 
-        {/* Right edge: presence, ask AI + settings */}
+        {/* Right edge: presence and navigation */}
         <div className="flex shrink-0 items-center gap-1.5 justify-self-end">
-          <PresenceStack />
-          <button
-            type="button"
-            onClick={toggleChat}
-            aria-label={chatOpen ? 'Close AI chat' : 'Open AI chat'}
-            aria-expanded={chatOpen}
-            className={cn(
-              'flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 font-mono text-[12px] font-medium lowercase tracking-[0.08em] transition-all active:scale-95',
-              chatOpen
-                ? 'border-[var(--accent-secondary)]/50 bg-[var(--accent-secondary)]/15 text-[var(--text)]'
-                : 'border-border/40 bg-secondary/20 text-muted-foreground hover:border-[var(--accent-secondary)]/40 hover:text-foreground',
-            )}
-          >
-            <CompanionCube size={15} />
-            <span className="max-sm:hidden">ask</span>
-          </button>
-          <Separator orientation="vertical" className="hidden h-5 sm:block" />
           <div className="flex items-center gap-0.5">
-            <div className="hidden sm:flex">
-              <ChangeTheme />
-            </div>
             <MobileNav />
           </div>
         </div>

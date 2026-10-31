@@ -41,20 +41,17 @@ export function SqueezeCarousel() {
               key={h.title}
               role="button"
               tabIndex={0}
-              aria-expanded={selected}
+              aria-pressed={selected}
               aria-label={`${h.title}${selected ? ' (current)' : ''}`}
               onClick={() => setActive(i)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
                   setActive(i);
                 }
               }}
-              onMouseEnter={() => {
-                setActive(i);
-              }}
               style={{ flexGrow: selected ? 3.5 : 0.55, flexBasis: 0 }}
-              className="relative min-h-0 min-w-0 cursor-pointer overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card-bg)] outline-none transition-[flex-grow,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:border-[var(--border-hover)] max-md:!flex-none max-md:data-[open=true]:h-[280px] max-md:data-[open=false]:h-[64px]"
+              className="group relative min-h-0 min-w-0 cursor-pointer overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--card-bg)] outline-none transition-[flex-grow,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:border-[var(--border-hover)] max-md:!flex-none max-md:data-[open=true]:h-[280px] max-md:data-[open=false]:h-[64px]"
               data-open={selected}
             >
               <Image
@@ -64,9 +61,7 @@ export function SqueezeCarousel() {
                 fill
                 sizes="(max-width: 768px) 100vw, 640px"
                 quality={80}
-                className={`object-cover object-center transition-[filter,transform,opacity] duration-500 ${
-                  selected ? 'scale-100 opacity-100 grayscale-0' : 'scale-[1.06] opacity-70 grayscale'
-                }`}
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.035]"
               />
               <div
                 aria-hidden="true"

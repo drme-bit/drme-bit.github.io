@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { NavLeaf, useNav } from '@/app/providers/NavProvider';
 import { useActivity } from '@/app/providers/ActivityProvider';
-import useLockOrientation from '@/shared/hooks/useLockOrientation';
 import Hero from '@/features/hero/ui/Hero';
 import About from '@/features/about/ui/About';
 import Experience from '@/features/experience/ui/Experience';
@@ -13,7 +12,6 @@ import { ProjectsPortal } from '@/features/projects/ui/ProjectsPortal';
 import Reviews from '@/features/reviews/ui/Reviews';
 import Contacts from '@/features/contacts/ui/Contacts';
 import PremiumFooter from '@/widgets/footer/PremiumFooter';
-import ScrollProgressBar from '@/shared/ui/ScrollProgressBar/ScrollProgressBar';
 import { OnboardingIntro } from '@/widgets/onboarding/OnboardingIntro';
 import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 
@@ -23,8 +21,6 @@ function MainInner() {
   const { setPageConfig, setActiveSection } = useNav();
   const { incrementSectionsRevealed } = useActivity();
   const revealedSections = useRef(new Set<string>());
-
-  useLockOrientation();
 
   // Configure nav for home page
   useEffect(() => {
@@ -74,7 +70,7 @@ function MainInner() {
 
   return (
     <>
-      <ScrollProgressBar />
+      <main className="relative z-10 pb-[340px] max-[700px]:pb-[300px]">
       <OnboardingIntro />
 
       <Scene />
@@ -92,13 +88,13 @@ function MainInner() {
 
       <Reviews />
       <Contacts />
+        <span id="footer-reveal-trigger" aria-hidden="true" className="pointer-events-none absolute bottom-[340px] h-px w-px max-[700px]:bottom-[300px]" />
+      </main>
       <PremiumFooter />
     </>
   );
 }
 
 export default function MainPage() {
-  return (
-    <MainInner />
-  );
+  return <MainInner />;
 }

@@ -2,15 +2,11 @@ import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import { SettingsProvider } from '@/app/providers/ThemeProvider';
-import { TerrainProvider } from '@/app/providers/TerrainProvider';
 import { ModalProvider } from '@/app/providers/ModalProvider';
 import { ActivityProvider } from '@/app/providers/ActivityProvider';
 import { NavProvider } from '@/app/providers/NavProvider';
 import { ChatProvider } from '@/app/providers/ChatProvider';
-import { PresenceProvider, RemoteCursors } from '@/features/presence';
-import Navbar from '@/widgets/navbar/Navbar';
-import Mascot from '@/widgets/mascot/Mascot';
-import { ContentWindow } from '@/widgets/content-window';
+import { Workspace } from '@/widgets/workspace';
 import Cursor from '@/shared/ui/Cursor/Cursor';
 import { SmoothScrolling } from '@/widgets/smooth-scrolling/SmoothScrolling';
 import { LoadingCurtain } from '@/features/loading';
@@ -55,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         />
-        <meta name="theme-color" content="#0a0a0a" />
+        <meta name="theme-color" content="#ffffff" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body
@@ -64,32 +60,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
       >
         <SettingsProvider>
-          <TerrainProvider>
-            <ModalProvider>
-              <ActivityProvider>
-                <NavProvider>
-                  <ChatProvider>
-                  <PresenceProvider>
+          <ModalProvider>
+            <ActivityProvider>
+              <NavProvider>
+                <ChatProvider>
                   <PageTransitionProvider>
-                    <ContentWindow id="main" tone="quiet">
+                    <Workspace>
                       <LoadingCurtain />
                       <TransitionLayer />
 
-                      <Navbar />
                       <Analytics />
                       <SpeedInsights />
                       <SmoothScrolling>{children}</SmoothScrolling>
-                    </ContentWindow>
+                    </Workspace>
                     <Cursor />
-                    <RemoteCursors />
-                    <Mascot />
                   </PageTransitionProvider>
-                  </PresenceProvider>
-                  </ChatProvider>
-                </NavProvider>
-              </ActivityProvider>
-            </ModalProvider>
-          </TerrainProvider>
+                </ChatProvider>
+              </NavProvider>
+            </ActivityProvider>
+          </ModalProvider>
         </SettingsProvider>
       </body>
     </html>

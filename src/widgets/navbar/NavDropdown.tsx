@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { motion } from 'motion/react';
-import { ArrowRight } from '@/shared/ui/Icon';
 import { cn } from '@/shared/lib/cn';
 import type { NavGroup, NavLeaf, NavRouteLink } from '@/shared/config/navTypes';
 
@@ -17,7 +16,6 @@ interface NavDropdownProps {
   onCloseImmediate: () => void;
   onCancelClose: () => void;
   onNavigateLeaf: (leaf: NavLeaf) => void;
-  router: ReturnType<typeof import('next/navigation').useRouter>;
 }
 
 function leafHref(leaf: NavLeaf): string {
@@ -27,9 +25,8 @@ function leafHref(leaf: NavLeaf): string {
 }
 
 /*
- * Linear/Vercel command surface: monochrome 16px glyphs, no tiles,
- * no color accents. Featured rows carry a second description line,
- * plain links are single-line. Tiny captions carry the hierarchy.
+ * Compact navigation surface: featured destinations get a small preview,
+ * while the remaining links stay quiet and text-led.
  */
 export function NavDropdown({
   groups,
@@ -39,7 +36,6 @@ export function NavDropdown({
   onCloseImmediate,
   onCancelClose,
   onNavigateLeaf,
-  router,
 }: NavDropdownProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [focusIndex, setFocusIndex] = useState(0);
@@ -62,7 +58,7 @@ export function NavDropdown({
   const links = useMemo(() => activeGroup?.children.filter((c) => !c.featured) ?? [], [activeGroup]);
   const rows = useMemo(() => [...featured, ...links], [featured, links]);
 
-  /* Span the full center pill; follow scroll/resize while open. */
+  /* Keep the menu close to its trigger instead of turning it into a second bar. */
   useEffect(() => {
     const nav = document.querySelector<HTMLElement>('nav[aria-label="Navigation"]');
     if (!nav) return;
@@ -71,12 +67,9 @@ export function NavDropdown({
       const gutter = 8;
       const pill = document.querySelector<HTMLElement>('[data-nav-pill]');
       const pillRect = pill?.getBoundingClientRect();
-      // Panel stretches across the whole pill, clamped to the viewport.
-      const width = pillRect
-        ? Math.min(pillRect.width, window.innerWidth - gutter * 2)
-        : Math.min(nav.getBoundingClientRect().width, window.innerWidth - gutter * 2, 460);
+      const width = Math.min(420, window.innerWidth - gutter * 2);
       const left = pillRect
-        ? Math.max(gutter, Math.min(pillRect.left, window.innerWidth - width - gutter))
+        ? Math.max(gutter, Math.min(pillRect.left + (pillRect.width - width) / 2, window.innerWidth - width - gutter))
         : gutter;
       const top = (pillRect ?? nav.getBoundingClientRect()).bottom + 8;
       setRect({ top, left, width });
@@ -163,16 +156,8 @@ export function NavDropdown({
         className={rowClass(dropIndex === focusIndex)}
       >
         {child.image ? (
-          <span className="relative block h-[72px] w-[112px] shrink-0 self-start overflow-hidden rounded-md border border-border" aria-hidden="true">
-            <Image
-              src={child.image}
-              alt=""
-              width={224}
-              height={144}
-              sizes="224px"
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
+          <span className="relative block h-11 w-[68px] shrink-0 self-center overflow-hidden rounded border border-border" aria-hidden="true">
+            <Image src={child.image} alt="" width={136} height={88} sizes="68px" loading="lazy" className="h-full w-full object-cover" />
           </span>
         ) : child.tint ? (
           <span
@@ -181,7 +166,7 @@ export function NavDropdown({
               backgroundColor: `color-mix(in srgb, ${child.tint} 13%, transparent)`,
               borderColor: `color-mix(in srgb, ${child.tint} 30%, transparent)`,
             }}
-            className="flex h-[72px] w-[112px] shrink-0 items-center justify-center self-start overflow-hidden rounded-md border"
+            className="flex h-11 w-[68px] shrink-0 items-center justify-center self-center overflow-hidden rounded border"
           >
             <span
               className="font-mono text-[13px] font-semibold tracking-tight"
@@ -232,7 +217,7 @@ export function NavDropdown({
     >
       <motion.div
         ref={panelRef}
-        className="pointer-events-auto overflow-hidden rounded-lg border border-border bg-popover shadow-lg shadow-black/10"
+        className="pointer-events-auto overflow-hidden rounded-xl border border-border bg-popover shadow-xl shadow-black/10"
         initial={{ opacity: 0, y: -4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.14, ease: 'easeOut' }}
@@ -242,14 +227,11 @@ export function NavDropdown({
         role="menu"
         aria-label={activeGroup.label}
       >
-        <div role="none" className="max-h-[min(380px,56vh)] overflow-y-auto overscroll-contain p-1.5">
-          <p className="m-0 px-2.5 pb-1 pt-1.5 text-[11px] font-medium text-muted-foreground/70">
-            {activeGroup.label}
-          </p>
+        <div role="none" className="max-h-[min(380px,56vh)] overflow-y-auto overscroll-contain p-2">
           <div
             role="none"
             className={cn(
-              featured.length > 0 && links.length > 0 && 'grid grid-cols-[1.25fr_1fr] gap-1',
+              featured.length > 0 && links.length > 0 && 'grid grid-cols-1 gap-1',
             )}
           >
             {featured.length > 0 && (
@@ -262,29 +244,12 @@ export function NavDropdown({
                 role="none"
                 className={cn(
                   'flex min-w-0 flex-col gap-0.5',
-                  featured.length > 0 && 'border-l border-border pl-1',
                 )}
               >
                 {links.map((child) => renderLink(child, rows.indexOf(child)))}
               </div>
             )}
           </div>
-          {activeGroup.href && (
-            <a
-              href={activeGroup.href}
-              onClick={(e) => {
-                e.preventDefault();
-                onCloseImmediate();
-                router.push(activeGroup.href as string);
-              }}
-              className="mt-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left outline-none transition-colors duration-100 text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-            >
-              <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="min-w-0 flex-1 truncate text-[13px]">
-                View all {activeGroup.label.toLowerCase()}
-              </span>
-            </a>
-          )}
         </div>
       </motion.div>
     </div>,

@@ -61,9 +61,10 @@ export default function ContentWindow({
       className={cn(
         TONE[tone],
         MOTION[motion],
-        animated && (hidden
-          ? 'pointer-events-none translate-x-[calc(100%+24px)] opacity-0'
-          : 'translate-x-0 opacity-100'),
+        animated &&
+          (hidden
+            ? 'pointer-events-none translate-x-[calc(100%+24px)] opacity-0'
+            : 'translate-x-0 opacity-100'),
         className,
       )}
     >

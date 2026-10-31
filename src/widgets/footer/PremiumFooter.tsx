@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { TransitionLink } from '@/features/transitions';
 import { scrollToTop } from '@/widgets/smooth-scrolling/lenisStore';
@@ -31,39 +31,47 @@ const SOCIAL_ICONS: Record<string, typeof FiGithub> = {
 };
 
 export function PremiumFooter() {
-  const footerRef = useRef<HTMLElement>(null);
-
   useEffect(() => {
-    const footer = footerRef.current;
-    if (!footer) return;
+    const footer = document.getElementById('footer');
+    const trigger = document.getElementById('footer-reveal-trigger');
+    if (!footer || !trigger) return;
 
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        // One-shot: re-hiding on scroll-back makes the bar flicker at
-        // the threshold and replay the rise mid-scroll.
-        if (entry.isIntersecting) {
-          footer.classList.add('is-revealed');
-          io.disconnect();
-        }
-      },
-      { threshold: 0.08 },
-    );
-    io.observe(footer);
-    return () => io.disconnect();
+    let frame = 0;
+    const updateReveal = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const start = trigger.getBoundingClientRect().top;
+        const distance = Math.max(1, footer.getBoundingClientRect().height);
+        const progress = Math.max(0, Math.min(1, (window.innerHeight - start) / distance));
+        footer.style.opacity = String(progress);
+        footer.style.transform = `translateY(${(1 - progress) * 24}px)`;
+      });
+    };
+
+    updateReveal();
+    window.addEventListener('scroll', updateReveal, { passive: true });
+    window.addEventListener('resize', updateReveal);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', updateReveal);
+      window.removeEventListener('resize', updateReveal);
+    };
   }, []);
 
   return (
     <footer
-      ref={footerRef}
       id="footer"
       role="contentinfo"
-      className="relative z-[0] border-t border-[var(--border)] bg-[var(--bg)]"
+      className="fixed inset-x-0 bottom-0 z-0 min-h-[340px] overflow-hidden bg-[var(--bg)] max-[700px]:min-h-[300px]"
     >
-      <div className="footer-inner mx-auto flex w-full max-w-[1400px] flex-wrap items-center gap-x-6 gap-y-3 px-[4vw] py-5 max-[700px]:px-5">
+      <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden whitespace-nowrap font-display text-[clamp(9rem,28vw,26rem)] font-semibold leading-none tracking-[-0.105em] text-[var(--text)] opacity-[0.05]">
+        drme
+      </span>
+      <div className="footer-inner relative z-10 mx-auto flex min-h-[340px] w-full max-w-[1400px] flex-wrap items-end gap-x-6 gap-y-3 px-[4vw] pb-6 pt-28 max-[700px]:min-h-[300px] max-[700px]:px-5 max-[700px]:pb-5">
         <Link
           href="/"
           aria-label="Back to home"
-          className="font-mono text-[13px] font-semibold lowercase tracking-[0.14em] text-foreground no-underline transition-opacity hover:opacity-80"
+          className="font-mono text-[13px] font-semibold lowercase tracking-[0.14em] text-[var(--text)] no-underline transition-opacity hover:opacity-80"
         >
           drme<span className="text-accent">_</span>
         </Link>
