@@ -53,22 +53,22 @@
   &::after {
     position: absolute;
     top: 50%;
-    left: 6px;
-    width: 2px;
-    height: 32px;
-    border-radius: 2px;
-    background: var(--border-hover);
+    left: 5px;
+    width: 3px;
+    height: 44px;
+    border-radius: 3px;
+    background: var(--text);
     content: '';
-    opacity: 0;
+    opacity: 1;
     transform: translateY(-50%);
-    transition: opacity 140ms ease, background-color 140ms ease;
+    transition: background-color 140ms ease, height 140ms ease;
   }
 
   &:hover::after,
   &:focus-visible::after,
   &[data-dragging='true']::after {
     background: var(--geist-focus);
-    opacity: 1;
+    height: 56px;
   }
 }
 
@@ -80,7 +80,7 @@
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-hover);
 }
 .identity {
   display: flex;
@@ -152,7 +152,7 @@
   display: flex;
   justify-content: space-between;
   padding: 7px 9px 9px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-hover);
   color: var(--text-dim);
   font-size: 11px;
   font-weight: 500;
@@ -225,7 +225,8 @@
   width: 1px;
   height: 16px;
   margin: 0 2px;
-  opacity: 0.45;
+  background: var(--border-hover);
+  opacity: 0.9;
 }
 
 .panelNav {
@@ -511,9 +512,10 @@
   }
 }
 .railSeparator {
-  width: 20px;
+  width: 24px;
   height: 1px;
-  opacity: 0.52;
+  background: var(--border-hover);
+  opacity: 0.9;
 }
 .railSpacer {
   flex: 1;
@@ -878,7 +880,7 @@
     width: 48px;
     padding: 10px 4px max(10px, env(safe-area-inset-bottom, 0px));
     border: 0;
-    border-left: 1px solid var(--border);
+    border-left: 1px solid var(--border-hover);
     border-radius: 0;
     box-shadow: none;
     flex-direction: column;

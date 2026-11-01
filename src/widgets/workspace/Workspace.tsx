@@ -3,7 +3,7 @@
 import { useEffect, type CSSProperties, type ReactNode } from 'react';
 import { useChat } from '@/app/providers/ChatProvider';
 import { ContentWindow } from '@/widgets/content-window';
-import Mascot from '@/widgets/mascot/Mascot';
+import { WorkspaceSidebar } from '@/widgets/sidebar';
 import Navbar from '@/widgets/navbar/Navbar';
 
 interface WorkspaceProps {
@@ -12,7 +12,7 @@ interface WorkspaceProps {
 
 /**
  * Keeps the portfolio and its assistant as two neighbouring work areas on
- * wide screens. On smaller viewports Mascot keeps its drawer behaviour, so
+ * wide screens. On smaller viewports the assistant keeps its drawer behaviour, so
  * reading the page never becomes a cramped two-column exercise.
  */
 export function Workspace({ children }: WorkspaceProps) {
@@ -49,7 +49,7 @@ export function Workspace({ children }: WorkspaceProps) {
       />
       <Navbar />
       <div
-        className="ml-1 mr-1 min-w-0 pt-[70px] transition-[margin] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:ml-2 xl:mr-[var(--workspace-reserved-right)]"
+        className="ml-1 mr-[52px] min-w-0 pt-[70px] transition-[margin] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:ml-2 xl:mr-[var(--workspace-reserved-right)]"
       >
         <ContentWindow
           id="main"
@@ -59,7 +59,7 @@ export function Workspace({ children }: WorkspaceProps) {
           {children}
         </ContentWindow>
       </div>
-      <Mascot />
+      <WorkspaceSidebar />
     </div>
   );
 }
