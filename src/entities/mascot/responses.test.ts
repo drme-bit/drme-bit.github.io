@@ -10,9 +10,9 @@ describe('mascot responses', () => {
   });
 
   it('picks a keyword-matched response', () => {
-    expect(pickResponse('hello there')).toBe(RESPONSES[1].response);
+    expect(pickResponse('hello there')).toBe(RESPONSES[0].response);
     expect(pickResponse('how are you doing')).toBe(RESPONSES[0].response);
-    expect(pickResponse('tell me a joke')).toBe(RESPONSES[5].response);
+    expect(pickResponse('tell me about Nexagon')).toBe(RESPONSES[2].response);
   });
 
   it('falls back to a default for unknown input', () => {

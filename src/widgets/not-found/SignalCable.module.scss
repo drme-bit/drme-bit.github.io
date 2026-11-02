@@ -1,0 +1,88 @@
+.scene {
+  position: relative;
+  z-index: 0;
+  width: min(100%, 760px);
+  aspect-ratio: 2.67;
+  margin: 0 auto;
+}
+.art {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.circuit {
+  stroke: var(--border);
+  stroke-width: 1;
+  opacity: 0.22;
+}
+.circuit circle {
+  fill: var(--bg);
+  stroke: var(--text-ghost);
+  stroke-width: 1;
+}
+.wire {
+  stroke: #303235;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+.wireGlow {
+  stroke: url(#wire-light);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 9 330;
+  opacity: 0.5;
+  animation: current-flow 8s linear infinite;
+}
+.reverseFlow {
+  animation-delay: -4s;
+  animation-direction: reverse;
+}
+.plugLeft,
+.plugRight {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: plug-drift 6s ease-in-out infinite;
+}
+.plugRight {
+  animation-delay: -3s;
+}
+
+@keyframes current-flow {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -339;
+  }
+}
+@keyframes plug-drift {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -2px;
+  }
+}
+
+@media (max-width: 700px) {
+  .scene {
+    width: 120%;
+    max-width: none;
+    aspect-ratio: 2.2;
+    margin: 0 -10%;
+  }
+  .wire {
+    stroke-width: 9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wireGlow,
+  .plugLeft,
+  .plugRight {
+    animation: none;
+  }
+}

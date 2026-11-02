@@ -1,0 +1,59 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px 14px 20px;
+  fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+}
+.legend {
+  padding: 0;
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+}
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.themeButton {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    border-color 120ms;
+  &:hover {
+    background: var(--glass-hover);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--geist-focus);
+    outline-offset: 1px;
+  }
+  &[aria-pressed='true'] {
+    border-color: color-mix(in srgb, var(--text) 38%, transparent);
+  }
+}
+.preferenceRow {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+}

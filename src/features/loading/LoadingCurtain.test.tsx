@@ -21,8 +21,8 @@ describe('LoadingCurtain', () => {
     render(<LoadingCurtain />);
     const status = screen.getByRole('status');
     expect(status).toBeInTheDocument();
-    expect(status).toHaveTextContent('drme@portfolio');
-    expect(status).toHaveTextContent('booting Dr.ME');
+    expect(status).toHaveTextContent('drme-bit');
+    expect(status).toHaveTextContent('Opening portfolio');
   });
 
   it('exports a stable loaded event name', () => {

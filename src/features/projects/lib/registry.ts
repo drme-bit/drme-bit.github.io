@@ -1,6 +1,6 @@
 import { ProjectRepository } from './project-repository';
 import { PROJECTS } from '@/entities/project';
-import { graph } from '@/features/skills/lib/registry';
+import { graph } from '@/entities/skill';
 import type { ProjectData } from './project-repository';
 
 /*  Singleton repository instance ── */

@@ -1,8 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useCallback, useState } from 'react';
-import { doc, onSnapshot, increment, runTransaction } from 'firebase/firestore';
-import { db } from '@/shared/config/firebase';
+import { createContext, useContext, useEffect, useRef, useCallback, useState, useSyncExternalStore } from 'react';
 
 /*  Types  */
 
@@ -14,17 +12,8 @@ interface PersonalStats {
   timeOnSite: number;
 }
 
-interface GlobalStats {
-  totalClicks: number;
-  totalVisitors: number;
-  totalSkillsChecked: number;
-  totalProjectsViewed: number;
-  totalSectionsRevealed: number;
-}
-
 interface ActivityContextValue {
   personal: PersonalStats;
-  global: GlobalStats;
   mounted: boolean;
   incrementClicks: () => void;
   incrementSkillsChecked: () => void;
@@ -39,17 +28,10 @@ const SAVE_INTERVAL = 5000;
 
 const EMPTY: PersonalStats = { clicks: 0, skillsChecked: 0, projectsViewed: 0, sectionsRevealed: 0, timeOnSite: 0 };
 
-const EMPTY_GLOBAL: GlobalStats = {
-  totalClicks: 0,
-  totalVisitors: 0,
-  totalSkillsChecked: 0,
-  totalProjectsViewed: 0,
-  totalSectionsRevealed: 0,
-};
-
 /*  Helpers ─ */
 
 function loadPersonal(): PersonalStats {
+  if (typeof window === 'undefined') return EMPTY;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
@@ -61,6 +43,18 @@ function savePersonal(stats: PersonalStats) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
   } catch {}
+}
+
+function subscribeMounted(): () => void {
+  return () => {};
+}
+
+function snapshotMountedClient(): boolean {
+  return true;
+}
+
+function snapshotMountedServer(): boolean {
+  return false;
 }
 
 /*  Context ─ */
@@ -76,59 +70,21 @@ export function useActivity() {
 /*  Provider  */
 
 export function ActivityProvider({ children }: { children: React.ReactNode }) {
-  const [personal, setPersonal] = useState<PersonalStats>(EMPTY);
-  const [global, setGlobal] = useState<GlobalStats>(EMPTY_GLOBAL);
-  const [mounted, setMounted] = useState(false);
+  const [personal, setPersonal] = useState<PersonalStats>(() =>
+    typeof window === 'undefined' ? EMPTY : loadPersonal(),
+  );
+  // Mounted flag without a setState-in-effect: false during SSR, true on the client.
+  const mounted = useSyncExternalStore(
+    subscribeMounted,
+    snapshotMountedClient,
+    snapshotMountedServer,
+  );
   const dirtyRef = useRef(false);
   const startTime = useRef(0);
 
-  // Hydrate from localStorage after mount (avoids SSR mismatch)
+  // Record session start (ref write only — no setState, safe in an effect).
   useEffect(() => {
-    setPersonal(loadPersonal());
     startTime.current = Date.now();
-    setMounted(true);
-  }, []);
-
-  // Listen to global stats
-  useEffect(() => {
-    const ref = doc(db, 'siteStats', 'global');
-    const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) {
-        const d = snap.data();
-        setGlobal({
-          totalClicks: d.totalClicks ?? 0,
-          totalVisitors: d.totalVisitors ?? 0,
-          totalSkillsChecked: d.totalSkillsChecked ?? 0,
-          totalProjectsViewed: d.totalProjectsViewed ?? 0,
-          totalSectionsRevealed: d.totalSectionsRevealed ?? 0,
-        });
-      }
-    }, () => {});
-    return () => unsub();
-  }, []);
-
-  // Increment visitor count on mount
-  useEffect(() => {
-    async function incVisitor() {
-      try {
-        const ref = doc(db, 'siteStats', 'global');
-        await runTransaction(db, async (tx) => {
-          const snap = await tx.get(ref);
-          if (!snap.exists()) {
-            tx.set(ref, {
-              totalClicks: 0,
-              totalVisitors: 1,
-              totalSkillsChecked: 0,
-              totalProjectsViewed: 0,
-              totalSectionsRevealed: 0,
-            });
-          } else {
-            tx.update(ref, { totalVisitors: increment(1) });
-          }
-        });
-      } catch {}
-    }
-    incVisitor();
   }, []);
 
   // Track time on site
@@ -161,39 +117,25 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
 
   const markDirty = useCallback(() => { dirtyRef.current = true; }, []);
 
-  const incGlobal = useCallback((field: string) => {
-    try {
-      const ref = doc(db, 'siteStats', 'global');
-      runTransaction(db, async (tx) => {
-        const snap = await tx.get(ref);
-        if (snap.exists()) tx.update(ref, { [field]: increment(1) });
-      });
-    } catch {}
-  }, []);
-
   const incrementClicks = useCallback(() => {
     setPersonal((prev) => ({ ...prev, clicks: prev.clicks + 1 }));
     markDirty();
-    incGlobal('totalClicks');
-  }, [markDirty, incGlobal]);
+  }, [markDirty]);
 
   const incrementSkillsChecked = useCallback(() => {
     setPersonal((prev) => ({ ...prev, skillsChecked: prev.skillsChecked + 1 }));
     markDirty();
-    incGlobal('totalSkillsChecked');
-  }, [markDirty, incGlobal]);
+  }, [markDirty]);
 
   const incrementProjectsViewed = useCallback(() => {
     setPersonal((prev) => ({ ...prev, projectsViewed: prev.projectsViewed + 1 }));
     markDirty();
-    incGlobal('totalProjectsViewed');
-  }, [markDirty, incGlobal]);
+  }, [markDirty]);
 
   const incrementSectionsRevealed = useCallback(() => {
     setPersonal((prev) => ({ ...prev, sectionsRevealed: prev.sectionsRevealed + 1 }));
     markDirty();
-    incGlobal('totalSectionsRevealed');
-  }, [markDirty, incGlobal]);
+  }, [markDirty]);
 
   // Track all clicks globally
   useEffect(() => {
@@ -207,7 +149,6 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
     <ActivityContext.Provider
       value={{
         personal,
-        global,
         mounted,
         incrementClicks,
         incrementSkillsChecked,
