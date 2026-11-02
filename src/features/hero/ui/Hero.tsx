@@ -55,12 +55,7 @@ function HeroMascot({ mascotRef }: { mascotRef: React.RefObject<HTMLDivElement |
         if (image) image.style.transform = '';
       }}
     >
-      <div className="pointer-events-none absolute inset-[8%] rounded-full border border-[var(--border)] opacity-70" />
-      <div className="pointer-events-none absolute inset-[18%] rounded-full border border-dashed border-[var(--border)] opacity-70" />
-      <div className="pointer-events-none absolute inset-[24%] rounded-full bg-[radial-gradient(circle,var(--accent-secondary-glow)_0%,transparent_70%)] blur-xl" />
-      <span className="pointer-events-none absolute left-[12%] top-[23%] h-2 w-2 rounded-full bg-[var(--accent)] shadow-[0_0_18px_var(--accent-secondary-glow)]" />
-      <span className="pointer-events-none absolute right-[13%] top-[41%] h-1.5 w-1.5 rounded-full bg-[#18a874] shadow-[0_0_16px_rgba(24,168,116,0.45)]" />
-      <span className="pointer-events-none absolute bottom-[21%] left-[23%] h-1.5 w-1.5 rounded-full bg-[var(--accent-secondary)]" />
+
       <Image
         src="/images/mascot/guide-cat-lowpoly.png"
         alt="Dr.ME, the portfolio mascot"
@@ -69,14 +64,6 @@ function HeroMascot({ mascotRef }: { mascotRef: React.RefObject<HTMLDivElement |
         priority
         className="relative z-[1] h-full w-full object-contain drop-shadow-[0_24px_48px_var(--accent-secondary-glow)] transition-transform duration-300 ease-out will-change-transform motion-reduce:transition-none"
       />
-      <div className="pointer-events-none absolute -right-[1%] top-[24%] hidden items-center gap-2 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--text-dim)] xl:flex">
-        <span className="h-px w-8 bg-[var(--border)]" />
-        systems
-      </div>
-      <div className="pointer-events-none absolute -left-[3%] bottom-[24%] hidden items-center gap-2 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--text-dim)] xl:flex">
-        interfaces
-        <span className="h-px w-8 bg-[var(--border)]" />
-      </div>
     </div>
   );
 }
@@ -230,13 +217,13 @@ export default function Hero() {
       id="hero"
       ref={sectionRef}
       style={{ '--workspace-reserved-right': `${reservedRight}px` } as React.CSSProperties}
-      className="pointer-events-none fixed inset-0 z-20 flex h-screen w-full flex-col items-center justify-center overflow-hidden xl:right-[var(--workspace-reserved-right)] xl:w-auto"
+      className="pointer-events-none fixed inset-x-0 top-0 z-20 flex h-svh w-full flex-col items-center justify-center overflow-hidden xl:right-[var(--workspace-reserved-right)] xl:w-auto"
     >
       <div
         ref={overlayRef}
-        className="pointer-events-none fixed inset-0 z-[1] flex flex-col items-center justify-center will-change-[opacity] xl:right-[var(--workspace-reserved-right)]"
+        className="pointer-events-none absolute inset-0 z-[1] flex flex-col items-center justify-center will-change-[opacity]"
       >
-        <div className="pointer-events-auto relative z-10 grid w-full max-w-[1180px] grid-cols-[1fr_0.95fr] items-center gap-[clamp(2rem,7vw,7rem)] px-[6vw] max-md:grid-cols-1 max-md:gap-1 max-md:px-6 max-md:pt-[5vh]">
+        <div className="pointer-events-auto relative z-10 grid w-full max-w-[1180px] grid-cols-[1fr_0.95fr] items-center gap-[clamp(2rem,7vw,7rem)] px-[6vw] max-md:-translate-y-[4svh] max-md:grid-cols-1 max-md:gap-3 max-md:px-6">
           <div className="flex flex-col items-start text-left max-md:order-2 max-md:items-center max-md:text-center">
             <div className="mb-5 flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[var(--text-dim)] max-md:mb-4 max-md:text-[0.55rem]">
             <span className="relative flex h-2 w-2 items-center justify-center" aria-hidden="true">
@@ -283,7 +270,7 @@ export default function Hero() {
             </p>
           </div>
 
-          <div className="max-md:order-1 max-md:-mb-3">
+          <div className="max-md:order-1">
             <HeroMascot mascotRef={mascotRef} />
           </div>
         </div>

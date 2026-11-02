@@ -14,7 +14,6 @@ import {
   PanelRightClose,
   Bell,
   MessageCircle,
-  Settings2,
   CheckCheck,
   History,
   MessageSquarePlus,
@@ -456,29 +455,6 @@ export default function WorkspaceSidebar() {
             </button>
           </div>
         </header>
-
-        <nav aria-label="Workspace sections" className={styles.panelNav}>
-          {[
-            { id: 'chat', label: 'Chat', Icon: MessageCircle },
-            { id: 'notifications', label: 'Inbox', Icon: Bell },
-            { id: 'explore', label: 'Explore', Icon: Compass },
-            { id: 'settings', label: 'Settings', Icon: Settings2 },
-          ].map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              type="button"
-              aria-current={panel === id ? 'page' : undefined}
-              title={`${label} · ⌘⇧${id === 'chat' ? '1' : id === 'notifications' ? '2' : id === 'explore' ? '3' : '4'}`}
-              onClick={() => openPanel(id as 'chat' | 'notifications' | 'explore' | 'settings')}
-            >
-              <Icon size={14} />
-              {label}
-              {id === 'notifications' && unread > 0 && (
-                <span className={styles.count}>{unread}</span>
-              )}
-            </button>
-          ))}
-        </nav>
 
         {panel === 'settings' && (
           <div className={styles.utilityBody} data-lenis-prevent>

@@ -19,6 +19,7 @@ const reveal = (inView: boolean) =>
   }`;
 
 const STATUS_LINES = ['AVAILABLE FOR WORK', 'REPLY WITHIN 24H', 'ODESA · GMT+3'];
+const COMPACT_STATUS_LINES = ['AVAILABLE', 'REPLY IN 24H', 'ODESA GMT+3'];
 
 function SectionHeading({ id, title, detail }: { id: string; title: string; detail: string }) {
   return (
@@ -69,7 +70,9 @@ export default function About() {
   }, []);
 
   const boardText = snapshot
-    ? `5+ YEARS SHIPPING\n${snapshot.data.total} CONTRIBUTIONS\n${snapshot.commits.length} RECENT COMMITS\n${STATUS_LINES[statusIdx]}`
+    ? compactBoard
+      ? `5+ YEARS\n${snapshot.data.total} CONTRIB\n${snapshot.commits.length} COMMITS\n${COMPACT_STATUS_LINES[statusIdx]}`
+      : `5+ YEARS SHIPPING\n${snapshot.data.total} CONTRIBUTIONS\n${snapshot.commits.length} RECENT COMMITS\n${STATUS_LINES[statusIdx]}`
     : 'TUNING\nSIGNAL';
 
   return (
@@ -159,7 +162,7 @@ export default function About() {
           <TextFlippingBoard
             text={boardText}
             boardRows={4}
-            boardCols={compactBoard ? 18 : 22}
+            boardCols={compactBoard ? 12 : 22}
             className="w-full max-w-none rounded-none border-0 bg-transparent p-0 shadow-none dark:bg-transparent dark:shadow-none"
           />
         </figure>

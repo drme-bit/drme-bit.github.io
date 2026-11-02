@@ -1,86 +1,32 @@
-# portfolio
+# Dr.ME portfolio
 
-Terminal‑inspired portfolio built with Next.js, Three.js, and SCSS.
+An interactive developer portfolio built with Next.js App Router, React, TypeScript, Geist, and SCSS. Production is hosted on Vercel.
 
-[buy me a coffee](https://ko-fi.com/drmebit)
-
-## dev
+## Local development
 
 ```bash
-npm run dev       # → localhost:3000
-npm run build     # → .next/
-npm run start     # production server
+npm install
+npm run dev
 ```
 
-## stack
+Useful commands:
 
-- **Next.js 15** + **App Router** — file-based routing, static generation, RSC
-- **React 19** — concurrent features, Server Components
-- **Three.js / R3F** — subtle ambient starfield with gentle pointer parallax on dark themes
-- **cobe** — interactive globe with skill markers and arcs
-- **SCSS Modules** — design tokens, BEM naming, kebab-case bracket notation
-- **Firebase** — Firestore reviews, Google auth
-- **motion** — scroll animations, infinite testimonials
-- **react-icons** — Feather + dev icons
-- **Tailwind CSS v4** — utility classes where needed
-- **Vercel** — deployment, analytics, speed insights
-
-## design tokens
-
-Spacing and border-radius use a consistent scale in `globals.scss`:
-
-```
---space-xs: 4px     --radius-xs: 4px
---space-sm: 8px     --radius-sm: 8px
---space-md: 16px    --radius-md: 12px
---space-lg: 24px    --radius-lg: 16px
---space-xl: 32px    --radius-xl: 24px
-                     --radius-full: 9999px
+```bash
+npm run build
+npm run start
+npm run lint
+npm test
 ```
 
-## structure
+## Deployment
 
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx          # root layout, ThemeProvider, fonts
-│   ├── page.tsx            # main page (RSC wrapper)
-│   ├── globals.scss        # tokens, reset, utilities
-│   ├── posts/              # /posts route
-│   │   ├── page.tsx        # posts list
-│   │   └── [slug]/         # dynamic post pages
-│   ├── project/[id]/       # dynamic project pages
-│   └── not-found.tsx       # 404
-├── features/               # Feature-sliced sections
-│   ├── hero/ui/            # Hero
-│   ├── about/ui/           # About
-│   ├── skills/ui/          # Skills (globe + filters)
-│   ├── experience/ui/      # Experience
-│   ├── projects/ui/        # Projects
-│   ├── blog/ui/            # Blog
-│   ├── reviews/ui/         # Reviews
-│   ├── contacts/ui/        # Contacts
-│   └── theme/ui/           # ThemeProvider
-├── widgets/                # Reusable widgets
-│   ├── navbar/             # Dock navigation
-│   ├── mascot/             # AI mascot
-│   └── archive/            # Project archive
-├── shared/
-│   ├── hooks/              # useReveal, useScrollPhase, useHorizontalScroll
-│   ├── styles/             # _mixins.scss, _animations.scss
-│   └── ui/
-│       ├── atoms/          # Skeleton, TapRipple
-│       ├── molecules/      # SectionHeader, SearchBar, GitHubStatus, ...
-│       └── organisms/      # Globe, Cursor, LoadingScreen
-├── providers/              # SceneProvider, ModalProvider
-├── config/                 # Firebase config
-└── data/                   # blog posts, skills, projects
-```
+Connect the GitHub repository to Vercel. Vercel builds the app with `npm run build` and deploys it; configure required environment variables in the Vercel project settings. There is no GitHub Pages build or Firebase infrastructure in this repository.
 
-## conventions
+## Project structure
 
-- **CSS Modules**: kebab-case class names, bracket notation in TSX (`styles['post-page']`)
-- **Feature-sliced design**: features/, widgets/, shared/ layers
-- **Atomic design**: atoms → molecules → organisms
-- **SCSS mixins**: `section-base`, `reveal-base`, `terminal-bar`, `backdrop-blur`
-- **Scroll-driven**: `useScrollPhase` hook drives CSS custom properties (`--scroll`, `--sp`)
+- `src/app` — routes, API handlers, providers, and global styles
+- `src/features` — page sections and product features
+- `src/entities` — portfolio content and domain data
+- `src/widgets` — navigation, workspace, mascot, and other page-level UI
+- `src/shared` — reusable UI, hooks, and utilities
+- `public` — static images, media, icons, and résumé
