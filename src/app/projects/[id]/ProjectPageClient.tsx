@@ -1,21 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { TransitionLink } from '@/features/transitions';
-import {
-  FiGithub,
-  FiExternalLink,
-  FiCheck,
-  FiCode,
-  FiAlertCircle,
-} from '@/shared/ui/atoms/Icon';
+import { FiGithub } from '@/shared/ui/Icon';
+import { Check, Code, Warning, External, ArrowLeft, ArrowRight } from '@/shared/ui/Icon';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { projects } from '@/features/projects/lib/registry';
 import { STATUS_META } from '@/features/projects/lib/constants';
 import type { Project } from '@/features/projects/lib/project-repository';
 import { NavLeaf, useNav } from '@/app/providers/NavProvider';
+import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 import { useActivity } from '@/app/providers/ActivityProvider';
-import styles from './ProjectPage.module.scss';
+import CodeBlock from '@/shared/ui/CodeBlock/CodeBlock';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface ContentSection {
   id: string;
@@ -25,8 +27,6 @@ interface ContentSection {
   items?: unknown[];
   cards?: { title: string; icon?: React.ComponentType<{ size?: number }>; body: string }[];
 }
-
-
 
 function splitParagraphs(text: string | undefined | null): string[] {
   if (!text) return [];
@@ -74,10 +74,10 @@ function buildDefaultSections(project: Project): ContentSection[] {
       type: 'cards',
       cards: [
         project.architecture
-          ? { title: 'System Design', icon: FiCode, body: project.architecture }
+          ? { title: 'System Design', icon: Code, body: project.architecture }
           : null,
         project.challenges
-          ? { title: 'Challenges', icon: FiAlertCircle, body: project.challenges }
+          ? { title: 'Challenges', icon: Warning, body: project.challenges }
           : null,
       ].filter(Boolean) as ContentSection['cards'],
     });
@@ -106,13 +106,14 @@ function buildDefaultSections(project: Project): ContentSection[] {
 
 function useIsMobile(breakpoint = 700) {
   const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth <= breakpoint : false,
+    typeof window !== 'undefined'
+      ? window.matchMedia(`(max-width: ${breakpoint}px)`).matches
+      : false,
   );
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener('change', handler);
-    setIsMobile(mq.matches);
     return () => mq.removeEventListener('change', handler);
   }, [breakpoint]);
   return isMobile;
@@ -123,8 +124,14 @@ function GalleryCarousel({ images }: { images: string[] }) {
   const [fullscreen, setFullscreen] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
-  const prev = () => setCurrent((c) => (c === 0 ? images.length - 1 : c - 1));
-  const next = () => setCurrent((c) => (c === images.length - 1 ? 0 : c + 1));
+  const prev = useCallback(
+    () => setCurrent((c) => (c === 0 ? images.length - 1 : c - 1)),
+    [images.length],
+  );
+  const next = useCallback(
+    () => setCurrent((c) => (c === images.length - 1 ? 0 : c + 1)),
+    [images.length],
+  );
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -134,24 +141,41 @@ function GalleryCarousel({ images }: { images: string[] }) {
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, []);
+  }, [prev, next]);
 
   const handleImgClick = isMobile ? undefined : () => setFullscreen(images[current] || images[0]);
 
+  const mainImg = (src: string, onClick?: () => void) => (
+    <div className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)]">
+      <Image
+        src={src}
+        alt=""
+        width={1200}
+        height={800}
+        sizes="(max-width: 700px) 100vw, 800px"
+        className="h-auto w-full cursor-zoom-in object-cover"
+        onClick={onClick}
+      />
+    </div>
+  );
+
   if (images.length === 1) {
     return (
-      <div className={styles['pp-gallery']}>
-        <div className={styles['pp-gallery-main']}>
-          <img
-            src={images[0]}
-            alt=""
-            className={styles['pp-gallery-img']}
-            onClick={isMobile ? undefined : () => setFullscreen(images[0])}
-          />
-        </div>
+      <div>
+        {mainImg(images[0], handleImgClick)}
         {!isMobile && fullscreen && (
-          <div className={styles['pp-gallery-fullscreen']} onClick={() => setFullscreen(null)}>
-            <img src={fullscreen} alt="" className={styles['pp-gallery-fullscreen-img']} />
+          <div
+            className="fixed inset-0 z-[1100] flex cursor-zoom-out items-center justify-center bg-black/85 p-4 backdrop-blur-sm lg:p-10"
+            onClick={() => setFullscreen(null)}
+          >
+            <Image
+              src={fullscreen}
+              alt=""
+              width={1600}
+              height={1200}
+              sizes="92vw"
+              className="max-h-full w-auto max-w-full rounded-[var(--radius-md)] object-contain"
+            />
           </div>
         )}
       </div>
@@ -159,43 +183,60 @@ function GalleryCarousel({ images }: { images: string[] }) {
   }
 
   return (
-    <div className={styles['pp-gallery']}>
-      <div className={styles['pp-gallery-main']}>
+    <div>
+      <div className="group relative">
+        {mainImg(images[current], handleImgClick)}
         <button
-          className={`${styles['pp-gallery-zone']} ${styles['pp-gallery-zone--prev']}`}
+          type="button"
           onClick={prev}
-          aria-label="Previous"
+          aria-label="Previous image"
+          className="absolute top-1/2 left-3 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[var(--border)] bg-black/60 text-white opacity-0 outline-none transition-all duration-200 group-hover:opacity-100 hover:bg-black/80 focus-visible:opacity-100 max-[700px]:opacity-100"
         >
-          <span className={styles['pp-gallery-zone-shadow']} />
+          <ArrowLeft size={15} aria-hidden="true" />
         </button>
-        <img
-          src={images[current]}
-          alt=""
-          className={styles['pp-gallery-img']}
-          onClick={handleImgClick}
-        />
         <button
-          className={`${styles['pp-gallery-zone']} ${styles['pp-gallery-zone--next']}`}
+          type="button"
           onClick={next}
-          aria-label="Next"
+          aria-label="Next image"
+          className="absolute top-1/2 right-3 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[var(--border)] bg-black/60 text-white opacity-0 outline-none transition-all duration-200 group-hover:opacity-100 hover:bg-black/80 focus-visible:opacity-100 max-[700px]:opacity-100"
         >
-          <span className={styles['pp-gallery-zone-shadow']} />
+          <ArrowRight size={15} aria-hidden="true" />
         </button>
+        <span className="absolute right-3 bottom-3 rounded-full bg-black/60 px-2 py-0.5 font-mono text-[0.62rem] text-white/80">
+          {current + 1} / {images.length}
+        </span>
       </div>
-      <div className={styles['pp-gallery-thumbs']}>
+      <div className="mt-2.5 flex gap-2 overflow-x-auto pb-1">
         {images.map((src, i) => (
           <button
             key={i}
-            className={`${styles['pp-gallery-thumb']}${i === current ? ` ${styles['is-active']}` : ''}`}
+            type="button"
             onClick={() => setCurrent(i)}
+            aria-label={`Image ${i + 1}`}
+            aria-pressed={i === current}
+            className={`relative h-[52px] w-[80px] shrink-0 cursor-pointer overflow-hidden rounded-[var(--radius-sm)] border outline-none transition-all ${
+              i === current
+                ? 'border-[var(--accent-secondary)]'
+                : 'border-[var(--border)] opacity-55 hover:opacity-100'
+            }`}
           >
-            <img src={src} alt="" />
+            <Image src={src} alt="" width={128} height={88} className="h-full w-full object-cover" />
           </button>
         ))}
       </div>
       {!isMobile && fullscreen && (
-        <div className={styles['pp-gallery-fullscreen']} onClick={() => setFullscreen(null)}>
-          <img src={fullscreen} alt="" className={styles['pp-gallery-fullscreen-img']} />
+        <div
+          className="fixed inset-0 z-[1100] flex cursor-zoom-out items-center justify-center bg-black/85 p-4 backdrop-blur-sm lg:p-10"
+          onClick={() => setFullscreen(null)}
+        >
+          <Image
+            src={fullscreen}
+            alt=""
+            width={1600}
+            height={1200}
+            sizes="92vw"
+            className="max-h-full w-auto max-w-full rounded-[var(--radius-md)] object-contain"
+          />
         </div>
       )}
     </div>
@@ -205,23 +246,29 @@ function GalleryCarousel({ images }: { images: string[] }) {
 function renderSectionContent(section: ContentSection) {
   if (section.type === 'timeline' && Array.isArray(section.items)) {
     return (
-      <div className={styles['pp-stages']}>
+      <div className="flex flex-col">
         {section.items.map((stage, i) => {
           const s = stage as { title: string; duration?: string; desc: string };
+          const last = i === section.items!.length - 1;
           return (
-            <div key={s.title || i} className={styles['pp-stage']}>
-              <div className={styles['pp-stage-marker']}>
-                <span className={styles['pp-stage-num']}>{String(i + 1).padStart(2, '0')}</span>
-                {i < section.items!.length - 1 && <div className={styles['pp-stage-line']} />}
-              </div>
-              <div className={styles['pp-stage-content']}>
-                <div className={styles['pp-stage-head']}>
-                  <h3 className={styles['pp-stage-title']}>{s.title}</h3>
+            <div key={s.title || i} className="relative flex gap-4 pb-8 last:pb-0">
+              {!last && (
+                <span aria-hidden="true" className="absolute top-7 bottom-0 left-[7px] w-px bg-[var(--border)]" />
+              )}
+              <span
+                aria-hidden="true"
+                className="mt-1 size-[15px] shrink-0 rounded-full border-2 border-[var(--accent-secondary)] bg-[var(--bg)]"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className="m-0 text-[1rem] font-semibold text-foreground">{s.title}</h3>
                   {s.duration && (
-                    <span className={styles['pp-stage-duration']}>{s.duration}</span>
+                    <span className="font-mono text-[0.62rem] text-[var(--text-ghost)]">{s.duration}</span>
                   )}
                 </div>
-                <p className={styles['pp-stage-desc']}>{s.desc}</p>
+                <p className="m-0 mt-1.5 max-w-[68ch] text-[0.86rem] leading-[1.7] text-muted-foreground">
+                  {s.desc}
+                </p>
               </div>
             </div>
           );
@@ -232,29 +279,29 @@ function renderSectionContent(section: ContentSection) {
 
   if (section.type === 'list' && Array.isArray(section.items)) {
     return (
-      <div className={styles['pp-features']}>
+      <ul className="m-0 grid list-none gap-x-8 gap-y-2.5 p-0 sm:grid-cols-2">
         {section.items.map((item) => (
-          <div key={String(item)} className={styles['pp-feature-item']}>
-            <FiCheck size={14} className={styles['pp-feature-check']} />
+          <li key={String(item)} className="flex items-start gap-2.5 text-[0.86rem] leading-[1.6] text-[var(--text-secondary)]">
+            <Check size={14} aria-hidden="true" className="mt-1 shrink-0 text-[var(--accent-secondary)]" />
             <span>{String(item)}</span>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     );
   }
 
   if (section.type === 'cards' && Array.isArray(section.cards)) {
     return (
-      <div className={styles['pp-arch-cards']}>
+      <div className="grid gap-3 sm:grid-cols-2">
         {section.cards.map((card, i) => {
-          const CardIcon = card.icon || FiCode;
+          const CardIcon = card.icon || Code;
           return (
-            <div key={card.title || i} className={styles['pp-arch-card']}>
-              <div className={styles['pp-arch-card-head']}>
-                <CardIcon size={14} />
+            <div key={card.title || i} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
+              <p className="m-0 flex items-center gap-2 text-[0.9rem] font-semibold text-foreground">
+                <CardIcon size={15} aria-hidden="true" className="text-[var(--accent-secondary)]" />
                 {card.title}
-              </div>
-              <p className={styles['pp-arch-text']}>{card.body}</p>
+              </p>
+              <p className="m-0 mt-2 text-[0.84rem] leading-[1.7] text-muted-foreground">{card.body}</p>
             </div>
           );
         })}
@@ -268,11 +315,13 @@ function renderSectionContent(section: ContentSection) {
 
   if (section.type === 'text') {
     return (
-      <div className={styles['pp-content-body']}>
+      <div className="flex max-w-[68ch] flex-col gap-4">
         {splitParagraphs(
           Array.isArray(section.body) ? section.body.join('\n\n') : section.body,
         ).map((paragraph, i) => (
-          <p key={i}>{paragraph}</p>
+          <p key={i} className="m-0 text-[0.92rem] leading-[1.8] text-[var(--text-secondary)]">
+            {paragraph}
+          </p>
         ))}
       </div>
     );
@@ -281,12 +330,20 @@ function renderSectionContent(section: ContentSection) {
   return null;
 }
 
-export default function ProjectPageClient({ params }: { params: Promise<{ id: string }> }) {
+const STATUS_DOT: Record<string, string> = {
+  ACTIVE: 'bg-[var(--accent-success)]',
+  PAUSED: 'bg-[var(--accent-secondary)]',
+  DEPRECATED: 'bg-white/25',
+};
+
+export default function ProjectPageClient({ params: _params }: { params: Promise<{ id: string }> }) {
   const { id } = useParams() as { id: string };
   const router = useRouter();
   const project = projects.get(id);
-  const { setPageConfig, setActiveSection } = useNav();
+  const { setPageConfig, setActiveSection, active } = useNav();
   const { incrementProjectsViewed } = useActivity();
+  const heroRef = useRef<HTMLHeadElement>(null);
+  const heroInnerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -298,17 +355,20 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
   }, [project, router]);
 
   const meta = project ? STATUS_META[project.status] || STATUS_META.ACTIVE : null;
-  const StatusIcon = meta?.icon;
   const allProjects = projects.all;
   const currentIndex = project ? allProjects.findIndex(p => p.id === id) : -1;
   const prevProject = currentIndex > 0 ? allProjects[currentIndex - 1] : null;
   const nextProject =
     project && currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null;
-  const contentSections: ContentSection[] = project
-    ? Array.isArray(project.sections) && project.sections.length > 0
-      ? (project.sections as ContentSection[])
-      : buildDefaultSections(project)
-    : [];
+  const contentSections: ContentSection[] = useMemo(
+    () =>
+      project
+        ? Array.isArray(project.sections) && project.sections.length > 0
+          ? (project.sections as ContentSection[])
+          : buildDefaultSections(project)
+        : [],
+    [project],
+  );
 
   const links: { label: string; url: string }[] = [];
   if (project?.url && project.url !== '#') {
@@ -317,6 +377,18 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
   if (project?.repo) {
     links.push({ label: 'Source Code', url: project.repo });
   }
+  const projectSnapshot = project
+    ? JSON.stringify(
+        {
+          id: project.id,
+          status: project.status.toLowerCase(),
+          stack: project.techNames,
+          sections: contentSections.map(({ id }) => id),
+        },
+        null,
+        2,
+      )
+    : '';
 
   // Configure GlobalNav — set once per projects
   useEffect(() => {
@@ -330,8 +402,7 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
     }));
 
     const onSectionClick = (sectionId: string) => {
-      const el = document.getElementById(`section-${sectionId}`);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      scrollToTarget(`#section-${sectionId}`);
     };
 
     setPageConfig({
@@ -354,12 +425,11 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
           : undefined,
       },
     });
-  }, [project?.id]);
+  }, [project, contentSections, prevProject, nextProject, router, setPageConfig]);
 
   useEffect(() => {
     if (!project) return;
-    const observers = contentSections.map((section) => {
-      const el = document.getElementById(`section-${section.id}`);
+    const observers = contentSections.map((section) => {      const el = document.getElementById(`section-${section.id}`);
       if (!el) return null;
       const observer = new IntersectionObserver(
         ([entry]) => {
@@ -374,144 +444,246 @@ export default function ProjectPageClient({ params }: { params: Promise<{ id: st
     return () => observers.forEach((observer) => observer?.disconnect());
   }, [contentSections, project, setActiveSection]);
 
+  // Hero gets covered by the content card: inner copy drifts up + fades.
+  // Kept shallow so the title stays readable while it slides away.
+  useGSAP(() => {
+    const inner = heroInnerRef.current;
+    const hero = heroRef.current;
+    if (!inner || !hero || !project) return;
+    const tween = gsap.to(inner, {
+      yPercent: -8,
+      opacity: 0.6,
+      ease: 'none',
+      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
+    });
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, [id, project]);
+
   if (!project) return null;
 
   return (
-    <div className={styles['project-page']}>
-      {/* Hero */}
-      <header className={styles['pp-hero']}>
+    <div className="-mt-11 w-full animate-rise pb-20">
+      <header ref={heroRef} className="sticky -top-11 z-[1] flex h-[78vh] min-h-[520px] items-end overflow-hidden border-b border-[var(--border)] will-change-transform">
         {(project.video || project.image) && (
-          <div className={styles['pp-hero-bg']}>
+          <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
             {project.video ? (
               <video
                 src={project.video}
-                className={styles['pp-hero-bg-video']}
+                className="h-full w-full scale-110 object-cover blur-[20px] saturate-[1.2]"
                 autoPlay
                 loop
                 muted
                 playsInline
               />
             ) : (
-              <img src={project.image!} alt="" className={styles['pp-hero-bg-img']} />
+              <Image
+                src={project.image!}
+                alt=""
+                fill
+                sizes="100vw"
+                className="scale-110 object-cover blur-[20px] saturate-[1.2]"
+                priority
+              />
             )}
-            <div className={styles['pp-hero-bg-overlay']} />
-            <div className={styles['pp-hero-bg-fade']} />
+            <div className="absolute inset-0 bg-[var(--bg)] opacity-65" />
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_bottom,transparent,var(--bg))]" />
           </div>
         )}
-        <div className={styles['pp-hero-inner']}>
-          <div className={styles['pp-hero-breadcrumb']}>
+        <div ref={heroInnerRef} className="relative mx-auto w-full max-w-[1200px] px-8 pt-24 pb-16 will-change-[transform,opacity] max-[700px]:px-5 max-[700px]:py-10">
+          <p className="m-0 font-mono text-[0.62rem] tracking-[0.1em] text-[var(--text-ghost)]">
             <TransitionLink href="/">home</TransitionLink>
-            <span>/</span>
+            <span aria-hidden="true"> / </span>
             <TransitionLink href="/#projects">projects</TransitionLink>
-            <span>/</span>
-            <span className={styles['pp-hero-bc-current']}>{project.id}</span>
-          </div>
-          <h1 className={styles['pp-hero-title']}>{project.title}</h1>
-          <p className={styles['pp-hero-desc']}>{project.desc}</p>
-          <div className={styles['pp-hero-meta']}>
-            <span className={`${styles['pp-hero-status']} ${styles[meta!.cls]}`}>
-              {StatusIcon && <StatusIcon size={12} />} {meta!.label}
+            <span aria-hidden="true"> / </span>
+            <span className="text-[var(--text-dim)]">{project.id}</span>
+          </p>
+          <h1 className="m-0 mt-4 max-w-[16ch] font-display text-[clamp(2.2rem,5.5vw,3.8rem)] font-bold leading-[1.03] tracking-[var(--tracking-section)] text-[var(--text)]">
+            {project.title}
+          </h1>
+          <p className="m-0 mt-3 max-w-[60ch] text-[0.95rem] leading-[1.65] text-[var(--text-secondary)]">
+            {project.desc}
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <span className="inline-flex items-center gap-1.5 font-mono text-[0.64rem] uppercase tracking-[0.12em] text-[var(--text-secondary)]">
+              <span aria-hidden="true" className={`size-1.5 rounded-full ${STATUS_DOT[project.status] || STATUS_DOT.ACTIVE}`} />
+              {meta!.label}
             </span>
-            <span className={styles['pp-hero-counter']}>
-              {String(currentIndex + 1).padStart(2, '0')} /{' '}
-              {String(allProjects.length).padStart(2, '0')}
+            <span className="font-mono text-[0.64rem] tracking-[0.1em] text-[var(--text-ghost)]">
+              {String(currentIndex + 1).padStart(2, '0')} / {String(allProjects.length).padStart(2, '0')}
             </span>
-          </div>
-          <div className={styles['pp-hero-actions']}>
-            {links.map((link) => (
-              <a
-                key={link.label}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles['pp-btn']}
-              >
-                {link.label === 'Source Code' ? (
-                  <FiGithub size={14} />
-                ) : (
-                  <FiExternalLink size={14} />
-                )}
-                {link.label}
-              </a>
-            ))}
+            <span className="flex gap-2 max-[700px]:w-full">
+              {links.map((link) => (
+                <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-sm)] bg-[var(--text)] px-3 py-1.5 font-mono text-[0.68rem] font-medium text-[var(--bg)] no-underline transition-opacity hover:opacity-85">
+                  {link.label === 'Source Code' ? <FiGithub size={13} aria-hidden="true" /> : <External size={13} aria-hidden="true" />}
+                  {link.label}
+                </a>
+              ))}
+            </span>
           </div>
         </div>
       </header>
 
-      {/* Content */}
-      <div className={styles['pp-content']}>
-        {/* Main Content */}
-        <main className={styles['pp-main']}>
+      {/* Content + big sidebar — overlapping card over the hero.
+          NOTE: no items-start here — the aside must stretch full height,
+          otherwise its sticky rail has zero travel range. */}
+      <div className="relative z-[2] -mt-6 rounded-t-[24px] border-t border-[var(--border)] bg-[var(--bg)]">
+      <div className="mx-auto grid w-full max-w-[1320px] gap-12 px-[clamp(1rem,5vw,5rem)] pt-12 [grid-template-columns:minmax(0,1fr)_250px] max-[1024px]:grid-cols-1 max-[700px]:px-4">
+        <main className="flex min-w-0 flex-col gap-12">
           {contentSections.map((section, index) => (
-            <section
-              key={section.id}
-              id={`section-${section.id}`}
-              className={styles['pp-section']}
-            >
-              <div className={styles['pp-section-header']}>
-                <span className={styles['pp-section-number']}>
+            <section key={section.id} id={`section-${section.id}`} className="scroll-mt-24">
+              <div className="flex items-baseline gap-3 border-b border-[var(--border)] pb-3">
+                <span className="font-mono text-[0.62rem] text-[var(--text-ghost)]">
                   {String(index + 1).padStart(2, '0')}
                 </span>
-                <h2 className={styles['pp-section-title']}>{section.label}</h2>
+                <h2 className="m-0 font-display text-[1.5rem] font-semibold tracking-[var(--tracking-tight)] text-foreground">
+                  {section.label}
+                </h2>
               </div>
-              {renderSectionContent(section)}
+              <div className="pt-5">{renderSectionContent(section)}</div>
             </section>
           ))}
+
+          {/* Prev / next */}
+          <nav aria-label="More projects" className="grid gap-3 border-t border-[var(--border)] pt-6 sm:grid-cols-2">
+            {prevProject ? (
+              <button
+                type="button"
+                onClick={() => router.push(`/projects/${prevProject.id}`)}
+                className="group flex cursor-pointer flex-col gap-1 rounded-[var(--radius-md)] border border-[var(--border)] bg-transparent p-4 text-left transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--glass)]"
+              >
+                <span className="inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-[0.1em] text-[var(--text-ghost)]">
+                  <ArrowLeft size={12} aria-hidden="true" /> prev
+                </span>
+                <span className="font-display text-[1rem] font-semibold text-foreground">
+                  {prevProject.title}
+                </span>
+              </button>
+            ) : <span aria-hidden="true" />}
+            {nextProject ? (
+              <button
+                type="button"
+                onClick={() => router.push(`/projects/${nextProject.id}`)}
+                className="group flex cursor-pointer flex-col items-end gap-1 rounded-[var(--radius-md)] border border-[var(--border)] bg-transparent p-4 text-right transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--glass)]"
+              >
+                <span className="inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-[0.1em] text-[var(--text-ghost)]">
+                  next <ArrowRight size={12} aria-hidden="true" />
+                </span>
+                <span className="font-display text-[1rem] font-semibold text-foreground">
+                  {nextProject.title}
+                </span>
+              </button>
+            ) : <span aria-hidden="true" />}
+          </nav>
         </main>
 
-        {/* Right Sidebar */}
-        <aside className={styles['pp-right-sidebar']}>
-          <div className={styles['pp-right-sidebar-sticky']}>
-            {/* Links */}
-            {links.length > 0 && (
-              <div className={styles['pp-right-section']}>
-                <span className={styles['pp-right-label']}>Links</span>
-                <div className={styles['pp-right-links']}>
-                  {links.map((link) => (
-                    <a
-                      key={link.label}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles['pp-right-link']}
+        {/* Project companion rail follows the quieter article TOC pattern. */}
+        <aside className="max-[1024px]:hidden">
+          <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col gap-6 overflow-y-auto overscroll-contain pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <nav
+              aria-label="On this page"
+              className="flex flex-col"
+            >
+              <p className="m-0 px-2 pb-2 text-[13px] font-medium text-foreground">
+                On this page
+              </p>
+              <div className="flex flex-col gap-px">
+                {contentSections.map((s, i) => {
+                  const isActive = active.sectionId === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => scrollToTarget(`#section-${s.id}`)}
+                      aria-current={isActive || undefined}
+                      className={`flex w-full cursor-pointer items-baseline gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors ${
+                        isActive
+                          ? 'bg-secondary text-foreground'
+                          : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+                      }`}
                     >
-                      {link.label === 'Source Code' ? (
-                        <FiGithub size={12} />
-                      ) : (
-                        <FiExternalLink size={12} />
-                      )}
-                      {link.label}
-                    </a>
-                  ))}
-                </div>
+                      <span
+                        className={`font-mono text-[0.6rem] ${isActive ? 'text-[var(--accent-secondary)]' : 'text-[var(--text-ghost)]'}`}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="truncate text-[0.82rem]">{s.label}</span>
+                    </button>
+                  );
+                })}
               </div>
-            )}
+            </nav>
 
-            {/* Status */}
-            <div className={styles['pp-right-section']}>
-              <span className={styles['pp-right-label']}>Status</span>
-              <span className={`${styles['pp-right-status']} ${styles[meta!.cls]}`}>
-                {StatusIcon && <StatusIcon size={12} />} {meta!.label}
-              </span>
-              <span className={styles['pp-right-counter']}>
-                {String(currentIndex + 1).padStart(2, '0')} /{' '}
-                {String(allProjects.length).padStart(2, '0')}
-              </span>
+            <div className="border-t border-[var(--border)] pt-4">
+              <p className="m-0 inline-flex items-center gap-1.5 text-[13px] font-medium text-foreground">
+                <span
+                  aria-hidden="true"
+                  className={`size-1.5 rounded-full ${STATUS_DOT[project.status] || STATUS_DOT.ACTIVE}`}
+                />
+                {meta!.label}
+              </p>
+              <p className="m-0 mt-1 text-xs text-muted-foreground">
+                {String(currentIndex + 1).padStart(2, '0')} / {String(allProjects.length).padStart(2, '0')} projects
+              </p>
             </div>
 
-            {/* Stack */}
-            <div className={styles['pp-right-section']}>
-              <span className={styles['pp-right-label']}>Stack</span>
-              <div className={styles['pp-right-stack']}>
+            <div>
+              <p className="m-0 px-2 pb-2 text-[13px] font-medium text-foreground">
+                Built with
+              </p>
+              <div className="flex flex-wrap gap-1.5 px-2">
                 {project.techNames.map((t) => (
-                  <span key={t} className={styles['pp-right-tag']}>
+                  <span
+                    key={t}
+                    className="rounded-full bg-secondary px-2 py-1 text-[11px] text-muted-foreground"
+                  >
                     {t}
                   </span>
                 ))}
               </div>
             </div>
+
+            <details className="group border-t border-[var(--border)] pt-4">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-2 text-[13px] font-medium text-foreground outline-none marker:hidden hover:text-[var(--accent-secondary)] focus-visible:ring-2 focus-visible:ring-[var(--geist-focus)] [&::-webkit-details-marker]:hidden">
+                <span className="inline-flex items-center gap-2">
+                  <Code size={14} aria-hidden="true" />
+                  Project snapshot
+                </span>
+                <span className="font-mono text-[10px] text-muted-foreground">JSON</span>
+              </summary>
+              <p className="m-0 px-2 pt-2 text-xs leading-relaxed text-muted-foreground">
+                A compact view of the project data and sections shown here.
+              </p>
+              <div className="[&>div]:my-3 [&_pre]:max-h-56 [&_pre]:overflow-auto [&_pre]:p-3 [&_code]:text-[10px]">
+                <CodeBlock code={projectSnapshot} lang="json" />
+              </div>
+            </details>
+
+            {links.length > 0 && (
+              <div className="flex flex-col border-t border-[var(--border)] pt-3">
+                {links.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-9 items-center gap-2 rounded-md px-2 text-[13px] text-muted-foreground no-underline transition-colors hover:bg-secondary/60 hover:text-foreground"
+                  >
+                    {link.label === 'Source Code' ? (
+                      <FiGithub size={13} aria-hidden="true" />
+                    ) : (
+                      <External size={13} aria-hidden="true" />
+                    )}
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </aside>
+      </div>
       </div>
     </div>
   );

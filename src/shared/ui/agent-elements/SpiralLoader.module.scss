@@ -1,0 +1,38 @@
+.loader {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+  animation: rotate 1.8s linear infinite;
+}
+.arc {
+  stroke-dasharray: 8 57;
+  transform-origin: center;
+  animation: spiral 1.4s ease-in-out infinite;
+}
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spiral {
+  0% {
+    stroke-dasharray: 4 57;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 40 57;
+    stroke-dashoffset: -12;
+  }
+  100% {
+    stroke-dasharray: 4 57;
+    stroke-dashoffset: -56;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader,
+  .arc {
+    animation: none;
+  }
+  .arc {
+    stroke-dasharray: 40 57;
+  }
+}

@@ -15,6 +15,7 @@ export interface ThemeColors {
 }
 
 export type FontSize = 'sm' | 'md' | 'lg';
+const SETTINGS_VERSION = 2;
 
 interface SettingsState {
   theme: ThemeId;
@@ -37,7 +38,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 export const THEMES: { id: ThemeId; label: string; color: string }[] = [
   { id: 'dark', label: 'Dark', color: '#0a0a0a' },
-  { id: 'light', label: 'Light', color: '#f5f3f0' },
+  { id: 'light', label: 'Light', color: '#ffffff' },
   { id: 'cattpuchin', label: 'Cattpuchin', color: '#1e1c1c' },
   { id: 'nord', label: 'Nord', color: '#2e3440' },
   { id: 'dracula', label: 'Dracula', color: '#282a36' },
@@ -78,7 +79,7 @@ function readColors(): ThemeColors {
   };
 }
 
-function loadSettings(): Partial<SettingsState> {
+function loadSettings(): Partial<SettingsState> & { version?: number } {
   if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem('settings');
@@ -89,6 +90,7 @@ function loadSettings(): Partial<SettingsState> {
 function saveSettings(s: SettingsState) {
   if (typeof window === 'undefined') return;
   localStorage.setItem('settings', JSON.stringify({
+    version: SETTINGS_VERSION,
     theme: s.theme,
     fontSize: s.fontSize,
     reducedMotion: s.reducedMotion,
@@ -101,31 +103,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<SettingsState>(() => {
     const saved = loadSettings();
     return {
-      theme: saved.theme || 'dark',
+      theme: saved.version === SETTINGS_VERSION ? saved.theme || 'light' : 'light',
       fontSize: saved.fontSize || 'md',
       reducedMotion: saved.reducedMotion ?? false,
       compactMode: saved.compactMode ?? false,
       blurEffects: saved.blurEffects ?? true,
     };
   });
-  const [mounted, setMounted] = useState(false);
   const [colors, setColors] = useState<ThemeColors>(readColors);
 
   useEffect(() => {
-    const saved = loadSettings();
-    setState((s) => ({
-      ...s,
-      theme: (saved.theme as ThemeId) || s.theme,
-      fontSize: saved.fontSize || s.fontSize,
-      reducedMotion: saved.reducedMotion ?? s.reducedMotion,
-      compactMode: saved.compactMode ?? s.compactMode,
-      blurEffects: saved.blurEffects ?? s.blurEffects,
-    }));
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
     const html = document.documentElement;
     const body = document.body;
 
@@ -149,8 +136,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     html.classList.toggle('no-blur', !state.blurEffects);
 
     saveSettings(state);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- re-read computed theme colors after applying classes to document
     setColors(readColors());
-  }, [state, mounted]);
+  }, [state]);
 
   useEffect(() => {
     const observer = new MutationObserver(() => setColors(readColors()));

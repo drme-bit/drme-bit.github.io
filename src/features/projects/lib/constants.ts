@@ -1,4 +1,4 @@
-import { FiSettings, FiClock, FiX } from '@/shared/ui/atoms/Icon';
+import { FiSettings, FiClock, FiX } from '@/shared/ui/Icon';
 import type { IconType } from 'react-icons';
 
 export interface StatusMeta {
