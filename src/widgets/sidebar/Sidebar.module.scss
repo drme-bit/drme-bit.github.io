@@ -256,15 +256,6 @@
     opacity 180ms ease,
     visibility 0s linear 0s;
 
-  &[data-open='true'] {
-    @media (max-width: 1279px) {
-      opacity: 0;
-      pointer-events: none;
-      transform: translateX(12px);
-      visibility: hidden;
-      transition-delay: 0s, 0s, 180ms;
-    }
-  }
 }
 
 .chatBody {
@@ -833,9 +824,10 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
   transition: transform 180ms;
 
   &[data-busy='true'] {
@@ -880,7 +872,6 @@
     width: 48px;
     padding: 10px 4px max(10px, env(safe-area-inset-bottom, 0px));
     border: 0;
-    border-left: 1px solid var(--border-hover);
     border-radius: 0;
     box-shadow: none;
     flex-direction: column;
@@ -892,8 +883,12 @@
     display: none;
   }
   .sidebar {
-    inset: 64px 8px 8px;
+    inset: 84px 56px 8px 8px;
+    width: auto;
+    max-width: none;
     background: var(--bg);
+    border: 1px solid var(--border-hover);
+    border-radius: 12px;
     box-shadow: var(--shadow-lg);
   }
   .panelNav {
@@ -957,13 +952,12 @@
   .railSocials {
     display: none;
   }
-  .railSpacer,
   .socialSeparator {
     display: none;
   }
   .railSeparator {
-    width: 1px;
-    height: 20px;
+    width: 24px;
+    height: 1px;
   }
   .railFooter {
     margin: 0;

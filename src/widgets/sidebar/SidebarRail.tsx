@@ -1,12 +1,11 @@
 'use client';
 
 import type { RefObject } from 'react';
-import { Bell, Compass, Settings2 } from 'lucide-react';
+import { Bell, Compass, MessageCircle, Settings2, Sparkles } from 'lucide-react';
 import { FiAtSign, FiGithub, FiLinkedin, SiDiscord } from '@/shared/ui/Icon';
 import type { SidebarPanel } from '@/app/providers/ChatProvider';
 import { profile, socialLinks } from '@/entities/profile';
 import { Separator } from '@/shared/ui';
-import GuideCat from '@/widgets/mascot/GuideCat';
 import WorkspaceMenu from '@/widgets/workspace/WorkspaceMenu';
 import styles from './Sidebar.module.scss';
 
@@ -44,7 +43,8 @@ export default function SidebarRail({
         title="Portfolio guide · ⌘⇧1"
       >
         <span className={styles.portrait} data-busy={sending}>
-          <GuideCat size={30} />
+          <MessageCircle size={19} strokeWidth={1.8} />
+          <Sparkles className="absolute -right-0.5 -top-0.5 rounded-full bg-background p-0.5 text-accent" size={12} />
           <span className={styles.dot} data-busy={sending} />
         </span>
       </button>

@@ -41,6 +41,15 @@ export default function About() {
   const [bodyRef, bodyIn] = useInView<HTMLDivElement>({ threshold: 0.03 });
   const [snapshot, setSnapshot] = useState<{ commits: CommitInfo[]; data: HeatmapData } | null>(null);
   const [statusIdx, setStatusIdx] = useState(0);
+  const [compactBoard, setCompactBoard] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 767px)');
+    const update = () => setCompactBoard(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -142,7 +151,7 @@ export default function About() {
           </figure>
         </div>
 
-        <figure className="relative left-1/2 m-0 w-screen -translate-x-1/2 border-y border-[var(--border)] py-8 md:py-10">
+        <figure className="relative left-1/2 m-0 w-[calc(100vw-48px)] -translate-x-1/2 border-y border-[var(--border)] py-8 md:w-screen md:py-10">
           <figcaption className="mx-auto mb-4 flex w-full max-w-[1240px] flex-wrap items-baseline justify-between gap-2 px-5 text-[0.8rem] text-[var(--text-dim)] md:px-8">
             <span>Recent work, at a glance</span>
             <span>Live GitHub activity</span>
@@ -150,6 +159,7 @@ export default function About() {
           <TextFlippingBoard
             text={boardText}
             boardRows={4}
+            boardCols={compactBoard ? 18 : 22}
             className="w-full max-w-none rounded-none border-0 bg-transparent p-0 shadow-none dark:bg-transparent dark:shadow-none"
           />
         </figure>

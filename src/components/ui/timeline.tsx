@@ -35,7 +35,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 
   return (
     <div
-      className="w-full bg-transparent font-sans"
+      className="@container/timeline w-full bg-transparent font-sans"
       ref={containerRef}
     >
       <div className="mx-auto w-full max-w-none px-4 pb-8 pt-12 md:px-0 md:pb-10 md:pt-14">
@@ -53,19 +53,19 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
           <div
             key={index}
             id={`timeline-entry-${index}`}
-            className="flex scroll-mt-28 justify-start pt-5 md:scroll-mt-36 md:gap-10 md:pt-16"
+            className="flex scroll-mt-28 justify-start pt-5 @[900px]/timeline:scroll-mt-36 @[900px]/timeline:gap-10 @[900px]/timeline:pt-16"
           >
-            <div className="sticky top-40 z-40 flex max-w-xs flex-col items-center self-start md:w-[30%] md:shrink-0 md:flex-row md:max-w-none">
+            <div className="sticky top-40 z-40 flex max-w-xs flex-col items-center self-start @[900px]/timeline:w-[30%] @[900px]/timeline:shrink-0 @[900px]/timeline:flex-row @[900px]/timeline:max-w-none">
               <div className="absolute left-0 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg)] md:left-0">
                 <div className="h-3 w-3 rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] md:left-3" />
               </div>
-              <h3 className="hidden text-xl font-semibold tracking-[-0.045em] text-[var(--text-dim)] md:block md:pl-20 md:text-4xl">
+              <h3 className="hidden text-xl font-semibold tracking-[-0.045em] text-[var(--text-dim)] @[900px]/timeline:block @[900px]/timeline:pl-20 @[900px]/timeline:text-4xl">
                 {item.title}
               </h3>
             </div>
 
-            <div className="relative w-full min-w-0 pr-2 pl-14 sm:pr-3 sm:pl-16 md:flex-1 md:pr-4 md:pl-4">
-              <h3 className="mb-3 block text-left text-xl font-semibold tracking-[-0.04em] text-[var(--text-dim)] sm:mb-4 sm:text-2xl md:hidden">
+            <div className="@container/timeline-entry relative w-full min-w-0 pr-2 pl-14 sm:pr-3 sm:pl-16 @[900px]/timeline:flex-1 @[900px]/timeline:pr-4 @[900px]/timeline:pl-4">
+              <h3 className="mb-3 block text-left text-xl font-semibold tracking-[-0.04em] text-[var(--text-dim)] sm:mb-4 sm:text-2xl @[900px]/timeline:hidden">
                 {item.title}
               </h3>
               {item.content}{" "}

@@ -176,12 +176,12 @@ export default function Navbar() {
       ref={ref}
       data-section={active.sectionId || undefined}
       data-scrolled={scrolled}
-      className={`fixed top-2 left-1 right-[52px] z-[999] w-auto rounded-[14px] bg-background px-[clamp(1rem,2.2vw,2rem)] transition-[right,background-color] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:left-2 ${
+      className={`fixed top-2 left-1 right-[52px] z-[999] w-auto rounded-[14px] bg-background px-[clamp(1rem,2.2vw,2rem)] max-lg:right-12 max-lg:pr-0 transition-[right,background-color] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:left-2 ${
         chatOpen ? 'xl:right-[var(--workspace-reserved-right)]' : 'xl:right-[56px]'
       }`}
       aria-label="Navigation"
     >
-      <div className="grid h-[54px] w-full grid-cols-[1fr_auto_1fr] items-center gap-4 max-[640px]:grid-cols-[auto_1fr_auto]">
+      <div className="grid h-[60px] w-full grid-cols-[1fr_auto_1fr] items-center gap-4 lg:h-[54px] max-lg:grid-cols-[1fr_auto] max-lg:gap-3">
         {/* Left edge: logo */}
         <div className="flex min-w-0 items-center justify-self-start">
           <Link
@@ -200,7 +200,7 @@ export default function Navbar() {
             The pill is always present (no pop-in): only its tint deepens. */}
         <div
           data-nav-pill
-          className="flex min-w-0 items-center justify-center gap-2.5 justify-self-center"
+          className="flex min-w-0 items-center justify-center gap-2.5 justify-self-center max-lg:absolute max-lg:top-1/2 max-lg:right-0 max-lg:w-auto max-lg:-translate-y-1/2 max-lg:justify-end"
         >
           <ul
           className="hidden items-center gap-0.5 lg:flex"
@@ -236,13 +236,7 @@ export default function Navbar() {
 
           <Separator orientation="vertical" className="mx-1 hidden h-5 lg:block" />
           <SearchBar items={searchItems} onSelect={handleSearchSelect} />
-        </div>
-
-        {/* Right edge: presence and navigation */}
-        <div className="flex shrink-0 items-center gap-1.5 justify-self-end">
-          <div className="flex items-center gap-0.5">
-            <MobileNav />
-          </div>
+          <MobileNav />
         </div>
       </div>
 

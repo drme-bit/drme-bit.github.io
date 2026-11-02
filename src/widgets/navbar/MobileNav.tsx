@@ -47,7 +47,8 @@ export function MobileNav() {
         </IconButton>
       </SheetTrigger>
       <SheetContent
-        className="!top-[64px] !right-[52px] !bottom-2 !left-auto !h-auto !w-[min(360px,calc(100vw-64px))] !max-w-none gap-0 rounded-xl border border-border bg-background p-0 shadow-2xl"
+        overlayClassName="!bg-transparent !backdrop-blur-0"
+        className="!top-[84px] !right-[56px] !bottom-2 !left-2 !h-auto !w-auto !max-w-none !gap-0 !overflow-hidden !rounded-xl !border !border-border !bg-background !p-0 !shadow-xl !z-[1002]"
         showClose={false}
         side="right"
       >

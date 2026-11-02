@@ -46,7 +46,6 @@ export default function WorkspaceSidebar() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [showJump, setShowJump] = useState(false);
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const {
     messages,
     sending,
@@ -63,18 +62,9 @@ export default function WorkspaceSidebar() {
   } = useAiChat();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
   const stickRef = useRef(true);
   const dockRef = useRef<HTMLButtonElement>(null);
   const historyRef = useRef<HTMLDetailsElement>(null);
-
-  useEffect(() => {
-    const media = window.matchMedia('(max-width: 1279px)');
-    const updateViewport = () => setIsMobileViewport(media.matches);
-    updateViewport();
-    media.addEventListener('change', updateViewport);
-    return () => media.removeEventListener('change', updateViewport);
-  }, []);
 
   const suggestedQuestions = useMemo(() => {
     const context = messages
@@ -188,19 +178,9 @@ export default function WorkspaceSidebar() {
   }, [draft]);
 
   useEffect(() => {
-    if (open && isMobileViewport) closeRef.current?.focus({ preventScroll: true });
-    else if (chatVisible) inputRef.current?.focus({ preventScroll: true });
+    if (chatVisible) inputRef.current?.focus({ preventScroll: true });
     else if (!open && document.activeElement?.closest('#chat')) dockRef.current?.focus();
-  }, [open, panel, chatVisible, isMobileViewport]);
-
-  useEffect(() => {
-    if (!open || !isMobileViewport) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open, isMobileViewport]);
+  }, [open, chatVisible]);
 
   useEffect(() => {
     if (stickRef.current) {
@@ -213,36 +193,6 @@ export default function WorkspaceSidebar() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Tab' && open && isMobileViewport) {
-        const dialog = document.getElementById('chat');
-        const focusable = dialog
-          ? Array.from(
-              dialog.querySelectorAll<HTMLElement>(
-                'button:not([disabled]), a[href], textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
-              ),
-            ).filter((element) => element.getClientRects().length > 0)
-          : [];
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (
-          first &&
-          last &&
-          e.shiftKey &&
-          (document.activeElement === first || !dialog?.contains(document.activeElement))
-        ) {
-          e.preventDefault();
-          last.focus();
-        } else if (
-          first &&
-          last &&
-          !e.shiftKey &&
-          (document.activeElement === last || !dialog?.contains(document.activeElement))
-        ) {
-          e.preventDefault();
-          first.focus();
-        }
-        return;
-      }
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && ['1', '2', '3', '4'].includes(e.key)) {
         e.preventDefault();
         if (e.key === '1') openPanel('chat');
@@ -263,7 +213,7 @@ export default function WorkspaceSidebar() {
     };
     document.addEventListener('keydown', onKey, true);
     return () => document.removeEventListener('keydown', onKey, true);
-  }, [isMobileViewport, open, openPanel, setOpen]);
+  }, [open, openPanel, setOpen]);
 
   const submit = (text: string) => {
     if (!text.trim() || sending) return;
@@ -356,21 +306,9 @@ export default function WorkspaceSidebar() {
         dockRef={dockRef}
         openPanel={openPanel}
       />
-      {/* Mobile backdrop — always mounted so Safari computes the blur once;
-          desktop keeps the page visible in its neighbouring work area. */}
-      <div
-        aria-hidden="true"
-        onClick={() => setOpen(false)}
-        className={`fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm transition-opacity duration-[360ms] xl:hidden ${
-          open ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-      />
-
       <section
         id="chat"
         aria-label="Portfolio workspace"
-        role={open && isMobileViewport ? 'dialog' : undefined}
-        aria-modal={open && isMobileViewport ? true : undefined}
         aria-hidden={!open}
         inert={!open}
         data-open={open}
@@ -384,7 +322,7 @@ export default function WorkspaceSidebar() {
           aria-valuemin={360}
           aria-valuemax={640}
           aria-valuenow={panelWidth}
-          tabIndex={open && !isMobileViewport ? 0 : -1}
+          tabIndex={open ? 0 : -1}
           className={styles.resizeHandle}
           onPointerDown={(event) => {
             event.preventDefault();
@@ -506,7 +444,6 @@ export default function WorkspaceSidebar() {
               style={panel !== 'chat' ? { display: 'none' } : undefined}
             />
             <button
-              ref={closeRef}
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Close sidebar panel"

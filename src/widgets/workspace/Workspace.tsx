@@ -36,7 +36,7 @@ export function Workspace({ children }: WorkspaceProps) {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed left-2 top-[70px] bottom-2 z-[950] hidden rounded-[14px] border border-[var(--border)] transition-[right] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:block"
+        className="pointer-events-none fixed left-1 top-[84px] bottom-2 z-[950] block rounded-[14px] border border-[var(--border)] transition-[right] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:left-2 xl:top-[70px]"
         style={{ boxShadow: '0 0 0 100vmax var(--bg)', right: 'var(--workspace-reserved-right)' }}
       />
       <div
@@ -49,7 +49,7 @@ export function Workspace({ children }: WorkspaceProps) {
       />
       <Navbar />
       <div
-        className="ml-1 mr-[52px] min-w-0 pt-[70px] transition-[margin] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:ml-2 xl:mr-[var(--workspace-reserved-right)]"
+        className="ml-1 mr-[52px] min-w-0 pt-[84px] transition-[margin] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:ml-2 xl:mr-[var(--workspace-reserved-right)] xl:pt-[70px]"
       >
         <ContentWindow
           id="main"
