@@ -30,7 +30,7 @@
   }
 
   @media (max-width: 1279px) {
-    inset: 64px 8px 8px;
+    inset: 52px 8px 8px;
     width: auto;
     max-width: none;
     border: 1px solid var(--border);
@@ -227,10 +227,6 @@
   margin: 0 2px;
   background: var(--border-hover);
   opacity: 0.9;
-}
-
-.panelNav {
-  display: none;
 }
 
 .rail {
@@ -868,7 +864,7 @@
 
 @media (max-width: 1279px) {
   .rail {
-    inset: 68px 0 8px auto;
+    inset: 52px 0 8px auto;
     width: 48px;
     padding: 10px 4px max(10px, env(safe-area-inset-bottom, 0px));
     border: 0;
@@ -883,66 +879,13 @@
     display: none;
   }
   .sidebar {
-    inset: 84px 56px 8px 8px;
+    inset: 60px 56px 8px 8px;
     width: auto;
     max-width: none;
     background: var(--bg);
     border: 1px solid var(--border-hover);
     border-radius: 12px;
     box-shadow: var(--shadow-lg);
-  }
-  .panelNav {
-    display: flex;
-    gap: 4px;
-    margin: 0 16px 10px;
-    padding: 0 0 5px;
-    border-bottom: 1px solid var(--border);
-    background: transparent;
-    animation: sidebar-content-in 180ms ease-out both;
-
-    button {
-      display: flex;
-      min-width: 0;
-      position: relative;
-      min-height: 36px;
-      flex: 1;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      border: 0;
-      border-radius: 5px;
-      color: var(--text-dim);
-      font-size: 10px;
-      cursor: pointer;
-
-      &[aria-current='page'] {
-        color: var(--text);
-        &::after {
-          position: absolute;
-          right: 8px;
-          bottom: -6px;
-          left: 8px;
-          height: 2px;
-          border-radius: 2px;
-          background: var(--text);
-          content: '';
-        }
-      }
-
-      &:focus-visible {
-        outline: 2px solid var(--geist-focus);
-      }
-    }
-
-    .count {
-      padding: 1px 4px;
-      border-radius: 5px;
-      background: color-mix(in srgb, var(--accent-secondary) 18%, transparent);
-      color: var(--accent-secondary);
-      font-size: 9px;
-      line-height: 13px;
-      font-variant-numeric: tabular-nums;
-    }
   }
   .launcher {
     width: 36px;
@@ -978,8 +921,7 @@
 :global(.reduced-motion) .portrait,
 :global(.reduced-motion) .sidebar,
 :global(.reduced-motion) .chatBody,
-:global(.reduced-motion) .utilityBody,
-:global(.reduced-motion) .panelNav {
+:global(.reduced-motion) .utilityBody {
   animation: none !important;
   transition: none;
 }
@@ -990,8 +932,7 @@
   .portrait,
   .toast,
   .chatBody,
-  .utilityBody,
-  .panelNav {
+  .utilityBody {
     transition: none;
     animation: none !important;
   }
