@@ -39,15 +39,15 @@ export default function Experience() {
   return (
     <section
       id="experience"
-      className="relative isolate flex flex-col pb-16 pt-12 max-[700px]:pb-12 max-[700px]:pt-8"
+      className="relative isolate @container/experience flex flex-col pb-16 pt-12 max-[700px]:pb-12 max-[700px]:pt-8"
     >
-      <div className="relative mx-auto grid w-full max-w-[1800px] grid-cols-[minmax(0,1fr)_160px] gap-x-6 pl-[9vw] pr-[3vw] max-[1100px]:grid-cols-1 max-[1100px]:px-5">
+      <div className="relative mx-auto grid w-full max-w-[1800px] grid-cols-1 gap-x-6 px-5 @[1120px]/experience:grid-cols-[minmax(0,1fr)_160px] @[1120px]/experience:pl-[9vw] @[1120px]/experience:pr-[3vw]">
         <div className="min-w-0">
           <Timeline
             data={experienceData.map((e) => ({
               title: e.period,
             content: (
-              <article className="grid grid-cols-1 gap-5 rounded-lg bg-transparent p-3 sm:gap-6 sm:p-4 md:grid-cols-[minmax(0,1.15fr)_minmax(240px,0.85fr)] md:gap-8 md:p-7">
+              <article className="grid grid-cols-1 gap-5 rounded-lg bg-transparent p-3 sm:gap-6 sm:p-4 @[680px]/timeline-entry:grid-cols-[minmax(0,1.15fr)_minmax(240px,0.85fr)] @[680px]/timeline-entry:gap-8 @[680px]/timeline-entry:p-7">
                 <div className="min-w-0">
                   <p className="mb-1 text-[15px] font-semibold text-[var(--text)] md:text-base">
                     {e.role}
@@ -121,7 +121,7 @@ export default function Experience() {
         </div>
 
         {/* ── Sticky times rail ── */}
-        <aside className="max-[1100px]:hidden">
+        <aside className="hidden @[1120px]/experience:block">
           <nav
             aria-label="Experience periods"
             className="sticky top-40 flex flex-col"

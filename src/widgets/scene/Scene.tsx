@@ -21,12 +21,11 @@ function useScrollProgress() {
 
 function Starfield() {
   const ref = useRef<THREE.Points>(null);
-  const matRef = useRef<THREE.PointsMaterial>(null);
   const target = useRef(new THREE.Vector2());
   const { colors } = useTheme();
 
   const [geometry] = useState(() => {
-    const count = 700;
+    const count = 480;
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const r = 40 + Math.random() * 18;
@@ -41,19 +40,22 @@ function Starfield() {
     return geo;
   });
 
-  useFrame(({ mouse }) => {
+  useFrame(({ mouse, invalidate }) => {
     if (!ref.current) return;
-    ref.current.rotation.y += 0.00006;
     target.current.set(mouse.x * 0.32, mouse.y * 0.18);
     ref.current.position.x += (target.current.x - ref.current.position.x) * 0.025;
     ref.current.position.y += (target.current.y - ref.current.position.y) * 0.025;
-    if (matRef.current) matRef.current.color.set(colors.accent);
+    if (
+      Math.abs(target.current.x - ref.current.position.x) > 0.001 ||
+      Math.abs(target.current.y - ref.current.position.y) > 0.001
+    ) {
+      invalidate();
+    }
   });
 
   return (
     <points ref={ref} geometry={geometry}>
       <pointsMaterial
-        ref={matRef}
         color={colors.accent}
         size={0.06}
         transparent
@@ -66,39 +68,58 @@ function Starfield() {
 
 const _camTarget = new THREE.Vector3();
 
-function IsoCamera({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
-  const { camera, gl } = useThree();
+function IsoCamera({
+  scrollT,
+  active,
+}: {
+  scrollT: React.MutableRefObject<number>;
+  active: boolean;
+}) {
+  const { camera, gl, invalidate } = useThree();
   const angle = useRef(0.78);
   const dragAngle = useRef(0);
   const isDragging = useRef(false);
   const prevX = useRef(0);
 
   useEffect(() => {
+    if (active) invalidate();
+  }, [active, invalidate]);
+
+  useEffect(() => {
     const el = gl.domElement;
     const onDown = (e: PointerEvent) => {
       isDragging.current = true;
       prevX.current = e.clientX;
+      invalidate();
     };
     const onUp = () => {
       isDragging.current = false;
+      invalidate();
     };
     const onMove = (e: PointerEvent) => {
-      if (!isDragging.current) return;
+      if (!isDragging.current) {
+        invalidate();
+        return;
+      }
       dragAngle.current += (e.clientX - prevX.current) * 0.005;
       prevX.current = e.clientX;
+      invalidate();
     };
+    const onScroll = () => invalidate();
 
     el.addEventListener('pointerdown', onDown);
     window.addEventListener('pointerup', onUp);
     window.addEventListener('pointermove', onMove);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       el.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('scroll', onScroll);
     };
-  }, [gl]);
+  }, [gl, invalidate]);
 
-  useFrame(() => {
+  useFrame(({ invalidate }) => {
     const s = scrollT.current;
 
     const targetAngle = 0.78 + s * 1.2 + dragAngle.current;
@@ -118,6 +139,12 @@ function IsoCamera({ scrollT }: { scrollT: React.MutableRefObject<number> }) {
 
     camera.position.lerp(_camTarget.set(camX, camY, camZ), 0.05);
     camera.lookAt(0, 0.3 * t, -4);
+    if (
+      Math.abs(targetAngle - angle.current) > 0.001 ||
+      camera.position.distanceToSquared(_camTarget) > 0.0001
+    ) {
+      invalidate();
+    }
   });
 
   return null;
@@ -130,11 +157,9 @@ function PixelRatioManager({ lowPower }: { lowPower: boolean }) {
     const apply = () => {
       const dpr = window.devicePixelRatio || 1;
       const area = window.innerWidth * window.innerHeight;
-      // Keep framebuffer pixels bounded: past ~3.5M CSS px the ratio falls
-      // smoothly, so fullscreen/4K stops rasterizing 10M+ pixels per frame.
-      // Keep the background scene light enough for high-density displays.
+      // Keep framebuffer pixels bounded and cap DPR to reduce fill-rate cost.
       const budget = Math.sqrt(3_500_000 / Math.max(area, 1));
-      gl.setPixelRatio(Math.min(dpr, lowPower ? 1 : 1.25, Math.max(budget, 0.65)));
+      gl.setPixelRatio(Math.min(dpr, lowPower ? 0.8 : 1, Math.max(budget, 0.65)));
     };
     apply();
     window.addEventListener('resize', apply);
@@ -173,23 +198,11 @@ function FogUpdater() {
   const { scene } = useThree();
   const { width } = useThree((state) => state.size);
   const { theme, colors } = useTheme();
-  const fogRef = useRef<THREE.Fog | null>(null);
-  if (fogRef.current === null) fogRef.current = new THREE.Fog('#080808', 14, 34);
-  const lastColor = useRef<string | null>(null);
-
-  // eslint-disable-next-line react-hooks/immutability -- R3F scene graph is external mutable state
-  useFrame(() => {
+  useEffect(() => {
     const fogColor = theme === 'light' ? colors.bg : '#080808';
-    fogRef.current!.near = width <= 768 ? 10 : 14;
-    fogRef.current!.far = width <= 768 ? 28 : 34;
-    if (!scene.fog) {
-      // eslint-disable-next-line react-hooks/immutability -- R3F scene graph is external mutable state
-      scene.fog = fogRef.current;
-    } else if (lastColor.current !== fogColor) {
-      lastColor.current = fogColor;
-      fogRef.current!.color.set(fogColor);
-    }
-  });
+    // eslint-disable-next-line react-hooks/immutability -- Three.js scene is external mutable state.
+    scene.fog = new THREE.Fog(fogColor, width <= 768 ? 10 : 14, width <= 768 ? 28 : 34);
+  }, [colors.bg, scene, theme, width]);
 
   return null;
 }
@@ -200,6 +213,8 @@ export default function Scene() {
   const scrollT = useScrollProgress();
   // Paused while an opaque takeover (projects portal) covers the viewport.
   const [bgPaused, setBgPaused] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
+  const sceneActive = !bgPaused && pageVisible;
 
   useEffect(() => {
     const onPause = (e: Event): void => {
@@ -209,38 +224,42 @@ export default function Scene() {
     return () => window.removeEventListener('bg-pause', onPause);
   }, []);
 
+  useEffect(() => {
+    const updateVisibility = () => setPageVisible(!document.hidden);
+    updateVisibility();
+    document.addEventListener('visibilitychange', updateVisibility);
+    return () => document.removeEventListener('visibilitychange', updateVisibility);
+  }, []);
+
   return (
     <>
-      <Canvas
-        id="bg"
-        camera={{ position: [9, 9.2, 5], fov: 32, near: 0.1, far: 80 }}
-        gl={{
-          alpha: true,
-          antialias: !lowPower,
-          powerPreference: 'high-performance',
-          stencil: false,
-          depth: true,
-          preserveDrawingBuffer: false,
-        }}
-        frameloop={bgPaused ? 'never' : 'always'}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 0,
-          background: 'transparent',
-          pointerEvents: theme === 'light' ? 'none' : 'auto',
-          display: theme === 'light' ? 'none' : undefined,
-        }}
-      >
-        <PixelRatioManager lowPower={lowPower} />
-        <FogUpdater />
-        <IsoCamera scrollT={scrollT} />
-        {!lowPower && (
-          <>
-            <Starfield />
-          </>
-        )}
-      </Canvas>
+      {theme !== 'light' && (
+        <Canvas
+          id="bg"
+          camera={{ position: [9, 9.2, 5], fov: 32, near: 0.1, far: 80 }}
+          gl={{
+            alpha: true,
+            antialias: !lowPower,
+            powerPreference: 'high-performance',
+            stencil: false,
+            depth: true,
+            preserveDrawingBuffer: false,
+          }}
+          frameloop={sceneActive ? 'demand' : 'never'}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 0,
+            background: 'transparent',
+            pointerEvents: 'auto',
+          }}
+        >
+          <PixelRatioManager lowPower={lowPower} />
+          <FogUpdater />
+          <IsoCamera scrollT={scrollT} active={sceneActive} />
+          {!lowPower && <Starfield />}
+        </Canvas>
+      )}
     </>
   );
 }

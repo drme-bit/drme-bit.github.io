@@ -46,6 +46,9 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
   const [focusIndex, setFocusIndex] = useState(0);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const results = useMemo(() => {
@@ -79,7 +82,10 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
     setOpen(false);
     setQuery('');
     setFocusIndex(0);
-    triggerRef.current?.focus({ preventScroll: true });
+    const isCompact = window.matchMedia('(max-width: 1023px)').matches;
+    requestAnimationFrame(() => {
+      (isCompact ? mobileTriggerRef.current : triggerRef.current)?.focus({ preventScroll: true });
+    });
   }, []);
 
   const run = useCallback(
@@ -92,10 +98,23 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
 
   useEffect(() => {
     if (open) {
-      const t = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 30);
+      const isCompact = window.matchMedia('(max-width: 1023px)').matches;
+      const t = setTimeout(
+        () => (isCompact ? mobileInputRef.current : inputRef.current)?.focus({ preventScroll: true }),
+        30,
+      );
       return () => clearTimeout(t);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !window.matchMedia('(max-width: 1023px)').matches) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!mobileSearchRef.current?.contains(event.target as Node)) close();
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [open, close]);
 
   /*  ⌘K global shortcut  */
 
@@ -133,7 +152,7 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
   }, [focusIndex]);
 
   useEffect(() => {
-    if (open) {
+    if (open && !window.matchMedia('(max-width: 1023px)').matches) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
@@ -158,7 +177,7 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
         aria-expanded={open}
         onClick={toggle}
         className={cn(
-          'group hidden h-8 w-44 items-center gap-2 rounded-[var(--radius-sm)] border bg-secondary/40 px-2.5 transition-colors duration-150 outline-none focus-visible:border-[color-mix(in_srgb,currentColor_25%,transparent)] hover:bg-secondary/70 md:flex',
+          'group hidden h-8 w-44 items-center gap-2 rounded-[var(--radius-sm)] border bg-secondary/40 px-2.5 transition-colors duration-150 outline-none focus-visible:border-[color-mix(in_srgb,currentColor_25%,transparent)] hover:bg-secondary/70 lg:flex',
           open
             ? 'border-[color-mix(in_srgb,currentColor_25%,transparent)] text-foreground'
             : 'border-border/70',
@@ -170,23 +189,87 @@ export default function SearchBar({ items = [], onSelect }: SearchBarProps) {
         </span>
         <Kbd>⌘K</Kbd>
       </button>
-      <IconButton
-        size="icon-sm"
-        aria-label="Search"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={toggle}
+      <div
+        ref={mobileSearchRef}
         className={cn(
-          'text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden',
-          open && 'bg-secondary text-foreground',
+          'relative flex h-9 items-center transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none lg:hidden',
+          open ? 'w-[min(46vw,220px)]' : 'w-9',
         )}
       >
-        <FiSearch className="size-4" />
-      </IconButton>
+        {open ? (
+          <div className="flex h-9 w-full items-center gap-2 rounded-md border border-border bg-background px-2.5 shadow-sm focus-within:border-foreground/30">
+            <FiSearch className="size-4 shrink-0 text-muted-foreground" />
+            <CommandInput
+              ref={mobileInputRef}
+              type="text"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setFocusIndex(0);
+              }}
+              placeholder="Search"
+              autoComplete="off"
+              spellCheck={false}
+              aria-label="Search portfolio"
+              className="text-[13px]"
+            />
+            <button
+              type="button"
+              onClick={close}
+              aria-label="Close search"
+              className="shrink-0 text-base leading-none text-muted-foreground hover:text-foreground"
+            >
+              ×
+            </button>
+          </div>
+        ) : (
+          <IconButton
+            ref={mobileTriggerRef}
+            size="icon-sm"
+            aria-label="Search"
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            onClick={toggle}
+            className="text-muted-foreground hover:bg-secondary hover:text-foreground"
+          >
+            <FiSearch className="size-4" />
+          </IconButton>
+        )}
+
+        {open && (
+          <div className="absolute top-[calc(100%+10px)] right-0 z-[1101] w-[min(360px,calc(100vw-72px))] overflow-hidden rounded-lg border border-border bg-popover shadow-xl">
+            {results.length === 0 ? (
+              <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                No results for “{query.trim()}”.
+              </div>
+            ) : (
+              <CommandList ref={listRef} className="max-h-[min(56dvh,420px)]">
+                {visible.map((item, index) => {
+                  const ItemIcon = item.icon ?? FiSearch;
+                  return (
+                    <CommandItem
+                      key={item.id}
+                      active={index === focusIndex}
+                      data-search-index={index}
+                      onMouseEnter={() => setFocusIndex(index)}
+                      onClick={() => run(item)}
+                    >
+                      <ItemIcon className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate font-medium">{item.label}</span>
+                      <ArrowRight className="size-3.5 shrink-0 text-muted-foreground/60" />
+                    </CommandItem>
+                  );
+                })}
+              </CommandList>
+            )}
+          </div>
+        )}
+      </div>
 
       {open &&
         createPortal(
           <CommandOverlay
+            className="max-lg:hidden"
             onClick={(e) => {
               if (e.target === e.currentTarget) close();
             }}

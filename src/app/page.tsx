@@ -12,7 +12,6 @@ import { ProjectsPortal } from '@/features/projects/ui/ProjectsPortal';
 import Reviews from '@/features/reviews/ui/Reviews';
 import Contacts from '@/features/contacts/ui/Contacts';
 import PremiumFooter from '@/widgets/footer/PremiumFooter';
-import { OnboardingIntro } from '@/widgets/onboarding/OnboardingIntro';
 import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 
 const Scene = dynamic(() => import('@/widgets/scene/Scene'), { ssr: true });
@@ -71,23 +70,21 @@ function MainInner() {
   return (
     <>
       <main className="relative z-10 pb-[340px] max-[700px]:pb-[300px]">
-      <OnboardingIntro />
+        <Scene />
 
-      <Scene />
+        <Hero />
 
-      <Hero />
+        <About />
+        <Experience />
 
-      <About />
-      <Experience />
+        <ProjectsPortal />
 
-      <ProjectsPortal />
+        <div id="projects" className="projects-wrapper">
+          <Projects />
+        </div>
 
-      <div id="projects" className="projects-wrapper">
-        <Projects />
-      </div>
-
-      <Reviews />
-      <Contacts />
+        <Reviews />
+        <Contacts />
         <span id="footer-reveal-trigger" aria-hidden="true" className="pointer-events-none absolute bottom-[340px] h-px w-px max-[700px]:bottom-[300px]" />
       </main>
       <PremiumFooter />
