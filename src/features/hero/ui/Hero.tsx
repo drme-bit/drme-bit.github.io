@@ -41,7 +41,7 @@ function HeroMascot({ mascotRef }: { mascotRef: React.RefObject<HTMLDivElement |
   return (
     <div
       ref={mascotRef}
-      className="group relative mx-auto aspect-square w-[min(42vw,500px)] max-w-full max-md:w-[min(48vw,200px)]"
+      className="group relative mx-auto aspect-square w-[min(42vw,500px)] max-w-full max-md:w-[min(52vw,184px)]"
       onPointerMove={(event) => {
         if (event.pointerType !== 'mouse') return;
         const bounds = event.currentTarget.getBoundingClientRect();
@@ -223,7 +223,7 @@ export default function Hero() {
         ref={overlayRef}
         className="pointer-events-none absolute inset-0 z-[1] flex flex-col items-center justify-center will-change-[opacity]"
       >
-        <div className="pointer-events-auto relative z-10 grid w-full max-w-[1180px] grid-cols-[1fr_0.95fr] items-center gap-[clamp(2rem,7vw,7rem)] px-[6vw] max-md:-translate-y-[4svh] max-md:grid-cols-1 max-md:gap-3 max-md:px-6">
+        <div className="pointer-events-auto relative z-10 grid w-full max-w-[1180px] grid-cols-[1fr_0.95fr] items-center gap-[clamp(2rem,7vw,7rem)] px-[6vw] max-md:-translate-y-[2svh] max-md:grid-cols-1 max-md:gap-2 max-md:px-5">
           <div className="flex flex-col items-start text-left max-md:order-2 max-md:items-center max-md:text-center">
             <div className="mb-5 flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[var(--text-dim)] max-md:mb-4 max-md:text-[0.55rem]">
             <span className="relative flex h-2 w-2 items-center justify-center" aria-hidden="true">
@@ -237,10 +237,10 @@ export default function Hero() {
               ref={nameRef}
               className="mb-3 flex flex-col leading-[0.92] tracking-[-0.055em] max-md:mb-2"
             >
-              <span className="font-display text-[clamp(3.1rem,6vw,6.6rem)] font-semibold text-[var(--text)] max-md:text-[clamp(2.8rem,12vw,4.2rem)]">
+              <span className="font-display text-[clamp(3.1rem,6vw,6.6rem)] font-semibold text-[var(--text)] max-md:text-[clamp(2.35rem,10.4vw,3.8rem)]">
                 {profile.firstName}
               </span>
-              <span className="font-display text-[clamp(3.1rem,6vw,6.6rem)] font-semibold text-[var(--text-secondary)] max-md:text-[clamp(2.8rem,12vw,4.2rem)]">
+              <span className="font-display text-[clamp(3.1rem,6vw,6.6rem)] font-semibold text-[var(--text-secondary)] max-md:text-[clamp(2.35rem,10.4vw,3.8rem)]">
                 {profile.lastName}
               </span>
             </h1>

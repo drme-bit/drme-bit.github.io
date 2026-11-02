@@ -287,3 +287,46 @@
     color: var(--accent-secondary);
   }
 }
+
+@media (max-width: 640px) {
+  .section {
+    min-height: 0;
+    justify-content: flex-start;
+    padding: 3.5rem 1.25rem;
+  }
+
+  .headerTitle {
+    font-size: clamp(2.6rem, 12vw, 3.5rem);
+    line-height: 0.98;
+  }
+
+  .headerSub {
+    max-width: 34ch;
+    font-size: 0.9rem;
+  }
+
+  .blog-card--featured {
+    margin-bottom: 1rem;
+    border-radius: var(--radius-sm);
+
+    .blog-card-inner {
+      min-height: 0;
+      padding: 1.2rem;
+    }
+
+    .blog-card-title {
+      max-width: 24ch;
+      font-size: clamp(1.45rem, 7vw, 1.9rem);
+    }
+
+    .blog-card-excerpt {
+      -webkit-line-clamp: 4;
+      font-size: 0.86rem;
+    }
+  }
+
+  .blog-card:not(.blog-card--featured) {
+    .blog-card-title { font-size: 1.05rem; }
+    .blog-card-excerpt { -webkit-line-clamp: 3; }
+  }
+}

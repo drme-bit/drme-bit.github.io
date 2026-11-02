@@ -23,7 +23,7 @@ function ProjectGallery({ title, images, priority }: { title: string; images: st
 
   return (
     <div
-      className={`grid aspect-[1.45] gap-2 max-[900px]:aspect-[1.35] max-[560px]:aspect-[1.1] ${
+      className={`grid aspect-[1.45] gap-2 max-[900px]:aspect-[1.25] max-[560px]:aspect-[0.9] max-[560px]:gap-1.5 ${
         hasSideImages ? 'grid-cols-[minmax(0,1.35fr)_minmax(0,0.75fr)] grid-rows-2' : 'grid-cols-1'
       }`}
     >
@@ -57,7 +57,7 @@ function ProjectStory({ project, index, total }: { project: Project; index: numb
   const isReversed = index % 2 === 1;
 
   return (
-    <article className="grid gap-8 border-t border-[var(--border)] py-10 md:gap-10 md:py-14 lg:grid-cols-[minmax(250px,0.78fr)_minmax(0,1.22fr)] lg:items-center lg:gap-14">
+    <article className="grid min-w-0 gap-6 border-t border-[var(--border)] py-8 sm:gap-8 sm:py-10 md:gap-10 md:py-14 lg:grid-cols-[minmax(250px,0.78fr)_minmax(0,1.22fr)] lg:items-center lg:gap-14">
       <div className={`flex min-w-0 flex-col items-start ${isReversed ? 'lg:order-2' : ''}`}>
         <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[0.76rem] text-[var(--text-dim)]">
           <span className="font-mono tabular-nums text-[var(--text-ghost)]">
@@ -146,7 +146,7 @@ export function Projects() {
 
   return (
     <div className="relative w-full">
-      <section className="w-full px-5 pb-20 pt-16 md:px-8 md:pb-28 md:pt-20" aria-labelledby="projects-heading">
+      <section className="w-full px-5 pb-16 pt-12 sm:px-6 md:px-8 md:pb-28 md:pt-20" aria-labelledby="projects-heading">
         <div className="mx-auto w-full max-w-[1320px]">
           <ProjectsHero count={allProjects.length} />
           <ProjectsList />

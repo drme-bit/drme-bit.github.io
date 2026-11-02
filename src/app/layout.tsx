@@ -21,20 +21,20 @@ import './globals.scss';
 export const metadata: Metadata = {
   title: 'Dr.ME — Full-Stack Developer Portfolio',
   description:
-    'Terminal-inspired portfolio of Dr.ME — full-stack developer specializing in React, Three.js, and modern web technologies.',
-  keywords: ['portfolio', 'developer', 'Dr.ME', 'drme', 'drme-bit'],
+    'Portfolio of Dr.ME — full-stack developer.',
+  keywords: ['portfolio', 'developer', 'Dr.ME', 'drme', 'drme-bit', 'fullstack', 'backend', 'frontend'],
   authors: [{ name: 'Dr.ME' }],
   openGraph: {
     type: 'website',
     title: 'Dr.ME — Full-Stack Developer Portfolio',
-    description: 'Terminal-inspired portfolio showcasing projects, skills, and blog posts.',
+    description: 'Portfolio showcasing projects, skills, and blog posts.',
     url: 'https://drme.me',
     siteName: 'Dr.ME Portfolio',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Dr.ME — Full-Stack Developer Portfolio',
-    description: 'Terminal-inspired portfolio showcasing projects, skills, and blog posts.',
+    description: 'Portfolio showcasing projects, skills, and blog posts.',
   },
   metadataBase: new URL('https://drme.me'),
   icons: {

@@ -49,7 +49,7 @@ export function Workspace({ children }: WorkspaceProps) {
       />
       <Navbar />
       <div
-        className="ml-1 mr-[52px] min-w-0 pt-[60px] transition-[margin] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:ml-2 xl:mr-[var(--workspace-reserved-right)] xl:pt-[70px]"
+        className="ml-1 mr-[52px] min-w-0 pt-[60px] transition-[margin] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none max-[767px]:!mr-[52px] xl:ml-2 xl:mr-[var(--workspace-reserved-right)] xl:pt-[70px]"
       >
         <ContentWindow
           id="main"

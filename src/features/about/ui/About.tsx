@@ -78,7 +78,7 @@ export default function About() {
   return (
     <section
       id="about"
-      className="relative flex w-full flex-col items-center overflow-x-clip border-t border-[var(--border)] py-20 md:py-28"
+      className="relative flex w-full flex-col items-center overflow-x-clip border-t border-[var(--border)] py-14 md:py-28"
     >
       <div className="relative z-[1] mx-auto flex w-full max-w-[1240px] flex-col gap-16 px-5 md:gap-20 md:px-8">
         <div ref={headRef} className={`grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.58fr)] lg:gap-20 ${reveal(headIn)}`}>
@@ -154,7 +154,7 @@ export default function About() {
           </figure>
         </div>
 
-        <figure className="relative left-1/2 m-0 w-[calc(100vw-48px)] -translate-x-1/2 border-y border-[var(--border)] py-8 md:w-screen md:py-10">
+        <figure className="relative left-1/2 m-0 w-[calc(100vw-48px)] -translate-x-1/2 overflow-hidden border-y border-[var(--border)] py-7 md:w-screen md:py-10">
           <figcaption className="mx-auto mb-4 flex w-full max-w-[1240px] flex-wrap items-baseline justify-between gap-2 px-5 text-[0.8rem] text-[var(--text-dim)] md:px-8">
             <span>Recent work, at a glance</span>
             <span>Live GitHub activity</span>
@@ -162,7 +162,7 @@ export default function About() {
           <TextFlippingBoard
             text={boardText}
             boardRows={4}
-            boardCols={compactBoard ? 12 : 22}
+            boardCols={compactBoard ? 20 : 22}
             className="w-full max-w-none rounded-none border-0 bg-transparent p-0 shadow-none dark:bg-transparent dark:shadow-none"
           />
         </figure>
