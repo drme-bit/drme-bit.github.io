@@ -62,12 +62,12 @@ export function PremiumFooter() {
     <footer
       id="footer"
       role="contentinfo"
-      className="fixed inset-x-0 bottom-0 z-0 min-h-[340px] overflow-hidden bg-[var(--bg)] max-[700px]:min-h-[300px] xl:inset-x-auto xl:left-0 xl:right-[var(--workspace-reserved-right)]"
+      className="fixed inset-x-0 bottom-0 z-0 min-h-[340px] overflow-hidden bg-[var(--bg)] max-[700px]:min-h-[240px] xl:inset-x-auto xl:left-0 xl:right-[var(--workspace-reserved-right)]"
     >
       <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden whitespace-nowrap font-display text-[clamp(9rem,28vw,26rem)] font-semibold leading-none tracking-[-0.105em] text-[var(--text)] opacity-[0.05]">
         drme
       </span>
-      <div className="footer-inner relative z-10 mx-auto flex min-h-[340px] w-full max-w-[1400px] flex-wrap items-end gap-x-6 gap-y-3 px-[4vw] pb-6 pt-28 max-[700px]:min-h-[300px] max-[700px]:px-5 max-[700px]:pb-5">
+      <div className="footer-inner relative z-10 mx-auto flex min-h-[340px] w-full max-w-[1400px] flex-wrap items-end gap-x-6 gap-y-3 px-[4vw] pb-6 pt-28 max-[700px]:min-h-[240px] max-[700px]:gap-x-4 max-[700px]:gap-y-2 max-[700px]:px-5 max-[700px]:pb-5 max-[700px]:pt-20">
         <Link
           href="/"
           aria-label="Back to home"

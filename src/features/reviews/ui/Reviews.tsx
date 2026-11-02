@@ -28,7 +28,7 @@ function QuoteCard({ endorsement, index }: { endorsement: Endorsement; index: nu
   const image = portraitPath(endorsement);
 
   return (
-    <article className="group relative isolate flex min-h-[340px] flex-col overflow-hidden rounded-[10px] p-7 md:min-h-[410px] md:p-9 lg:p-10">
+    <article className="group relative isolate flex min-h-[280px] flex-col overflow-hidden rounded-[10px] p-5 sm:p-7 md:min-h-[410px] md:p-9 lg:p-10">
       <div
         aria-hidden="true"
         className={`absolute inset-0 -z-10 ${index === 0 ? 'bg-[color-mix(in_srgb,var(--accent-secondary)_16%,var(--bg-surface))]' : 'bg-[color-mix(in_srgb,var(--accent-warm)_17%,var(--bg-surface))]'}`}
@@ -40,7 +40,7 @@ function QuoteCard({ endorsement, index }: { endorsement: Endorsement; index: nu
         ”
       </span>
 
-      <blockquote className="m-0 max-w-[27ch] font-display text-[clamp(1.7rem,3.5vw,3.15rem)] font-medium leading-[1.08] tracking-[-0.055em] text-[var(--text)]">
+      <blockquote className="m-0 max-w-[27ch] font-display text-[clamp(1.45rem,6.2vw,3.15rem)] font-medium leading-[1.12] tracking-[-0.05em] text-[var(--text)] sm:text-[clamp(1.7rem,3.5vw,3.15rem)]">
         “{endorsement.text}”
       </blockquote>
 
@@ -150,7 +150,7 @@ export default function Reviews() {
           </AnimatePresence>
         </div>
 
-        <footer className="mt-7 flex items-center justify-between gap-4 text-[0.82rem] text-[var(--text-dim)] md:mt-9">
+        <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 text-[0.78rem] text-[var(--text-dim)] md:mt-9 md:text-[0.82rem]">
           <span>Thoughtful work leaves a good impression.</span>
           <nav aria-label="Recommendations" className="flex items-center gap-1.5">
             {Array.from({ length: slideCount }, (_, index) => (

@@ -528,7 +528,7 @@ export default function WorkspaceSidebar() {
             ref={listRef}
             onScroll={onListScroll}
             data-lenis-prevent
-            className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain p-5"
+            className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-y-contain p-5 [-webkit-overflow-scrolling:touch]"
           >
             {quota.blocked && (
               <div

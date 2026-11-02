@@ -372,7 +372,7 @@ export function PremiumContacts() {
         <header className="mb-14 grid grid-cols-[minmax(0,1fr)_minmax(260px,0.65fr)] items-end gap-10 max-[760px]:mb-10 max-[760px]:grid-cols-1 max-[760px]:gap-5">
           <div>
             <p className="mb-4 text-[0.78rem] text-[var(--text-dim)]">A good conversation starts somewhere</p>
-            <h2 className="m-0 font-display text-[clamp(3rem,7vw,6rem)] font-semibold leading-[0.94] tracking-[-0.075em] text-[var(--text)]">Let&apos;s talk.</h2>
+            <h2 className="m-0 font-display text-[clamp(2.65rem,11vw,4rem)] font-semibold leading-[0.94] tracking-[-0.075em] text-[var(--text)] sm:text-[clamp(3rem,7vw,6rem)]">Let&apos;s talk.</h2>
           </div>
           <p className="m-0 max-w-[42ch] text-[clamp(0.95rem,1.25vw,1.05rem)] leading-[1.75] text-[var(--text-secondary)]">
             Have a project in mind, a role to discuss, or just want to say hello? Send a note — I usually reply within a day.
