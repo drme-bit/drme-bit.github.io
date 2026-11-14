@@ -1,10 +1,14 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { useAiChat } from './useAiChat';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useAssistant } from './useAssistant';
+
+beforeEach(() => {
+  localStorage.clear();
+});
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe('chat cancellation', () => {
+describe('assistant cancellation', () => {
   it('ignores an old response after stopping and starting a new request', async () => {
     let resolveFirst!: (value: Response) => void;
     const fetchMock = vi
@@ -17,7 +21,7 @@ describe('chat cancellation', () => {
       )
       .mockImplementationOnce(() => new Promise<Response>(() => {}));
     vi.stubGlobal('fetch', fetchMock);
-    const { result, unmount } = renderHook(() => useAiChat());
+    const { result, unmount } = renderHook(() => useAssistant());
     let first!: Promise<void>;
     act(() => {
       first = result.current.send('First');
@@ -44,7 +48,7 @@ describe('chat cancellation', () => {
         .fn()
         .mockResolvedValue(new Response(JSON.stringify({ reply: 'A long answer '.repeat(40) }))),
     );
-    const { result } = renderHook(() => useAiChat());
+    const { result } = renderHook(() => useAssistant());
     let request!: Promise<void>;
     act(() => {
       request = result.current.send('Projects');
@@ -58,5 +62,47 @@ describe('chat cancellation', () => {
     });
     expect(result.current.messages).toEqual([]);
     expect(result.current.sending).toBe(false);
+  });
+});
+
+describe('assistant streaming', () => {
+  it('renders tool activity and token deltas from SSE', async () => {
+    const encoder = new TextEncoder();
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode(
+            'event: tool\ndata: {"id":"context","name":"portfolio_search","label":"Searched portfolio context","status":"done"}\n\n',
+          ),
+        );
+        controller.enqueue(encoder.encode('event: delta\ndata: {"text":"Hel"}\n\n'));
+        controller.enqueue(encoder.encode('event: delta\ndata: {"text":"lo"}\n\n'));
+        controller.enqueue(
+          encoder.encode(
+            'event: done\ndata: {"reply":"Hello","sources":[{"title":"Nexagon","description":"Case study","href":"/projects/nexagon"}]}\n\n',
+          ),
+        );
+        controller.close();
+      },
+    });
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(body, {
+          headers: { 'Content-Type': 'text/event-stream; charset=utf-8' },
+        }),
+      ),
+    );
+
+    const { result } = renderHook(() => useAssistant());
+    await act(async () => {
+      await result.current.send('Hi');
+    });
+
+    const answer = result.current.messages.find((message) => message.role === 'assistant');
+    expect(answer?.content).toBe('Hello');
+    expect(answer?.streaming).toBe(false);
+    expect(answer?.sources?.[0]).toMatchObject({ title: 'Nexagon' });
   });
 });

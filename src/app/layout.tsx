@@ -5,7 +5,7 @@ import { SettingsProvider } from '@/app/providers/ThemeProvider';
 import { ModalProvider } from '@/app/providers/ModalProvider';
 import { ActivityProvider } from '@/app/providers/ActivityProvider';
 import { NavProvider } from '@/app/providers/NavProvider';
-import { ChatProvider } from '@/app/providers/ChatProvider';
+import { WorkspaceProvider } from '@/app/providers/WorkspaceProvider';
 import { Workspace } from '@/widgets/workspace';
 import Cursor from '@/shared/ui/Cursor/Cursor';
 import { SmoothScrolling } from '@/widgets/smooth-scrolling/SmoothScrolling';
@@ -53,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <meta name="theme-color" content="#ffffff" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <title>Dr.ME Portfolio</title>
       </head>
       <body
         className={`${GeistSans.variable} ${GeistMono.variable}`}
@@ -63,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ModalProvider>
             <ActivityProvider>
               <NavProvider>
-                <ChatProvider>
+                <WorkspaceProvider>
                   <PageTransitionProvider>
                     <Workspace>
                       <LoadingCurtain />
@@ -75,7 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     </Workspace>
                     <Cursor />
                   </PageTransitionProvider>
-                </ChatProvider>
+                </WorkspaceProvider>
               </NavProvider>
             </ActivityProvider>
           </ModalProvider>

@@ -2,172 +2,157 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import {
-  Code2,
-  Briefcase,
-  Compass,
-  FolderOpen,
-  Mail,
-  FileText,
-  Wrench,
-  Square,
-  PanelRightClose,
+  ArrowUpRight,
   Bell,
-  MessageCircle,
+  Briefcase,
   CheckCheck,
+  Code2,
+  Copy,
+  FolderOpen,
   History,
+  Mail,
+  MessageCircle,
   MessageSquarePlus,
+  Pencil,
+  PanelRightClose,
+  RotateCcw,
+  Square,
+  Terminal,
 } from 'lucide-react';
-import { Trash, ArrowDown, ArrowUpRight, ArrowUp, Warning } from '@/shared/ui/Icon';
-import { useChat } from '@/app/providers/ChatProvider';
-import { CHAT_QUOTA_LIMIT } from '@/app/api/chat/quota';
+import { ArrowDown, ArrowUp, Trash, Warning } from '@/shared/ui/Icon';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
+import { useNav } from '@/app/providers/NavProvider';
+import { ASSISTANT_QUOTA_LIMIT } from '@/app/api/assistant/quota';
+import {
+  ASSISTANT_COMMANDS,
+  ASSISTANT_MODELS,
+  filterAssistantCommands,
+  type AssistantCommand,
+  type AssistantModelId,
+} from '@/entities/assistant';
 import { profile } from '@/entities/profile';
 import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 import { Suggestions } from '@/shared/ui/agent-elements/Suggestions';
 import type { SuggestionItem } from '@/shared/ui/agent-elements/Suggestions';
 import { ThinkingTool } from '@/shared/ui/agent-elements/ThinkingTool';
-import GuideCat from '@/widgets/mascot/GuideCat';
-import GuideCompanion from '@/widgets/mascot/GuideCompanion';
-import { useAiChat } from '@/widgets/mascot/useAiChat';
-import MarkdownMessage from '@/widgets/mascot/MarkdownMessage';
+import AssistantAvatar from '@/widgets/assistant/AssistantAvatar';
+import AssistantMarkdown from '@/widgets/assistant/AssistantMarkdown';
+import { useAssistant } from '@/widgets/assistant/useAssistant';
 import styles from './Sidebar.module.scss';
 import WorkspaceSettings from '@/widgets/workspace/WorkspaceSettings';
 import ExplorePanel from '@/widgets/workspace/ExplorePanel';
 import { Separator } from '@/shared/ui';
 import SidebarRail from './SidebarRail';
 
-/*  Geist-style chat: user messages are inverted pills, assistant replies
-    are plain rows (no bubbles), composer sends with an arrow button.  */
+/*  Geist-style assistant: user messages are inverted pills, answers are
+    plain rows (no bubbles), and the composer sends with an arrow button.
+    Slash commands navigate the portfolio or control the conversation.  */
+
+const STARTER_PROMPTS = [
+  {
+    label: 'Backend',
+    prompt: 'Which projects best show backend and systems work?',
+    icon: <Code2 size={13} />,
+  },
+  {
+    label: 'Nexagon',
+    prompt: 'Tell me about Nexagon and the technical decisions behind it.',
+    icon: <FolderOpen size={13} />,
+  },
+  {
+    label: 'Experience',
+    prompt: 'What experience is most relevant for a product team?',
+    icon: <Briefcase size={13} />,
+  },
+] as const;
 
 export default function WorkspaceSidebar() {
-  const { open, setOpen, panel, panelWidth, setPanelWidth, openPanel } = useChat();
+  const { open, setOpen, panel, panelWidth, setPanelWidth, openPanel } = useWorkspace();
+  const { active } = useNav();
+  const pathname = usePathname();
+  const router = useRouter();
   const [readIds, setReadIds] = useState<number[]>([]);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [showJump, setShowJump] = useState(false);
+  const [commandIndex, setCommandIndex] = useState(0);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
   const {
     messages,
     sending,
-    thinkingLabel,
-    offline,
     quota,
+    model,
+    setModel,
     sessions,
     activeSessionId,
     switchSession,
     deleteSession,
     send,
     stop,
+    regenerate,
+    editMessage,
     clear,
-  } = useAiChat();
+  } = useAssistant();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const stickRef = useRef(true);
   const dockRef = useRef<HTMLButtonElement>(null);
   const historyRef = useRef<HTMLDetailsElement>(null);
-
-  const suggestedQuestions = useMemo(() => {
-    const context = messages
-      .slice(-3)
-      .map((message) => message.content)
-      .join(' ')
-      .toLowerCase();
-
-    if (context.includes('nexagon') || context.includes('webgpu') || context.includes('rust')) {
-      return [
-        {
-          label: 'Architecture',
-          prompt: 'What technical decisions shaped Nexagon?',
-        },
-        { label: 'Systems', prompt: 'Which other projects show systems work?' },
-        { label: 'Live UI', prompt: 'How does he approach real-time interfaces?' },
-      ];
-    }
-    if (
-      context.includes('available') ||
-      context.includes('freelance') ||
-      context.includes('full-time')
-    ) {
-      return [
-        { label: 'Good collaboration fit', prompt: 'What kind of collaboration is a good fit?' },
-        { label: 'Product-focused projects', prompt: 'Which projects best show product work?' },
-        { label: 'How to get in touch', prompt: 'How can I get in touch with Vyacheslav?' },
-      ];
-    }
-    if (
-      context.includes('experience') ||
-      context.includes('team') ||
-      context.includes('timeline')
-    ) {
-      return [
-        {
-          label: 'Relevant product experience',
-          prompt: 'Which experience is most relevant to a product team?',
-        },
-        { label: 'End-to-end ownership', prompt: 'What does he usually own end to end?' },
-        { label: 'What to explore next', prompt: 'Which project should I look at next?' },
-      ];
-    }
-    if (
-      context.includes('backend') ||
-      context.includes('systems') ||
-      context.includes('infrastructure')
-    ) {
-      return [
-        { label: 'Beyond the frontend', prompt: 'What did he build beyond the frontend?' },
-        { label: 'Deepest architecture', prompt: 'Which project has the deepest architecture?' },
-        {
-          label: 'Speed vs engineering depth',
-          prompt: 'How does he balance speed and engineering depth?',
-        },
-      ];
-    }
-    return [
-      {
-        label: 'Backend',
-        prompt: 'Which projects best show backend and systems work?',
-      },
-      {
-        label: 'Nexagon',
-        prompt: 'Tell me about Nexagon and the technical decisions behind it.',
-      },
-      {
-        label: 'Experience',
-        prompt: 'What experience is most relevant for a product team?',
-      },
-    ];
-  }, [messages]);
+  const copyTimer = useRef<number | null>(null);
 
   const suggestionItems = useMemo<SuggestionItem[]>(
     () =>
-      suggestedQuestions.map((question, index) => ({
-        id: question.prompt,
-        label: question.label,
-        value: question.prompt,
-        icon:
-          index === 0 ? (
-            <Code2 size={13} />
-          ) : index === 1 ? (
-            <FolderOpen size={13} />
-          ) : (
-            <Briefcase size={13} />
-          ),
+      STARTER_PROMPTS.map((starter) => ({
+        id: starter.prompt,
+        label: starter.label,
+        value: starter.prompt,
+        icon: starter.icon,
       })),
-    [suggestedQuestions],
+    [],
   );
-  const hasStreamingMessage = messages.some((message) => message.streaming);
+
+  const assistantVisible = open && panel === 'assistant';
+  const streamingMessage = messages.find((message) => message.streaming);
+  const hasAnswerContent = messages.some(
+    (message) => message.streaming && message.content.length > 0,
+  );
+  const thinkingLabel =
+    streamingMessage && streamingMessage.tools && streamingMessage.tools.length > 0
+      ? streamingMessage.tools[streamingMessage.tools.length - 1].label
+      : 'Thinking…';
   const completed = messages.filter(
     (message) => message.role === 'assistant' && !message.streaming && !message.interrupted,
   );
   const completedKey = completed.map((message) => message.id).join(',');
-  const chatVisible = open && panel === 'chat';
   const unread = completed.filter((message) => !readIds.includes(message.id)).length;
+  const lastAssistantId = [...messages]
+    .reverse()
+    .find((message) => message.role === 'assistant' && !message.streaming)?.id;
+  const activeSession = sessions.find((session) => session.id === activeSessionId);
+  const commandQuery = draft.startsWith('/') && !/\s/.test(draft) ? draft : '';
+  const commandMatches = useMemo(
+    () => (commandQuery ? filterAssistantCommands(commandQuery) : []),
+    [commandQuery],
+  );
+  const showCommands = commandMatches.length > 0;
+  const quotaHint = quota.blocked
+    ? `Quota reached · back in ~${quota.resetHours}h`
+    : `${quota.remaining} of ${ASSISTANT_QUOTA_LIMIT} left today`;
+  const quotaPercent = Math.round((quota.remaining / ASSISTANT_QUOTA_LIMIT) * 100);
+  const panelTitle =
+    panel === 'notifications'
+      ? 'Notifications'
+      : panel === 'explore'
+        ? 'On this page'
+        : 'Appearance';
 
   useEffect(() => {
-    if (!chatVisible) return;
+    if (!assistantVisible) return;
     // Mark replies as seen only when their conversation is actually visible.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setReadIds(completedKey ? completedKey.split(',').map(Number) : []);
-  }, [chatVisible, completedKey]);
+  }, [assistantVisible, completedKey]);
 
   useEffect(() => {
     const input = inputRef.current;
@@ -177,9 +162,9 @@ export default function WorkspaceSidebar() {
   }, [draft]);
 
   useEffect(() => {
-    if (chatVisible) inputRef.current?.focus({ preventScroll: true });
-    else if (!open && document.activeElement?.closest('#chat')) dockRef.current?.focus();
-  }, [open, chatVisible]);
+    if (assistantVisible) inputRef.current?.focus({ preventScroll: true });
+    else if (!open && document.activeElement?.closest('#assistant')) dockRef.current?.focus();
+  }, [open, assistantVisible]);
 
   useEffect(() => {
     if (stickRef.current) {
@@ -190,20 +175,38 @@ export default function WorkspaceSidebar() {
     }
   }, [messages, sending, open]);
 
+  useEffect(
+    () => () => {
+      if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+    },
+    [],
+  );
+
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && ['1', '2', '3', '4'].includes(e.key)) {
-        e.preventDefault();
-        if (e.key === '1') openPanel('chat');
-        if (e.key === '2') openPanel('notifications');
-        if (e.key === '3') openPanel('explore');
-        if (e.key === '4') openPanel('settings');
+    const onKey = (event: KeyboardEvent) => {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.shiftKey &&
+        ['1', '2', '3', '4'].includes(event.key)
+      ) {
+        event.preventDefault();
+        if (event.key === '1') openPanel('assistant');
+        if (event.key === '2') openPanel('notifications');
+        if (event.key === '3') openPanel('explore');
+        if (event.key === '4') openPanel('settings');
+        return;
+      }
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'Backspace') {
+        event.preventDefault();
+        clear();
+        setDraft('');
+        inputRef.current?.focus({ preventScroll: true });
         return;
       }
       if (
-        e.key === 'Escape' &&
+        event.key === 'Escape' &&
         open &&
-        !e.defaultPrevented &&
+        !event.defaultPrevented &&
         !document.querySelector('[data-workspace-menu]')
       ) {
         setOpen(false);
@@ -212,20 +215,94 @@ export default function WorkspaceSidebar() {
     };
     document.addEventListener('keydown', onKey, true);
     return () => document.removeEventListener('keydown', onKey, true);
-  }, [open, openPanel, setOpen]);
+  }, [clear, open, openPanel, setOpen]);
 
-  const submit = (text: string) => {
-    if (!text.trim() || sending) return;
+  const navigate = (rawHref: string) => {
+    const href = rawHref.startsWith('#') ? `/${rawHref}` : rawHref;
+    if (!window.matchMedia('(min-width: 1280px)').matches) setOpen(false);
+    const hash = href.startsWith('/#') ? href.slice(1) : null;
+    if (hash && window.location.pathname === '/') {
+      scrollToTarget(hash === '#hero' ? 0 : hash);
+      return;
+    }
+    router.push(href);
+  };
+
+  const handlePortfolioLink = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    event.preventDefault();
+    navigate(href);
+  };
+
+  const copyText = async (text: string, id: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopiedId(null), 1600);
+    } catch {
+      /* Clipboard permissions are optional; the message stays selectable. */
+    }
+  };
+
+  const copyLatest = () => {
+    const latest = [...messages].reverse().find((message) => message.role === 'assistant');
+    if (latest) void copyText(latest.content, latest.id);
+  };
+
+  const startNewConversation = () => {
+    clear();
+    setDraft('');
+    setReadIds([]);
+    inputRef.current?.focus({ preventScroll: true });
+  };
+
+  const runCommand = (command: AssistantCommand) => {
+    setDraft('');
+    setCommandIndex(0);
+    if (command.kind === 'navigate' && command.target) {
+      navigate(command.target);
+      return;
+    }
+    if (command.kind === 'prompt' && command.prompt) {
+      setDraft(command.prompt);
+      requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
+      return;
+    }
+    if (command.action === 'new') startNewConversation();
+    else if (command.action === 'stop') stop();
+    else if (command.action === 'copy') copyLatest();
+  };
+
+  const submit = (raw: string) => {
+    const text = raw.trim();
+    if (!text || sending) return;
+
+    if (text.startsWith('/')) {
+      const token = text.split(/\s+/)[0];
+      const command = ASSISTANT_COMMANDS.find((entry) => entry.name === token);
+      if (command) {
+        runCommand(command);
+        return;
+      }
+    }
+
     setDraft('');
     stickRef.current = true;
     setShowJump(false);
-    void send(text);
+    void send(text, { pathname, sectionId: active.sectionId ?? undefined });
+  };
+
+  const editCurrentMessage = (id: number) => {
+    const content = editMessage(id);
+    if (content === null) return;
+    setDraft(content);
+    requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
   };
 
   const onListScroll = () => {
-    const el = listRef.current;
-    if (!el) return;
-    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    const element = listRef.current;
+    if (!element) return;
+    const nearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
     stickRef.current = nearBottom;
     setShowJump(!nearBottom);
   };
@@ -237,82 +314,23 @@ export default function WorkspaceSidebar() {
     inputRef.current?.focus({ preventScroll: true });
   };
 
-  const statusDot = offline
-    ? 'bg-amber-400'
-    : sending
-      ? 'animate-pulse bg-[var(--accent-secondary)]'
-      : 'bg-[var(--accent-success)]';
-  const quotaHint = quota.blocked
-    ? `Quota reached · back in ~${quota.resetHours}h`
-    : `${quota.remaining} of ${CHAT_QUOTA_LIMIT} left today`;
-  const quotaPercent = Math.round((quota.remaining / CHAT_QUOTA_LIMIT) * 100);
-  const panelTitle =
-    panel === 'chat'
-      ? sessions.find((session) => session.id === activeSessionId)?.title || 'Portfolio guide'
-      : panel === 'notifications'
-        ? 'Notifications'
-        : panel === 'explore'
-          ? 'On this page'
-          : 'Appearance';
-  const panelSubtitle =
-    panel === 'chat'
-      ? hasStreamingMessage
-        ? 'Replying'
-        : sending
-          ? 'Thinking'
-          : offline
-            ? 'Local mode'
-            : 'Ready to help'
-      : '';
-
-  const previousCompletedKey = useRef(completedKey);
-  useEffect(() => {
-    if (
-      previousCompletedKey.current &&
-      previousCompletedKey.current !== completedKey &&
-      !chatVisible
-    ) {
-      const latest = completed[completed.length - 1];
-      if (latest) {
-        // The toast is an external notification synchronized with a completed reply.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setToastMessage(
-          latest.offline ? 'The local guide has replied' : 'Your portfolio answer is ready',
-        );
-        const timer = window.setTimeout(() => setToastMessage(null), 5200);
-        return () => window.clearTimeout(timer);
-      }
-    }
-    previousCompletedKey.current = completedKey;
-  }, [chatVisible, completed, completedKey]);
-
-  const handlePortfolioLink = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
-    const hash = href.startsWith('/#') ? href.slice(1) : null;
-    if (hash && window.location.pathname === '/') {
-      event.preventDefault();
-      scrollToTarget(hash);
-    }
-    if (!window.matchMedia('(min-width: 1280px)').matches) setOpen(false);
-  };
-
   return (
     <>
       <SidebarRail
         open={open}
         panel={panel}
-        sending={sending}
         unread={unread}
         dockRef={dockRef}
         openPanel={openPanel}
       />
       <section
-        id="chat"
+        id="assistant"
         aria-label="Portfolio workspace"
         aria-hidden={!open}
         inert={!open}
         data-open={open}
         className={styles.sidebar}
-        style={{ '--chat-panel-width': `${panelWidth}px` } as CSSProperties}
+        style={{ '--assistant-panel-width': `${panelWidth}px` } as CSSProperties}
       >
         <div
           role="separator"
@@ -347,27 +365,13 @@ export default function WorkspaceSidebar() {
           }}
         />
         <header className={styles.sidebarHeader}>
-          <GuideCompanion
-            mood={
-              hasStreamingMessage
-                ? 'replying'
-                : sending
-                  ? 'thinking'
-                  : draft
-                    ? 'listening'
-                    : messages.length
-                      ? 'ready'
-                      : 'idle'
-            }
-          />
           <div className={styles.identity}>
             <span className="truncate text-[13px] font-medium tracking-[-0.01em] text-[var(--text)]">
-              {panelTitle}
+              {panel === 'assistant' ? 'Assistant' : panelTitle}
             </span>
-            {panel === 'chat' && (
-              <span className={styles.statusLine}>
-                <span className={`size-1.5 rounded-full ${statusDot}`} aria-hidden="true" />
-                {panelSubtitle}
+            {panel === 'assistant' && (
+              <span className={styles.headerSubtitle}>
+                {activeSession?.title ?? 'Portfolio helper'}
               </span>
             )}
           </div>
@@ -375,11 +379,11 @@ export default function WorkspaceSidebar() {
             <details
               ref={historyRef}
               className={styles.historyMenu}
-              style={panel !== 'chat' ? { display: 'none' } : undefined}
+              style={panel !== 'assistant' ? { display: 'none' } : undefined}
             >
               <summary
-                aria-label="Chat history"
-                title="Saved chats"
+                aria-label="Conversation history"
+                title="Saved conversations"
                 tabIndex={open ? undefined : -1}
                 className={styles.headerAction}
               >
@@ -387,7 +391,7 @@ export default function WorkspaceSidebar() {
               </summary>
               <div className={styles.historyPopover}>
                 <div className={styles.historyHeading}>
-                  <span>Saved chats</span>
+                  <span>Saved conversations</span>
                   <span>{sessions.length}</span>
                 </div>
                 {sessions.length === 0 ? (
@@ -407,13 +411,16 @@ export default function WorkspaceSidebar() {
                         >
                           <span>{session.title}</span>
                           <time dateTime={new Date(session.updatedAt).toISOString()}>
-                            {new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(session.updatedAt)}
+                            {new Intl.DateTimeFormat(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                            }).format(session.updatedAt)}
                           </time>
                         </button>
                         <button
                           type="button"
                           aria-label={`Delete ${session.title}`}
-                          title="Delete chat"
+                          title="Delete conversation"
                           className={styles.historyDelete}
                           onClick={() => deleteSession(session.id)}
                         >
@@ -427,11 +434,11 @@ export default function WorkspaceSidebar() {
             </details>
             <button
               type="button"
-              onClick={clear}
-              style={panel !== 'chat' ? { display: 'none' } : undefined}
-              aria-label="Start a new chat"
+              onClick={startNewConversation}
+              style={panel !== 'assistant' ? { display: 'none' } : undefined}
+              aria-label="Start a new conversation"
               aria-keyshortcuts="Control Shift Backspace"
-              title="New chat · Ctrl+Shift+Backspace"
+              title="New conversation · Ctrl+Shift+Backspace"
               tabIndex={open ? undefined : -1}
               className={styles.headerAction}
             >
@@ -440,7 +447,7 @@ export default function WorkspaceSidebar() {
             <Separator
               orientation="vertical"
               className={styles.headerSeparator}
-              style={panel !== 'chat' ? { display: 'none' } : undefined}
+              style={panel !== 'assistant' ? { display: 'none' } : undefined}
             />
             <button
               type="button"
@@ -505,14 +512,14 @@ export default function WorkspaceSidebar() {
                   className={styles.notification}
                   data-unread={!readIds.includes(message.id)}
                   onClick={() => {
-                    openPanel('chat');
+                    openPanel('assistant');
                     stickRef.current = true;
                   }}
                 >
                   <MessageCircle size={16} />
                   <span>
                     <strong>
-                      {message.offline ? 'Local guide replied' : 'Your answer is ready'}
+                      {message.offline ? 'Local assistant replied' : 'A new answer is ready'}
                     </strong>
                     <span>{message.content.replace(/[*#`]/g, '').slice(0, 140)}</span>
                   </span>
@@ -523,7 +530,10 @@ export default function WorkspaceSidebar() {
           </div>
         )}
 
-        <div className={styles.chatBody} style={panel !== 'chat' ? { display: 'none' } : undefined}>
+        <div
+          className={styles.assistantBody}
+          style={panel !== 'assistant' ? { display: 'none' } : undefined}
+        >
           <div
             ref={listRef}
             onScroll={onListScroll}
@@ -538,11 +548,11 @@ export default function WorkspaceSidebar() {
                 <Warning size={14} className="mt-0.5 shrink-0 text-amber-300" aria-hidden="true" />
                 <div className="min-w-0">
                   <p className="m-0 text-[0.76rem] font-medium text-[var(--text)]">
-                    Daily chat limit reached
+                    Daily assistant limit reached
                   </p>
                   <p className="mt-1 mb-0 text-[0.68rem] leading-[1.5] text-[var(--text-secondary)]">
-                    You&apos;ve used all {CHAT_QUOTA_LIMIT} questions for today. New questions will
-                    be available in about {quota.resetHours}h.
+                    You&apos;ve used all {ASSISTANT_QUOTA_LIMIT} questions for today. New questions
+                    will be available in about {quota.resetHours}h.
                   </p>
                 </div>
               </div>
@@ -550,13 +560,16 @@ export default function WorkspaceSidebar() {
             {messages.length === 0 && !sending && (
               <div className={styles.emptyOverview}>
                 <div className={styles.overviewIntro}>
-                  <span className={styles.overviewMascot}>
-                    <GuideCat size={38} />
+                  <span className={styles.overviewAvatar}>
+                    <AssistantAvatar size={30} />
                   </span>
                   <div>
-                    <span className={styles.eyebrow}>PORTFOLIO GUIDE</span>
+                    <span className={styles.eyebrow}>ASSISTANT</span>
                     <h2>Good work starts with a good question.</h2>
-                    <p>Explore the work or ask me about the thinking behind it.</p>
+                    <p>
+                      Ask about Vyacheslav&apos;s projects, experience, writing, or how to get in
+                      touch.
+                    </p>
                   </div>
                 </div>
                 <Link
@@ -568,6 +581,13 @@ export default function WorkspaceSidebar() {
                   <span>{profile.brandTagline.replace('Building things that matter. ', '')}</span>
                   <ArrowUpRight size={14} />
                 </Link>
+                <div className={styles.starters} aria-label="Suggested questions">
+                  <Suggestions
+                    items={suggestionItems}
+                    disabled={sending || quota.blocked}
+                    onSelect={(item) => submit(item.value ?? item.label)}
+                  />
+                </div>
                 <div className={styles.quickLinks} aria-label="Explore portfolio">
                   <Link
                     href="/#projects"
@@ -597,29 +617,54 @@ export default function WorkspaceSidebar() {
               </div>
             )}
 
-            {messages.map((m) =>
-              m.role === 'user' ? (
-                <div key={m.id} className="animate-msg-in flex flex-col items-end">
+            {messages.map((message) =>
+              message.role === 'user' ? (
+                <div
+                  key={message.id}
+                  className={`${styles.messageGroup} animate-msg-in flex flex-col items-end`}
+                >
                   <div className="max-w-[82%] rounded-[14px] rounded-br-[5px] bg-[var(--text)] px-4 py-3 text-[0.84rem] leading-[1.6] whitespace-pre-wrap text-[var(--bg)]">
-                    <MarkdownMessage content={m.content} />
+                    <AssistantMarkdown content={message.content} onAction={navigate} />
+                  </div>
+                  <div className={styles.messageActions}>
+                    <button
+                      type="button"
+                      className={styles.messageAction}
+                      onClick={() => editCurrentMessage(message.id)}
+                      disabled={sending}
+                      aria-label="Edit this message"
+                    >
+                      <Pencil size={12} />
+                      Edit
+                    </button>
                   </div>
                 </div>
               ) : (
-                <div key={m.id} className="animate-msg-in flex items-start gap-3 py-1">
-                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)]">
-                    <GuideCat size={21} />
+                <div
+                  key={message.id}
+                  className={`${styles.messageGroup} animate-msg-in flex items-start gap-3 py-1`}
+                >
+                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg text-[var(--accent-secondary)]">
+                    <AssistantAvatar size={17} />
                   </span>
                   <div className="min-w-0 flex-1 pt-px text-[0.875rem] leading-[1.72] text-[var(--text)]">
-                    <MarkdownMessage content={m.content} />
-                    {m.interrupted && (
+                    {message.streaming && !message.content && (
+                      <div className="flex min-h-7 items-center">
+                        <ThinkingTool label={thinkingLabel} />
+                      </div>
+                    )}
+                    {message.content && (
+                      <AssistantMarkdown content={message.content} onAction={navigate} />
+                    )}
+                    {message.interrupted && (
                       <p className="mt-2 text-xs text-[var(--text-secondary)]">Response stopped</p>
                     )}
-                    {m.offline && (
+                    {message.offline && (
                       <span className="mt-1.5 inline-block rounded-full border border-[var(--border)] px-1.5 py-px text-[0.6rem] text-[var(--text-dim)]">
-                        Answered from the local portfolio guide
+                        Answered from local portfolio context
                       </span>
                     )}
-                    {!m.streaming && m.sources && m.sources.length > 0 && (
+                    {!message.streaming && message.sources && message.sources.length > 0 && (
                       <nav
                         aria-label="Related portfolio content"
                         className="mt-4 grid gap-2 whitespace-normal"
@@ -627,44 +672,78 @@ export default function WorkspaceSidebar() {
                         <span className="text-[0.62rem] font-medium text-[var(--text-dim)]">
                           Related portfolio content
                         </span>
-                        {m.sources.map((source) => (
-                          <a
-                            key={source.href}
-                            href={source.href.startsWith('#') ? `/${source.href}` : source.href}
-                            onClick={(event) => {
-                              const href = source.href.startsWith('#')
-                                ? `/${source.href}`
-                                : source.href;
-                              handlePortfolioLink(event, href);
-                            }}
-                          className="group flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-elevated)]/35 px-3 py-2.5 text-left no-underline outline-none transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--glass-hover)] focus-visible:border-[var(--geist-focus)]"
-                          >
-                            <span className="min-w-0">
-                              <span className="block text-[0.72rem] font-medium text-[var(--text)]">
-                                {source.title}
+                        {message.sources.map((source) => {
+                          const href = source.href.startsWith('#')
+                            ? `/${source.href}`
+                            : source.href;
+                          return (
+                            <a
+                              key={source.href}
+                              href={href}
+                              onClick={(event) => handlePortfolioLink(event, href)}
+                              className="group flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-elevated)]/35 px-3 py-2.5 text-left no-underline outline-none transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--glass-hover)] focus-visible:border-[var(--geist-focus)]"
+                            >
+                              <span className="min-w-0">
+                                <span className="block text-[0.72rem] font-medium text-[var(--text)]">
+                                  {source.title}
+                                </span>
+                                <span className="block truncate text-[0.62rem] text-[var(--text-dim)]">
+                                  {source.description}
+                                </span>
                               </span>
-                              <span className="block truncate text-[0.62rem] text-[var(--text-dim)]">
-                                {source.description}
-                              </span>
-                            </span>
-                            <ArrowUpRight
-                              size={13}
-                              aria-hidden="true"
-                              className="shrink-0 text-[var(--text-ghost)]"
-                            />
-                          </a>
-                        ))}
+                              <ArrowUpRight
+                                size={13}
+                                aria-hidden="true"
+                                className="shrink-0 text-[var(--text-ghost)]"
+                              />
+                            </a>
+                          );
+                        })}
                       </nav>
+                    )}
+                    {!message.streaming && message.content && (
+                      <div className={styles.messageActions}>
+                        <button
+                          type="button"
+                          className={styles.messageAction}
+                          onClick={() => void copyText(message.content, message.id)}
+                          aria-label="Copy this answer"
+                        >
+                          {copiedId === message.id ? <CheckCheck size={12} /> : <Copy size={12} />}
+                          {copiedId === message.id ? 'Copied' : 'Copy'}
+                        </button>
+                        {message.id === lastAssistantId && (
+                          <button
+                            type="button"
+                            className={styles.messageAction}
+                            onClick={() =>
+                              regenerate({
+                                pathname,
+                                sectionId: active.sectionId ?? undefined,
+                              })
+                            }
+                            disabled={sending}
+                            aria-label="Regenerate this answer"
+                          >
+                            <RotateCcw size={12} />
+                            Regenerate
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
               ),
             )}
 
-            {sending && !hasStreamingMessage && (
-              <div className="animate-msg-in flex items-start gap-2.5 py-0.5">
-                <GuideCat size={24} />
-                <ThinkingTool label={thinkingLabel} />
+            {sending && !hasAnswerContent && !streamingMessage && (
+              <div className={`${styles.messageGroup} animate-msg-in flex items-start gap-3 py-1`}>
+                <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg text-[var(--accent-secondary)]">
+                  <AssistantAvatar size={17} />
+                </span>
+                <div className="flex min-h-7 min-w-0 flex-1 items-center">
+                  <ThinkingTool label={thinkingLabel} />
+                </div>
               </div>
             )}
           </div>
@@ -682,9 +761,29 @@ export default function WorkspaceSidebar() {
           </button>
 
           <div className={styles.composerArea}>
+            {showCommands && (
+              <div className={styles.commandMenu} role="listbox" aria-label="Assistant commands">
+                {commandMatches.map((command, index) => (
+                  <button
+                    key={command.id}
+                    type="button"
+                    role="option"
+                    aria-selected={index === commandIndex}
+                    data-active={index === commandIndex}
+                    className={styles.commandRow}
+                    onMouseEnter={() => setCommandIndex(index)}
+                    onClick={() => runCommand(command)}
+                  >
+                    <Terminal size={13} />
+                    <span className={styles.commandName}>{command.name}</span>
+                    <span className={styles.commandDescription}>{command.description}</span>
+                  </button>
+                ))}
+              </div>
+            )}
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
+              onSubmit={(event) => {
+                event.preventDefault();
                 submit(draft);
               }}
               className="flex min-h-12 items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--border-hover)] bg-transparent py-1.5 pr-1.5 pl-3.5 transition-colors focus-within:border-[var(--text-secondary)]"
@@ -692,9 +791,37 @@ export default function WorkspaceSidebar() {
               <textarea
                 ref={inputRef}
                 value={draft}
-                onChange={(e) => setDraft(e.target.value)}
+                onChange={(event) => {
+                  setDraft(event.target.value);
+                  setCommandIndex(0);
+                }}
                 rows={1}
                 onKeyDown={(event) => {
+                  if (showCommands) {
+                    if (event.key === 'ArrowDown') {
+                      event.preventDefault();
+                      setCommandIndex((index) => (index + 1) % commandMatches.length);
+                      return;
+                    }
+                    if (event.key === 'ArrowUp') {
+                      event.preventDefault();
+                      setCommandIndex(
+                        (index) => (index - 1 + commandMatches.length) % commandMatches.length,
+                      );
+                      return;
+                    }
+                    if (
+                      event.key === 'Enter' &&
+                      !event.shiftKey &&
+                      !event.nativeEvent.isComposing
+                    ) {
+                      event.preventDefault();
+                      const command =
+                        commandMatches[Math.min(commandIndex, commandMatches.length - 1)];
+                      if (command) runCommand(command);
+                      return;
+                    }
+                  }
                   if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
                     event.preventDefault();
                     submit(draft);
@@ -703,9 +830,9 @@ export default function WorkspaceSidebar() {
                 placeholder={
                   quota.blocked
                     ? 'Daily quota reached — come back tomorrow'
-                    : 'Ask about a project or experience'
+                    : 'Ask about Vyacheslav, or type / for commands'
                 }
-                aria-label="Chat message"
+                aria-label="Message the assistant"
                 maxLength={2000}
                 autoComplete="off"
                 disabled={quota.blocked}
@@ -724,89 +851,38 @@ export default function WorkspaceSidebar() {
                 {sending ? <Square size={13} fill="currentColor" /> : <ArrowUp size={14} />}
               </button>
             </form>
-            <div className={styles.composerSuggestions}>
-              <Suggestions
-                className="min-w-0 flex-1"
-                items={suggestionItems}
-                disabled={sending || quota.blocked}
-                onSelect={(item) => {
-                  setDraft(item.value ?? item.label);
-                  inputRef.current?.focus({ preventScroll: true });
-                }}
-              />
-              <details className={styles.composerTools}>
-                <summary
-                  title="Page actions"
-                  aria-label="Page actions"
-                  className="flex size-7 cursor-pointer list-none items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--glass-hover)] focus-visible:outline-2 [&::-webkit-details-marker]:hidden"
-                >
-                  <Wrench size={14} />
-                </summary>
-                <nav
-                  aria-label="Page actions"
-                  className="absolute right-0 bottom-9 z-20 w-44 rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] p-1 shadow-lg"
-                >
-                  {[
-                    { label: 'Open projects', href: '/#projects', Icon: FolderOpen },
-                    { label: 'Open experience', href: '/#experience', Icon: Briefcase },
-                    { label: 'Open contact', href: '/#contact', Icon: Mail },
-                    { label: 'View resume', href: '/resume', Icon: FileText },
-                    { label: 'Back to top', href: '/#hero', Icon: Compass },
-                  ].map(({ label, href, Icon }) => (
-                    <a
-                      key={href}
-                      href={href}
-                      onClick={(event) => {
-                        event.currentTarget.closest('details')?.removeAttribute('open');
-                        const hash = href.startsWith('/#') ? href.slice(1) : null;
-                        if (hash && hash === '#hero' && window.location.pathname === '/') {
-                          event.preventDefault();
-                          scrollToTarget(0);
-                          if (!window.matchMedia('(min-width: 1280px)').matches) setOpen(false);
-                          return;
-                        }
-                        handlePortfolioLink(event, href);
-                      }}
-                      className="flex items-center gap-2 rounded px-2 py-2 text-xs text-[var(--text-secondary)] no-underline hover:bg-[var(--glass-hover)] focus-visible:outline-2"
-                    >
-                      <Icon size={14} />
-                      {label}
-                    </a>
-                  ))}
-                </nav>
-              </details>
-            </div>
             <div className={styles.composerMeta}>
               <span>{quotaHint}</span>
-              <span
-                className={styles.quotaGauge}
-                role="progressbar"
-                aria-label="Daily chat quota remaining"
-                aria-valuemin={0}
-                aria-valuemax={CHAT_QUOTA_LIMIT}
-                aria-valuenow={quota.remaining}
-              >
-                <span style={{ width: `${quotaPercent}%` }} />
+              <span className={styles.composerToolbar}>
+                <span
+                  className={styles.quotaGauge}
+                  role="progressbar"
+                  aria-label="Daily assistant quota remaining"
+                  aria-valuemin={0}
+                  aria-valuemax={ASSISTANT_QUOTA_LIMIT}
+                  aria-valuenow={quota.remaining}
+                >
+                  <span style={{ width: `${quotaPercent}%` }} />
+                </span>
+                <select
+                  className={styles.modelPicker}
+                  value={model}
+                  onChange={(event) => setModel(event.target.value as AssistantModelId)}
+                  aria-label="Assistant model"
+                  title="Assistant model"
+                  disabled={sending}
+                >
+                  {ASSISTANT_MODELS.map((entry) => (
+                    <option key={entry.id} value={entry.id} title={entry.note}>
+                      {entry.label}
+                    </option>
+                  ))}
+                </select>
               </span>
             </div>
           </div>
         </div>
       </section>
-      {toastMessage && (
-        <button
-          type="button"
-          className={styles.toast}
-          onClick={() => {
-            setToastMessage(null);
-            openPanel('chat');
-          }}
-          role="status"
-        >
-          <span className={styles.toastDot} />
-          <span>{toastMessage}</span>
-          <MessageCircle size={14} />
-        </button>
-      )}
     </>
   );
 }

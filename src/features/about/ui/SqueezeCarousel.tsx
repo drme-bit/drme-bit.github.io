@@ -43,7 +43,7 @@ export function SqueezeCarousel() {
               tabIndex={0}
               aria-pressed={selected}
               aria-label={`${h.title}${selected ? ' (current)' : ''}`}
-              onClick={() => setActive(i)}
+              onFocus={() => setActive(i)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
@@ -61,7 +61,9 @@ export function SqueezeCarousel() {
                 fill
                 sizes="(max-width: 768px) 100vw, 640px"
                 quality={80}
-                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+                className={`object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  selected ? 'scale-100' : 'scale-[1.15]'
+                }`}
               />
               <div
                 aria-hidden="true"
@@ -72,7 +74,7 @@ export function SqueezeCarousel() {
               {/* Squeezed state: vertical label */}
               <div
                 aria-hidden="true"
-                className={`absolute inset-x-0 bottom-0 flex items-center gap-3 p-2 text-white transition-opacity duration-300 ${
+                className={`absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 p-2 text-white transition-opacity duration-300 ${
                   selected ? 'pointer-events-none opacity-0' : 'opacity-100'
                 }`}
               >
@@ -89,9 +91,6 @@ export function SqueezeCarousel() {
                   selected ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0'
                 }`}
               >
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/45 px-2.5 py-1 font-mono text-[0.6rem] tracking-[0.08em]">
-                  0{i + 1} — {h.tags?.[0] ?? 'workflow'}
-                </span>
                 <h4 className="m-0 font-display text-[clamp(1.2rem,2.4vw,1.7rem)] font-semibold tracking-[var(--tracking-tight)]">
                   {h.title}
                 </h4>

@@ -1,18 +1,18 @@
 'use client';
 
 import type { RefObject } from 'react';
-import { Bell, Compass, MessageCircle, Settings2, Sparkles } from 'lucide-react';
+import { Bell, Compass, Settings2 } from 'lucide-react';
 import { FiAtSign, FiGithub, FiLinkedin, SiDiscord } from '@/shared/ui/Icon';
-import type { SidebarPanel } from '@/app/providers/ChatProvider';
+import type { SidebarPanel } from '@/app/providers/WorkspaceProvider';
 import { profile, socialLinks } from '@/entities/profile';
 import { Separator } from '@/shared/ui';
+import AssistantAvatar from '@/widgets/assistant/AssistantAvatar';
 import WorkspaceMenu from '@/widgets/workspace/WorkspaceMenu';
 import styles from './Sidebar.module.scss';
 
 interface SidebarRailProps {
   open: boolean;
   panel: SidebarPanel;
-  sending: boolean;
   unread: number;
   dockRef: RefObject<HTMLButtonElement | null>;
   openPanel: (panel: SidebarPanel) => void;
@@ -21,31 +21,28 @@ interface SidebarRailProps {
 export default function SidebarRail({
   open,
   panel,
-  sending,
   unread,
   dockRef,
   openPanel,
 }: SidebarRailProps) {
   return (
-    <aside className={styles.rail} data-open={open} aria-label="Portfolio guide dock">
+    <aside className={styles.rail} data-open={open} aria-label="Workspace dock">
       <button
         ref={dockRef}
         type="button"
         className={styles.launcher}
-        onClick={() => openPanel('chat')}
-        data-active={open && panel === 'chat'}
-        aria-label={sending ? 'Open portfolio guide, response in progress' : 'Open portfolio guide'}
+        onClick={() => openPanel('assistant')}
+        data-active={open && panel === 'assistant'}
+        aria-label="Open the assistant"
         aria-expanded={open}
-        aria-controls="chat"
-        aria-current={open && panel === 'chat' ? 'page' : undefined}
+        aria-controls="assistant"
+        aria-current={open && panel === 'assistant' ? 'page' : undefined}
         aria-keyshortcuts="Control Shift 1 Meta Shift 1"
-        data-tooltip="Portfolio guide"
-        title="Portfolio guide · ⌘⇧1"
+        data-tooltip="Assistant"
+        title="Assistant · ⌘⇧1"
       >
-        <span className={styles.portrait} data-busy={sending}>
-          <MessageCircle size={19} strokeWidth={1.8} />
-          <Sparkles className="absolute -right-0.5 -top-0.5 rounded-full bg-background p-0.5 text-accent" size={12} />
-          <span className={styles.dot} data-busy={sending} />
+        <span className={styles.portrait}>
+          <AssistantAvatar size={19} />
         </span>
       </button>
       <Separator orientation="horizontal" className={styles.railSeparator} />

@@ -5,7 +5,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import {
-  FiArrowDown,
   FiDownload,
 } from '@/shared/ui/Icon';
 //GSAP
@@ -19,7 +18,7 @@ import useGithubStats from '@/shared/hooks/useGithubStats';
 import { TYPEWRITER_STRINGS } from '@/entities/hero';
 import { profile } from '@/entities/profile';
 import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
-import { useChat } from '@/app/providers/ChatProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 gsap.registerPlugin(CustomEase);
 
@@ -112,8 +111,8 @@ function ResumeRow({
 export default function Hero() {
   const [show, setShow] = useState(false);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
-  const { open: isChatOpen, panelWidth } = useChat();
-  const reservedRight = isChatOpen ? panelWidth + 72 : 56;
+  const { open: isWorkspaceOpen, panelWidth } = useWorkspace();
+  const reservedRight = isWorkspaceOpen ? panelWidth + 72 : 56;
   const stats = useGithubStats(profile.githubUsername);
   const sectionRef = useRef<HTMLElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
@@ -208,10 +207,6 @@ export default function Hero() {
     };
   }, [show]);
 
-  const scrollDown = useCallback(() => {
-    scrollToTarget('#about');
-  }, []);
-
   const hero = (
     <section
       id="hero"
@@ -225,14 +220,6 @@ export default function Hero() {
       >
         <div className="pointer-events-auto relative z-10 grid w-full max-w-[1180px] grid-cols-[1fr_0.95fr] items-center gap-[clamp(2rem,7vw,7rem)] px-[6vw] max-md:-translate-y-[2svh] max-md:grid-cols-1 max-md:gap-2 max-md:px-5">
           <div className="flex flex-col items-start text-left max-md:order-2 max-md:items-center max-md:text-center">
-            <div className="mb-5 flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[var(--text-dim)] max-md:mb-4 max-md:text-[0.55rem]">
-            <span className="relative flex h-2 w-2 items-center justify-center" aria-hidden="true">
-              <span className="absolute h-2 w-2 motion-safe:animate-ping rounded-full bg-[#18a874] opacity-35" />
-              <span className="relative h-1.5 w-1.5 rounded-full bg-[#18a874]" />
-            </span>
-            Independent developer <span className="text-[var(--text-ghost)]">/</span> Odesa, UA
-            </div>
-
             <h1
               ref={nameRef}
               className="mb-3 flex flex-col leading-[0.92] tracking-[-0.055em] max-md:mb-2"
@@ -254,14 +241,6 @@ export default function Hero() {
 
             <ResumeRow stats={stats} resumeRef={resumeRef} />
 
-            <div className="mb-4 flex items-center gap-2 font-mono text-[0.62rem] tracking-[0.035em] text-[var(--text-dim)] max-md:mb-3 max-md:gap-1.5 max-md:text-[0.55rem]" aria-label="Areas of work">
-              <span>game systems</span>
-              <span className="h-1 w-1 rounded-full bg-[var(--accent)]" aria-hidden="true" />
-              <span>web apps</span>
-              <span className="h-1 w-1 rounded-full bg-[var(--accent)]" aria-hidden="true" />
-              <span>automation</span>
-            </div>
-
             <p
               ref={taglineRef}
               className="m-0 max-w-[30ch] font-mono text-[0.72rem] lowercase leading-relaxed tracking-[0.08em] text-[var(--text-secondary)] max-md:text-[0.62rem]"
@@ -274,15 +253,6 @@ export default function Hero() {
             <HeroMascot mascotRef={mascotRef} />
           </div>
         </div>
-
-        <button
-          ref={scrollRef}
-          className="pointer-events-auto fixed bottom-8 left-1/2 flex -translate-x-1/2 cursor-pointer flex-col items-center gap-1.5 border-none bg-none p-1.5 text-[var(--text-dim)] transition-colors duration-300 hover:text-[var(--text-secondary)] max-md:bottom-[1.2rem] max-md:p-2.5 xl:left-[calc((100vw-var(--workspace-reserved-right))/2)]"
-          onClick={scrollDown}
-          aria-label="Scroll down"
-        >
-          <FiArrowDown size={13} />
-        </button>
       </div>
     </section>
   );

@@ -12,6 +12,7 @@ import type { CommitInfo, HeatmapData } from '../lib/github';
 import { SqueezeCarousel } from './SqueezeCarousel';
 import { PrinciplesComparison } from './PrinciplesComparison';
 import { HoverPreviewLink } from './HoverPreviewLink';
+import Link from 'next/link';
 
 const reveal = (inView: boolean) =>
   `transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
@@ -188,9 +189,9 @@ export default function About() {
 
           <p className="m-0 border-t border-[var(--border)] pt-5 text-[0.9rem] leading-[1.7] text-[var(--text-secondary)]">
             Have a project in mind?{' '}
-            <a href="#contact" className={inlineLinkClass}>
+            <Link href="#contact" className={inlineLinkClass}>
               Tell me about it.
-            </a>
+            </Link>
           </p>
         </div>
       </div>

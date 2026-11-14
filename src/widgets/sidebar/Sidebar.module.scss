@@ -6,7 +6,7 @@
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  width: var(--chat-panel-width, 408px);
+  width: var(--assistant-panel-width, 408px);
   max-width: calc(100vw - 64px);
   padding-bottom: env(safe-area-inset-bottom);
   border: 0;
@@ -84,6 +84,7 @@
   padding: 0 16px;
   border-bottom: 1px solid var(--border-hover);
 }
+
 .identity {
   display: flex;
   min-width: 0;
@@ -95,12 +96,13 @@
   font-size: 12px;
   letter-spacing: -0.01em;
 }
-.statusLine {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.headerSubtitle {
+  overflow: hidden;
   color: var(--text-dim);
   font-size: 10px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .headerAction {
   display: flex;
@@ -256,7 +258,7 @@
 
 }
 
-.chatBody {
+.assistantBody {
   position: relative;
   display: flex;
   flex: 1;
@@ -306,7 +308,7 @@
     line-height: 1.6;
   }
 }
-.overviewMascot {
+.overviewAvatar {
   display: flex;
   width: 46px;
   height: 46px;
@@ -400,50 +402,145 @@
   }
 }
 .composerArea {
+  position: relative;
   flex-shrink: 0;
   padding: 14px 18px 16px;
 }
-.composerSuggestions {
+.starters {
   display: flex;
-  min-height: 32px;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: -6px;
+}
+.commandMenu {
+  position: absolute;
+  right: 18px;
+  bottom: calc(100% - 4px);
+  left: 18px;
+  z-index: 20;
+  display: flex;
+  max-height: min(320px, 50vh);
+  flex-direction: column;
+  gap: 1px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-lg);
+}
+.commandRow {
+  display: flex;
+  width: 100%;
+  min-width: 0;
   align-items: center;
   gap: 8px;
-  margin-top: 10px;
-}
-.composerSuggestions > :first-child {
-  min-width: 0;
-  flex: 1;
-}
-.composerTools {
-  position: relative;
-  flex-shrink: 0;
-  summary {
-    display: flex;
-    width: 28px;
-    height: 28px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 5px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    list-style: none;
-    transition:
-      color 120ms,
-      background 120ms;
-    &::-webkit-details-marker {
-      display: none;
-    }
-    &:hover {
-      background: var(--glass-hover);
-      color: var(--text);
-    }
-    &:focus-visible {
-      outline: 2px solid var(--geist-focus);
-      outline-offset: 1px;
-    }
+  padding: 7px 9px;
+  border-radius: 5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+  > svg {
+    flex-shrink: 0;
+    color: var(--text-dim);
   }
-  nav {
-    bottom: 34px;
+  &:hover,
+  &:focus-visible,
+  &[data-active='true'] {
+    background: var(--glass-hover);
+    color: var(--text);
+    outline: none;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--geist-focus);
+    outline-offset: -2px;
+  }
+}
+.commandName {
+  flex-shrink: 0;
+  color: var(--text);
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+}
+.commandDescription {
+  overflow: hidden;
+  color: var(--text-dim);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.messageGroup {
+  width: 100%;
+  min-width: 0;
+}
+.messageActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 6px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.messageGroup:hover .messageActions,
+.messageGroup:focus-within .messageActions {
+  opacity: 1;
+}
+.messageAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  color: var(--text-dim);
+  font-size: 10px;
+  cursor: pointer;
+  &:hover,
+  &:focus-visible {
+    background: var(--glass-hover);
+    color: var(--text);
+    outline: none;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--geist-focus);
+    outline-offset: 1px;
+  }
+  &:disabled {
+    cursor: default;
+    opacity: 0.4;
+  }
+}
+.composerToolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modelPicker {
+  max-width: 104px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 10px;
+  cursor: pointer;
+  &:hover,
+  &:focus-visible {
+    background: var(--glass-hover);
+    color: var(--text);
+    outline: none;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--geist-focus);
+    outline-offset: 1px;
+  }
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+}
+@media (hover: none) {
+  .messageActions {
+    opacity: 1;
   }
 }
 .railTools {
@@ -618,50 +715,6 @@
     transition: width 220ms ease;
   }
 }
-.toast {
-  position: fixed;
-  top: 16px;
-  right: 76px;
-  z-index: 1100;
-  display: flex;
-  min-height: 36px;
-  align-items: center;
-  gap: 9px;
-  max-width: min(300px, calc(100vw - 32px));
-  padding: 8px 10px;
-  border: 1px solid color-mix(in srgb, var(--text) 16%, transparent);
-  border-radius: 7px;
-  background: var(--bg);
-  color: var(--text);
-  box-shadow: 0 8px 28px rgb(0 0 0 / 0.24);
-  font-size: 12px;
-  cursor: pointer;
-  animation: toast-in 180ms ease-out;
-  &:hover {
-    border-color: color-mix(in srgb, var(--text) 30%, transparent);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--geist-focus);
-    outline-offset: 2px;
-  }
-}
-.toastDot {
-  width: 6px;
-  height: 6px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--accent-secondary);
-}
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 .utilityBody {
   flex: 1;
   min-height: 0;
@@ -773,21 +826,21 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border-radius: 9px;
-  color: var(--text-secondary);
   cursor: pointer;
+  border-radius: 8px;
   transition:
     background 160ms,
     color 160ms;
 
   &:hover {
-    background: var(--glass-hover);
     color: var(--text);
   }
+
   &:focus-visible {
     outline: 2px solid var(--geist-focus);
     outline-offset: 2px;
   }
+
   &::after {
     position: absolute;
     right: calc(100% + 9px);
@@ -795,7 +848,6 @@
     padding: 6px 9px;
     border: 1px solid var(--border);
     border-radius: 6px;
-    background: var(--bg-elevated);
     color: var(--text);
     content: attr(data-tooltip);
     font-size: 11px;
@@ -824,46 +876,8 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-elevated);
   color: var(--text-secondary);
   transition: transform 180ms;
-
-  &[data-busy='true'] {
-    animation: working 1.8s ease-in-out infinite;
-  }
-}
-
-.dot {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 9px;
-  height: 9px;
-  border: 2px solid var(--bg-elevated);
-  border-radius: 50%;
-  background: var(--accent-success);
-
-  &[data-busy='true'] {
-    background: var(--accent-secondary);
-  }
-}
-
-.railStatus {
-  writing-mode: vertical-rl;
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-@keyframes working {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-4deg);
-  }
-  50% {
-    transform: translateY(-3px) rotate(4deg);
-  }
 }
 
 @media (max-width: 1279px) {
@@ -909,13 +923,6 @@
   .railFooter {
     margin: 0;
   }
-  .railStatus {
-    display: none;
-  }
-  .toast {
-    top: 12px;
-    right: 12px;
-  }
 }
 
 @media (max-width: 767px) {
@@ -939,16 +946,15 @@
   .identity > span:first-child { font-size: 13px; }
   .headerActions { gap: 1px; }
   .headerAction { width: 30px; height: 30px; }
-  .chatBody [data-lenis-prevent] {
+  .assistantBody [data-lenis-prevent] {
     padding: 12px;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
   }
   .composerArea { padding: 10px 10px max(10px, env(safe-area-inset-bottom, 0px)); }
-  .composerSuggestions { align-items: flex-start; gap: 6px; margin-top: 8px; }
+  .starters { gap: 2px; }
   .composerMeta { gap: 6px; font-size: 9px; }
   .quotaGauge { width: 42px; flex-basis: 42px; }
-  .toast { top: 68px; right: 12px; }
 }
 
 @media (min-width: 1280px) {
@@ -957,7 +963,7 @@
 
 :global(.reduced-motion) .portrait,
 :global(.reduced-motion) .sidebar,
-:global(.reduced-motion) .chatBody,
+:global(.reduced-motion) .assistantBody,
 :global(.reduced-motion) .utilityBody {
   animation: none !important;
   transition: none;
@@ -967,8 +973,7 @@
   .sidebar,
   .launcher,
   .portrait,
-  .toast,
-  .chatBody,
+  .assistantBody,
   .utilityBody {
     transition: none;
     animation: none !important;
