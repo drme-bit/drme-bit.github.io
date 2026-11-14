@@ -3,14 +3,14 @@
 import * as Popover from '@radix-ui/react-popover';
 import { useState } from 'react';
 import { MoreHorizontal, FolderOpen, FileText, Mail, ArrowUpRight } from 'lucide-react';
-import { useChat } from '@/app/providers/ChatProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import styles from './WorkspaceMenu.module.scss';
 import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 
 /** Compact navigation to portfolio destinations outside the workspace panels. */
 export default function WorkspaceMenu() {
   const [open, setOpen] = useState(false);
-  const { setOpen: setSidebarOpen } = useChat();
+  const { setOpen: setSidebarOpen } = useWorkspace();
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>

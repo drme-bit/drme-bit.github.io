@@ -4,10 +4,10 @@ import { TransitionLink } from '@/features/transitions';
 import { usePathname } from 'next/navigation';
 import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
 import { Menu } from '@/shared/ui/Icon';
-import { useChat } from '@/app/providers/ChatProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useNav } from '@/app/providers/NavProvider';
 import styles from './MobileNav.module.scss';
-import GuideCat from '@/widgets/mascot/GuideCat';
+import AssistantAvatar from '@/widgets/assistant/AssistantAvatar';
 import { GLOBAL_NAV } from '@/shared/config/navConfig';
 import type { NavGroup, NavRouteLink, NavLeaf } from '@/shared/config/navTypes';
 import { IconButton, Separator } from '@/shared/ui';
@@ -35,7 +35,7 @@ export function MobileNav() {
   const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
   const routes = GLOBAL_NAV.filter((item): item is NavRouteLink => item.type === 'route');
   const pathname = usePathname();
-  const { setOpen: setChatOpen } = useChat();
+  const { setOpen: setAssistantOpen } = useWorkspace();
   const { active } = useNav();
 
   return (
@@ -78,12 +78,12 @@ export function MobileNav() {
           <SheetClose asChild>
             <button
               type="button"
-              onClick={() => setChatOpen(true)}
+              onClick={() => setAssistantOpen(true)}
               className="flex min-h-[72px] items-center gap-3 rounded-xl bg-foreground px-4 py-3 text-left text-background transition-opacity hover:opacity-90 active:scale-[0.99]"
             >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-background/10"><GuideCat size={22} /></span>
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-background/10"><AssistantAvatar size={22} /></span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[14px] font-medium">Ask the portfolio guide</span>
+                <span className="block text-[14px] font-medium">Ask the assistant</span>
                 <span className="mt-0.5 block text-[12px] text-background/65">Projects, experience, or collaboration</span>
               </span>
               <span aria-hidden="true" className="text-lg">↗</span>

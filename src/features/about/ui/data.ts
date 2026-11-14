@@ -40,21 +40,18 @@ export const HIGHLIGHTS: Highlight[] = [
     icon: BsFillKanbanFill,
     title: 'Kanban Workflow',
     desc: 'I ship in small, frequent iterations — tasks move with intention from Backlog to Done.',
-    tags: ['productivity'],
     image: '/images/demonstration/kanban-demo.webp',
   },
   {
     icon: RiRobot2Fill,
     title: 'AI-Augmented',
     desc: 'Copilot, Cursor and agents as force multipliers for speed, refactoring and code quality.',
-    tags: ['tooling'],
     image: '/images/demonstration/jetbrains-ai-use-demo.webp',
   },
   {
     icon: FiZap,
     title: 'Deep Focus',
     desc: 'When something doesn\u2019t work, I don\u2019t stop — every bug is a puzzle that just needs more time.',
-    tags: ['mindset'],
     image: '/images/demonstration/me-coding-demo.webp',
   },
 ];

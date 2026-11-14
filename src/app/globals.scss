@@ -83,7 +83,7 @@
 
   --animate-name-shimmer: name-shimmer 5s ease-in-out infinite;
   @keyframes name-shimmer {
-    0%, 100% { background-position: 0% 50%; }
+    0%, 100% { background-position: 0 50%; }
     50% { background-position: 100% 50%; }
   }
 
@@ -851,7 +851,7 @@ body {
 // Chat + command palette carry their own focus language (tints, rings).
 // The global accent outline reads there as an off-theme square, and even
 // a neutral ring clashes — so no outline at all inside both surfaces.
-#chat :focus-visible,
+#assistant :focus-visible,
 [role='dialog'] :focus-visible {
   outline: none;
 }
@@ -881,8 +881,6 @@ body {
   position: fixed !important;
   inset: 0;
   width: 100%;
-  // lvh (not dvh): stable canvas when the iOS toolbar shows/hides.
-  height: 100vh;
   height: 100lvh;
 }
 

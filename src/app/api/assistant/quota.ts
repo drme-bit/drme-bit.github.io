@@ -1,12 +1,12 @@
-/*  Per-visitor question quota for /api/chat: LIMIT questions per rolling
+/*  Per-visitor question quota for /api/assistant: LIMIT questions per rolling
     WINDOW, keyed by client IP. In-memory and process-local (resets on cold
     start / differs across instances), so this is best-effort protection.
     Pure logic lives here so it stays unit-testable.  */
 
 // Generous for real visitors while keeping a per-IP ceiling on paid Gateway
 // calls. Vercel's API-key budget remains the hard dollar cap for the account.
-export const CHAT_QUOTA_LIMIT = 30;
-export const CHAT_QUOTA_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const ASSISTANT_QUOTA_LIMIT = 30;
+export const ASSISTANT_QUOTA_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 interface Bucket {
   used: number;
@@ -25,13 +25,13 @@ export interface QuotaCheck {
   reset: number;
 }
 
-export function checkChatQuota(ip: string, now: number = Date.now()): QuotaCheck {
+export function checkAssistantQuota(ip: string, now: number = Date.now()): QuotaCheck {
   let bucket = buckets.get(ip);
   if (!bucket || now >= bucket.reset) {
-    bucket = { used: 0, reset: now + CHAT_QUOTA_WINDOW_MS };
+    bucket = { used: 0, reset: now + ASSISTANT_QUOTA_WINDOW_MS };
     buckets.set(ip, bucket);
   }
-  if (bucket.used >= CHAT_QUOTA_LIMIT) {
+  if (bucket.used >= ASSISTANT_QUOTA_LIMIT) {
     return { allowed: false, remaining: 0, reset: bucket.reset };
   }
   bucket.used += 1;
@@ -42,10 +42,10 @@ export function checkChatQuota(ip: string, now: number = Date.now()): QuotaCheck
     }
   }
 
-  return { allowed: true, remaining: CHAT_QUOTA_LIMIT - bucket.used, reset: bucket.reset };
+  return { allowed: true, remaining: ASSISTANT_QUOTA_LIMIT - bucket.used, reset: bucket.reset };
 }
 
 /** Test-only escape hatch. */
-export function resetChatQuotaForTests(): void {
+export function resetAssistantQuotaForTests(): void {
   buckets.clear();
 }

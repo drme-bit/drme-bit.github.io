@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, type CSSProperties, type ReactNode } from 'react';
-import { useChat } from '@/app/providers/ChatProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { ContentWindow } from '@/widgets/content-window';
 import { WorkspaceSidebar } from '@/widgets/sidebar';
 import Navbar from '@/widgets/navbar/Navbar';
@@ -16,8 +16,8 @@ interface WorkspaceProps {
  * reading the page never becomes a cramped two-column exercise.
  */
 export function Workspace({ children }: WorkspaceProps) {
-  const { open: isChatOpen, panelWidth } = useChat();
-  const reservedRight = isChatOpen ? panelWidth + 72 : 56;
+  const { open: isWorkspaceOpen, panelWidth } = useWorkspace();
+  const reservedRight = isWorkspaceOpen ? panelWidth + 72 : 56;
 
   useEffect(() => {
     if (
@@ -27,7 +27,7 @@ export function Workspace({ children }: WorkspaceProps) {
       return;
     }
     window.dispatchEvent(new Event('resize'));
-  }, [isChatOpen]);
+  }, [isWorkspaceOpen]);
 
   return (
     <div

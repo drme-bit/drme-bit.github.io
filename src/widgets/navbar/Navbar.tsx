@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNav } from '@/app/providers/NavProvider';
-import { useChat } from '@/app/providers/ChatProvider';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { GLOBAL_NAV } from '@/shared/config/navConfig';
 import type { NavGroup, NavRouteLink, NavLeaf } from '@/shared/config/navTypes';
 import { Separator } from '@/shared/ui';
@@ -42,7 +42,7 @@ export default function Navbar() {
   const ref = useRef<HTMLElement>(null);
 
   const { pageConfig, setPageConfig, active, setActiveSection } = useNav();
-  const { open: chatOpen } = useChat();
+  const { open: workspaceOpen } = useWorkspace();
 
   const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
   const routes = GLOBAL_NAV.filter((item): item is NavRouteLink => item.type === 'route');
@@ -177,7 +177,7 @@ export default function Navbar() {
       data-section={active.sectionId || undefined}
       data-scrolled={scrolled}
       className={`fixed top-2 left-1 right-[52px] z-[999] w-auto rounded-[14px] bg-background px-[clamp(1rem,2.2vw,2rem)] max-lg:right-2 max-lg:pr-0 transition-[right,background-color] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none xl:left-2 ${
-        chatOpen ? 'xl:right-[var(--workspace-reserved-right)]' : 'xl:right-[56px]'
+        workspaceOpen ? 'xl:right-[var(--workspace-reserved-right)]' : 'xl:right-[56px]'
       }`}
       aria-label="Navigation"
     >
