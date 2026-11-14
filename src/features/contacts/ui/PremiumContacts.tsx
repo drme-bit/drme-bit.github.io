@@ -22,6 +22,7 @@ import {
 import { useContactForm } from '../model/useContactForm';
 import type { ContactFormData } from '../model/contacts';
 import { fieldConfigs, contactItems, socialLinks } from '@/entities/contact';
+import Link from 'next/link';
 
 const iconMap = {
   calendar: FiCalendar,
@@ -340,20 +341,19 @@ function Routes() {
         {socialLinks.map((link) => {
           const IconComponent = iconMap[link.icon];
           return (
-            <a
+            <Link
               key={link.id}
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-2 py-1 text-[0.78rem] text-[var(--text-secondary)] no-underline transition-colors hover:text-[var(--text)]"
+              className="group inline-flex items-center gap-2 py-1 text-[0.82rem] text-[var(--text-secondary)] no-underline transition-colors hover:text-[var(--text)]"
               aria-label={link.label}
             >
               <span className="inline-flex text-[var(--text-ghost)] transition-colors duration-200 group-hover:text-[var(--accent-secondary)]" aria-hidden="true">
                 <IconComponent size={15} />
               </span>
               <span className="min-w-0 truncate">{link.label}</span>
-              <span className="text-[var(--text-ghost)] transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">↗</span>
-            </a>
+            </Link>
           );
         })}
       </div>
@@ -385,10 +385,6 @@ export function PremiumContacts() {
           </div>
 
           <aside className="flex min-w-0 flex-col">
-            <div className="mb-7 flex items-center gap-2.5 border-b border-[var(--border)] pb-5 text-[0.8rem] text-[var(--text-secondary)]">
-              <span className="h-2 w-2 animate-status-pulse rounded-full bg-[var(--accent-success)]" aria-hidden="true" />
-              <span>Available for select projects</span>
-            </div>
             <Conduits />
             <div className="mt-7"><Routes /></div>
           </aside>
