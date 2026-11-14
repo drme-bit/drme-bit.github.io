@@ -10,7 +10,9 @@ import {
   FiLinkedin,
   FiArrowUp,
   SiDiscord,
+  GoHeartFill
 } from '@/shared/ui/Icon';
+
 import {
   footerNavLinks,
   footerSocialLinks,
@@ -93,8 +95,7 @@ export function PremiumFooter() {
 
         <div className="ml-auto flex items-center gap-4 max-[700px]:ml-0">
           <span className="inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.04em] text-[var(--text-dim)]">
-            <span className="size-1.5 rounded-full bg-[var(--accent-success)]" aria-hidden="true" />
-            <OdesaClock />
+            Build with <GoHeartFill /> by drme
           </span>
 
           <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
@@ -116,15 +117,6 @@ export function PremiumFooter() {
               );
             })}
           </div>
-
-          <button
-            type="button"
-            onClick={scrollToTop}
-            aria-label="Back to top"
-            className="cursor-pointer text-[var(--text-dim)] transition-all duration-200 hover:-translate-y-px hover:text-foreground"
-          >
-            <FiArrowUp aria-hidden="true" size={15} />
-          </button>
         </div>
       </div>
     </footer>
