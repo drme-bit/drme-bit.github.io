@@ -527,7 +527,6 @@ function DetailRow({ item }: { item: ContactInfoItem }) {
 function Profiles() {
   return (
     <div>
-      <h4 className={sectionLabel}>Profiles</h4>
       <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
         {socialLinks.map((link) => {
           const IconComponent = iconMap[link.icon];
@@ -563,13 +562,6 @@ function ContactAside() {
         </h3>
         <p className="m-0 text-[0.82rem] leading-relaxed text-[var(--text-secondary)]">
           A call is thirty minutes. Write when there is a brief to read.
-        </p>
-        <p
-          className="m-0 font-mono text-[0.72rem] tracking-[0.04em] text-[var(--text-dim)]"
-          aria-label={now ? `Local time in Odesa, ${now.time}` : 'Local time in Odesa'}
-        >
-          Odesa {now?.time ?? '––:––'}
-          {now?.zone ? `, ${now.zone}` : ''}
         </p>
       </div>
 
