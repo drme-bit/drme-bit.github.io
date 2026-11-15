@@ -97,6 +97,10 @@ export {
 } from 'react-icons/si';
 
 export {
+  GoHeartFill
+} from 'react-icons/go';
+
+export {
   DiJava,
 } from 'react-icons/di';
 

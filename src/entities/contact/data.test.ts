@@ -11,11 +11,14 @@ describe('contact entity', () => {
   });
 
   it('contact items cover the main channels', () => {
-    expect(contactItems.map(i => i.id)).toEqual(['calendar', 'email', 'phone', 'location']);
+    expect(contactItems.map(i => i.id)).toEqual(['calendar', 'email', 'phone', 'resume', 'location']);
     for (const i of contactItems) {
       expect(i.title).toBeTruthy();
       expect(i.subtitle).toBeTruthy();
     }
+    expect(contactItems.find(i => i.id === 'email')?.href).toMatch(/^mailto:/);
+    expect(contactItems.find(i => i.id === 'phone')?.href).toMatch(/^tel:\+380/);
+    expect(contactItems.find(i => i.id === 'location')?.href).toBeUndefined();
   });
 
   it('re-exports social links', () => {
