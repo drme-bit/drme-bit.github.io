@@ -19,6 +19,7 @@ export const profile = {
   kofiUrl: 'https://ko-fi.com/drmebit',
 } as const;
 
+
 export type SocialLinkId = 'github' | 'linkedin' | 'discord';
 
 export interface SocialLink {

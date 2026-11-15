@@ -20,9 +20,7 @@ import {
   currentYear,
 } from './lib/data';
 
-/*  Minimal status-bar footer (Linear/Railway/Supabase language):
-    one quiet row — wordmark, sitemap, status, bare icons, top.
-    No surfaces, no CTA, icons without boxes.  */
+/*  Minimal status-bar footer: wordmark, sitemap, local time, bare icons, top.  */
 
 const SOCIAL_ICONS: Record<string, typeof FiGithub> = {
   GitHub: FiGithub,
@@ -32,7 +30,29 @@ const SOCIAL_ICONS: Record<string, typeof FiGithub> = {
   Discord: SiDiscord,
 };
 
-export function PremiumFooter() {
+function OdesaClock() {
+  const [time, setTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    const format = () =>
+      new Date().toLocaleTimeString('en-GB', {
+        timeZone: 'Europe/Kyiv',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    setTime(format());
+    const id = setInterval(() => setTime(format()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <span aria-label={time ? `Local time in Odesa, ${time}` : 'Local time in Odesa'}>
+      Odesa {time ?? '––:––'}
+    </span>
+  );
+}
+
+export function Footer() {
   useEffect(() => {
     const footer = document.getElementById('footer');
     const trigger = document.getElementById('footer-reveal-trigger');
@@ -66,7 +86,10 @@ export function PremiumFooter() {
       role="contentinfo"
       className="fixed inset-x-0 bottom-0 z-0 min-h-[340px] overflow-hidden bg-[var(--bg)] max-[700px]:min-h-[240px] xl:inset-x-auto xl:left-0 xl:right-[var(--workspace-reserved-right)]"
     >
-      <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden whitespace-nowrap font-display text-[clamp(9rem,28vw,26rem)] font-semibold leading-none tracking-[-0.105em] text-[var(--text)] opacity-[0.05]">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden whitespace-nowrap font-display text-[clamp(9rem,28vw,26rem)] font-semibold leading-none tracking-[-0.105em] text-[var(--text)] opacity-[0.05]"
+      >
         drme
       </span>
       <div className="footer-inner relative z-10 mx-auto flex min-h-[340px] w-full max-w-[1400px] flex-wrap items-end gap-x-6 gap-y-3 px-[4vw] pb-6 pt-28 max-[700px]:min-h-[240px] max-[700px]:gap-x-4 max-[700px]:gap-y-2 max-[700px]:px-5 max-[700px]:pb-5 max-[700px]:pt-20">
@@ -77,9 +100,14 @@ export function PremiumFooter() {
         >
           drme<span className="text-accent">_</span>
         </Link>
+
+        <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
+
         <span className="font-mono text-[11px] tracking-[0.06em] text-[var(--text-dim)]">
           © {currentYear} {brandName}
         </span>
+
+        <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
 
         <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-5 gap-y-2">
           {footerNavLinks.map((link) => (
@@ -117,24 +145,16 @@ export function PremiumFooter() {
               );
             })}
           </div>
+
+          <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
+
+          <span className="font-mono text-[11px] tracking-[0.06em] text-[var(--text-dim)]">
+            <OdesaClock />
+          </span>
         </div>
       </div>
     </footer>
   );
 }
 
-function OdesaClock() {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  const time = now.toLocaleTimeString('en-GB', {
-    timeZone: 'Europe/Kyiv',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  return <span>Odesa — {time}</span>;
-}
-
-export default PremiumFooter;
+export default Footer;
