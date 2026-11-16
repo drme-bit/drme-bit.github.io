@@ -27,10 +27,28 @@ export function contributionLevel(count: number, yearMax: number): HeatmapLevel 
   return 4;
 }
 
-function toISODate(d: Date): string {
+export function toISODate(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${d.getFullYear()}-${m}-${day}`;
+}
+
+/*  Consecutive active days ending today (or yesterday while today is still quiet).  */
+
+export function computeCurrentStreak(
+  counts: ReadonlyMap<string, number>,
+  now: Date = new Date(),
+): number {
+  const cursor = new Date(now);
+  cursor.setHours(0, 0, 0, 0);
+  if ((counts.get(toISODate(cursor)) ?? 0) === 0) cursor.setDate(cursor.getDate() - 1);
+
+  let streak = 0;
+  while ((counts.get(toISODate(cursor)) ?? 0) > 0) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
 }
 
 /*  Builds a 52×7 heatmap ending at `now` purely from real contribution counts.  */

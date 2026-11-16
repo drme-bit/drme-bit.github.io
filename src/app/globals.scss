@@ -1144,6 +1144,64 @@ html.no-blur {
   }
 }
 
+/* ── Bento cards ── */
+
+.bento-scrim {
+  background: linear-gradient(
+    180deg,
+    transparent 32%,
+    color-mix(in srgb, var(--bg) 30%, transparent) 62%,
+    color-mix(in srgb, var(--card-bg) 84%, transparent) 100%
+  );
+}
+
+.bento-lines {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--text) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--text) 5%, transparent) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(ellipse at 68% 14%, #000, transparent 78%);
+  mask-image: radial-gradient(ellipse at 68% 14%, #000, transparent 78%);
+}
+
+/* ── Skill wall ── */
+
+.skill-wall {
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 65%, transparent 100%);
+  mask-image: radial-gradient(ellipse at center, #000 65%, transparent 100%);
+}
+
+.skill-slot {
+  background-color: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.skill-tile {
+  border-color: var(--border);
+  color: var(--text-secondary);
+
+  &:hover {
+    z-index: 1;
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--tile-accent) 45%, var(--border));
+    background-color: color-mix(in srgb, var(--tile-accent) 5%, var(--card-bg));
+  }
+
+  &:hover .skill-tile__icon {
+    color: var(--tile-accent);
+  }
+}
+
+.skill-tile__icon {
+  color: var(--text-secondary);
+  transition: color 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skill-tile:hover {
+    transform: none;
+  }
+}
+
 /* ── Split-flap board ── */
 
 @keyframes flip-in {

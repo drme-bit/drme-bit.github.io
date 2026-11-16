@@ -1,26 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { FiMapPin, FiMail } from '@/shared/ui/Icon';
 import { profile } from '@/entities/profile';
-import { TextFlippingBoard } from '@/shared/ui/TextFlippingBoard/TextFlippingBoard';
 import { TransitionLink } from '@/features/transitions';
 import { useInView } from '@/shared/hooks/useInView';
-import { loadActivity } from '../lib/github';
-import type { CommitInfo, HeatmapData } from '../lib/github';
-import { SqueezeCarousel } from './SqueezeCarousel';
-import { PrinciplesComparison } from './PrinciplesComparison';
+import { PracticeBento } from './PracticeBento';
 import { HoverPreviewLink } from './HoverPreviewLink';
+import { SkillsGrid } from './SkillsGrid';
 import Link from 'next/link';
 
 const reveal = (inView: boolean) =>
   `transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
     inView ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
   }`;
-
-const STATUS_LINES = ['AVAILABLE FOR WORK', 'REPLY WITHIN 24H', 'ODESA · GMT+3'];
-const COMPACT_STATUS_LINES = ['AVAILABLE', 'REPLY IN 24H', 'ODESA GMT+3'];
 
 function SectionHeading({ id, title, detail }: { id: string; title: string; detail: string }) {
   return (
@@ -41,40 +34,6 @@ const inlineLinkClass =
 export default function About() {
   const [headRef, headIn] = useInView<HTMLDivElement>({ threshold: 0.15 });
   const [bodyRef, bodyIn] = useInView<HTMLDivElement>({ threshold: 0.03 });
-  const [snapshot, setSnapshot] = useState<{ commits: CommitInfo[]; data: HeatmapData } | null>(null);
-  const [statusIdx, setStatusIdx] = useState(0);
-  const [compactBoard, setCompactBoard] = useState(false);
-
-  useEffect(() => {
-    const query = window.matchMedia('(max-width: 767px)');
-    const update = () => setCompactBoard(query.matches);
-    update();
-    query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    loadActivity(profile.githubUsername).then((res) => {
-      if (cancelled) return;
-      setSnapshot({ commits: res.commits, data: res.data });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const id = setInterval(() => setStatusIdx((i) => (i + 1) % STATUS_LINES.length), 9000);
-    return () => clearInterval(id);
-  }, []);
-
-  const boardText = snapshot
-    ? compactBoard
-      ? `5+ YEARS\n${snapshot.data.total} CONTRIB\n${snapshot.commits.length} COMMITS\n${COMPACT_STATUS_LINES[statusIdx]}`
-      : `5+ YEARS SHIPPING\n${snapshot.data.total} CONTRIBUTIONS\n${snapshot.commits.length} RECENT COMMITS\n${STATUS_LINES[statusIdx]}`
-    : 'TUNING\nSIGNAL';
 
   return (
     <section
@@ -122,11 +81,20 @@ export default function About() {
               </HoverPreviewLink>
               .
             </p>
+            <div className="mt-7 max-w-[58ch] border-l-2 border-[color-mix(in_srgb,var(--accent-secondary)_45%,transparent)] pl-4">
+              <p className="m-0 font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--text-ghost)]">
+                Currently
+              </p>
+              <p className="m-0 mt-1.5 text-[0.9rem] leading-[1.7] text-[var(--text-secondary)]">
+                Most of my time goes into{' '}
+                <Link href="/projects/nexagon" className={inlineLinkClass}>
+                  Nexagon
+                </Link>
+                , a real-time server monitoring platform built with Rust, React and WebGPU. The
+                tricky parts tend to turn into notes on the blog.
+              </p>
+            </div>
             <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.82rem] text-[var(--text-dim)]">
-              <span className="inline-flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-success)]" aria-hidden="true" />
-                Available for work
-              </span>
               <span className="inline-flex items-center gap-1.5">
                 <FiMapPin size={14} aria-hidden="true" />
                 {profile.location}
@@ -136,9 +104,6 @@ export default function About() {
                 {profile.email}
               </a>
             </div>
-            <TransitionLink href="/resume" className={`${inlineLinkClass} mt-5 text-[0.84rem]`}>
-              Résumé
-            </TransitionLink>
           </div>
 
           <figure className="group m-0 min-w-0 overflow-hidden rounded-lg border border-[var(--border)] max-lg:max-w-[520px]">
@@ -155,44 +120,28 @@ export default function About() {
           </figure>
         </div>
 
-        <figure className="relative left-1/2 m-0 w-[calc(100vw-48px)] -translate-x-1/2 overflow-hidden border-y border-[var(--border)] py-7 md:w-screen md:py-10">
-          <figcaption className="mx-auto mb-4 flex w-full max-w-[1240px] flex-wrap items-baseline justify-between gap-2 px-5 text-[0.8rem] text-[var(--text-dim)] md:px-8">
-            <span>Recent work, at a glance</span>
-            <span>Live GitHub activity</span>
-          </figcaption>
-          <TextFlippingBoard
-            text={boardText}
-            boardRows={4}
-            boardCols={compactBoard ? 20 : 22}
-            className="w-full max-w-none rounded-none border-0 bg-transparent p-0 shadow-none dark:bg-transparent dark:shadow-none"
-          />
-        </figure>
-
         <div ref={bodyRef} className={`flex flex-col gap-14 md:gap-16 ${reveal(bodyIn)}`}>
+          <section aria-labelledby="about-skills-heading">
+            <SectionHeading
+              id="about-skills-heading"
+              title="Stack"
+              detail="The tools I reach for daily, grouped by where they do the most work."
+            />
+            <SkillsGrid />
+          </section>
+
           <section aria-labelledby="about-practice-heading">
             <SectionHeading
               id="about-practice-heading"
               title="How I work"
               detail="A few parts of the process that shape what I build and how I ship it."
             />
-            <SqueezeCarousel />
+            <PracticeBento />
           </section>
 
-          <section aria-labelledby="about-principles-heading">
-            <SectionHeading
-              id="about-principles-heading"
-              title="What guides me"
-              detail="Simple habits that keep projects useful, maintainable, and moving forward."
-            />
-            <PrinciplesComparison />
-          </section>
-
-          <p className="m-0 border-t border-[var(--border)] pt-5 text-[0.9rem] leading-[1.7] text-[var(--text-secondary)]">
-            Have a project in mind?{' '}
-            <Link href="#contact" className={inlineLinkClass}>
-              Tell me about it.
-            </Link>
-          </p>
+          {/* TODO
+            some text here should go, that makes conclusion
+          */}
         </div>
       </div>
     </section>
