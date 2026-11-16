@@ -94,6 +94,10 @@ export {
   SiDiscord,
   SiOpengl,
   SiLinux,
+  SiCplusplus,
+  SiDotnet,
+  SiLuau,
+  SiWebgpu,
 } from 'react-icons/si';
 
 export {

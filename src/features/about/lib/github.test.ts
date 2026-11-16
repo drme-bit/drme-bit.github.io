@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { contributionLevel, buildHeatmap, buildHeatmapData, HEATMAP_WEEKS } from './github';
+import {
+  contributionLevel,
+  buildHeatmap,
+  buildHeatmapData,
+  computeCurrentStreak,
+  HEATMAP_WEEKS,
+} from './github';
 
 describe('contributionLevel', () => {
   it('maps zero counts to empty', () => {
@@ -62,6 +68,32 @@ describe('buildHeatmap', () => {
     const flat = heatmap.flat();
     const cell = flat.find((c) => c.date === '2026-01-10');
     expect(cell?.level).toBe(1);
+  });
+});
+
+describe('computeCurrentStreak', () => {
+  const now = new Date('2026-01-15T12:00:00Z');
+
+  it('counts consecutive active days ending today', () => {
+    const counts = new Map([
+      ['2026-01-15', 2],
+      ['2026-01-14', 1],
+      ['2026-01-13', 4],
+      ['2026-01-11', 3],
+    ]);
+    expect(computeCurrentStreak(counts, now)).toBe(3);
+  });
+
+  it('falls back to yesterday when today has no contributions yet', () => {
+    const counts = new Map([
+      ['2026-01-14', 1],
+      ['2026-01-13', 2],
+    ]);
+    expect(computeCurrentStreak(counts, now)).toBe(2);
+  });
+
+  it('returns zero for an idle window', () => {
+    expect(computeCurrentStreak(new Map(), now)).toBe(0);
   });
 });
 

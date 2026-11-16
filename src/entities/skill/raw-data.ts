@@ -2,7 +2,7 @@ import {
   SiReact, SiTypescript, SiJavascript, SiHtml5, SiSass,
   SiThreedotjs, SiNodedotjs, SiPython, SiGo, SiRust,
   SiPostgresql, SiRedis, SiGit, SiDocker,
-  SiOpengl, SiLinux,
+  SiOpengl, SiLinux, SiCplusplus, SiDotnet, SiLuau, SiWebgpu,
   FiCode, FiCpu,
 } from '@/shared/ui/Icon';
 import { DiJava } from '@/shared/ui/Icon';
@@ -16,9 +16,9 @@ export const ICON_MAP: Record<string, IconType> = {
   Go: SiGo, Rust: SiRust, Java: DiJava,
   PostgreSQL: SiPostgresql, Redis: SiRedis,
   Git: SiGit, Docker: SiDocker,
-  WebGPU: FiCode,
+  WebGPU: SiWebgpu,
   CUDA: FiCpu, OpenGL: SiOpengl, Linux: SiLinux,
-  C: FiCode, 'C++': FiCode, 'C#': FiCode, Luau: FiCode,
+  'C/C++': SiCplusplus, C: SiCplusplus, 'C++': SiCplusplus, 'C#': SiDotnet, Luau: SiLuau,
 };
 
 export const SKILLS_DATA: SkillData[] = [

@@ -1,26 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { FiMapPin, FiMail } from '@/shared/ui/Icon';
 import { profile } from '@/entities/profile';
-import { TextFlippingBoard } from '@/shared/ui/TextFlippingBoard/TextFlippingBoard';
 import { TransitionLink } from '@/features/transitions';
 import { useInView } from '@/shared/hooks/useInView';
-import { loadActivity } from '../lib/github';
-import type { CommitInfo, HeatmapData } from '../lib/github';
-import { SqueezeCarousel } from './SqueezeCarousel';
-import { PrinciplesComparison } from './PrinciplesComparison';
+import { PracticeBento } from './PracticeBento';
 import { HoverPreviewLink } from './HoverPreviewLink';
+import { SkillsGrid } from './SkillsGrid';
 import Link from 'next/link';
 
 const reveal = (inView: boolean) =>
   `transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
     inView ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
   }`;
-
-const STATUS_LINES = ['AVAILABLE FOR WORK', 'REPLY WITHIN 24H', 'ODESA · GMT+3'];
-const COMPACT_STATUS_LINES = ['AVAILABLE', 'REPLY IN 24H', 'ODESA GMT+3'];
 
 function SectionHeading({ id, title, detail }: { id: string; title: string; detail: string }) {
   return (
@@ -41,40 +34,6 @@ const inlineLinkClass =
 export default function About() {
   const [headRef, headIn] = useInView<HTMLDivElement>({ threshold: 0.15 });
   const [bodyRef, bodyIn] = useInView<HTMLDivElement>({ threshold: 0.03 });
-  const [snapshot, setSnapshot] = useState<{ commits: CommitInfo[]; data: HeatmapData } | null>(null);
-  const [statusIdx, setStatusIdx] = useState(0);
-  const [compactBoard, setCompactBoard] = useState(false);
-
-  useEffect(() => {
-    const query = window.matchMedia('(max-width: 767px)');
-    const update = () => setCompactBoard(query.matches);
-    update();
-    query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    loadActivity(profile.githubUsername).then((res) => {
-      if (cancelled) return;
-      setSnapshot({ commits: res.commits, data: res.data });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const id = setInterval(() => setStatusIdx((i) => (i + 1) % STATUS_LINES.length), 9000);
-    return () => clearInterval(id);
-  }, []);
-
-  const boardText = snapshot
-    ? compactBoard
-      ? `5+ YEARS\n${snapshot.data.total} CONTRIB\n${snapshot.commits.length} COMMITS\n${COMPACT_STATUS_LINES[statusIdx]}`
-      : `5+ YEARS SHIPPING\n${snapshot.data.total} CONTRIBUTIONS\n${snapshot.commits.length} RECENT COMMITS\n${STATUS_LINES[statusIdx]}`
-    : 'TUNING\nSIGNAL';
 
   return (
     <section
@@ -82,18 +41,22 @@ export default function About() {
       className="relative flex w-full flex-col items-center overflow-x-clip border-t border-[var(--border)] py-14 md:py-28"
     >
       <div className="relative z-[1] mx-auto flex w-full max-w-[1240px] flex-col gap-16 px-5 md:gap-20 md:px-8">
-        <div ref={headRef} className={`grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.58fr)] lg:gap-20 ${reveal(headIn)}`}>
+        <div
+          ref={headRef}
+          className={`grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_1px_minmax(260px,0.58fr)] lg:gap-16 ${reveal(headIn)}`}
+        >
           <div className="flex min-w-0 flex-col items-start">
-            <p className="mb-4 text-[0.82rem] font-medium text-[var(--text-dim)]">A bit about me</p>
+            <p className="mb-4 text-[0.82rem] font-medium text-[var(--text-dim)]">Introduction</p>
             <h2 className="m-0 max-w-[12ch] font-display text-[clamp(3rem,7vw,6.25rem)] font-semibold leading-[0.94] tracking-[-0.075em] text-[var(--text)]">
-              How I build
+              Building with intent
             </h2>
             <p className="mt-6 max-w-[42ch] font-display text-[clamp(1.2rem,2vw,1.55rem)] leading-[1.5] tracking-[var(--tracking-tight)] text-[var(--text-secondary)]">
               {profile.brandTagline}
             </p>
             <p className="mt-5 max-w-[58ch] text-[0.98rem] leading-[1.8] text-[var(--text-secondary)]">
-              I’m a full-stack developer from Odesa with around five years of experience. I learn by
-              building: from{' '}
+              <b>Heellooo!</b> Welcome there, my name is Vyacheslav — a developer focused on
+              learning everything new, building interesting and challenging products. I always open
+              to new. My work ranges from{' '}
               <HoverPreviewLink
                 href="/projects/gmod-roblox"
                 preview="/media/projects/project-gmod/images/pgm_overview.webp"
@@ -111,35 +74,39 @@ export default function About() {
               >
                 Nexagon
               </HoverPreviewLink>
-              . I also share practical notes on{' '}
+              . I also document{' '}
               <HoverPreviewLink
                 href="/blog"
                 preview="/images/perspective.webp"
                 caption="Notes on building"
                 desc="Short notes on architecture, backends, design decisions, and shipping software."
               >
-                what I learn along the way
-              </HoverPreviewLink>
-              .
+                lessons from the process
+              </HoverPreviewLink>{' '}
+              as I go.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.82rem] text-[var(--text-dim)]">
-              <span className="inline-flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-success)]" aria-hidden="true" />
-                Available for work
-              </span>
+            <div className="mt-7 max-w-[58ch]">
+              <p className="m-0 font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--text-ghost)]">
+                Currently
+              </p>
+              <p className="m-0 mt-1.5 text-[0.9rem] leading-[1.7] text-[var(--text-secondary)]">
+                Most of my time goes into{' '}
+                <Link href="/projects/nexagon" className={inlineLinkClass}>
+                  Nexagon
+                </Link>
+                , a real-time server monitoring platform built with Rust, React and WebGPU — where
+                performance, clarity, and reliability all have to meet.
+              </p>
+            </div>
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.82rem] text-[var(--text-dim)]">
               <span className="inline-flex items-center gap-1.5">
                 <FiMapPin size={14} aria-hidden="true" />
                 {profile.location}
               </span>
-              <a href={`mailto:${profile.email}`} className={`${inlineLinkClass} inline-flex items-center gap-1.5`}>
-                <FiMail size={14} aria-hidden="true" />
-                {profile.email}
-              </a>
             </div>
-            <TransitionLink href="/resume" className={`${inlineLinkClass} mt-5 text-[0.84rem]`}>
-              Résumé
-            </TransitionLink>
           </div>
+
+          <div aria-hidden="true" className="hidden h-full w-px bg-[var(--border)] lg:block" />
 
           <figure className="group m-0 min-w-0 overflow-hidden rounded-lg border border-[var(--border)] max-lg:max-w-[520px]">
             <div className="relative aspect-[4/4.5] overflow-hidden">
@@ -155,44 +122,93 @@ export default function About() {
           </figure>
         </div>
 
-        <figure className="relative left-1/2 m-0 w-[calc(100vw-48px)] -translate-x-1/2 overflow-hidden border-y border-[var(--border)] py-7 md:w-screen md:py-10">
-          <figcaption className="mx-auto mb-4 flex w-full max-w-[1240px] flex-wrap items-baseline justify-between gap-2 px-5 text-[0.8rem] text-[var(--text-dim)] md:px-8">
-            <span>Recent work, at a glance</span>
-            <span>Live GitHub activity</span>
-          </figcaption>
-          <TextFlippingBoard
-            text={boardText}
-            boardRows={4}
-            boardCols={compactBoard ? 20 : 22}
-            className="w-full max-w-none rounded-none border-0 bg-transparent p-0 shadow-none dark:bg-transparent dark:shadow-none"
-          />
-        </figure>
+        <section aria-labelledby="about-me-heading" className={`mt-10 md:mt-16 ${reveal(headIn)}`}>
+          <div className="grid items-stretch gap-8 lg:grid-cols-[minmax(220px,0.72fr)_1px_minmax(0,1.28fr)] lg:gap-10">
+            <figure className="group relative m-0 min-h-[260px] overflow-hidden rounded-lg lg:min-h-full">
+              <Image
+                src="/images/5465461019808308089-y.webp"
+                alt="Vyacheslav working at his desk"
+                fill
+                sizes="(max-width: 1024px) 100vw, 360px"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+              />
+            </figure>
+
+            <div aria-hidden="true" className="hidden w-px bg-[var(--border)] lg:block" />
+
+            <div className="flex min-w-0 flex-col justify-center py-1">
+              <p
+                id="about-me-heading"
+                className="m-0 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-[var(--text-ghost)]"
+              >
+                About me
+              </p>
+              <h3 className="m-0 mt-3 font-display text-[clamp(1.6rem,2.6vw,2.2rem)] font-medium leading-[1.1] tracking-[var(--tracking-tight)] text-[var(--text)]">
+                Curious builder with a product mindset
+              </h3>
+              <div className="mt-5 space-y-4 text-[0.98rem] leading-[1.85] text-[var(--text-secondary)]">
+                <p className="m-0">
+                  Based in <b>Odesa, Ukraine</b>, I’ve spent the last few years learning by building
+                  — moving between frontend, backend, and infrastructure depending on what a product
+                  needs. I’m most comfortable when I can take ownership across the whole flow, from
+                  an early idea and interface sketch to implementation, deployment, and iteration.
+                </p>
+                <p className="m-0">
+                  I’m drawn to problems where engineering and product thinking meet: making complex
+                  systems understandable, keeping performance predictable, and shaping details so
+                  the result feels intentional rather than accidental.
+                </p>
+                <p className="m-0 text-[0.94rem] text-[var(--text-dim)]">
+                  Outside of shipping features, I spend a lot of time exploring game tech, tooling,
+                  and new approaches that make building software faster and more enjoyable.
+                </p>
+              </div>
+              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.82rem] text-[var(--text-dim)]">
+                <a
+                  href={`mailto:${profile.email}`}
+                  className={`${inlineLinkClass} inline-flex items-center gap-1.5`}
+                >
+                  <FiMail size={14} aria-hidden="true" />
+                  {profile.email}
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div ref={bodyRef} className={`flex flex-col gap-14 md:gap-16 ${reveal(bodyIn)}`}>
+          <section aria-labelledby="about-skills-heading">
+            <SectionHeading
+              id="about-skills-heading"
+              title="Stack"
+              detail="The tools I reach for daily, grouped by where they do the most work."
+            />
+            <SkillsGrid />
+          </section>
+
           <section aria-labelledby="about-practice-heading">
             <SectionHeading
               id="about-practice-heading"
               title="How I work"
               detail="A few parts of the process that shape what I build and how I ship it."
             />
-            <SqueezeCarousel />
+            <PracticeBento />
           </section>
 
-          <section aria-labelledby="about-principles-heading">
-            <SectionHeading
-              id="about-principles-heading"
-              title="What guides me"
-              detail="Simple habits that keep projects useful, maintainable, and moving forward."
-            />
-            <PrinciplesComparison />
-          </section>
-
-          <p className="m-0 border-t border-[var(--border)] pt-5 text-[0.9rem] leading-[1.7] text-[var(--text-secondary)]">
-            Have a project in mind?{' '}
-            <Link href="#contact" className={inlineLinkClass}>
-              Tell me about it.
-            </Link>
-          </p>
+          <footer className="border-t border-[var(--border)] pt-8">
+            <p className="m-0 max-w-[62ch] text-[0.95rem] leading-[1.8] text-[var(--text-secondary)]">
+              I care about building things that are useful, clear, and pleasant to maintain. If
+              you&apos;d like to talk about a project or collaboration, feel free to{' '}
+              <a href={`mailto:${profile.email}`} className={inlineLinkClass}>
+                get in touch
+              </a>{' '}
+              or take a look at my{' '}
+              <TransitionLink href="/resume" className={inlineLinkClass}>
+                résumé
+              </TransitionLink>
+              .
+            </p>
+          </footer>
         </div>
       </div>
     </section>

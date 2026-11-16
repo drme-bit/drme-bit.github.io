@@ -465,13 +465,6 @@ body.light::after {
 }
 
 :is(html.light, body.light) {
-  .section--about,
-  .section--skills,
-  .section--projects,
-  .section--experience {
-    background: transparent;
-  }
-
   #experience::after {
     display: none;
   }
@@ -902,21 +895,6 @@ body {
 // SECTION BACKGROUNDS
 // ═══════════════════════════════════════════════════════════
 
-.section--about {
-  background: linear-gradient(180deg, transparent 0%, rgba(125, 211, 252, 0.015) 50%, transparent 100%);
-}
-
-.section--skills {
-  background: linear-gradient(180deg, transparent 0%, rgba(196, 181, 253, 0.015) 50%, transparent 100%);
-}
-
-.section--projects {
-  background: linear-gradient(180deg, transparent 0%, rgba(125, 211, 252, 0.012) 50%, transparent 100%);
-}
-
-.section--experience {
-  background: linear-gradient(180deg, transparent 0%, rgba(251, 191, 36, 0.012) 50%, transparent 100%);
-}
 
 // ═══════════════════════════════════════════════════════════
 // UTILITY CLASSES
@@ -1141,6 +1119,42 @@ html.no-blur {
 @media (prefers-reduced-motion: reduce) {
   #footer {
     transform: none !important;
+  }
+}
+
+/* ── Bento cards ── */
+
+/* ── Skill wall ── */
+
+.skill-wall {
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 65%, transparent 100%);
+  mask-image: radial-gradient(ellipse at center, #000 65%, transparent 100%);
+}
+
+.skill-slot {
+  background-color: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.skill-tile {
+  border-color: var(--border);
+  color: var(--text-secondary);
+
+  &:hover {
+    z-index: 1;
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--tile-accent) 45%, var(--border));
+    background-color: color-mix(in srgb, var(--tile-accent) 8%, var(--card-bg));
+  }
+}
+
+.skill-tile__icon {
+  color: var(--tile-accent);
+  transition: color 200ms ease, transform 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skill-tile:hover {
+    transform: none;
   }
 }
 
