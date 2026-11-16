@@ -14,7 +14,7 @@ import { cn } from '@/shared/lib/cn';
 /*  Scrim: fades from the page background color at the bottom to transparent at the top,
     so the photo stays visible while the text keeps its contrast in both themes.  */
 const SCRIM =
-  'bg-[linear-gradient(to_top,color-mix(in_srgb,var(--bg)_97%,transparent)_0%,color-mix(in_srgb,var(--bg)_92%,transparent)_30%,color-mix(in_srgb,var(--bg)_72%,transparent)_58%,color-mix(in_srgb,var(--bg)_28%,transparent)_85%,transparent_100%)]';
+  'bg-[linear-gradient(to_top,color-mix(in_srgb,var(--bg)_86%,transparent)_0%,color-mix(in_srgb,var(--bg)_72%,transparent)_28%,color-mix(in_srgb,var(--bg)_46%,transparent)_56%,color-mix(in_srgb,var(--bg)_16%,transparent)_82%,transparent_100%)]';
 
 /*  Soft halo behind the glyphs instead of a box behind the whole text.  */
 const TEXT_SHADOW =

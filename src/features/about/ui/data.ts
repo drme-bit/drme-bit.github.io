@@ -1,6 +1,4 @@
 import { FiZap, BsFillKanbanFill, RiRobot2Fill } from '@/shared/ui/Icon';
-// These three are imported straight from react-icons; if you prefer, re-export them
-// through '@/shared/ui/Icon' like the ones above and import them from there.
 import { FiLayers, FiGitBranch, FiActivity } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 
@@ -17,30 +15,6 @@ export interface Highlight {
   image: string;
   imageAlt: string;
 }
-
-export interface Principle {
-  title: string;
-  desc: string;
-}
-
-export const PRINCIPLES: Principle[] = [
-  {
-    title: 'Ship early, ship often',
-    desc: 'Small iterations beat big reveals. Every prototype teaches something no plan can.',
-  },
-  {
-    title: 'Measure, don’t guess',
-    desc: 'Performance budgets, real metrics, profiling before optimizing — feelings are not benchmarks.',
-  },
-  {
-    title: 'Simple over clever',
-    desc: 'Boring architecture the next person can understand wins over elegant puzzles.',
-  },
-  {
-    title: 'Own the whole loop',
-    desc: 'From idea and design to deploy and support — no handoff gaps, no “not my part”.',
-  },
-];
 
 export const HIGHLIGHTS: Highlight[] = [
   {
@@ -103,36 +77,4 @@ export const HIGHLIGHTS: Highlight[] = [
     image: '/images/demonstration/me-coding-demo.webp',
     imageAlt: 'Me coding at my workstation',
   },
-];
-
-export const STATS: Array<{ value: string; label: string }> = [
-  { value: '5+', label: 'years coding' },
-  { value: '9', label: 'languages' },
-  { value: '6', label: 'projects shipped' },
-];
-
-export const QUOTES: Array<{ text: string; game: string }> = [
-  { text: 'The factory must grow.', game: 'Factorio' },
-  { text: 'We do what we must because we can.', game: 'Portal' },
-  { text: 'You can do this.', game: 'Celeste' },
-];
-
-export const BOARD_MESSAGES = [
-  '5+ YEARS\nSHIPPING\nFULL-STACK APPS',
-  '12 TOOLS\nIN DAILY\nROTATION',
-  '6 PROJECTS\nLIVE IN\nPRODUCTION',
-  'REPLY WITHIN\n24 HOURS',
-];
-
-export const MARQUEE = [
-  'full-stack developer',
-  'react',
-  'typescript',
-  'rust',
-  'three.js',
-  'node.js',
-  'open source',
-  'available for work',
-  'from odesa, ukraine',
-  'drme-bit',
 ];

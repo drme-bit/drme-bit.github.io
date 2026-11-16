@@ -465,13 +465,6 @@ body.light::after {
 }
 
 :is(html.light, body.light) {
-  .section--about,
-  .section--skills,
-  .section--projects,
-  .section--experience {
-    background: transparent;
-  }
-
   #experience::after {
     display: none;
   }
@@ -902,21 +895,6 @@ body {
 // SECTION BACKGROUNDS
 // ═══════════════════════════════════════════════════════════
 
-.section--about {
-  background: linear-gradient(180deg, transparent 0%, rgba(125, 211, 252, 0.015) 50%, transparent 100%);
-}
-
-.section--skills {
-  background: linear-gradient(180deg, transparent 0%, rgba(196, 181, 253, 0.015) 50%, transparent 100%);
-}
-
-.section--projects {
-  background: linear-gradient(180deg, transparent 0%, rgba(125, 211, 252, 0.012) 50%, transparent 100%);
-}
-
-.section--experience {
-  background: linear-gradient(180deg, transparent 0%, rgba(251, 191, 36, 0.012) 50%, transparent 100%);
-}
 
 // ═══════════════════════════════════════════════════════════
 // UTILITY CLASSES
@@ -1146,24 +1124,6 @@ html.no-blur {
 
 /* ── Bento cards ── */
 
-.bento-scrim {
-  background: linear-gradient(
-    180deg,
-    transparent 32%,
-    color-mix(in srgb, var(--bg) 30%, transparent) 62%,
-    color-mix(in srgb, var(--card-bg) 84%, transparent) 100%
-  );
-}
-
-.bento-lines {
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--text) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--text) 5%, transparent) 1px, transparent 1px);
-  background-size: 34px 34px;
-  -webkit-mask-image: radial-gradient(ellipse at 68% 14%, #000, transparent 78%);
-  mask-image: radial-gradient(ellipse at 68% 14%, #000, transparent 78%);
-}
-
 /* ── Skill wall ── */
 
 .skill-wall {
@@ -1183,17 +1143,13 @@ html.no-blur {
     z-index: 1;
     transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--tile-accent) 45%, var(--border));
-    background-color: color-mix(in srgb, var(--tile-accent) 5%, var(--card-bg));
-  }
-
-  &:hover .skill-tile__icon {
-    color: var(--tile-accent);
+    background-color: color-mix(in srgb, var(--tile-accent) 8%, var(--card-bg));
   }
 }
 
 .skill-tile__icon {
-  color: var(--text-secondary);
-  transition: color 200ms ease;
+  color: var(--tile-accent);
+  transition: color 200ms ease, transform 200ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {

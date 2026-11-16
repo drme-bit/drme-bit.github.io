@@ -41,18 +41,22 @@ export default function About() {
       className="relative flex w-full flex-col items-center overflow-x-clip border-t border-[var(--border)] py-14 md:py-28"
     >
       <div className="relative z-[1] mx-auto flex w-full max-w-[1240px] flex-col gap-16 px-5 md:gap-20 md:px-8">
-        <div ref={headRef} className={`grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.58fr)] lg:gap-20 ${reveal(headIn)}`}>
+        <div
+          ref={headRef}
+          className={`grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_1px_minmax(260px,0.58fr)] lg:gap-16 ${reveal(headIn)}`}
+        >
           <div className="flex min-w-0 flex-col items-start">
-            <p className="mb-4 text-[0.82rem] font-medium text-[var(--text-dim)]">A bit about me</p>
+            <p className="mb-4 text-[0.82rem] font-medium text-[var(--text-dim)]">Introduction</p>
             <h2 className="m-0 max-w-[12ch] font-display text-[clamp(3rem,7vw,6.25rem)] font-semibold leading-[0.94] tracking-[-0.075em] text-[var(--text)]">
-              How I build
+              Building with intent
             </h2>
             <p className="mt-6 max-w-[42ch] font-display text-[clamp(1.2rem,2vw,1.55rem)] leading-[1.5] tracking-[var(--tracking-tight)] text-[var(--text-secondary)]">
               {profile.brandTagline}
             </p>
             <p className="mt-5 max-w-[58ch] text-[0.98rem] leading-[1.8] text-[var(--text-secondary)]">
-              I’m a full-stack developer from Odesa with around five years of experience. I learn by
-              building: from{' '}
+              <b>Heellooo!</b> Welcome there, my name is Vyacheslav — a developer focused on
+              learning everything new, building interesting and challenging products. I always open
+              to new. My work ranges from{' '}
               <HoverPreviewLink
                 href="/projects/gmod-roblox"
                 preview="/media/projects/project-gmod/images/pgm_overview.webp"
@@ -70,18 +74,18 @@ export default function About() {
               >
                 Nexagon
               </HoverPreviewLink>
-              . I also share practical notes on{' '}
+              . I also document{' '}
               <HoverPreviewLink
                 href="/blog"
                 preview="/images/perspective.webp"
                 caption="Notes on building"
                 desc="Short notes on architecture, backends, design decisions, and shipping software."
               >
-                what I learn along the way
-              </HoverPreviewLink>
-              .
+                lessons from the process
+              </HoverPreviewLink>{' '}
+              as I go.
             </p>
-            <div className="mt-7 max-w-[58ch] border-l-2 border-[color-mix(in_srgb,var(--accent-secondary)_45%,transparent)] pl-4">
+            <div className="mt-7 max-w-[58ch]">
               <p className="m-0 font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--text-ghost)]">
                 Currently
               </p>
@@ -90,21 +94,19 @@ export default function About() {
                 <Link href="/projects/nexagon" className={inlineLinkClass}>
                   Nexagon
                 </Link>
-                , a real-time server monitoring platform built with Rust, React and WebGPU. The
-                tricky parts tend to turn into notes on the blog.
+                , a real-time server monitoring platform built with Rust, React and WebGPU — where
+                performance, clarity, and reliability all have to meet.
               </p>
             </div>
-            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.82rem] text-[var(--text-dim)]">
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.82rem] text-[var(--text-dim)]">
               <span className="inline-flex items-center gap-1.5">
                 <FiMapPin size={14} aria-hidden="true" />
                 {profile.location}
               </span>
-              <a href={`mailto:${profile.email}`} className={`${inlineLinkClass} inline-flex items-center gap-1.5`}>
-                <FiMail size={14} aria-hidden="true" />
-                {profile.email}
-              </a>
             </div>
           </div>
+
+          <div aria-hidden="true" className="hidden h-full w-px bg-[var(--border)] lg:block" />
 
           <figure className="group m-0 min-w-0 overflow-hidden rounded-lg border border-[var(--border)] max-lg:max-w-[520px]">
             <div className="relative aspect-[4/4.5] overflow-hidden">
@@ -119,6 +121,60 @@ export default function About() {
             </div>
           </figure>
         </div>
+
+        <section aria-labelledby="about-me-heading" className={`mt-10 md:mt-16 ${reveal(headIn)}`}>
+          <div className="grid items-stretch gap-8 lg:grid-cols-[minmax(220px,0.72fr)_1px_minmax(0,1.28fr)] lg:gap-10">
+            <figure className="group relative m-0 min-h-[260px] overflow-hidden rounded-lg lg:min-h-full">
+              <Image
+                src="/images/5465461019808308089-y.webp"
+                alt="Vyacheslav working at his desk"
+                fill
+                sizes="(max-width: 1024px) 100vw, 360px"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+              />
+            </figure>
+
+            <div aria-hidden="true" className="hidden w-px bg-[var(--border)] lg:block" />
+
+            <div className="flex min-w-0 flex-col justify-center py-1">
+              <p
+                id="about-me-heading"
+                className="m-0 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-[var(--text-ghost)]"
+              >
+                About me
+              </p>
+              <h3 className="m-0 mt-3 font-display text-[clamp(1.6rem,2.6vw,2.2rem)] font-medium leading-[1.1] tracking-[var(--tracking-tight)] text-[var(--text)]">
+                Curious builder with a product mindset
+              </h3>
+              <div className="mt-5 space-y-4 text-[0.98rem] leading-[1.85] text-[var(--text-secondary)]">
+                <p className="m-0">
+                  Based in <b>Odesa, Ukraine</b>, I’ve spent the last few years learning by building
+                  — moving between frontend, backend, and infrastructure depending on what a product
+                  needs. I’m most comfortable when I can take ownership across the whole flow, from
+                  an early idea and interface sketch to implementation, deployment, and iteration.
+                </p>
+                <p className="m-0">
+                  I’m drawn to problems where engineering and product thinking meet: making complex
+                  systems understandable, keeping performance predictable, and shaping details so
+                  the result feels intentional rather than accidental.
+                </p>
+                <p className="m-0 text-[0.94rem] text-[var(--text-dim)]">
+                  Outside of shipping features, I spend a lot of time exploring game tech, tooling,
+                  and new approaches that make building software faster and more enjoyable.
+                </p>
+              </div>
+              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.82rem] text-[var(--text-dim)]">
+                <a
+                  href={`mailto:${profile.email}`}
+                  className={`${inlineLinkClass} inline-flex items-center gap-1.5`}
+                >
+                  <FiMail size={14} aria-hidden="true" />
+                  {profile.email}
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div ref={bodyRef} className={`flex flex-col gap-14 md:gap-16 ${reveal(bodyIn)}`}>
           <section aria-labelledby="about-skills-heading">
@@ -139,9 +195,20 @@ export default function About() {
             <PracticeBento />
           </section>
 
-          {/* TODO
-            some text here should go, that makes conclusion
-          */}
+          <footer className="border-t border-[var(--border)] pt-8">
+            <p className="m-0 max-w-[62ch] text-[0.95rem] leading-[1.8] text-[var(--text-secondary)]">
+              I care about building things that are useful, clear, and pleasant to maintain. If
+              you&apos;d like to talk about a project or collaboration, feel free to{' '}
+              <a href={`mailto:${profile.email}`} className={inlineLinkClass}>
+                get in touch
+              </a>{' '}
+              or take a look at my{' '}
+              <TransitionLink href="/resume" className={inlineLinkClass}>
+                résumé
+              </TransitionLink>
+              .
+            </p>
+          </footer>
         </div>
       </div>
     </section>

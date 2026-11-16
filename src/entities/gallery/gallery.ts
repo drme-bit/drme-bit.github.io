@@ -35,12 +35,6 @@ export const BACKDROP_PHOTOS: BackdropPhoto[] = [
     height: 200,
   },
   {
-    src: '/images/perspective.webp',
-    alt: 'Perspective notes',
-    width: 320,
-    height: 200,
-  },
-  {
     src: '/media/projects/roblox/images/vault_overview.webp',
     alt: 'Vault overview',
     width: 320,

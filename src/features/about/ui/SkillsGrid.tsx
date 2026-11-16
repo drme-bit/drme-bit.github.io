@@ -5,6 +5,32 @@ import { FiCode } from '@/shared/ui/Icon';
 import { GROUP_COLORS, ICON_MAP, SKILLS_DATA } from '@/entities/skill';
 import type { SkillData, SkillGroup } from '@/entities/skill';
 
+const BRAND_COLORS: Record<string, string> = {
+  React: '#61DAFB',
+  TypeScript: '#3178C6',
+  JavaScript: '#F7DF1E',
+  'HTML/CSS': '#E34F26',
+  SCSS: '#CC6699',
+  'Three.js': '#049EF4',
+  R3F: '#61DAFB',
+  'Node.js': '#5FA04E',
+  Python: '#3776AB',
+  Go: '#00ADD8',
+  Rust: '#F74C00',
+  Java: '#ED8B00',
+  PostgreSQL: '#4169E1',
+  Redis: '#FF4438',
+  Git: '#F05032',
+  Docker: '#2496ED',
+  WebGPU: '#005A9C',
+  CUDA: '#76B900',
+  OpenGL: '#5586A4',
+  Linux: '#FCC624',
+  'C/C++': '#00599C',
+  'C#': '#512BD4',
+  Luau: '#00A2FF',
+};
+
 /*  Left: a readable list of stack areas (hover previews a layer, click keeps it isolated).
     Right: the icon wall, used as a backdrop that fades out toward the list.  */
 
@@ -144,11 +170,16 @@ export function SkillsGrid() {
             }
             const Icon = ICON_MAP[skill.name] ?? FiCode;
             const dim = focus !== null && focus !== skill.group;
+            const iconColor = BRAND_COLORS[skill.name] ?? GROUP_COLORS[skill.group];
             return (
               <li
                 key={skill.name}
                 title={`${skill.name} · ${skill.level}/5 — ${skill.desc}`}
-                style={{ '--tile-accent': GROUP_COLORS[skill.group] } as CSSProperties}
+                style={
+                  {
+                    '--tile-accent': iconColor,
+                  } as CSSProperties
+                }
                 onPointerEnter={() => setHovered(skill.group)}
                 className={`skill-tile flex aspect-square items-center justify-center rounded-md border bg-[var(--card-bg)] transition-[opacity,border-color,background-color,transform] duration-300 ${
                   dim ? 'opacity-20' : 'opacity-100'
