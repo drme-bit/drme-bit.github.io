@@ -63,7 +63,7 @@
     "jsdom": "^30.0.1",
     "lucide-react": "^1.73.0",
     "prettier": "^3.5.4",
-    "sass": "^1.101.7",
+    "sass": "^1.108.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
