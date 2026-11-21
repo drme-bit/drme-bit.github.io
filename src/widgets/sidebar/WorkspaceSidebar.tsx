@@ -9,6 +9,7 @@ import {
   Briefcase,
   CheckCheck,
   Code2,
+  Compass,
   Copy,
   FolderOpen,
   History,
@@ -18,6 +19,7 @@ import {
   Pencil,
   PanelRightClose,
   RotateCcw,
+  Settings2,
   Square,
   Terminal,
 } from 'lucide-react';
@@ -33,7 +35,7 @@ import {
   type AssistantModelId,
 } from '@/entities/assistant';
 import { profile } from '@/entities/profile';
-import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
+import { scrollToTarget, setScrollLocked } from '@/widgets/smooth-scrolling/lenisStore';
 import { Suggestions } from '@/shared/ui/agent-elements/Suggestions';
 import type { SuggestionItem } from '@/shared/ui/agent-elements/Suggestions';
 import { ThinkingTool } from '@/shared/ui/agent-elements/ThinkingTool';
@@ -182,6 +184,18 @@ export default function WorkspaceSidebar() {
     [],
   );
 
+  // On phones the panel is a bottom sheet, so the page behind it must not scroll.
+  useEffect(() => {
+    if (!open || !window.matchMedia('(max-width: 767px)').matches) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    setScrollLocked(true);
+    return () => {
+      document.body.style.overflow = previous;
+      setScrollLocked(false);
+    };
+  }, [open]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (
@@ -323,6 +337,14 @@ export default function WorkspaceSidebar() {
         dockRef={dockRef}
         openPanel={openPanel}
       />
+      <button
+        type="button"
+        aria-label="Close panel"
+        tabIndex={-1}
+        data-open={open}
+        className={styles.sheetBackdrop}
+        onClick={() => setOpen(false)}
+      />
       <section
         id="assistant"
         aria-label="Portfolio workspace"
@@ -332,6 +354,7 @@ export default function WorkspaceSidebar() {
         className={styles.sidebar}
         style={{ '--assistant-panel-width': `${panelWidth}px` } as CSSProperties}
       >
+        <span className={styles.sheetGrabber} aria-hidden="true" />
         <div
           role="separator"
           aria-label="Resize sidebar"
@@ -462,6 +485,32 @@ export default function WorkspaceSidebar() {
             </button>
           </div>
         </header>
+
+        <div className={styles.panelTabs} aria-label="Workspace panels">
+          {(
+            [
+              ['assistant', 'Assistant', MessageCircle],
+              ['notifications', 'Inbox', Bell],
+              ['explore', 'On this page', Compass],
+              ['settings', 'Appearance', Settings2],
+            ] as const
+          ).map(([id, label, Icon]) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={panel === id}
+              data-active={panel === id}
+              className={styles.panelTab}
+              onClick={() => openPanel(id)}
+            >
+              <Icon size={15} aria-hidden="true" />
+              <span>{label}</span>
+              {id === 'notifications' && unread > 0 && (
+                <span className={styles.panelTabBadge}>{unread}</span>
+              )}
+            </button>
+          ))}
+        </div>
 
         {panel === 'settings' && (
           <div className={styles.utilityBody} data-lenis-prevent>

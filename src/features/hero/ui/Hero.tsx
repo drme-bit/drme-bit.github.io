@@ -243,7 +243,7 @@ export default function Hero() {
 
             <p
               ref={taglineRef}
-              className="m-0 max-w-[30ch] font-mono text-[0.72rem] lowercase leading-relaxed tracking-[0.08em] text-[var(--text-secondary)] max-md:text-[0.62rem]"
+              className="m-0 max-w-[30ch] font-mono text-[0.72rem] lowercase leading-relaxed tracking-[0.08em] text-[var(--text-secondary)] max-md:text-[0.7rem]"
             >
               {profile.location} · available · replies &lt; 24h
             </p>

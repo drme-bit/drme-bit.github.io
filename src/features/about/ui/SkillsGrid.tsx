@@ -146,8 +146,9 @@ export function SkillsGrid() {
           })}
         </ul>
 
-        <p className="m-0 font-mono text-[0.53rem] uppercase tracking-[0.14em] text-[var(--text-ghost)]">
-          Hover or select a layer to isolate it
+        <p className="m-0 font-mono text-[0.53rem] uppercase tracking-[0.14em] text-[var(--text-ghost)] max-[767px]:text-[0.68rem]">
+          <span className="max-[767px]:hidden">Hover or select a layer to isolate it</span>
+          <span className="hidden max-[767px]:inline">Tap a layer to isolate it</span>
         </p>
       </div>
 

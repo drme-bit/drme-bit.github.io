@@ -58,10 +58,19 @@ export function Footer() {
     const trigger = document.getElementById('footer-reveal-trigger');
     if (!footer || !trigger) return;
 
+    // Phones use a normal in-flow footer; only the desktop footer is revealed
+    // progressively as the user nears the bottom of the page.
+    const mobile = window.matchMedia('(max-width: 767px)');
     let frame = 0;
+
     const updateReveal = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
+        if (mobile.matches) {
+          footer.style.opacity = '';
+          footer.style.transform = '';
+          return;
+        }
         const start = trigger.getBoundingClientRect().top;
         const distance = Math.max(1, footer.getBoundingClientRect().height);
         const progress = Math.max(0, Math.min(1, (window.innerHeight - start) / distance));
@@ -70,13 +79,19 @@ export function Footer() {
       });
     };
 
+    const onScroll = () => {
+      if (!mobile.matches) updateReveal();
+    };
+
     updateReveal();
-    window.addEventListener('scroll', updateReveal, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', updateReveal);
+    mobile.addEventListener('change', updateReveal);
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', updateReveal);
+      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', updateReveal);
+      mobile.removeEventListener('change', updateReveal);
     };
   }, []);
 
@@ -84,15 +99,15 @@ export function Footer() {
     <footer
       id="footer"
       role="contentinfo"
-      className="fixed inset-x-0 bottom-0 z-0 min-h-[340px] overflow-hidden bg-[var(--bg)] max-[700px]:min-h-[240px] xl:inset-x-auto xl:left-0 xl:right-[var(--workspace-reserved-right)]"
+      className="fixed inset-x-0 bottom-0 z-0 min-h-[340px] overflow-hidden bg-[var(--bg)] max-[767px]:static max-[767px]:z-auto max-[767px]:min-h-0 max-[767px]:border-t max-[767px]:border-[var(--border)] xl:inset-x-auto xl:left-0 xl:right-[var(--workspace-reserved-right)]"
     >
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden whitespace-nowrap font-display text-[clamp(9rem,28vw,26rem)] font-semibold leading-none tracking-[-0.105em] text-[var(--text)] opacity-[0.05]"
+        className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden whitespace-nowrap font-display text-[clamp(9rem,28vw,26rem)] font-semibold leading-none tracking-[-0.105em] text-[var(--text)] opacity-[0.05] max-[767px]:hidden"
       >
         drme
       </span>
-      <div className="footer-inner relative z-10 mx-auto flex min-h-[340px] w-full max-w-[1400px] flex-wrap items-end gap-x-6 gap-y-3 px-[4vw] pb-6 pt-28 max-[700px]:min-h-[240px] max-[700px]:gap-x-4 max-[700px]:gap-y-2 max-[700px]:px-5 max-[700px]:pb-5 max-[700px]:pt-20">
+      <div className="footer-inner relative z-10 mx-auto flex min-h-[340px] w-full max-w-[1400px] flex-wrap items-end gap-x-6 gap-y-3 px-[4vw] pb-6 pt-28 max-[767px]:min-h-0 max-[767px]:flex-col max-[767px]:items-start max-[767px]:gap-x-4 max-[767px]:gap-y-3 max-[767px]:px-5 max-[767px]:pb-[calc(24px+env(safe-area-inset-bottom))] max-[767px]:pt-6">
         <Link
           href="/"
           aria-label="Back to home"
@@ -101,13 +116,13 @@ export function Footer() {
           drme<span className="text-accent">_</span>
         </Link>
 
-        <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
+        <span aria-hidden="true" className="h-4 w-px bg-[var(--border)] max-[767px]:hidden" />
 
         <span className="font-mono text-[11px] tracking-[0.06em] text-[var(--text-dim)]">
           © {currentYear} {brandName}
         </span>
 
-        <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
+        <span aria-hidden="true" className="h-4 w-px bg-[var(--border)] max-[767px]:hidden" />
 
         <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-5 gap-y-2">
           {footerNavLinks.map((link) => (
@@ -121,12 +136,12 @@ export function Footer() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-4 max-[700px]:ml-0">
+        <div className="ml-auto flex items-center gap-4 max-[767px]:ml-0 max-[767px]:w-full max-[767px]:flex-wrap max-[767px]:gap-y-3">
           <span className="inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.04em] text-[var(--text-dim)]">
             Build with <GoHeartFill /> by drme
           </span>
 
-          <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
+          <span aria-hidden="true" className="h-4 w-px bg-[var(--border)] max-[767px]:hidden" />
 
           <div className="flex items-center gap-3.5">
             {footerSocialLinks.map((link) => {
@@ -146,7 +161,7 @@ export function Footer() {
             })}
           </div>
 
-          <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
+          <span aria-hidden="true" className="h-4 w-px bg-[var(--border)] max-[767px]:hidden" />
 
           <span className="font-mono text-[11px] tracking-[0.06em] text-[var(--text-dim)]">
             <OdesaClock />

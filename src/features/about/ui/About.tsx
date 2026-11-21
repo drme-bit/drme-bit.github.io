@@ -86,7 +86,7 @@ export default function About() {
               as I go.
             </p>
             <div className="mt-7 max-w-[58ch]">
-              <p className="m-0 font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--text-ghost)]">
+              <p className="m-0 font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--text-ghost)] max-[767px]:text-[0.7rem]">
                 Currently
               </p>
               <p className="m-0 mt-1.5 text-[0.9rem] leading-[1.7] text-[var(--text-secondary)]">
@@ -139,7 +139,7 @@ export default function About() {
             <div className="flex min-w-0 flex-col justify-center py-1">
               <p
                 id="about-me-heading"
-                className="m-0 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-[var(--text-ghost)]"
+                className="m-0 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-[var(--text-ghost)] max-[767px]:text-[0.7rem]"
               >
                 About me
               </p>

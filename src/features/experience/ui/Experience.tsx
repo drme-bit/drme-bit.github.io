@@ -141,7 +141,7 @@ export default function Experience() {
                     }`}
                   >
                     <span
-                      className={`font-mono text-[0.55rem] tracking-[0.12em] transition-colors duration-200 ${
+                      className={`font-mono text-[0.55rem] tracking-[0.12em] transition-colors duration-200 max-[767px]:text-[0.68rem] ${
                         active ? 'text-[var(--accent-secondary)]' : 'text-[var(--text-ghost)]'
                       }`}
                     >

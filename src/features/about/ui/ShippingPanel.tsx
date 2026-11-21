@@ -74,7 +74,7 @@ function WeekBars({
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <dt className="m-0 font-mono text-[0.54rem] uppercase tracking-[0.1em] text-[var(--text-ghost)]">
+      <dt className="m-0 font-mono text-[0.54rem] uppercase tracking-[0.1em] text-[var(--text-ghost)] max-[767px]:text-[0.68rem]">
         {label}
       </dt>
       <dd className="m-0 mt-1 font-display text-[0.9rem] font-medium tabular-nums leading-none text-[var(--text)]">
@@ -124,12 +124,12 @@ export function ShippingPanel({ snapshot }: { snapshot: GithubSnapshot | null })
           className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-[var(--accent-secondary)] opacity-[0.06] blur-3xl"
         />
         <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <p className="m-0 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--text-ghost)]">
+          <p className="m-0 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--text-ghost)] max-[767px]:text-[0.7rem]">
             Contribution rhythm
           </p>
           <span
             aria-live="polite"
-            className={`font-mono text-[0.6rem] tabular-nums transition-colors ${
+            className={`font-mono text-[0.6rem] tabular-nums transition-colors max-[767px]:text-[0.7rem] ${
               hovered ? 'text-[var(--accent-secondary)]' : 'text-[var(--text-ghost)]'
             }`}
           >
@@ -171,7 +171,7 @@ export function ShippingPanel({ snapshot }: { snapshot: GithubSnapshot | null })
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Open ${profile.githubUsername} on GitHub`}
-            className="inline-flex items-center gap-1 font-mono text-[0.58rem] uppercase tracking-[0.08em] text-[var(--text-dim)] no-underline transition-colors hover:text-[var(--accent-secondary)]"
+            className="inline-flex items-center gap-1 font-mono text-[0.58rem] uppercase tracking-[0.08em] text-[var(--text-dim)] no-underline transition-colors hover:text-[var(--accent-secondary)] max-[767px]:text-[0.7rem]"
           >
             {profile.githubUsername}
             <FiArrowUpRight size={11} aria-hidden="true" />

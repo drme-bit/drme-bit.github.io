@@ -19,7 +19,7 @@ export function PracticeBento() {
     <div className="flex flex-col gap-4">
       <p
         aria-hidden="true"
-        className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-[var(--text-dim)]"
+        className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-[var(--text-dim)] max-[767px]:text-[0.7rem]"
       >
         {HIGHLIGHTS.map((highlight, index) => (
           <span key={highlight.title} className="inline-flex items-center gap-2">
