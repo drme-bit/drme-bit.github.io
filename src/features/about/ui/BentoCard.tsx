@@ -77,7 +77,7 @@ export function BentoCard({
       )}
 
       <div className={cn('relative p-5 sm:p-6 lg:absolute lg:inset-x-0 lg:bottom-0', TEXT_SHADOW)}>
-        <p className="m-0 flex items-center gap-1.5 font-mono text-[0.53rem] uppercase tracking-[0.16em] text-[var(--text-dim)]">
+        <p className="m-0 flex items-center gap-1.5 font-mono text-[0.53rem] uppercase tracking-[0.16em] text-[var(--text-dim)] max-[767px]:text-[0.68rem]">
           {eyebrow}
         </p>
         <h4

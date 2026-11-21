@@ -246,6 +246,18 @@
   color: var(--text-dim);
 }
 
+@media (max-width: 767px) {
+  .blog-card-category,
+  .blog-card-featured,
+  .blog-card-meta {
+    font-size: 0.68rem;
+  }
+
+  .blog-card-tag {
+    font-size: 0.64rem;
+  }
+}
+
 .blog-card-action {
   margin-top: auto;
   padding-top: 0.35rem;

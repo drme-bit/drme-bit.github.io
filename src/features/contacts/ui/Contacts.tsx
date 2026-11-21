@@ -147,7 +147,7 @@ function FormField({
 
       {config.maxLength && config.type !== 'select' && (
         <div
-          className={`pointer-events-none absolute bottom-[0.45rem] font-mono text-[0.52rem] text-[var(--text-ghost)] ${
+          className={`pointer-events-none absolute bottom-[0.45rem] font-mono text-[0.52rem] text-[var(--text-ghost)] max-[767px]:text-[0.68rem] ${
             config.type === 'textarea' ? 'right-[0.85rem]' : 'right-[0.7rem]'
           }`}
           aria-hidden="true"

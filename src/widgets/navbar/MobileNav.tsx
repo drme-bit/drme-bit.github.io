@@ -1,161 +1,234 @@
 'use client';
 
+import { useEffect, useState, type MouseEvent } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { TransitionLink } from '@/features/transitions';
-import { usePathname } from 'next/navigation';
-import { scrollToTarget } from '@/widgets/smooth-scrolling/lenisStore';
-import { Menu } from '@/shared/ui/Icon';
+import { scrollToTarget, setScrollLocked } from '@/widgets/smooth-scrolling/lenisStore';
+import {
+  Menu,
+  ChartActivity,
+  FileText,
+  FolderClosed,
+  BookOpen,
+  FiAtSign,
+  FiGithub,
+  FiLinkedin,
+  SiDiscord,
+} from '@/shared/ui/Icon';
+import { IconButton, Separator } from '@/shared/ui';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useNav } from '@/app/providers/NavProvider';
 import styles from './MobileNav.module.scss';
 import AssistantAvatar from '@/widgets/assistant/AssistantAvatar';
-import { GLOBAL_NAV } from '@/shared/config/navConfig';
-import type { NavGroup, NavRouteLink, NavLeaf } from '@/shared/config/navTypes';
-import { IconButton, Separator } from '@/shared/ui';
-import { FiAtSign, FiGithub, FiLinkedin, SiDiscord } from '@/shared/ui/Icon';
+import { GLOBAL_NAV, HOME_SECTION_IDS } from '@/shared/config/navConfig';
+import type { NavGroup, NavLeaf } from '@/shared/config/navTypes';
 import { profile, socialLinks } from '@/entities/profile';
 import {
   Sheet,
   SheetClose,
   SheetContent,
+  SheetTitle,
   SheetTrigger,
 } from '@/shared/ui/Sheet/Sheet';
 
-function leafHref(leaf: NavLeaf): string {
-  if (leaf.type === 'route') return leaf.href;
-  if (leaf.type === 'section') return `/#${leaf.targetId}`;
-  return '#';
-}
+const homeGroup = GLOBAL_NAV.find((item): item is NavGroup => item.id === 'home');
 
-const linkClass =
-  'group flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-muted-foreground transition-[background,color,transform] duration-150 hover:bg-secondary/70 hover:text-foreground active:scale-[0.99]';
-const iconClass = 'size-4 shrink-0 text-accent';
+const SECTIONS = HOME_SECTION_IDS.map((id) =>
+  homeGroup?.children.find(
+    (child): child is NavLeaf & { type: 'section' } =>
+      child.type === 'section' && child.targetId === id,
+  ),
+).filter((item): item is NavLeaf & { type: 'section' } => Boolean(item));
+
+const QUICK_LINKS = [
+  { id: 'projects', label: 'All projects', href: '/projects', Icon: FolderClosed },
+  { id: 'blog', label: 'Writing', href: '/blog', Icon: BookOpen },
+  { id: 'stats', label: 'Stats', href: '/stats', Icon: ChartActivity },
+  { id: 'resume', label: 'Résumé', href: '/resume', Icon: FileText },
+] as const;
+
+const TOOLS = [
+  { id: 'notifications', label: 'Inbox' },
+  { id: 'explore', label: 'Explore this page' },
+  { id: 'settings', label: 'Appearance' },
+] as const;
+
 const socialIcons = { github: FiGithub, linkedin: FiLinkedin, discord: SiDiscord } as const;
 
+const rowClass =
+  'group flex min-h-12 items-center gap-3 rounded-xl px-3 py-2 text-[14px] text-foreground transition-colors duration-150 hover:bg-secondary active:bg-secondary/70';
+const rowIconClass = 'size-[18px] shrink-0 text-muted-foreground';
+
 export function MobileNav() {
-  const groups = GLOBAL_NAV.filter((item): item is NavGroup => item.type === 'group');
-  const routes = GLOBAL_NAV.filter((item): item is NavRouteLink => item.type === 'route');
   const pathname = usePathname();
-  const { setOpen: setAssistantOpen } = useWorkspace();
+  const router = useRouter();
+  const { setOpen: setAssistantOpen, openPanel } = useWorkspace();
   const { active } = useNav();
+  const isHome = pathname === '/';
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // The menu covers the whole viewport, so the page behind it must not scroll.
+  useEffect(() => {
+    if (!menuOpen || !window.matchMedia('(max-width: 767px)').matches) return;
+    setScrollLocked(true);
+    return () => setScrollLocked(false);
+  }, [menuOpen]);
+
+  const openTool = (panel: (typeof TOOLS)[number]['id']) => {
+    openPanel(panel);
+  };
+
+  const sectionClick = (event: MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    if (isHome) {
+      event.preventDefault();
+      scrollToTarget(`#${targetId}`);
+    } else {
+      event.preventDefault();
+      router.push(`/#${targetId}`);
+    }
+  };
 
   return (
-    <Sheet>
+    <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
       <SheetTrigger asChild>
         <IconButton
           size="icon-sm"
           aria-label="Open menu"
           className="text-muted-foreground hover:bg-secondary hover:text-foreground lg:hidden"
         >
-          <Menu className="size-4" />
+          <Menu className="size-[18px]" />
         </IconButton>
       </SheetTrigger>
+
       <SheetContent
         overlayClassName={styles.menuOverlay}
-        className={`${styles.menuContent} !top-[60px] !right-[56px] !bottom-2 !left-2 !h-[calc(100dvh-68px)] !min-h-0 !max-h-[calc(100dvh-68px)] !w-auto !max-w-none !gap-0 !overflow-hidden !rounded-2xl !border !border-border !bg-background !p-0 !shadow-2xl !z-[1010] max-[767px]:!inset-x-2 max-[767px]:!top-[max(8px,env(safe-area-inset-top))] max-[767px]:!bottom-[max(8px,env(safe-area-inset-bottom))] max-[767px]:!h-auto max-[767px]:!max-h-none`}
+        className={`${styles.menuContent} flex flex-col gap-0 overflow-hidden p-0`}
         showClose={false}
         side="right"
       >
-        <div className="flex min-h-[64px] shrink-0 items-center justify-between border-b border-border px-4 py-3 sm:px-5">
+        <header className={`${styles.header} flex shrink-0 items-center justify-between px-4`}>
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary/50 font-mono text-xs font-semibold tracking-wide text-foreground">d_</span>
+            <span
+              data-mobile-nav-logo
+              className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary/50 font-mono text-xs font-semibold tracking-wide text-foreground"
+            >
+              d_
+            </span>
             <div className="flex min-w-0 flex-col gap-0.5">
-              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">drme_ / portfolio</span>
-              <span className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">Menu</span>
+              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                drme_ / portfolio
+              </span>
+              <SheetTitle className="m-0 text-[16px] font-semibold tracking-[-0.02em] text-foreground">
+                Menu
+              </SheetTitle>
             </div>
           </div>
           <SheetClose asChild>
             <IconButton
               size="icon-sm"
               aria-label="Close menu"
-              className="size-9 rounded-lg border border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground"
+              className="size-10 rounded-lg border border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
-              <span className="text-xs">✕</span>
+              <span className="text-sm">✕</span>
             </IconButton>
           </SheetClose>
-        </div>
+        </header>
 
-        <div className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-y-contain p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] [-webkit-overflow-scrolling:touch] sm:p-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-x-hidden overflow-y-auto px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-5 touch-pan-y [-webkit-overflow-scrolling:touch]" data-lenis-prevent>
           <SheetClose asChild>
             <button
               type="button"
               onClick={() => setAssistantOpen(true)}
-              className="flex min-h-[72px] items-center gap-3 rounded-xl bg-foreground px-4 py-3 text-left text-background transition-opacity hover:opacity-90 active:scale-[0.99]"
+              className="flex min-h-[64px] w-full items-center gap-3 rounded-xl bg-foreground px-4 py-3 text-left text-background transition-opacity hover:opacity-90 active:scale-[0.99]"
             >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-background/10"><AssistantAvatar size={22} /></span>
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-background/10">
+                <AssistantAvatar size={22} />
+              </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[14px] font-medium">Ask the assistant</span>
-                <span className="mt-0.5 block text-[12px] text-background/65">Projects, experience, or collaboration</span>
+                <span className="block text-[15px] font-medium">Ask the assistant</span>
+                <span className="mt-0.5 block text-[12px] text-background/65">
+                  Projects, experience, or collaboration
+                </span>
               </span>
               <span aria-hidden="true" className="text-lg">↗</span>
             </button>
           </SheetClose>
 
-          <div className="flex items-center justify-between px-1 pt-1">
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">Navigate</span>
-            <span className="text-[11px] text-muted-foreground/60">{groups.reduce((count, group) => count + group.children.length, 0) + routes.length} destinations</span>
-          </div>
+          <section aria-label="On this page">
+            <h3 className="m-0 mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+              On this page
+            </h3>
+            <nav className="flex flex-col gap-0.5">
+              {SECTIONS.map((leaf) => {
+                const Icon = leaf.icon;
+                const selected = isHome && active.sectionId === leaf.id;
+                return (
+                  <SheetClose asChild key={leaf.id}>
+                    <a
+                      href={`/#${leaf.targetId}`}
+                      aria-current={selected ? 'location' : undefined}
+                      onClick={(event) => sectionClick(event, leaf.targetId)}
+                      className={`${rowClass} ${selected ? 'bg-secondary' : ''}`}
+                    >
+                      {Icon && <Icon className={rowIconClass} aria-hidden="true" />}
+                      <span className="min-w-0 flex-1">{leaf.label}</span>
+                      {selected && <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />}
+                    </a>
+                  </SheetClose>
+                );
+              })}
+            </nav>
+          </section>
 
-          {groups.map((group) => (
-            <div key={group.id} className="flex flex-col gap-1.5">
-              <span className="px-2 pb-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60">
-                {group.label}
-              </span>
-              <ul className="flex flex-col gap-0.5">
-                {group.children.map((child) => {
-                  const href = leafHref(child);
-                  const ChildIcon = child.icon;
-                  const selected = child.type === 'section' && active.sectionId === child.id;
-                  return (
-                      <li key={child.id}>
-                      <SheetClose asChild>
-                        <a
-                          href={href}
-                          className={`${linkClass} ${selected ? 'bg-secondary text-foreground' : ''}`}
-                          aria-current={selected ? 'location' : undefined}
-                          onClick={(e) => {
-                            if (child.type === 'section' && pathname === '/') {
-                              // Same-page jump through Lenis instead of the
-                              // browser's abrupt hash jump.
-                              e.preventDefault();
-                              scrollToTarget(`#${child.targetId}`);
-                            } else {
-                              window.location.href = href;
-                            }
-                          }}
-                        >
-                          {ChildIcon && <ChildIcon className={`${iconClass} ${selected ? 'text-foreground' : ''}`} />}
-                          <span className="min-w-0 flex-1">{child.label}</span>
-                          {selected && <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />}
-                        </a>
-                      </SheetClose>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+          <Separator />
 
-          <Separator className="my-1" />
+          <section aria-label="Explore">
+            <h3 className="m-0 mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+              Explore
+            </h3>
+            <nav className="flex flex-col gap-0.5">
+              {QUICK_LINKS.map(({ id, label, href, Icon }) => (
+                <SheetClose asChild key={id}>
+                  <TransitionLink href={href} className={rowClass}>
+                    <Icon className={rowIconClass} aria-hidden="true" />
+                    <span>{label}</span>
+                  </TransitionLink>
+                </SheetClose>
+              ))}
+            </nav>
+          </section>
 
-          {routes.map((route) => {
-            const RouteIcon = route.icon;
-            return (
-              <SheetClose key={route.id} asChild>
-                <TransitionLink href={route.href} className={linkClass}>
-                  {RouteIcon && <RouteIcon className={iconClass} />}
-                  <span>{route.label}</span>
-                </TransitionLink>
-              </SheetClose>
-            );
-          })}
+          <Separator />
 
-          <div className="mt-auto pt-2">
-            <Separator className="my-1" />
-            <div className="flex items-center justify-between px-2 pt-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground/65">
+          <section aria-label="Workspace tools">
+            <h3 className="m-0 mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+              Tools
+            </h3>
+            <nav className="flex flex-col gap-0.5">
+              {TOOLS.map(({ id, label }) => (
+                <SheetClose asChild key={id}>
+                  <button
+                    type="button"
+                    onClick={() => openTool(id)}
+                    className={rowClass}
+                  >
+                    <span className={`${rowIconClass} text-center font-mono text-[13px] leading-[18px]`} aria-hidden="true">
+                      {id === 'notifications' ? '◉' : id === 'explore' ? '◇' : '◐'}
+                    </span>
+                    <span>{label}</span>
+                  </button>
+                </SheetClose>
+              ))}
+            </nav>
+          </section>
+
+          <div className="mt-auto">
+            <Separator className="mb-3" />
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground/65">
                 Elsewhere
               </span>
-              <nav aria-label="Social links" className="flex items-center gap-1">
+              <nav aria-label="Social links" className="flex items-center gap-0.5">
                 {socialLinks.map((link) => {
                   const Icon = socialIcons[link.id];
                   return (
@@ -165,7 +238,7 @@ export function MobileNav() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={link.label}
-                      className="flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--geist-focus)]"
+                      className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
                       <Icon className="size-4" />
                     </a>
@@ -174,7 +247,7 @@ export function MobileNav() {
                 <a
                   href={`mailto:${profile.email}`}
                   aria-label="Email"
-                  className="flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--geist-focus)]"
+                  className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   <FiAtSign className="size-4" />
                 </a>

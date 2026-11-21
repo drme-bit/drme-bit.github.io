@@ -6,9 +6,11 @@ import type Lenis from 'lenis';
     useLenis, so they come here. Falls back to native smooth scroll.  */
 
 let lenis: Lenis | null = null;
+let scrollLocks = 0;
 
 export function setLenis(instance: Lenis | null): void {
   lenis = instance;
+  if (lenis && scrollLocks > 0) lenis.stop();
 }
 
 function resolveTarget(target: string | number | HTMLElement): string | number | HTMLElement | null {
@@ -43,4 +45,16 @@ export function scrollToTop(): void {
     return;
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/** Freeze page scrolling while a mobile sheet is open. Reference-counted so
+    closing the menu cannot accidentally re-enable scrolling behind the panel. */
+export function setScrollLocked(locked: boolean): void {
+  if (locked) {
+    scrollLocks += 1;
+    if (scrollLocks === 1) lenis?.stop();
+    return;
+  }
+  scrollLocks = Math.max(0, scrollLocks - 1);
+  if (scrollLocks === 0) lenis?.start();
 }

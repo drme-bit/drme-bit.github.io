@@ -9,6 +9,8 @@ interface TransitionLinkProps {
   children: ReactNode;
   className?: string;
   onClick?: () => void;
+  'aria-current'?: React.AriaAttributes['aria-current'];
+  'aria-label'?: string;
 }
 
 export function TransitionLink({
@@ -16,6 +18,7 @@ export function TransitionLink({
   children,
   className,
   onClick,
+  ...rest
 }: TransitionLinkProps) {
   const router = useRouter();
   const { setOrigin, setPhase } = usePageTransition();
@@ -42,7 +45,7 @@ export function TransitionLink({
   );
 
   return (
-    <a href={href} className={className} onClick={handleClick}>
+    <a href={href} className={className} onClick={handleClick} {...rest}>
       {children}
     </a>
   );

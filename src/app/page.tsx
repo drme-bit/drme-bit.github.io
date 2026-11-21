@@ -69,7 +69,7 @@ function MainInner() {
 
   return (
     <>
-      <main className="relative z-10 pb-[340px] max-[700px]:pb-[300px]">
+      <main className="relative z-10 pb-[340px] max-[767px]:pb-0">
         <Scene />
 
         <Hero />
@@ -85,7 +85,7 @@ function MainInner() {
 
         <Reviews />
         <Contacts />
-        <span id="footer-reveal-trigger" aria-hidden="true" className="pointer-events-none absolute bottom-[340px] h-px w-px max-[700px]:bottom-[300px]" />
+        <span id="footer-reveal-trigger" aria-hidden="true" className="pointer-events-none absolute bottom-[340px] h-px w-px max-[767px]:hidden" />
       </main>
       <Footer />
     </>
